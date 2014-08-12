@@ -323,6 +323,8 @@ public class TripPattern implements Serializable {
         trips.add(freq.tripTimes.trip);
         scheduledTimetable.addFrequencyEntry(freq);
         scheduledTimetable.addTripTimes(freq.tripTimes);
+        //increase the number of tripTimes in this tripPattern
+        noTrips = scheduledTimetable.getTripTimes().size();
         if (this.route != freq.tripTimes.trip.getRoute()) {
             LOG.warn("The trip {} is on a different route than its stop pattern, which is on {}.", freq.tripTimes.trip, route);
         }
