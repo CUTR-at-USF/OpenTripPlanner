@@ -142,7 +142,6 @@ public class TripPattern implements Serializable {
 
     /** Would be used by the MapBuilder, not currently implemented. */
     public LineString geometry = null;
-
     /**
      * An ordered list of PatternHop edges associated with this pattern. All trips in a pattern have
      * the same stops and a PatternHop apply to all those trips, so this array apply to every trip
@@ -323,6 +322,7 @@ public class TripPattern implements Serializable {
     public void add(FrequencyEntry freq) {
         trips.add(freq.tripTimes.trip);
         scheduledTimetable.addFrequencyEntry(freq);
+        scheduledTimetable.addTripTimes(freq.tripTimes);
         if (this.route != freq.tripTimes.trip.getRoute()) {
             LOG.warn("The trip {} is on a different route than its stop pattern, which is on {}.", freq.tripTimes.trip, route);
         }

@@ -134,7 +134,6 @@ public class TransitBoardAlight extends TablePatternEdge implements OnboardEdge 
         if (options.wheelchairAccessible && ! getPattern().wheelchairAccessible(stopIndex)) {
             return null;
         };
-
         /*
          * Determine whether we are going onto or off of transit. Entering and leaving transit is
          * not the same thing as boarding and alighting. When arriveBy == true, we are entering

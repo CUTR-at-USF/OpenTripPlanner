@@ -13,12 +13,14 @@
 
 package org.opentripplanner.routing.edgetype;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.io.BufferedWriter;
 
 import com.beust.jcommander.internal.Lists;
 
@@ -151,11 +153,15 @@ public class Timetable implements Serializable {
         int bestTime = boarding ? Integer.MAX_VALUE : Integer.MIN_VALUE;
         // Hoping JVM JIT will distribute the loop over the if clauses as needed.
         // We could invert this and skip some service days based on schedule overlap as in RRRR.
+        System.out.println("get next trip "+ this.getPattern().getRoute().getId() + ", len TripTimes = "+ tripTimes.size());
+        int count = 0;
         for (TripTimes tt : tripTimes) {
+        	count++;
+        	System.out.println(".........trip: "+ count+ ", vehicleID = "+ tt.getVehicleID()+ " , " + tt.serviceCode);
             if ( ! serviceDay.serviceRunning(tt.serviceCode)) continue; // TODO merge into call on next line
             if ( ! tt.tripAcceptable(s0, stopIndex)) continue;
             int adjustedTime = adjustTimeForTransfer(s0, currentStop, tt.trip, boarding, serviceDay, time);
-            if (adjustedTime == -1) continue;
+            if (adjustedTime == -1) continue;         
             if (boarding) {
                 int depTime = tt.getDepartureTime(stopIndex);
                 if (depTime < 0) continue;
@@ -291,6 +297,7 @@ public class Timetable implements Serializable {
     /** @return the index of TripTimes for this trip ID in this particular Timetable */
     public int getTripIndex(AgencyAndId tripId) {
         int ret = 0;
+        System.out.println("previous tripTimes.size = "+ tripTimes.size());
         for (TripTimes tt : tripTimes) {
             // could replace linear search with indexing in stoptime updater, but not necessary
             // at this point since the updater thread is far from pegged.
@@ -361,7 +368,9 @@ public class Timetable implements Serializable {
             }
 
             TripTimes newTimes = new TripTimes(getTripTimes(tripIndex));
-
+            System.out.println("new TripTimes :" + tripUpdate.getTrip().getRouteId() +" , "+ tripUpdate.getVehicle().getId() );
+            newTimes.setVehicleID(tripUpdate.getVehicle().getId());
+            
             if (tripDescriptor.hasScheduleRelationship() && tripDescriptor.getScheduleRelationship()
                     == TripDescriptor.ScheduleRelationship.CANCELED) {
                 newTimes.cancel();
@@ -417,6 +426,7 @@ public class Timetable implements Serializable {
                                 } else if (arrival.hasTime()) {
                                     newTimes.updateArrivalTime(i,
                                             (int) (arrival.getTime() - today));
+                                    //System.out.println("i= "+ i + ", "+ update.getStopId()+ ", arrival = "+ (int) (arrival.getTime() - today));
                                     delay = newTimes.getArrivalDelay(i);
                                 } else {
                                     LOG.error("Arrival time at index {} is erroneous.", i);
@@ -477,13 +487,35 @@ public class Timetable implements Serializable {
                     return false;
                 }
             }
-            if (!newTimes.timesIncreasing()) {
-                LOG.error("TripTimes are non-increasing after applying GTFS-RT delay propagation.");
-                return false;
-            }
+//            if (!newTimes.timesIncreasing()) {
+//                LOG.error("TripTimes are non-increasing after applying GTFS-RT delay propagation.");
+//                return false;
+//            }
 
             // Update succeeded, save the new TripTimes back into this Timetable.
-            tripTimes.set(tripIndex, newTimes);
+            if (tripTimes.get(tripIndex).vehicleID == null)
+            	tripTimes.set(tripIndex, newTimes);
+            else{
+            	int noTrips = tripTimes.size();
+            	tripIndex = noTrips;
+            	newTimes.setVehicleID(tripUpdate.getVehicle().getId());
+            	this.tripTimes.add(tripIndex, newTimes);
+            }
+            int pre = 0;
+             
+            //just for the debug
+            for (int i= 0; i <  newTimes.getNumStops() ; i++){
+            	int time= newTimes.getArrivalTime(i);
+            	if (time < pre){
+            		System.out.println("      ... Decreasing...     ");
+            		 
+            	}
+            	pre = time;
+            	System.out.println(this.getPattern().getRoute().getId() +", vehicle: "+ tripUpdate.getVehicle().getId() + ", stop "+ i +" , "+this.getPattern().getStop(i).getId() + ", arrival = "+ (int)(time/3600)+":"+ (int)(time%3600)/60);
+            }
+            System.out.println("tripTimes size = "+ this.tripTimes.size());
+            System.out.println("--------------------------------------------------------------------");
+           
         } catch (Exception e) { // prevent server from dying while debugging
             e.printStackTrace();
             return false;
