@@ -13,6 +13,8 @@
 
 package org.opentripplanner.updater.stoptime;
 
+ 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
@@ -111,7 +113,15 @@ public class TimetableSnapshotSource {
             LOG.warn("updates is null");
             return;
         }
-
+        
+        for (TripPattern pattern: graphIndex.patternForTrip.values()){
+        	
+        	int currentSize = pattern.getScheduledTimetable().getTripTimes().size(); 
+        	for (int i= pattern.noTrips; i < currentSize; i++){
+        		pattern.getScheduledTimetable().getTripTimes().remove(i);
+        		System.out.println("Before applying realtime update, item "+ i+ " in " + pattern.getRoute().getId() + " has been removed from the list, current size"+ pattern.getScheduledTimetable().getTripTimes().size());
+        	}
+        }
         LOG.debug("message contains {} trip updates", updates.size());
         int uIndex = 0;
         for (TripUpdate tripUpdate : updates) {
@@ -182,6 +192,7 @@ public class TimetableSnapshotSource {
         } else {
             getTimetableSnapshot();
         }
+         
     }
 
     protected boolean handleScheduledTrip(TripUpdate tripUpdate, String feedId, ServiceDate serviceDate) {
@@ -199,7 +210,7 @@ public class TimetableSnapshotSource {
             LOG.warn("TripUpdate contains no updates, skipping.");
             return false;
         }
-
+      
         // we have a message we actually want to apply
         return buffer.update(pattern, tripUpdate, feedId, timeZone, serviceDate);
     }

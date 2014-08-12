@@ -13,6 +13,8 @@
 
 package org.opentripplanner.routing.edgetype;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -86,7 +88,7 @@ public class TimetableResolver {
      * @return whether or not the update was actually applied
      */
     public boolean update(TripPattern pattern, TripUpdate tripUpdate, String agencyId,
-            TimeZone timeZone, ServiceDate serviceDate) {
+            TimeZone timeZone, ServiceDate serviceDate)  {
         // synchronization prevents commits/snapshots while update is in progress
         synchronized(this) {
             if (dirty == null)
