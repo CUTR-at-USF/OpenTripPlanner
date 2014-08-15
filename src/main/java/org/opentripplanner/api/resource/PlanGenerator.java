@@ -735,13 +735,20 @@ public class PlanGenerator {
      */
     private void addRealTimeData(Leg leg, State[] states) {
         TripTimes tripTimes = states[states.length - 1].getTripTimes();
-
+        int vehicleID = 0;
+        if (tripTimes.vehicleID != null)
+        	vehicleID = Integer.parseInt(tripTimes.vehicleID);
+        
         if (tripTimes != null && !tripTimes.isScheduled()) {
             leg.realTime = true;
             if (leg.from.stopIndex != null) {
                 leg.departureDelay = tripTimes.getDepartureDelay(leg.from.stopIndex);
             }
+             
+            int a = tripTimes.getArrivalDelay(leg.to.stopIndex);
+            System.out.println("$$$$$$$$ plan generator delay: "+ a/3600+":"+ (a%3600)/60);
             leg.arrivalDelay = tripTimes.getArrivalDelay(leg.to.stopIndex);
+            leg.agencyId= "Bus ID: "+ tripTimes.vehicleID;
         }
     }
 
