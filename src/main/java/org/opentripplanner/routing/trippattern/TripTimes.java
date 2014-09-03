@@ -229,6 +229,13 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
         else return arrivalTimes[stop]; // updated times are not time shifted.
     }
     
+    //backpropagate the delay
+    public void backPropagateDelay(int stop) {   
+    	int dt;
+    	dt = this.scheduledDepartureTimes[stop+1] - this.scheduledDepartureTimes[stop];
+    	arrivalTimes[stop] = getArrivalTime(stop+1) - dt;
+    }
+    
     // estimate arrival time for missing realtime updates.For stops in the head or tail of queue, delay is zero
     public void estimateArrivaltime(int stop, int delay) {   
     	int dt;

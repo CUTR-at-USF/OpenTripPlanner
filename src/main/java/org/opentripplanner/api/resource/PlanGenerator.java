@@ -747,7 +747,7 @@ public class PlanGenerator {
              
             int a = tripTimes.getArrivalDelay(leg.to.stopIndex);
             System.out.println("$$$$$$$$ plan generator delay: "+ a/3600+":"+ (a%3600)/60);
-            leg.arrivalDelay = tripTimes.getArrivalDelay(leg.to.stopIndex);
+           // leg.arrivalDelay = tripTimes.getArrivalDelay(leg.to.stopIndex);
             leg.agencyId= "Bus ID: "+ tripTimes.vehicleID;
         }
     }
