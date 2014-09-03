@@ -441,7 +441,7 @@ public class Timetable implements Serializable {
                                    if (a < previous){
                 	            		System.out.println("      ---- Decreasing----     ");
                 	            	}
-                                   System.out.println("route "+this.getPattern().getRoute().getId().getId() +", veh: "+ tripUpdate.getVehicle().getId() + ", stop "+ i +" ,ID: "+ this.getPattern().getStop(i).getId().getId()  + ", "+ update.getStopId()+ ", arrival = " + a/3600+ ":" + (a%3600)/60);
+                                  // System.out.println("route "+this.getPattern().getRoute().getId().getId() +", veh: "+ tripUpdate.getVehicle().getId() + ", stop "+ i +" ,ID: "+ this.getPattern().getStop(i).getId().getId()  + ", "+ update.getStopId()+ ", arrival = " + a/3600+ ":" + (a%3600)/60);
                                    
                                     previous = a;
                                     delay = newTimes.getArrivalDelay(i);
@@ -491,7 +491,7 @@ public class Timetable implements Serializable {
                         }
                     } else {
                     	previous = 0;
-                    	System.out.println("***realtime update is missing");
+                    	//System.out.println("***realtime update is missing");
                         if (delay == null) {
                             newTimes.updateArrivalTime(i, TripTimes.UNAVAILABLE);
                             newTimes.updateDepartureTime(i, TripTimes.UNAVAILABLE);
@@ -504,8 +504,8 @@ public class Timetable implements Serializable {
 	                            //System.out.println("***realtime update is missing: stop: "+ i+ ", ID: "+this.getPattern().getStop(i).getId().getId() + ", arrival = " + a/3600+ ":" + (a%3600)/60);
 	                            
 	                            newTimes.updateDepartureDelay(i, delay);
-                        	}else
-                        		System.out.println("  don't update, arrival time of stop: "+ i+ ", "+ newTimes.getArrivalTime(i));
+                        	}///else
+                        		//System.out.println("  don't update, arrival time of stop: "+ i+ ", "+ newTimes.getArrivalTime(i));
                       
                         }
                     }
@@ -569,21 +569,21 @@ public class Timetable implements Serializable {
             }
            
              
-//            if (estimationDone){
-//	            System.out.println("\n*******after estimation*************\n");
-//	           // just for the debug
-//	            int pre = 0;
-//	            for (int i= 0; i <  newTimes.getNumStops()-1 ; i++){
-//	            	int time= newTimes.getArrivalTime(i);
-//	            	if (time < pre){
-//	            		System.out.println("      ... Decreasing after estimation     ");
-//	            	}
-//	            	pre = time;
-//	            	System.out.println("Route: "+ this.getPattern().getRoute().getId().getId() +", veh: "+ tripUpdate.getVehicle().getId() + ", seq: "+ i + ", "+ this.getPattern().getStop(i).getId().getId()+", arrival = "+ (int)(time/3600)+":"+ (int)(time%3600)/60);
-//	            }
-//            }
-//            System.out.println("tripTimes size = "+ this.tripTimes.size());
-//            System.out.println("--------------------------------------------------------------------------");
+            if (estimationDone){
+	            System.out.println("\n*******after estimation*************\n");
+	           // just for the debug
+	            int pre = 0;
+	            for (int i= 0; i <  newTimes.getNumStops()-1 ; i++){
+	            	int time= newTimes.getArrivalTime(i);
+	            	if (time < pre){
+	            		System.out.println("      ... Decreasing after estimation     ");
+	            	}
+	            	pre = time;
+	            	System.out.println("Route: "+ this.getPattern().getRoute().getId().getId() +", veh: "+ tripUpdate.getVehicle().getId() + ", seq: "+ i + ", "+ this.getPattern().getStop(i).getId().getId()+", arrival = "+ (int)(time/3600)+":"+ (int)(time%3600)/60);
+	            }
+            }
+            System.out.println("tripTimes size = "+ this.tripTimes.size());
+            System.out.println("--------------------------------------------------------------------------");
            
         } catch (Exception e) { // prevent server from dying while debugging
             e.printStackTrace();

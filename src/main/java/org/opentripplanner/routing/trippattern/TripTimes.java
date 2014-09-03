@@ -280,8 +280,18 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
     }
     /** @return the amount of time in seconds that the vehicle takes to reach the following stop. */
     public int getRunningTime(int stop) {
-        // timeShift is not relevant since this involves updated times and is relative.
-        return getArrivalTime(stop + 1) - getDepartureTime(stop);
+    	if (stop != this.getNumStops()-2){
+	    	System.out.println("---TripTimes + get running time: "+ this.trip.getId()+" , vehicle = "+ this.vehicleID +", stop = "+ stop +" , ari2 = " + getArrivalTime(stop + 1) + " , ari1 = "+ getDepartureTime(stop) +", nStops = "+ this.getNumStops());	      
+	        return getArrivalTime(stop + 1) - getDepartureTime(stop);
+    	}else{
+    		
+	        int dt = getArrivalTime(0) - getDepartureTime(stop);
+	        if (dt < 0)
+	        	dt = this.scheduledDepartureTimes[stop+1] - this.scheduledDepartureTimes[stop];
+	        System.out.println("---TripTimes + get running time to the first stp: "+ this.trip.getId()+" , vehicle = "+ this.vehicleID +", stop = "+ stop +" , ari2 = " + getArrivalTime(0) + " , dt = "+ dt);
+    		return dt;
+    	}
+    		
     }
 
     /** @return the difference between the scheduled and actual arrival times at this stop. */
