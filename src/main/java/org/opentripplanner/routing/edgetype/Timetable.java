@@ -436,8 +436,14 @@ public class Timetable implements Serializable {
                                 } else if (arrival.hasTime()) {
                                     newTimes.updateArrivalTime(i,
                                             (int) (arrival.getTime() - today));
-                                    int a=(int) (arrival.getTime() - today);
-                                    System.out.println("route "+this.getPattern().getRoute().getId().getId() +", veh: "+ tripUpdate.getVehicle().getId() + ", stop "+ i +" ,ID: "+this.getPattern().getStop(i).getId().getId()  + ", "+ update.getStopId()+ ", arrival = " + a/3600+ ":" + (a%3600)/60);
+                                    int a = (int) (arrival.getTime() - today);
+                                    
+                                   if (a < previous){
+                	            		System.out.println("      ---- Decreasing----     ");
+                	            	}
+                                   System.out.println("route "+this.getPattern().getRoute().getId().getId() +", veh: "+ tripUpdate.getVehicle().getId() + ", stop "+ i +" ,ID: "+ this.getPattern().getStop(i).getId().getId()  + ", "+ update.getStopId()+ ", arrival = " + a/3600+ ":" + (a%3600)/60);
+                                   
+                                    previous = a;
                                     delay = newTimes.getArrivalDelay(i);
                                 } else {
                                     LOG.error("Arrival time at index {} is erroneous.", i);
@@ -484,17 +490,20 @@ public class Timetable implements Serializable {
                             update = null;
                         }
                     } else {
+                    	previous = 0;
+                    	System.out.println("***realtime update is missing");
                         if (delay == null) {
                             newTimes.updateArrivalTime(i, TripTimes.UNAVAILABLE);
                             newTimes.updateDepartureTime(i, TripTimes.UNAVAILABLE);
                         } else {
+                        	
                         	if ( firstNzIndex != -1){
-	                            //newTimes.updateArrivalDelay(i, delay);
-                        		newTimes.estimateArrivaltime(i, 0);
-	                            int a = newTimes.getArrivalTime(i);
-	                            System.out.println("***realtime update is missing: stop: "+ i+ ", ID: "+this.getPattern().getStop(i).getId().getId() + ", arrival = " + a/3600+ ":" + (a%3600)/60);
+	                            newTimes.updateArrivalDelay(i, delay);
+//                        		newTimes.estimateArrivaltime(i, 0);
+//	                            int a = newTimes.getArrivalTime(i);
+	                            //System.out.println("***realtime update is missing: stop: "+ i+ ", ID: "+this.getPattern().getStop(i).getId().getId() + ", arrival = " + a/3600+ ":" + (a%3600)/60);
 	                            
-	                            //newTimes.updateDepartureDelay(i, delay);
+	                            newTimes.updateDepartureDelay(i, delay);
                         	}else
                         		System.out.println("  don't update, arrival time of stop: "+ i+ ", "+ newTimes.getArrivalTime(i));
                       
@@ -534,9 +543,10 @@ public class Timetable implements Serializable {
          
                 //estimate arrival time for head of queue, eg: [0, 0, t3, t4]--> [t1, t2, t3, t4]
                 if (0 < firstNzIndex && firstNzIndex != 0){
-                	for(int i = 0 ; i< firstNzIndex; i++){
+                	for(int i = firstNzIndex ; 0 <= i; i--){
                     	System.out.print("head: estimate for stop: "+ i);
-                    	newTimes.estimateArrivaltime(i, 0);
+                    	//newTimes.estimateArrivaltime(i, 0);
+                    	newTimes.backPropagateDelay(i);
                     }
                 	estimationDone = true;
                 }
@@ -559,21 +569,21 @@ public class Timetable implements Serializable {
             }
            
              
-           // if (estimationDone){
-	            System.out.println("\n*******after estimation*************\n");
-	            //just for the debug
-	            int pre = 0;
-	            for (int i= 0; i <  newTimes.getNumStops()-1 ; i++){
-	            	int time= newTimes.getArrivalTime(i);
-	            	if (time < pre){
-	            		System.out.println("      ... Decreasing...     ");
-	            	}
-	            	pre = time;
-	            	System.out.println(this.getPattern().getRoute().getId().getId() +", veh: "+ tripUpdate.getVehicle().getId() + ", s "+ i +" , "+this.getPattern().getStop(i).getId().getId() + ", arrival = "+ (int)(time/3600)+":"+ (int)(time%3600)/60);
-	            }
-           // }
-            System.out.println("tripTimes size = "+ this.tripTimes.size());
-            System.out.println("--------------------------------------------------------------------------");
+//            if (estimationDone){
+//	            System.out.println("\n*******after estimation*************\n");
+//	           // just for the debug
+//	            int pre = 0;
+//	            for (int i= 0; i <  newTimes.getNumStops()-1 ; i++){
+//	            	int time= newTimes.getArrivalTime(i);
+//	            	if (time < pre){
+//	            		System.out.println("      ... Decreasing after estimation     ");
+//	            	}
+//	            	pre = time;
+//	            	System.out.println("Route: "+ this.getPattern().getRoute().getId().getId() +", veh: "+ tripUpdate.getVehicle().getId() + ", seq: "+ i + ", "+ this.getPattern().getStop(i).getId().getId()+", arrival = "+ (int)(time/3600)+":"+ (int)(time%3600)/60);
+//	            }
+//            }
+//            System.out.println("tripTimes size = "+ this.tripTimes.size());
+//            System.out.println("--------------------------------------------------------------------------");
            
         } catch (Exception e) { // prevent server from dying while debugging
             e.printStackTrace();
