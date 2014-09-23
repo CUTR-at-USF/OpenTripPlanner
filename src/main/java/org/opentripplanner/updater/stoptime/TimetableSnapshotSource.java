@@ -113,7 +113,6 @@ public class TimetableSnapshotSource {
             LOG.warn("updates is null");
             return;
         }
-        System.out.println("~~~~~~~~~~~~~~~~~~~~ new set of stops~~~~~~~~~~~~~~~~~~~~~~~~~");
         for (TripPattern pattern: graphIndex.patternForTrip.values()){
         	
         	int currentSize = pattern.getScheduledTimetable().getTripTimes().size(); 
