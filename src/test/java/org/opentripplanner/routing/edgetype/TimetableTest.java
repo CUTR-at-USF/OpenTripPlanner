@@ -298,4 +298,12 @@ public class TimetableTest {
         tripUpdate = tripUpdateBuilder.build();
         assertFalse(timetable.update(tripUpdate, "agency", timeZone, serviceDate));
     }
+    
+
+
+	@Test
+	public void testUpdateFreqTrip() {
+		System.out.println("This test should be run for only Frequency based trip");
+	}
+
 }
