@@ -237,7 +237,7 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
     }
     
     // estimate arrival time for missing realtime updates.For stops in the head or tail of queue, delay is zero
-    public void estimateArrivaltime(int stop, int delay) {   
+    public void estimateArrivaltime(int stop) {   
     	int dt;
     	int currentStop;
     	if (stop != 0){
@@ -251,11 +251,8 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
 //    		arrivalTimes[stop] = getArrivalTime(this.getNumStops()-2) + dt;
 //    		System.out.println(" ** "+ getArrivalTime(this.getNumStops()-2)/3600+ ":"+ (getArrivalTime(this.getNumStops()-2)%3600)/60+ " , " + " , "+ dt/60+ ":" + (dt%60));
     	}
-    	if (delay == 0)
-    		dt = this.scheduledDepartureTimes[currentStop] - this.scheduledDepartureTimes[currentStop-1];
-    	else
-    		dt = delay;
-    	
+    	 
+    	dt = this.scheduledDepartureTimes[currentStop] - this.scheduledDepartureTimes[currentStop-1];
     	//System.out.println("   "+ getArrivalTime(currentStop-1)/3600 + ":"+ (getArrivalTime(currentStop-1)%3600)/60 + " , "+ dt/60+ ":" + (dt%60) );
 		arrivalTimes[stop] = getArrivalTime(currentStop-1) + dt;
 		

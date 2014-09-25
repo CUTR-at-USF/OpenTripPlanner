@@ -113,14 +113,15 @@ public class TimetableSnapshotSource {
             LOG.warn("updates is null");
             return;
         }
-        for (TripPattern pattern: graphIndex.patternForTrip.values()){
-        	
-        	int currentSize = pattern.getScheduledTimetable().getTripTimes().size(); 
-        	for (int i= pattern.noTrips; i < currentSize; i++){
-        		pattern.getScheduledTimetable().getTripTimes().remove(i);
-        		System.out.println("Before applying realtime update, item "+ i+ " in " + pattern.getRoute().getId() + " has been removed from the list, current size"+ pattern.getScheduledTimetable().getTripTimes().size());
-        	}
-        }
+        // this should be executed for only frequency-based trip
+//        for (TripPattern pattern: graphIndex.patternForTrip.values()){      	
+//        	int currentSize = pattern.getScheduledTimetable().getTripTimes().size(); 
+//        	for (int i= pattern.noTrips; i < currentSize; i++){
+//        		System.out.println("preSize = "+ pattern.getScheduledTimetable().getTripTimes().size()+ ", pattern = "+ pattern.getRoute());
+//        		pattern.getScheduledTimetable().getTripTimes().remove(i);
+//        		System.out.println("Before applying realtime update, item "+ i+ " in " + pattern.getRoute().getId() + " has been removed from the list, current size"+ pattern.getScheduledTimetable().getTripTimes().size());
+//        	}
+//        }
         LOG.debug("message contains {} trip updates", updates.size());
         int uIndex = 0;
         for (TripUpdate tripUpdate : updates) {
