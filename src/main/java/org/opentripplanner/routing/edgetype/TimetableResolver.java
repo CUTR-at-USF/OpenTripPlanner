@@ -29,6 +29,8 @@ import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
+import com.google.transit.realtime.GtfsRealtime.TripDescriptor.ScheduleRelationship;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 
 // this is only currently in edgetype because that's where Trippattern is.
@@ -115,7 +117,10 @@ public class TimetableResolver {
                 dirty.add(tt);
             }
             // Assume all trips in a pattern are from the same feed, which should be the case.
-            return tt.update(tripUpdate, timeZone, serviceDate);
+            if (tripUpdate.getTrip().getScheduleRelationship() == ScheduleRelationship.UNSCHEDULED)
+            	return tt.updateFreqTrip(tripUpdate, timeZone, serviceDate);
+            else
+            	return tt.update(tripUpdate, timeZone, serviceDate);
         }
     }
 
