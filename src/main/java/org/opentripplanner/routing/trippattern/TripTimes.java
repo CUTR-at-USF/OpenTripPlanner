@@ -327,7 +327,6 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
         for (int s = 0; s < nStops; s++) {
             int arr = getArrivalTime(s);
             int dep = getDepartureTime(s);
-            System.out.println("stop = "+ s+ ", prevDep "+ prevDep + ", arr = "+ arr);
             if (dep < arr) {
                 LOG.error("Negative dwell time in TripTimes at stop index {}.", s);
                 return false;

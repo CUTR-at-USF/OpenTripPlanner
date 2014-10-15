@@ -13,8 +13,15 @@
 
 package org.opentripplanner.routing.edgetype;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -94,7 +101,7 @@ public class Timetable implements Serializable {
      * Helps determine whether a particular pattern is worth searching for departures at a given time. 
      */
     private transient int minTime, maxTime;
-    
+
     /** Construct an empty Timetable. */
     public Timetable(TripPattern pattern) {
         this.pattern = pattern;
@@ -352,7 +359,6 @@ public class Timetable implements Serializable {
                 return false;
             }
             AgencyAndId tripId = new AgencyAndId(agencyId, tripDescriptor.getTripId());
-
             int tripIndex = getTripIndex(tripId);
             if (tripIndex == -1) {
                 LOG.info("tripId {} not found in pattern.", tripId);
@@ -494,10 +500,7 @@ public class Timetable implements Serializable {
         return true;
     }
 
-    
 
-    
-    
     /**
      * 
      * Apply the TripUpdate of FrequnecyBased trip to the appropriate TripTimes from this Timetable.     
@@ -523,12 +526,10 @@ public class Timetable implements Serializable {
                 return false;
             }
             
-            int noOldTripTimes = pattern.getScheduledTimetable().getTripTimes().size(); 
-            for (int i= pattern.noTrips; i < noOldTripTimes; i++){
-        		//System.out.println("preSize = "+ pattern.getScheduledTimetable().getTripTimes().size()+ ", pattern = "+ pattern.getRoute());
-        		pattern.getScheduledTimetable().getTripTimes().remove(i);
-        		//System.out.println("Before applying realtime update, item "+ i+ " in " + pattern.getRoute().getId() + " has been removed from the list, current size"+ pattern.getScheduledTimetable().getTripTimes().size());
-        	}
+            FileWriter logFile = new FileWriter("tripUpdatesLogs.txt", true);
+            logFile.write("\n.....................................................\n");
+            
+     
             
             TripDescriptor tripDescriptor = tripUpdate.getTrip();
 
@@ -547,13 +548,13 @@ public class Timetable implements Serializable {
             }
 
             TripTimes newTimes = new TripTimes(getTripTimes(tripIndex));
-            //System.out.println("----new TripTimes :" + tripUpdate.getTrip().getRouteId() +" , "+ tripUpdate.getVehicle().getId() );
             newTimes.setVehicleID(tripUpdate.getVehicle().getId());
             
             if (tripDescriptor.hasScheduleRelationship() && tripDescriptor.getScheduleRelationship()
                     == TripDescriptor.ScheduleRelationship.CANCELED) {
                 newTimes.cancel();
             } else {
+            	 
                 // The GTFS-RT reference specifies that StopTimeUpdates are sorted by stop_sequence.
                 Iterator<StopTimeUpdate> updates = tripUpdate.getStopTimeUpdateList().iterator();
                 if (!updates.hasNext()) {
@@ -564,7 +565,7 @@ public class Timetable implements Serializable {
 
                 int numStops = newTimes.getNumStops()-1;
                 Integer delay = null;
-                //System.out.println("numStops = "+ (int)(numStops-1));
+                
                 int[] status = new int[numStops];
                  
                 boolean foundMatch = false;
@@ -615,8 +616,13 @@ public class Timetable implements Serializable {
                                             (int) (arrival.getTime() - today));
                                     int a = (int) (arrival.getTime() - today);
                                     status[update.getStopSequence()-1] = 1;
-                                    System.out.println(this.getPattern().getRoute().getId().getId() +", veh: "+ tripUpdate.getVehicle().getId() + ", seq:"+ i + ", "+ this.getPattern().getStop(i).getId().getId()+", arr = "+ (int)(a/3600)+":"+ (int)(a%3600)/60);
-                                
+                                    int minutes= (a%3600)/60;
+                                    int seconds = minutes %60; 
+                                    DecimalFormat df = new DecimalFormat(); 
+                                    df.setMinimumIntegerDigits(2);
+                                    System.out.println(this.getPattern().getRoute().getId().getId() +", veh: "+ tripUpdate.getVehicle().getId() + ", StopID: "+ this.getPattern().getStop(i).getId().getId()+ ", Stop.seq:"+ (int)(i+1) + ", "+", arrival = " + (int)(a/3600) + ":"+ df.format(seconds) +  ":"+ df.format(minutes));
+                                    logFile.write("Route:"+ this.getPattern().getRoute().getId().getId() +", Bus: "+ tripUpdate.getVehicle().getId()+ ", stopID: "+ this.getPattern().getStop(i).getId().getId() + ", stop_Seq.:"+ (int)(i+1)  + ", arrival = " + (int)(a/3600) + ":" + df.format(seconds) +  ":"+ df.format(minutes)+ "\n");
+                                    
                                    if (a < previous){
                 	            		System.out.println("      ---- Decreasing----     ");
                 	            	}                                  
@@ -673,7 +679,10 @@ public class Timetable implements Serializable {
                     }
                 }
                 if (update != null) {
+                	logFile.write("****Error: duplicate stopID****\n");
+                    logFile.write(update+"\n");
                     LOG.error("Part of a TripUpdate object could not be applied successfully.");
+                    
                     return false;
                 }
    
@@ -686,21 +695,38 @@ public class Timetable implements Serializable {
                 if (0 < firstNzIndex && firstNzIndex != 0){
                 	for(int i = firstNzIndex ; 0 <= i; i--){
                     	newTimes.backPropagateDelay(i);
-                    }
-                	
+                    }	
                 }
-                
-                
+                int numTrips = tripTimes.size();
+                String currentVehicle = tripUpdate.getVehicle().getId();
                 // Update succeeded, save the new TripTimes back into this Timetable.
-                if (tripTimes.get(tripIndex).vehicleID == null)
+                if (tripTimes.get(tripIndex).vehicleID == null){
                 	tripTimes.set(tripIndex, newTimes);
-                else{
-                	int noTrips = tripTimes.size();
-                	tripIndex = noTrips;
-                	newTimes.setVehicleID(tripUpdate.getVehicle().getId());
-                	this.tripTimes.add(tripIndex, newTimes);
+                	tripTimes.get(tripIndex).setVehicleID(currentVehicle);
+                } else { 
+                	tripIndex = numTrips;
+                	newTimes.setVehicleID(currentVehicle);
+                	 
+                	tripTimes.add(tripIndex, newTimes);
                 }
+                 
                
+                int noTripsWithSameVehicle = 0;
+                for (TripTimes tt : tripTimes) {      
+                	if (tt.getVehicleID() != null)
+	                    if (tt.getVehicleID().equals(currentVehicle)) 
+	                    	noTripsWithSameVehicle ++;
+                }
+                
+              //logFile.write(this.pattern.getRoute().getId().getId() + ", vehicleID: "+ currentVehicle +", numFreqTrips: "+ this.pattern.numFreqTrips+ ", current tripIndex = "+ tripIndex+ ", noTripsWithSameVehicle: "+ noTripsWithSameVehicle + "\n");
+             
+                 
+               System.out.println(this.pattern.getRoute().getId() + ", TripTimesSize = "+ tripTimes.size()+ ", current tripIndex = "+ tripIndex+ ", noTripsWithSameVehicle: "+ noTripsWithSameVehicle);
+               if (2 < noTripsWithSameVehicle){
+            	   logFile.write("****** ******Error in arrival time******* ******\n");
+            	   System.out.println("****** ******Error in arrival time******* ******");
+               }
+               logFile.close();
 //               if (verbose){ 
 //            	   System.out.println("--------------------after estimation-----------------");
 //            	 System.out.println("++++  firstNzIndex = "+ firstNzIndex +  "--------------------"); 
@@ -718,12 +744,10 @@ public class Timetable implements Serializable {
 //                System.out.println("tripTimes size = "+ this.tripTimes.size());
 //                System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 //               }
-                System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+                System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
             }
            
- 
-
-
+             
         } catch (Exception e) { // prevent server from dying while debugging
             e.printStackTrace();
             return false;
