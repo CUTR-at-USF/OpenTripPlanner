@@ -15,6 +15,7 @@ package org.opentripplanner.routing.edgetype;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -48,7 +49,7 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate;
  */
 public class TimetableResolver {
 
-    protected static class SortedTimetableComparator implements Comparator<Timetable> {
+    public static class SortedTimetableComparator implements Comparator<Timetable> {
         @Override
         public int compare(Timetable t1, Timetable t2) {
             return t1.serviceDate.compareTo(t2.serviceDate);
@@ -61,7 +62,7 @@ public class TimetableResolver {
     // if this turns out to be slow/spacious we can use an array with integer pattern indexes
     // The SortedSet members are copy-on-write
     // FIXME: this could be made into a flat hashtable with compound keys.
-    private HashMap<TripPattern, SortedSet<Timetable>> timetables =
+    public HashMap<TripPattern, SortedSet<Timetable>> timetables =
             new HashMap<TripPattern, SortedSet<Timetable>>();
 
     /** A set of all timetables which have been modified and are waiting to be indexed. */

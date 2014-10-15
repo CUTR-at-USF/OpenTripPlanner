@@ -14,17 +14,32 @@
 package org.opentripplanner.updater.stoptime;
 
  
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.Date;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+ 
+
+
+
+import java.util.TreeSet;
 
 import com.google.common.collect.Maps;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.opentripplanner.routing.core.ServiceDay;
+import org.opentripplanner.routing.edgetype.Timetable;
 import org.opentripplanner.routing.edgetype.TripPattern;
 import org.opentripplanner.routing.edgetype.TimetableResolver;
+import org.opentripplanner.routing.edgetype.TimetableResolver.SortedTimetableComparator;
 import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.routing.graph.GraphIndex;
 import org.slf4j.Logger;
@@ -71,10 +86,24 @@ public class TimetableSnapshotSource {
     private final TimeZone timeZone;
 
     private GraphIndex graphIndex;
-
+    //just for test
+    FileWriter logFile;
     public TimetableSnapshotSource(Graph graph) {
         timeZone = graph.getTimeZone();
         graphIndex = graph.index;
+ 
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+ 
+		try {
+			logFile = new FileWriter("tripUpdatesLogs.txt", false);
+			logFile.write("      OTP started at "+ dateFormat.format(date));
+			logFile.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+ 
     }
 
     /**
@@ -113,15 +142,48 @@ public class TimetableSnapshotSource {
             LOG.warn("updates is null");
             return;
         }
-        // this should be executed for only frequency-based trip
-//        for (TripPattern pattern: graphIndex.patternForTrip.values()){      	
-//        	int currentSize = pattern.getScheduledTimetable().getTripTimes().size(); 
-//        	for (int i= pattern.noTrips; i < currentSize; i++){
-//        		System.out.println("preSize = "+ pattern.getScheduledTimetable().getTripTimes().size()+ ", pattern = "+ pattern.getRoute());
-//        		pattern.getScheduledTimetable().getTripTimes().remove(i);
-//        		System.out.println("Before applying realtime update, item "+ i+ " in " + pattern.getRoute().getId() + " has been removed from the list, current size"+ pattern.getScheduledTimetable().getTripTimes().size());
-//        	}
-//        }
+        //Trip trip= graphIndex.tripForId.get(1);
+        
+ 
+   	 // this should be executed for only frequency-based trip
+        for (TripPattern pattern: graphIndex.patternForTrip.values()){      	
+        	 
+        	SortedSet<Timetable> sortedTimetables = buffer.timetables.get(pattern);
+        	if (sortedTimetables != null){
+	            
+	            for(Timetable timetable : sortedTimetables) {
+	            	int currentSize = timetable.getTripTimes().size();
+	            	System.out.println(pattern.route.getId().getId()+ ", timetable.getTripTimes size = "+ currentSize);
+	            	for (int i = 0; i< pattern.noTrips; i++){
+	            		timetable.getTripTimes(i).vehicleID = null;
+	            	}
+	            	for (int i= currentSize - 1;   pattern.noTrips <= i; i--){
+		        		//pattern.getScheduledTimetable().getTripTimes().remove(i);
+		        		timetable.getTripTimes().remove(i);
+		        		 
+		        	}
+	            	System.out.println("after: "+ timetable.getTripTimes().size()); 
+	           }
+        	}
+        }
+      	
+        
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+        FileWriter logFile;
+		try {
+			logFile = new FileWriter("tripUpdatesLogs.txt", true);
+			logFile.write("\n====================================================================\n");
+			logFile.write("                New set of TripUpdates     "+ dateFormat.format(date) + "            \n");
+			logFile.write("====================================================================\n");
+			logFile.close();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+        
+	       
+        
         LOG.debug("message contains {} trip updates", updates.size());
         int uIndex = 0;
         for (TripUpdate tripUpdate : updates) {

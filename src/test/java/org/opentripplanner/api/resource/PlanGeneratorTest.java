@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -634,9 +635,9 @@ public class PlanGeneratorTest {
         TimetableSnapshotSource timetableSnapshotSource = mock(TimetableSnapshotSource.class);
 
         when(timetableSnapshotSource.getTimetableSnapshot()).thenReturn(resolver);
-
-        timetableSnapshotSource.getTimetableSnapshot().update(
-                thirdTripPattern, tripUpdate, "Ferry", timeZone, serviceDate);
+ 
+		timetableSnapshotSource.getTimetableSnapshot().update(
+                thirdTripPattern, tripUpdate, "Ferry", timeZone, serviceDate );
 
         // Further graph initialization
         graph.putService(CalendarServiceData.class, calendarServiceData);

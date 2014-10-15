@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
@@ -101,7 +102,7 @@ public class TimetableResolverTest {
         tripUpdateBuilder.setTrip(tripDescriptorBuilder);
 
         TripUpdate tripUpdate = tripUpdateBuilder.build();
-
+    
         // add a new timetable for today
         resolver.update(pattern, tripUpdate, "agency", timeZone, today);
         Timetable forNow = resolver.resolve(pattern, today);
@@ -138,14 +139,15 @@ public class TimetableResolverTest {
         tripUpdateBuilder.setTrip(tripDescriptorBuilder);
 
         TripUpdate tripUpdate = tripUpdateBuilder.build();
-
-        // new timetable for today
+ 
+		// new timetable for today
         resolver.update(pattern, tripUpdate, "agency", timeZone, today);
         Timetable updatedNow = resolver.resolve(pattern, today);
         assertNotSame(origNow, updatedNow);
 
-        // reuse timetable for today
-        resolver.update(pattern, tripUpdate, "agency", timeZone, today);
+         
+		// reuse timetable for today
+        resolver.update(pattern, tripUpdate, "agency", timeZone, today );
         assertEquals(updatedNow, resolver.resolve(pattern, today));
 
         // create new timetable for tomorrow
@@ -180,7 +182,7 @@ public class TimetableResolverTest {
         tripUpdateBuilder.setTrip(tripDescriptorBuilder);
 
         TripUpdate tripUpdate = tripUpdateBuilder.build();
-
+         
         // add a new timetable for today, commit, and everything should match
         assertTrue(resolver.update(pattern, tripUpdate, "agency", timeZone, today));
         snapshot = resolver.commit();
@@ -223,7 +225,8 @@ public class TimetableResolverTest {
         TripUpdate tripUpdate = tripUpdateBuilder.build();
 
         TimetableResolver resolver = new TimetableResolver();
-        resolver.update(pattern, tripUpdate, "agency", timeZone, today);
+ 
+		resolver.update(pattern, tripUpdate, "agency", timeZone, today );
         resolver.update(pattern, tripUpdate, "agency", timeZone, yesterday);
 
         assertNotSame(resolver.resolve(pattern, yesterday), resolver.resolve(pattern, null));

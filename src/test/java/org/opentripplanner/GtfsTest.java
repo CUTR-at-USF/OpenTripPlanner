@@ -15,7 +15,9 @@ package org.opentripplanner;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -68,7 +70,7 @@ public abstract class GtfsTest extends TestCase {
 
     public Itinerary itinerary = null;
 
-    protected void setUp() {
+    protected void setUp() throws FileNotFoundException, UnsupportedEncodingException {
         File gtfs = new File("src/test/resources/" + getFeedName());
         File gtfsRealTime = new File("src/test/resources/" + getFeedName() + ".pb");
         GtfsBundle gtfsBundle = new GtfsBundle(gtfs);

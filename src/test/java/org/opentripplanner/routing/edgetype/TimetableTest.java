@@ -49,6 +49,7 @@ import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeEvent;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
+import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
 
 public class TimetableTest {
     
@@ -304,6 +305,67 @@ public class TimetableTest {
 	@Test
 	public void testUpdateFreqTrip() {
 		System.out.println("This test should be run for only Frequency based trip");
+		TripUpdate tripUpdate;
+        TripUpdate.Builder tripUpdateBuilder;
+        TripDescriptor.Builder tripDescriptorBuilder;
+        StopTimeUpdate.Builder stopTimeUpdateBuilder;
+        StopTimeEvent.Builder stopTimeEventBuilder;
+
+        int trip_1_1_index = timetable.getTripIndex(new AgencyAndId("agency", "1.1"));
+
+        Vertex stop_a = graph.getVertex("agency_A");
+        Vertex stop_c = graph.getVertex("agency_C");
+        RoutingRequest options = new RoutingRequest();
+
+        ShortestPathTree spt;
+        GraphPath path;
+      //---
+        long startTime = TestUtils.dateInSeconds("America/New_York", 2009, AUGUST, 7, 0, 0, 0);
+        long endTime;
+        options.dateTime = startTime;
+
+        //---
+        options.setRoutingContext(graph, stop_a, stop_c);
+        spt = aStar.getShortestPathTree(options);
+        path = spt.getPath(stop_c, false);
+        assertNotNull(path);
+        endTime = startTime + 20 * 60;
+        assertEquals(endTime, path.getEndTime());
+        
+        // test written by Mona
+        
+     // update trip
+        tripDescriptorBuilder = TripDescriptor.newBuilder();
+        tripDescriptorBuilder.setTripId("1.1");
+        tripDescriptorBuilder.setScheduleRelationship(
+                TripDescriptor.ScheduleRelationship.UNSCHEDULED);
+        tripUpdateBuilder = TripUpdate.newBuilder();
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder);
+        stopTimeUpdateBuilder = tripUpdateBuilder.addStopTimeUpdateBuilder(0);
+        stopTimeUpdateBuilder.setStopSequence(1);
+        stopTimeEventBuilder = stopTimeUpdateBuilder.getArrivalBuilder();
+        stopTimeEventBuilder.setTime(TestUtils.dateInSeconds(
+                "America/New_York", 2009, AUGUST, 7, 0, 2, 0));
+//        stopTimeEventBuilder = stopTimeUpdateBuilder.getDepartureBuilder();
+//        stopTimeEventBuilder.setTime(TestUtils.dateInSeconds(
+//                "America/New_York", 2009, AUGUST, 7, 0, 2, 0));
+
+        stopTimeUpdateBuilder.setStopSequence(2);
+        stopTimeEventBuilder = stopTimeUpdateBuilder.getArrivalBuilder();
+        stopTimeEventBuilder.setTime(TestUtils.dateInSeconds(
+                "America/New_York", 2009, AUGUST, 7, 0, 30, 0));
+        
+        VehicleDescriptor.Builder vehicleDescriptor = VehicleDescriptor.newBuilder();
+		vehicleDescriptor.setId("123");
+		 
+		tripUpdateBuilder.setVehicle(vehicleDescriptor);
+
+        tripUpdate = tripUpdateBuilder.build();
+        assertEquals(20*60, timetable.getTripTimes(trip_1_1_index).getArrivalTime(2));
+//        assertTrue(timetable.updateFreqTrip(tripUpdate, "agency", timeZone, serviceDate));
+        assertEquals(20*60 + 120, timetable.getTripTimes(trip_1_1_index).getArrivalTime(2));
+
+    
 	}
 
 }

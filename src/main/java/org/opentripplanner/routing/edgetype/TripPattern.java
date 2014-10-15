@@ -163,7 +163,7 @@ public class TripPattern implements Serializable {
      */
     // TODO MOVE codes INTO Timetable or TripTimes
     BitSet services;
-
+    
     public TripPattern(Route route, StopPattern stopPattern) {
         this.route = route;
         this.mode = GtfsLibrary.getTraverseMode(this.route);
