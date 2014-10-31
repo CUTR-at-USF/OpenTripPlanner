@@ -21,6 +21,7 @@ import static org.opentripplanner.common.IterableLibrary.filter;
 import static org.opentripplanner.util.TestUtils.AUGUST;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
@@ -152,7 +153,7 @@ public class TimetableTest {
         long endTime;
         options.dateTime = startTime;
 
-        //---
+        //---find shortest path
         options.setRoutingContext(graph, stop_a, stop_c);
         spt = aStar.getShortestPathTree(options);
         path = spt.getPath(stop_c, false);
@@ -303,69 +304,107 @@ public class TimetableTest {
 
 
 	@Test
-	public void testUpdateFreqTrip() {
+	public void testUpdateFreqTrip() throws Exception {
+		
 		System.out.println("This test should be run for only Frequency based trip");
+		GtfsContext context2 = GtfsLibrary.readGtfs(new File(ConstantsForTests.FAKE_Freq_GTFS));
+        Graph graph2 = new Graph();
+        
+        GTFSPatternHopFactory factory = new GTFSPatternHopFactory(context2);
+        factory.run(graph2);
+        graph2.putService(CalendarServiceData.class,
+                GtfsLibrary.createCalendarServiceData(context2.getDao()));
+
+        patternIndex = new HashMap<AgencyAndId, TripPattern>();
+        for (TransitStopDepart tsd : filter(graph2.getVertices(), TransitStopDepart.class)) {
+            for (TransitBoardAlight tba : filter(tsd.getOutgoing(), TransitBoardAlight.class)) {
+                if (!tba.isBoarding())
+                    continue;
+                TripPattern pattern = tba.getPattern();
+                for (Trip trip : pattern.getTrips()) {
+                    patternIndex.put(trip.getId(), pattern);
+                }
+            }
+        }
+        
+        pattern = patternIndex.get(new AgencyAndId("agency", "1"));
+        timetable = pattern.scheduledTimetable;
+		
 		TripUpdate tripUpdate;
         TripUpdate.Builder tripUpdateBuilder;
         TripDescriptor.Builder tripDescriptorBuilder;
         StopTimeUpdate.Builder stopTimeUpdateBuilder;
         StopTimeEvent.Builder stopTimeEventBuilder;
 
-        int trip_1_1_index = timetable.getTripIndex(new AgencyAndId("agency", "1.1"));
+        int trip_1_index = timetable.getTripIndex(new AgencyAndId("agency", "1"));
 
-        Vertex stop_a = graph.getVertex("agency_A");
-        Vertex stop_c = graph.getVertex("agency_C");
-        RoutingRequest options = new RoutingRequest();
-
-        ShortestPathTree spt;
-        GraphPath path;
-      //---
-        long startTime = TestUtils.dateInSeconds("America/New_York", 2009, AUGUST, 7, 0, 0, 0);
-        long endTime;
-        options.dateTime = startTime;
-
-        //---
-        options.setRoutingContext(graph, stop_a, stop_c);
-        spt = aStar.getShortestPathTree(options);
-        path = spt.getPath(stop_c, false);
-        assertNotNull(path);
-        endTime = startTime + 20 * 60;
-        assertEquals(endTime, path.getEndTime());
-        
-        // test written by Mona
-        
-     // update trip
+     // test written by Mona
+     // update arrival time of second stop along the trip
         tripDescriptorBuilder = TripDescriptor.newBuilder();
-        tripDescriptorBuilder.setTripId("1.1");
+        tripDescriptorBuilder.setTripId("1");
         tripDescriptorBuilder.setScheduleRelationship(
                 TripDescriptor.ScheduleRelationship.UNSCHEDULED);
         tripUpdateBuilder = TripUpdate.newBuilder();
         tripUpdateBuilder.setTrip(tripDescriptorBuilder);
         stopTimeUpdateBuilder = tripUpdateBuilder.addStopTimeUpdateBuilder(0);
-        stopTimeUpdateBuilder.setStopSequence(1);
-        stopTimeEventBuilder = stopTimeUpdateBuilder.getArrivalBuilder();
-        stopTimeEventBuilder.setTime(TestUtils.dateInSeconds(
-                "America/New_York", 2009, AUGUST, 7, 0, 2, 0));
-//        stopTimeEventBuilder = stopTimeUpdateBuilder.getDepartureBuilder();
-//        stopTimeEventBuilder.setTime(TestUtils.dateInSeconds(
-//                "America/New_York", 2009, AUGUST, 7, 0, 2, 0));
-
         stopTimeUpdateBuilder.setStopSequence(2);
         stopTimeEventBuilder = stopTimeUpdateBuilder.getArrivalBuilder();
         stopTimeEventBuilder.setTime(TestUtils.dateInSeconds(
-                "America/New_York", 2009, AUGUST, 7, 0, 30, 0));
-        
+                "America/New_York", 2009, AUGUST, 7, 07, 13, 0));
         VehicleDescriptor.Builder vehicleDescriptor = VehicleDescriptor.newBuilder();
-		vehicleDescriptor.setId("123");
-		 
+		vehicleDescriptor.setId("a");
 		tripUpdateBuilder.setVehicle(vehicleDescriptor);
-
-        tripUpdate = tripUpdateBuilder.build();
-        assertEquals(20*60, timetable.getTripTimes(trip_1_1_index).getArrivalTime(2));
-//        assertTrue(timetable.updateFreqTrip(tripUpdate, "agency", timeZone, serviceDate));
-        assertEquals(20*60 + 120, timetable.getTripTimes(trip_1_1_index).getArrivalTime(2));
-
-    
+        tripUpdate = tripUpdateBuilder.build();   
+        
+        assertTrue(timetable.updateFreqTrip(tripUpdate, "agency", timeZone, serviceDate));
+        assertEquals(7*3600 + 13*60, timetable.getTripTimes(trip_1_index).getArrivalTime(1));
+        //check the back-propagation of delay
+        assertEquals(7*3600 + 3*60, timetable.getTripTimes(trip_1_index).getArrivalTime(0));       
+        assertEquals(7*3600 + 33*60, timetable.getTripTimes(trip_1_index).getArrivalTime(3));
+        
+        //updates one trip with two different tripUpdates (different vehicle id)
+        TripUpdate tripUpdate2;
+        tripDescriptorBuilder = TripDescriptor.newBuilder();
+        tripDescriptorBuilder.setTripId("1");
+        tripDescriptorBuilder.setScheduleRelationship(
+                TripDescriptor.ScheduleRelationship.UNSCHEDULED);
+        tripUpdateBuilder = TripUpdate.newBuilder();
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder);
+        stopTimeUpdateBuilder = tripUpdateBuilder.addStopTimeUpdateBuilder(0);
+        stopTimeUpdateBuilder.setStopSequence(2);
+        stopTimeEventBuilder = stopTimeUpdateBuilder.getArrivalBuilder();
+        stopTimeEventBuilder.setTime(TestUtils.dateInSeconds(
+                "America/New_York", 2009, AUGUST, 7, 07, 45, 0));
+		vehicleDescriptor.setId("b");
+		tripUpdateBuilder.setVehicle(vehicleDescriptor);
+        tripUpdate2 = tripUpdateBuilder.build();    
+        assertTrue(timetable.updateFreqTrip(tripUpdate2, "agency", timeZone, serviceDate));
+        assertEquals(2, timetable.getTripTimes().size());
+        
+        assertEquals(7*3600 + 45*60, timetable.getTripTimes(1).getArrivalTime(1));
+        //check the back-propagation of delay
+        assertEquals(7*3600 + 35*60, timetable.getTripTimes(1).getArrivalTime(0));       
+        assertEquals(8*3600 + 5*60, timetable.getTripTimes(1).getArrivalTime(3));  
+        
+        
+        //shortest path after tripUpdate
+        long startTime = TestUtils.dateInSeconds("America/New_York", 2009, AUGUST, 7, 07, 0, 0);
+        long endTime;
+        Vertex stop_a = graph2.getVertex("agency_A");
+        Vertex stop_c = graph2.getVertex("agency_C");
+        RoutingRequest options = new RoutingRequest();
+        options.dateTime = startTime;
+        
+        
+        ShortestPathTree spt;
+        GraphPath path;
+        options.setRoutingContext(graph2, stop_a, stop_c);
+        GenericAStar aStar2 = new GenericAStar();
+        spt = aStar2.getShortestPathTree(options);
+        path = spt.getPath(stop_c, false);
+        assertNotNull(path);
+        endTime = startTime + 23 * 60;
+        assertEquals(endTime, path.getEndTime()); 
 	}
 
 }

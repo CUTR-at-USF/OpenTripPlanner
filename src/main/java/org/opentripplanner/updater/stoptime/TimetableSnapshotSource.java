@@ -147,13 +147,46 @@ public class TimetableSnapshotSource {
         
  
    	 // this should be executed for only frequency-based trip
-        for (TripPattern pattern: graphIndex.patternForTrip.values()){      	
-        	 
+//        for (TripPattern pattern: graphIndex.patternForTrip.values()){   
+//        	System.out.println(pattern.getRoute().getId());
+//         	//check if the pattern belongs to frequencyBased trips
+//        	if (pattern.getScheduledTimetable().getFrequencyEntries().size() != 0 ){
+//	        	SortedSet<Timetable> sortedTimetables = buffer.timetables.get(pattern);
+//	        	if (sortedTimetables != null){
+//		            
+//		            for(Timetable timetable : sortedTimetables) {
+//		            	int currentSize = timetable.getTripTimes().size();
+//		            	System.out.println(timetable.getFrequencyEntries().size());
+//		            	System.out.println(pattern.route.getId().getId()+ ", timetable.getTripTimes size = "+ currentSize);
+//		            	for (int i = 0; i< pattern.noTrips; i++){
+//		            		timetable.getTripTimes(i).vehicleID = null;
+//		            	}
+//		            	for (int i= currentSize - 1;   pattern.noTrips <= i; i--){
+//			        		//pattern.getScheduledTimetable().getTripTimes().remove(i);
+//			        		timetable.getTripTimes().remove(i);
+//			        		 
+//			        	}
+//		            	System.out.println("after: "+ timetable.getTripTimes().size()); 
+//		           }
+//	        	}
+//        	}
+//        }
+      	
+     // this should be executed for only frequency-based trip
+      for (TripPattern pattern: graphIndex.patternForTrip.values()){   
+      	System.out.println(pattern.getRoute().getId());
+       	//check if the pattern belongs to frequencyBased trips
+      	if (pattern.getScheduledTimetable().getFrequencyEntries().size() != 0 ){
+//      		int noTripTimes = pattern.getScheduledTimetable().getTripTimes().size();
+//      		for (int i= noTripTimes - 1;   pattern.noTrips <= i; i--){
+//      			pattern.getScheduledTimetable().getTripTimes().remove(i);
+//      		}
         	SortedSet<Timetable> sortedTimetables = buffer.timetables.get(pattern);
         	if (sortedTimetables != null){
 	            
 	            for(Timetable timetable : sortedTimetables) {
 	            	int currentSize = timetable.getTripTimes().size();
+	            	System.out.println(timetable.getFrequencyEntries().size());
 	            	System.out.println(pattern.route.getId().getId()+ ", timetable.getTripTimes size = "+ currentSize);
 	            	for (int i = 0; i< pattern.noTrips; i++){
 	            		timetable.getTripTimes(i).vehicleID = null;
@@ -166,8 +199,8 @@ public class TimetableSnapshotSource {
 	            	System.out.println("after: "+ timetable.getTripTimes().size()); 
 	           }
         	}
-        }
-      	
+      	}
+      }
         
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();

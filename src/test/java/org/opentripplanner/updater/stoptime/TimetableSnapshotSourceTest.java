@@ -17,8 +17,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
+
 import java.io.File;
 import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -34,6 +36,7 @@ import org.opentripplanner.routing.edgetype.Timetable;
 import org.opentripplanner.routing.edgetype.TimetableResolver;
 import org.opentripplanner.routing.edgetype.factory.GTFSPatternHopFactory;
 import org.opentripplanner.routing.graph.Graph;
+import org.opentripplanner.routing.graph.GraphIndex;
 import org.opentripplanner.routing.impl.DefaultStreetVertexIndexFactory;
 import org.opentripplanner.routing.trippattern.TripTimes;
 
@@ -88,12 +91,26 @@ public class TimetableSnapshotSourceTest {
         assertSame(resolver, updater.getTimetableSnapshot());
 
         updater.applyTripUpdates(Arrays.asList(TripUpdate.parseFrom(cancellation)), "agency");
-        assertSame(resolver, updater.getTimetableSnapshot());
+//        assertSame(resolver, updater.getTimetableSnapshot());
 
         updater.setMaxSnapshotFrequency(-1);
         TimetableResolver newResolver = updater.getTimetableSnapshot();
         assertNotNull(newResolver);
         assertNotSame(resolver, newResolver);
+        //applies only for frequencyBased trip. check whether the triptimes are cleared correclty 
+        GraphIndex graphIndex;
+        AgencyAndId tripId = new AgencyAndId("agency", "15.1");
+        Trip trip = graph.index.tripForId.get(tripId);
+        TripPattern pattern = graph.index.patternForTrip.get(trip);
+//        int tripIndex = pattern.getScheduledTimetable().getTripIndex(tripId);
+         System.out.println(pattern.getScheduledTimetable().getTripTimes().size());
+        Timetable forToday;
+        TripTimes tt = null; //new TripTimes(forToday.getTripTimes(tripIndex));
+        pattern.getScheduledTimetable().addTripTimes(tt);
+        System.out.println(pattern.getScheduledTimetable().getTripTimes().size());
+        updater.applyTripUpdates(Arrays.asList(TripUpdate.parseFrom(cancellation)), "agency");
+        System.out.println(pattern.getScheduledTimetable().getTripTimes().size());
+
     }
 
     @Test
