@@ -22,6 +22,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -390,7 +391,6 @@ public class Timetable implements Serializable {
                     return false;
                 }
                 StopTimeUpdate update = updates.next();
-
                 int numStops = newTimes.getNumStops();
                 Integer delay = null;
 
@@ -538,9 +538,7 @@ public class Timetable implements Serializable {
             
             FileWriter logFile = new FileWriter("tripUpdatesLogs.txt", true);
             logFile.write("\n.....................................................\n");
-            
-     
-            
+      
             TripDescriptor tripDescriptor = tripUpdate.getTrip();
             if (!tripDescriptor.hasTripId()) {
                 LOG.error("TripDescriptor object has no TripId field");
@@ -570,8 +568,12 @@ public class Timetable implements Serializable {
                     return false;
                 }
                 StopTimeUpdate update = updates.next();
-
-                int numStops = newTimes.getNumStops()-1;
+//                // remove repitative stopID (this happens in circular trips)
+//                HashSet hs = new HashSet();
+//                hs.addAll(this.getPattern().getStops());
+//                int numStops = hs.size(); //newTimes.getNumStops()-1;
+                
+                int numStops = newTimes.getNumStops();
                 Integer delay = null;
                 int firstNzIndex = -1;
 
@@ -588,6 +590,7 @@ public class Timetable implements Serializable {
                         }
                     }                   
                     if (match) {
+                    	int arrivalTime = 0;
                     	noStopsWithRealtimeUpdate = i;
                     	if (foundMatch ==false ){
                     		firstNzIndex = i;
@@ -622,16 +625,16 @@ public class Timetable implements Serializable {
                                 } else if (arrival.hasTime()) {
                                     newTimes.updateArrivalTime(i,
                                             (int) (arrival.getTime() - today));
-                                    int a = (int) (arrival.getTime() - today);
+                                    arrivalTime = (int) (arrival.getTime() - today);
                                     status[update.getStopSequence()-1] = 1;
-                                    int minutes= (a%3600)/60;
+                                    int minutes= (arrivalTime%3600)/60;
                                     int seconds = minutes %60; 
                                     DecimalFormat df = new DecimalFormat(); 
                                     df.setMinimumIntegerDigits(2);
-                                    System.out.println(this.getPattern().getRoute().getId().getId() +", veh: "+ tripUpdate.getVehicle().getId() + ", StopID: "+ this.getPattern().getStop(i).getId().getId()+ ", Stop.seq:"+ (int)(i+1) + ", "+", arrival = " + (int)(a/3600) + ":"+ df.format(seconds) +  ":"+ df.format(minutes));
-                                    logFile.write("Route:"+ this.getPattern().getRoute().getId().getId() +", Bus: "+ tripUpdate.getVehicle().getId()+ ", stopID: "+ this.getPattern().getStop(i).getId().getId() + ", stop_Seq.:"+ (int)(i+1)  + ", arrival = " + (int)(a/3600) + ":" + df.format(seconds) +  ":"+ df.format(minutes)+ "\n");
+                                    System.out.println(this.getPattern().getRoute().getId().getId() +", veh: "+ tripUpdate.getVehicle().getId() + ", StopID: "+ this.getPattern().getStop(i).getId().getId()+ ", Stop.seq:"+ (int)(i+1) + ", "+", arrival = " + (int)(arrivalTime/3600) + ":"+ df.format(minutes) +  ":"+ df.format(seconds));
+                                    logFile.write("Route:"+ this.getPattern().getRoute().getId().getId() +", Bus: "+ tripUpdate.getVehicle().getId()+ ", stopID: "+ this.getPattern().getStop(i).getId().getId() + ", stop_Seq.:"+ (int)(i+1)  + ", arrival = " + (int)(arrivalTime/3600) + ":" + df.format(minutes) +  ":"+ df.format(seconds)+ "\n");
                                     
-                                   if (a < previous){
+                                   if (arrivalTime < previous){
                 	            		System.out.println("      ---- Decreasing----     ");
                 	            	}
                                   // System.out.println("route "+this.getPattern().getRoute().getId().getId() +", veh: "+ tripUpdate.getVehicle().getId() + ", stop "+ i +" ,ID: "+ this.getPattern().getStop(i).getId().getId()  + ", "+ update.getStopId()+ ", arrival = " + a/3600+ ":" + (a%3600)/60);
@@ -669,11 +672,7 @@ public class Timetable implements Serializable {
                                     return false;
                                 }
                             } else {
-                                if (delay == null) {
-                                    newTimes.updateDepartureTime(i, TripTimes.UNAVAILABLE);
-                                } else {
-                                    newTimes.updateDepartureDelay(i, delay);
-                                }
+                            	 newTimes.updateDepartureTime(i, arrivalTime);
                             }
                         }
                         if (updates.hasNext()) {
@@ -722,30 +721,23 @@ public class Timetable implements Serializable {
                 	tripTimes.get(tripIndex).setVehicleID(currentVehicle);
                 } else { 
                 	tripIndex = numTrips;
-                	newTimes.setVehicleID(currentVehicle);
-                	 
+                	newTimes.setVehicleID(currentVehicle);        	 
                 	tripTimes.add(tripIndex, newTimes);
                 }
-                 
-               
+                  
                 int noTripsWithSameVehicle = 0;
                 for (TripTimes tt : tripTimes) {      
                 	if (tt.getVehicleID() != null)
 	                    if (tt.getVehicleID().equals(currentVehicle)) 
 	                    	noTripsWithSameVehicle ++;
                 }
-                
-              //logFile.write(this.pattern.getRoute().getId().getId() + ", vehicleID: "+ currentVehicle +", numFreqTrips: "+ this.pattern.numFreqTrips+ ", current tripIndex = "+ tripIndex+ ", noTripsWithSameVehicle: "+ noTripsWithSameVehicle + "\n");
-             
-                 
+                        
                System.out.println(this.pattern.getRoute().getId() + ", TripTimesSize = "+ tripTimes.size()+ ", current tripIndex = "+ tripIndex+ ", noTripsWithSameVehicle: "+ noTripsWithSameVehicle);
                if (2 < noTripsWithSameVehicle){
             	   logFile.write("****** ******Error in arrival time******* ******\n");
             	   System.out.println("****** ******Error in arrival time******* ******");
                }
-               logFile.close();
-               System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-            }
+                        }
            
             // Update succeeded, save the new TripTimes back into this Timetable.
             if (tripTimes.get(tripIndex).vehicleID == null)
