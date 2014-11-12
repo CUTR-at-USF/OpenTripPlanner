@@ -38,17 +38,18 @@ import com.vividsolutions.jts.geom.LineString;
 
 /**
  * {@link GraphBuilder} plugin that links up the stops of a transit network among themselves,
- * without using the street network at all. For now this just considers distance, but it should
- * also consider parent station specifications, which are present in the Dutch KV7 data.
+ * without using the street network at all. For now this just considers distance, but it should also
+ * consider parent station specifications, which are present in the Dutch KV7 data.
  */
 public class StreetlessStopLinker implements GraphBuilder {
 
-    @Setter private double radius = 500; 
+    @Setter
+    private double radius = 500;
 
-    private static Logger LOG = LoggerFactory.getLogger(StreetlessStopLinker.class); 
+    private static Logger LOG = LoggerFactory.getLogger(StreetlessStopLinker.class);
 
     DistanceLibrary distanceLibrary = SphericalDistanceLibrary.getInstance();
-    
+
     public List<String> provides() {
         return Arrays.asList("linking");
     }
@@ -61,16 +62,16 @@ public class StreetlessStopLinker implements GraphBuilder {
     public void buildGraph(Graph graph, HashMap<Class<?>, Object> extra) {
         StreetVertexIndexService index = new StreetVertexIndexServiceImpl(graph);
         GeometryFactory geometryFactory = GeometryUtils.getGeometryFactory();
-        
+
         for (TransitStop ts : IterableLibrary.filter(graph.getVertices(), TransitStop.class)) {
             Coordinate c = ts.getCoordinate();
             LOG.trace("linking stop {}", ts);
             int n = 0;
             for (TransitStop other : index.getNearbyTransitStops(c, radius)) {
-                if(!other.isStreetLinkable())
+                if (!other.isStreetLinkable())
                     continue;
 
-                Coordinate coordinates[] = new Coordinate[] {c, other.getCoordinate()};
+                Coordinate coordinates[] = new Coordinate[] { c, other.getCoordinate() };
                 double distance = distanceLibrary.distance(coordinates[0], coordinates[1]);
                 LineString geometry = geometryFactory.createLineString(coordinates);
                 LOG.trace("  to stop: {} ({}m)", other, distance);
@@ -79,12 +80,12 @@ public class StreetlessStopLinker implements GraphBuilder {
             }
             LOG.trace("linked to {} others.", n);
         }
-        
+
     }
 
     @Override
     public void checkInputs() {
-        //no inputs
+        // no inputs
     }
 
 }

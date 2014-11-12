@@ -5,13 +5,15 @@ import org.onebusaway.gtfs.model.calendar.ServiceDate;
 
 public class YearMonthDay extends QueryParameter {
 
-    static int[] daysInMonth = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    static int[] daysInMonth = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
     public int year;
+
     public int month;
+
     public int day;
 
-    public YearMonthDay (String value) {
+    public YearMonthDay(String value) {
         super(value);
     }
 
@@ -21,9 +23,9 @@ public class YearMonthDay extends QueryParameter {
             value = new LocalDate().toString(); // eeew
         }
         String[] fields = value.split("-");
-        year  = Integer.parseInt(fields[0]);
+        year = Integer.parseInt(fields[0]);
         month = Integer.parseInt(fields[1]);
-        day   = Integer.parseInt(fields[2]);
+        day = Integer.parseInt(fields[2]);
         checkRangeInclusive(year, 2000, 2100);
         checkRangeInclusive(month, 1, 12);
         checkRangeInclusive(day, 1, daysInMonth[month - 1]);

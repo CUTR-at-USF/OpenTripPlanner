@@ -83,7 +83,7 @@ public class MidblockMatchState extends MatchState {
                 /* this should not require the try/catch, but there is a bug in JTS */
                 try {
                     LinearLocation projected2 = indexedEdge.indexOfAfter(edgeCoord, edgeIndex);
-                    //another bug in JTS
+                    // another bug in JTS
                     if (Double.isNaN(projected2.getSegmentFraction())) {
                         // we are probably moving backwards
                         return Collections.emptyList();
@@ -124,7 +124,8 @@ public class MidblockMatchState extends MatchState {
                         if (Double.isNaN(routeProjectedEndIndex.getSegmentFraction())) {
                             // can't go forward
                             routeProjectedEndIndex = routeIndex; // this is bad, but not terrible
-                                                                 // since we are advancing along the edge
+                                                                 // since we are advancing along the
+                                                                 // edge
                         }
                     } catch (AssertionFailedException e) {
                         routeProjectedEndIndex = routeIndex;
@@ -140,13 +141,13 @@ public class MidblockMatchState extends MatchState {
                 double travelError = Math.abs(travelAlongEdge - travelAlongRoute);
 
                 double error = positionError + travelError;
-                
+
                 if (error > MAX_ERROR) {
                     // we're not going to bother with states which are
                     // totally wrong
                     return nextStates;
                 }
-                
+
                 for (Edge e : getOutgoingMatchableEdges(toVertex)) {
                     double cost = error + NEW_SEGMENT_PENALTY;
                     if (!carsCanTraverse(e)) {
@@ -187,7 +188,9 @@ public class MidblockMatchState extends MatchState {
                     newEdgeIndex = newIndexedEdge.project(newRouteCoord);
                     Coordinate newEdgeCoord = newEdgeIndex.getCoordinate(newEdgeGeometry);
                     positionError = distance(newEdgeCoord, newRouteCoord);
-                    travelAlongEdge = travelAlongOldEdge + distanceAlongGeometry(newEdgeGeometry, new LinearLocation(), newEdgeIndex);
+                    travelAlongEdge = travelAlongOldEdge
+                            + distanceAlongGeometry(newEdgeGeometry, new LinearLocation(),
+                                    newEdgeIndex);
                     travelError = Math.abs(travelAlongRoute - travelAlongEdge);
 
                     error = travelError + positionError;

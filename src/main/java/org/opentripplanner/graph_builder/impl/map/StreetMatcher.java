@@ -37,6 +37,7 @@ import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
 /** This is used by MapBuilder and it has no comments. TODO Figure out what it is for. */
 public class StreetMatcher {
     private static final Logger log = LoggerFactory.getLogger(StreetMatcher.class);
+
     private static final double DISTANCE_THRESHOLD = 0.0002;
 
     Graph graph;
@@ -67,12 +68,12 @@ public class StreetMatcher {
 
     @SuppressWarnings("unchecked")
     public List<Edge> match(Geometry routeGeometry) {
-        
+
         routeGeometry = removeDuplicatePoints(routeGeometry);
 
-        if (routeGeometry == null) 
+        if (routeGeometry == null)
             return null;
-        
+
         routeGeometry = DouglasPeuckerSimplifier.simplify(routeGeometry, 0.00001);
 
         // initial state: start midway along a block.
@@ -96,13 +97,16 @@ public class StreetMatcher {
         // compute initial states
         for (Edge initialEdge : nearbyEdges) {
             Geometry edgeGeometry = initialEdge.getGeometry();
-            
+
             LocationIndexedLine indexedEdge = new LocationIndexedLine(edgeGeometry);
             LinearLocation initialLocation = indexedEdge.project(routeStartCoordinate);
-            
-            double error = MatchState.distance(initialLocation.getCoordinate(edgeGeometry), routeStartCoordinate);
-            MidblockMatchState state = new MidblockMatchState(null, routeGeometry, initialEdge, startIndex, initialLocation, error, 0.01);
-            states.insert(state, 0); //make sure all initial states are visited by inserting them at 0
+
+            double error = MatchState.distance(initialLocation.getCoordinate(edgeGeometry),
+                    routeStartCoordinate);
+            MidblockMatchState state = new MidblockMatchState(null, routeGeometry, initialEdge,
+                    startIndex, initialLocation, error, 0.01);
+            states.insert(state, 0); // make sure all initial states are visited by inserting them
+                                     // at 0
         }
 
         // search for best-matching path
@@ -119,7 +123,7 @@ public class StreetMatcher {
                 continue;
             } else {
                 if (k != 0) {
-                    //but do not mark states as closed if we start at them
+                    // but do not mark states as closed if we start at them
                     seen.add(state);
                 }
             }

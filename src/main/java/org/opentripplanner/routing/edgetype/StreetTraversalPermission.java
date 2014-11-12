@@ -27,25 +27,30 @@ import lombok.Getter;
  * 
  */
 public enum StreetTraversalPermission {
-    NONE(0),
-    PEDESTRIAN(1),
-    BICYCLE(2),
-    PEDESTRIAN_AND_BICYCLE(2 | 1),
-    CAR(4),
-    PEDESTRIAN_AND_CAR(4 | 1),
-    BICYCLE_AND_CAR(4 | 2),
-    PEDESTRIAN_AND_BICYCLE_AND_CAR(4 | 2 | 1),
+    NONE(0), PEDESTRIAN(1), BICYCLE(2), PEDESTRIAN_AND_BICYCLE(2 | 1), CAR(4), PEDESTRIAN_AND_CAR(
+            4 | 1), BICYCLE_AND_CAR(4 | 2), PEDESTRIAN_AND_BICYCLE_AND_CAR(4 | 2 | 1),
     // This is a configurable motor vehicle that is not a vanilla car.
     // e.g. truck, motor bike, etc.
-    CUSTOM_MOTOR_VEHICLE(8),
-    PEDESTRIAN_AND_CUSTOM_MOTOR_VEHICLE(8 | 1),
-    BICYCLE_AND_CUSTOM_MOTOR_VEHICLE(8 | 2),
-    PEDESTRIAN_BICYCLE_MOTOR(8 | 2 | 1),
-    ALL_DRIVING(8 | 4),
-    PEDESTRIAN_AND_DRIVING(8 | 4 | 1),
-    BICYCLE_AND_DRIVING(8 | 4 | 2),
-    ALL(8 | 4 | 2 | 1),
-    CROSSHATCHED(16); // this street exists in both Beszel and Ul Qoma; traffic direction may depend on which city you're in.
+    CUSTOM_MOTOR_VEHICLE(8), PEDESTRIAN_AND_CUSTOM_MOTOR_VEHICLE(8 | 1), BICYCLE_AND_CUSTOM_MOTOR_VEHICLE(
+            8 | 2), PEDESTRIAN_BICYCLE_MOTOR(8 | 2 | 1), ALL_DRIVING(8 | 4), PEDESTRIAN_AND_DRIVING(
+            8 | 4 | 1), BICYCLE_AND_DRIVING(8 | 4 | 2), ALL(8 | 4 | 2 | 1), CROSSHATCHED(16); // this
+                                                                                              // street
+                                                                                              // exists
+                                                                                              // in
+                                                                                              // both
+                                                                                              // Beszel
+                                                                                              // and
+                                                                                              // Ul
+                                                                                              // Qoma;
+                                                                                              // traffic
+                                                                                              // direction
+                                                                                              // may
+                                                                                              // depend
+                                                                                              // on
+                                                                                              // which
+                                                                                              // city
+                                                                                              // you're
+                                                                                              // in.
 
     private static final Map<Integer, StreetTraversalPermission> lookup = new HashMap<Integer, StreetTraversalPermission>();
 
@@ -80,9 +85,10 @@ public enum StreetTraversalPermission {
     public boolean allows(StreetTraversalPermission perm) {
         return (code & perm.code) != 0;
     }
-    
+
     /**
      * Returns true if any of these modes are allowed.
+     * 
      * @param modes
      * @return
      */
@@ -99,9 +105,10 @@ public enum StreetTraversalPermission {
         }
         return false;
     }
-    
+
     /**
      * Returns true if this mode is allowed.
+     * 
      * @param mode
      * @return
      */
@@ -121,14 +128,16 @@ public enum StreetTraversalPermission {
 
     /**
      * Returns true if there are any modes allowed by this permission.
+     * 
      * @return
      */
     public boolean allowsAnything() {
         return !this.allowsNothing();
     }
-    
+
     /**
      * Returns true if there no modes are by this permission.
+     * 
      * @return
      */
     public boolean allowsNothing() {

@@ -109,7 +109,7 @@ public class StreetTraversalPermissionTest {
         StreetTraversalPermission perm = StreetTraversalPermission.ALL_DRIVING;
         assertTrue(perm.allowsAnything());
         assertFalse(perm.allowsNothing());
-        
+
         perm = StreetTraversalPermission.NONE;
         assertFalse(perm.allowsAnything());
         assertTrue(perm.allowsNothing());

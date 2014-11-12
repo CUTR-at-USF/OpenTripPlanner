@@ -68,9 +68,10 @@ public class GraphUpdaterConfigurator {
         }
         LOG.info("Using configurations: " + (mainConfig == null ? "" : "[main]") + " "
                 + (embeddedConfig == null ? "" : "[embedded]"));
-        
-        // Apply configuration 
-        updaterManager = applyConfigurationToGraph(graph, updaterManager, Arrays.asList(mainConfig, embeddedConfig));
+
+        // Apply configuration
+        updaterManager = applyConfigurationToGraph(graph, updaterManager,
+                Arrays.asList(mainConfig, embeddedConfig));
 
         // Stop the updater manager if it contains nothing
         if (updaterManager.size() == 0) {
@@ -85,12 +86,14 @@ public class GraphUpdaterConfigurator {
     /**
      * Apply a list of configs to a graph. Please note that the order of the config in the list *is
      * important* as a child node already seen will not be overriden.
+     * 
      * @param graph
      * @param updaterManager is the graph updater manager to which all updaters should be added
      * @param configs is the list of configs.
-     * @return reference to the same updaterManager as was given as input   
+     * @return reference to the same updaterManager as was given as input
      */
-    private GraphUpdaterManager applyConfigurationToGraph(Graph graph, GraphUpdaterManager updaterManager, List<Preferences> configs) {
+    private GraphUpdaterManager applyConfigurationToGraph(Graph graph,
+            GraphUpdaterManager updaterManager, List<Preferences> configs) {
         try {
             Set<String> configurableNames = new HashSet<String>();
             for (Preferences config : configs) {
@@ -104,7 +107,7 @@ public class GraphUpdaterConfigurator {
                         continue;
                     }
                     configurableNames.add(configurableName);
-                    
+
                     // Determine the updater
                     Preferences prefs = config.node(configurableName);
                     String type = prefs.get("type", null);
@@ -112,39 +115,33 @@ public class GraphUpdaterConfigurator {
                     if (type != null) {
                         if (type.equals("bike-rental")) {
                             updater = new BikeRentalUpdater();
-                        }
-                        else if (type.equals("stop-time-updater")) {
+                        } else if (type.equals("stop-time-updater")) {
                             updater = new PollingStoptimeUpdater();
-                        }
-                        else if (type.equals("websocket-gtfs-rt-updater")) {
+                        } else if (type.equals("websocket-gtfs-rt-updater")) {
                             updater = new WebsocketGtfsRealtimeUpdater();
-                        }
-                        else if (type.equals("real-time-alerts")) {
+                        } else if (type.equals("real-time-alerts")) {
                             updater = new GtfsRealtimeAlertsUpdater();
-                        }
-                        else if (type.equals("example-updater")) {
+                        } else if (type.equals("example-updater")) {
                             updater = new ExampleGraphUpdater();
-                        }
-                        else if (type.equals("example-polling-updater")) {
+                        } else if (type.equals("example-polling-updater")) {
                             updater = new ExamplePollingGraphUpdater();
                         }
                     }
-                    
+
                     // Configure and activate the updaters
                     try {
-                        // Check whether no updater type was found 
+                        // Check whether no updater type was found
                         if (updater == null) {
                             LOG.error("Unknown updater type: " + type);
-                        }
-                        else {
+                        } else {
                             // Add manager as parent
                             updater.setGraphUpdaterManager(updaterManager);
-                            
+
                             // Configure updater if found and necessary
                             if (updater instanceof PreferencesConfigurable) {
                                 ((PreferencesConfigurable) updater).configure(graph, prefs);
                             }
-                            
+
                             // Add graph updater to manager
                             updaterManager.addUpdater(updater);
                         }

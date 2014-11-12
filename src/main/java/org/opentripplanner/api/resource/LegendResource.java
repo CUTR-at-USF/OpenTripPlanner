@@ -33,18 +33,29 @@ import org.slf4j.LoggerFactory;
 
 @Path("/analyst/legend.{format}")
 public class LegendResource {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(LegendResource.class);
 
-    @PathParam("format")  String format; 
-    @QueryParam("width")  @DefaultValue("300") int width; 
-    @QueryParam("height") @DefaultValue("150") int height;
-    @QueryParam("styles")  @DefaultValue("color30") StyleList styles;
+    @PathParam("format")
+    String format;
 
-    @GET @Produces("image/*")
-    public Response tileGet() throws Exception { 
-    	if (format.equals("jpg"))
-    		format = "jpeg";
+    @QueryParam("width")
+    @DefaultValue("300")
+    int width;
+
+    @QueryParam("height")
+    @DefaultValue("150")
+    int height;
+
+    @QueryParam("styles")
+    @DefaultValue("color30")
+    StyleList styles;
+
+    @GET
+    @Produces("image/*")
+    public Response tileGet() throws Exception {
+        if (format.equals("jpg"))
+            format = "jpeg";
         MIMEImageFormat mimeFormat = new MIMEImageFormat("image/" + format);
         Style style = styles.get(0);
         BufferedImage image = Tile.getLegend(style, width, height);

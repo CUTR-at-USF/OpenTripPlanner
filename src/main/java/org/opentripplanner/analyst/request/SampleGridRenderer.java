@@ -54,6 +54,7 @@ public class SampleGridRenderer {
     private static final Logger LOG = LoggerFactory.getLogger(SampleGridRenderer.class);
 
     private GraphService graphService;
+
     private SPTService sptService;
 
     public SampleGridRenderer(GraphService graphService, SPTService sptService) {
@@ -110,9 +111,9 @@ public class SampleGridRenderer {
      * @param spt
      * @return
      */
-    public static void sampleSPT(ShortestPathTree spt, ZSampleGrid<WTWD> sampleGrid, final double d0,
-            final double gridSizeMeters, final double v0, final double maxWalkDistance,
-            final double cosLat) {
+    public static void sampleSPT(ShortestPathTree spt, ZSampleGrid<WTWD> sampleGrid,
+            final double d0, final double gridSizeMeters, final double v0,
+            final double maxWalkDistance, final double cosLat) {
 
         final DistanceLibrary distanceLibrary = SphericalDistanceLibrary.getInstance();
 
@@ -280,6 +281,7 @@ public class SampleGridRenderer {
                     return -1;
                 return 0;
             }
+
             @Override
             public double interpolate(WTWD zA, WTWD zB, WTWD z0) {
                 if (zA.d > z0.d || zB.d > z0.d) {

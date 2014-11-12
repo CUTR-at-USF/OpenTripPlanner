@@ -20,10 +20,9 @@ import java.util.TimeZone;
 import lombok.Data;
 
 /**
- * Represents a repeating time period, used for opening hours &c.
- * For instance: Monday - Friday 8AM to 8PM, Satuday 10AM to 5PM, Sunday closed.
- * For now it is week-based so doesn't handle every possible case, but since it is encapsulated 
- * that could conceivably be changed.
+ * Represents a repeating time period, used for opening hours &c. For instance: Monday - Friday 8AM
+ * to 8PM, Satuday 10AM to 5PM, Sunday closed. For now it is week-based so doesn't handle every
+ * possible case, but since it is encapsulated that could conceivably be changed.
  * 
  * @author mattwigway
  *
@@ -31,37 +30,44 @@ import lombok.Data;
 @Data
 public class RepeatingTimePeriod implements Serializable {
     private static final long serialVersionUID = -5977328371879835782L;
-    
-    private RepeatingTimePeriod () {
+
+    private RepeatingTimePeriod() {
         this.timeZone = null;
     }
-    
-    /** 
-     * This stores the time periods this is active/open, stored as seconds from noon
-     * (positive or negative) on the given day.
+
+    /**
+     * This stores the time periods this is active/open, stored as seconds from noon (positive or
+     * negative) on the given day.
      */
     private int[][] monday;
+
     private int[][] tuesday;
+
     private int[][] wednesday;
+
     private int[][] thursday;
+
     private int[][] friday;
+
     private int[][] saturday;
+
     private int[][] sunday;
-    
+
     /**
      * The timezone this is represented in.
      */
     private TimeZone timeZone;
-   
+
     /**
      * Parse the time specification from an OSM turn restriction
+     * 
      * @param day_on
      * @param day_off
      * @param hour_on
      * @param hour_off
      * @return
      */
-    public static RepeatingTimePeriod parseFromOsmTurnRestriction (String day_on, String day_off, 
+    public static RepeatingTimePeriod parseFromOsmTurnRestriction(String day_on, String day_off,
             String hour_on, String hour_off) {
         // first, create the opening and closing times. This is easy because there is the same one
         // every day of the week that this restriction is in force.
@@ -69,69 +75,70 @@ public class RepeatingTimePeriod implements Serializable {
         String[] parsedOff = hour_off.split(";");
         if (parsedOn.length != parsedOff.length)
             return null;
-        
+
         int[][] onOff = new int[parsedOn.length][];
-        
+
         for (int i = 0; i < parsedOn.length; i++) {
-            onOff[i] = new int[] {parseHour(parsedOn[i]), parseHour(parsedOff[i])};
+            onOff[i] = new int[] { parseHour(parsedOn[i]), parseHour(parsedOff[i]) };
         }
-             
+
         boolean active = false;
         RepeatingTimePeriod ret = new RepeatingTimePeriod();
-        
+
         // loop through twice to handle cases like Saturday - Tuesday
-        for (String today : new String[] {"monday", "tuesday", "wednesday", "thursday", "friday",
+        for (String today : new String[] { "monday", "tuesday", "wednesday", "thursday", "friday",
                 "saturday", "sunday", "monday", "tuesday", "wednesday", "thursday", "friday",
-                "saturday", "sunday"}) {
-            
+                "saturday", "sunday" }) {
+
             if (today.startsWith(day_on.toLowerCase()))
                 active = true;
-            
+
             if (active) {
                 if (today == "monday")
                     ret.setMonday(onOff);
-                
+
                 else if (today == "tuesday")
                     ret.setTuesday(onOff);
-        
+
                 else if (today == "wednesday")
                     ret.setWednesday(onOff);
-                    
+
                 else if (today == "thursday")
                     ret.setThursday(onOff);
-                
+
                 else if (today == "friday")
                     ret.setFriday(onOff);
-                
+
                 else if (today == "saturday")
                     ret.setSaturday(onOff);
-                
+
                 else if (today == "sunday")
                     ret.setSunday(onOff);
             }
-                
+
             if (today.startsWith(day_off.toLowerCase()))
                 active = false;
         }
-        
+
         return ret;
     }
-    
+
     /**
-     * Return seconds before or after noon for the given hour. 
+     * Return seconds before or after noon for the given hour.
+     * 
      * @param hour
      */
     private static int parseHour(String hour) {
         String[] parsed = hour.split(":");
         int ret = Integer.parseInt(parsed[0]) * 3600;
-        
+
         if (parsed.length >= 2) {
             ret += Integer.parseInt(parsed[1]) * 60;
         }
-        
+
         // subtract 12 hours to make it noon-relative. This implicitly handles DST.
         ret -= 12 * 3600;
-        
+
         return ret;
     }
 
@@ -144,13 +151,13 @@ public class RepeatingTimePeriod implements Serializable {
         else
             // FIXME hardwired time zone
             cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-        
+
         cal.setTimeInMillis(time * 1000);
         int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
-        
+
         int[][] times = null;
-                
-        switch(dayOfWeek) {
+
+        switch (dayOfWeek) {
         case Calendar.MONDAY:
             times = monday;
             break;
@@ -175,18 +182,18 @@ public class RepeatingTimePeriod implements Serializable {
         }
 
         if (times == null) {
-            //no restriction today
+            // no restriction today
             return false;
         }
-        
-        int timeOfDay = cal.get(Calendar.HOUR_OF_DAY) * 3600 + cal.get(Calendar.MINUTE) * 60 +
-                cal.get(Calendar.SECOND) - 12 * 3600; 
-        
+
+        int timeOfDay = cal.get(Calendar.HOUR_OF_DAY) * 3600 + cal.get(Calendar.MINUTE) * 60
+                + cal.get(Calendar.SECOND) - 12 * 3600;
+
         for (int[] range : times) {
             if (timeOfDay >= range[0] && timeOfDay <= range[1])
                 return true;
         }
-        
-        return false;   
+
+        return false;
     }
 }

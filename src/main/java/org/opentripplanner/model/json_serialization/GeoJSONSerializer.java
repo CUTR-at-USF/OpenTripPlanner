@@ -15,7 +15,6 @@ package org.opentripplanner.model.json_serialization;
 
 import java.io.IOException;
 
-
 import org.geotools.geojson.geom.GeometryJSON;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -29,9 +28,9 @@ public class GeoJSONSerializer extends JsonSerializer<Geometry> {
     @Override
     public void serialize(Geometry value, JsonGenerator jgen, SerializerProvider provider)
             throws IOException, JsonProcessingException {
-        
+
         GeometryJSON json = new GeometryJSON();
-        
+
         jgen.writeRawValue(json.toString(value));
     }
 

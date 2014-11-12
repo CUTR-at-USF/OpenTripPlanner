@@ -52,23 +52,24 @@ public class OTPMain {
             LOG.error("Parameter error: {}", pex.getMessage());
             System.exit(1);
         }
-        
+
         OTPConfigurator configurator = new OTPConfigurator(params);
-        
+
         // start graph builder, if asked for
         GraphBuilderTask graphBuilder = configurator.builderFromParameters();
         if (graphBuilder != null) {
             graphBuilder.run();
             // Inform configurator which graph is to be used for in-memory handoff.
-            if (params.inMemory) configurator.makeGraphService(graphBuilder.getGraph());
+            if (params.inMemory)
+                configurator.makeGraphService(graphBuilder.getGraph());
         }
-        
+
         // start visualizer, if asked for
         GraphVisualizer graphVisualizer = configurator.visualizerFromParameters();
         if (graphVisualizer != null) {
             graphVisualizer.run();
         }
-        
+
         // start web server, if asked for
         GrizzlyServer grizzlyServer = configurator.serverFromParameters();
         if (grizzlyServer != null) {
@@ -78,15 +79,16 @@ public class OTPMain {
                     return;
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
-                    LOG.error("An uncaught {} occurred inside OTP. Restarting server.", 
-                              throwable.getClass().getSimpleName());
+                    LOG.error("An uncaught {} occurred inside OTP. Restarting server.", throwable
+                            .getClass().getSimpleName());
                 }
             }
         }
-        
-        if( graphBuilder==null && graphVisualizer==null && grizzlyServer==null ){
-        	LOG.info( "Nothing to do. Use --help to see available tasks.");;
+
+        if (graphBuilder == null && graphVisualizer == null && grizzlyServer == null) {
+            LOG.info("Nothing to do. Use --help to see available tasks.");
+            ;
         }
-        
+
     }
 }

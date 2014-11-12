@@ -27,18 +27,19 @@ public class IntPackedCoordinateSequence implements CoordinateSequence, Cloneabl
     private static final long serialVersionUID = 1L;
 
     int[] ordinates;
-    
+
     private static final double TO_FIXED = Integer.MAX_VALUE / 180.0;
+
     private static final double FROM_FIXED = 180.0 / Integer.MAX_VALUE;
-            
+
     private int toFixedInt(double latlon) {
         return (int) (latlon * TO_FIXED);
     }
-    
+
     private double fromFixedInt(int fixed) {
         return (double) (fixed * FROM_FIXED);
     }
-    
+
     public IntPackedCoordinateSequence(Coordinate[] coordinates) {
         int nc = coordinates.length;
         ordinates = new int[nc * 2];
@@ -49,7 +50,7 @@ public class IntPackedCoordinateSequence implements CoordinateSequence, Cloneabl
             i++;
         }
     }
-    
+
     @Override
     public int getDimension() {
         return 2;
@@ -73,17 +74,17 @@ public class IntPackedCoordinateSequence implements CoordinateSequence, Cloneabl
 
     @Override
     public double getX(int index) {
-        return fromFixedInt(ordinates[2*index]);
+        return fromFixedInt(ordinates[2 * index]);
     }
 
     @Override
     public double getY(int index) {
-        return fromFixedInt(ordinates[2*index + 1]);
+        return fromFixedInt(ordinates[2 * index + 1]);
     }
 
     @Override
     public double getOrdinate(int index, int ordinateIndex) {
-        return fromFixedInt(ordinates[2*index + ordinateIndex]);
+        return fromFixedInt(ordinates[2 * index + ordinateIndex]);
     }
 
     @Override
@@ -93,7 +94,7 @@ public class IntPackedCoordinateSequence implements CoordinateSequence, Cloneabl
 
     @Override
     public void setOrdinate(int index, int ordinateIndex, double value) {
-        ordinates[2*index + ordinateIndex] = toFixedInt(value);
+        ordinates[2 * index + ordinateIndex] = toFixedInt(value);
     }
 
     @Override

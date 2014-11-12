@@ -23,9 +23,9 @@ public class ElevationFlattened extends GraphBuilderAnnotation {
     private static final long serialVersionUID = 1L;
 
     public static final String FMT = "Edge %s was steeper than Baldwin Street and was flattened.";
-    
+
     final Edge edge;
-    
+
     @Override
     public String getMessage() {
         return String.format(FMT, edge);

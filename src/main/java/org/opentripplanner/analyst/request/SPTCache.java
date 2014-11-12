@@ -33,24 +33,26 @@ public class SPTCache extends CacheLoader<RoutingRequest, ShortestPathTree> {
     private static final Logger LOG = LoggerFactory.getLogger(SPTCache.class);
 
     private SPTService sptService;
-    
+
     private GraphService graphService;
 
     public SPTCache(SPTService sptService, GraphService graphService) {
         this.sptService = sptService;
         this.graphService = graphService;
-        this.sptCache = CacheBuilder.newBuilder()
-                .concurrencyLevel(concurrency)
-                .maximumSize(size)
+        this.sptCache = CacheBuilder.newBuilder().concurrencyLevel(concurrency).maximumSize(size)
                 .build(this);
     }
 
     private LoadingCache<RoutingRequest, ShortestPathTree> sptCache;
 
-    @Setter private int size = 200;
-    @Setter private int concurrency = 16;
+    @Setter
+    private int size = 200;
 
-    @Override /** completes the abstract CacheLoader superclass */
+    @Setter
+    private int concurrency = 16;
+
+    @Override
+    /** completes the abstract CacheLoader superclass */
     public ShortestPathTree load(RoutingRequest req) throws Exception {
         LOG.debug("spt cache miss : {}", req);
         req.setRoutingContext(graphService.getGraph());
@@ -65,5 +67,5 @@ public class SPTCache extends CacheLoader<RoutingRequest, ShortestPathTree> {
     public ShortestPathTree get(RoutingRequest req) throws Exception {
         return req == null ? null : sptCache.get(req);
     }
-    
+
 }

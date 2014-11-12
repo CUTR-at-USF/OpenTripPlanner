@@ -27,8 +27,8 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineString;
 
 /**
- * A transit vehicle's journey between departure at one stop and arrival at the next.
- * This version represents a set of such journeys specified by a TripPattern.
+ * A transit vehicle's journey between departure at one stop and arrival at the next. This version
+ * represents a set of such journeys specified by a TripPattern.
  */
 public class PatternHop extends TablePatternEdge implements OnboardEdge, HopEdge {
 
@@ -40,7 +40,8 @@ public class PatternHop extends TablePatternEdge implements OnboardEdge, HopEdge
 
     private LineString geometry = null;
 
-    public PatternHop(PatternStopVertex from, PatternStopVertex to, Stop begin, Stop end, int stopIndex) {
+    public PatternHop(PatternStopVertex from, PatternStopVertex to, Stop begin, Stop end,
+            int stopIndex) {
         super(from, to);
         this.begin = begin;
         this.end = end;
@@ -49,21 +50,21 @@ public class PatternHop extends TablePatternEdge implements OnboardEdge, HopEdge
     }
 
     public double getDistance() {
-        return SphericalDistanceLibrary.getInstance().distance(begin.getLat(), begin.getLon(), end.getLat(),
-                end.getLon());
+        return SphericalDistanceLibrary.getInstance().distance(begin.getLat(), begin.getLon(),
+                end.getLat(), end.getLon());
     }
 
     public TraverseMode getMode() {
         return GtfsLibrary.getTraverseMode(getPattern().getRoute());
     }
-    
+
     public String getName() {
         return GtfsLibrary.getRouteName(getPattern().getRoute());
     }
-    
+
     public State optimisticTraverse(State state0) {
         RoutingRequest options = state0.getOptions();
-        
+
         // Ignore this edge if either of its stop is banned hard
         if (!options.getBannedStopsHard().isEmpty()) {
             if (options.getBannedStopsHard().matches(((PatternStopVertex) fromv).getStop())
@@ -71,28 +72,28 @@ public class PatternHop extends TablePatternEdge implements OnboardEdge, HopEdge
                 return null;
             }
         }
-        
-    	int runningTime = getPattern().scheduledTimetable.getBestRunningTime(stopIndex);
-    	StateEditor s1 = state0.edit(this);
-    	s1.incrementTimeInSeconds(runningTime);
-    	s1.setBackMode(getMode());
-    	s1.incrementWeight(runningTime);
-    	return s1.makeState();
+
+        int runningTime = getPattern().scheduledTimetable.getBestRunningTime(stopIndex);
+        StateEditor s1 = state0.edit(this);
+        s1.incrementTimeInSeconds(runningTime);
+        s1.setBackMode(getMode());
+        s1.incrementWeight(runningTime);
+        return s1.makeState();
     }
 
     @Override
     public double timeLowerBound(RoutingRequest options) {
         return getPattern().scheduledTimetable.getBestRunningTime(stopIndex);
     }
-    
+
     @Override
     public double weightLowerBound(RoutingRequest options) {
         return timeLowerBound(options);
     }
-    
+
     public State traverse(State s0) {
         RoutingRequest options = s0.getOptions();
-        
+
         // Ignore this edge if either of its stop is banned hard
         if (!options.getBannedStopsHard().isEmpty()) {
             if (options.getBannedStopsHard().matches(((PatternStopVertex) fromv).getStop())
@@ -100,7 +101,7 @@ public class PatternHop extends TablePatternEdge implements OnboardEdge, HopEdge
                 return null;
             }
         }
-        //System.out.println("\n PatternHop edge+ get running time!");
+        // System.out.println("\n PatternHop edge+ get running time!");
         TripTimes tripTimes = s0.getTripTimes();
         int runningTime = tripTimes.getRunningTime(stopIndex);
         StateEditor s1 = s0.edit(this);
@@ -109,7 +110,7 @@ public class PatternHop extends TablePatternEdge implements OnboardEdge, HopEdge
             s1.setZone(getBeginStop().getZoneId());
         else
             s1.setZone(getEndStop().getZoneId());
-        //s1.setRoute(pattern.getExemplar().getRoute().getId());
+        // s1.setRoute(pattern.getExemplar().getRoute().getId());
         s1.incrementWeight(runningTime);
         s1.setBackMode(getMode());
         return s1.makeState();
@@ -125,7 +126,8 @@ public class PatternHop extends TablePatternEdge implements OnboardEdge, HopEdge
             Coordinate c1 = new Coordinate(begin.getLon(), begin.getLat());
             Coordinate c2 = new Coordinate(end.getLon(), end.getLat());
 
-            geometry = GeometryUtils.getGeometryFactory().createLineString(new Coordinate[] { c1, c2 });
+            geometry = GeometryUtils.getGeometryFactory().createLineString(
+                    new Coordinate[] { c1, c2 });
         }
         return geometry;
     }
@@ -141,7 +143,7 @@ public class PatternHop extends TablePatternEdge implements OnboardEdge, HopEdge
     }
 
     public String toString() {
-    	return "PatternHop(" + getFromVertex() + ", " + getToVertex() + ")";
+        return "PatternHop(" + getFromVertex() + ", " + getToVertex() + ")";
     }
 
     @Override

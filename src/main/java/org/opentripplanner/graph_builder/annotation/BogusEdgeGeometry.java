@@ -22,11 +22,11 @@ public class BogusEdgeGeometry extends GraphBuilderAnnotation {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String FMT = "Edge %s has bogus geometry (some coordinates are NaN, " +
-    		"or geometry has fewer than two points)";
-    
+    public static final String FMT = "Edge %s has bogus geometry (some coordinates are NaN, "
+            + "or geometry has fewer than two points)";
+
     final Edge edge;
-    
+
     @Override
     public String getMessage() {
         return String.format(FMT, edge);

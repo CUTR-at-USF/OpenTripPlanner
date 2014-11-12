@@ -39,7 +39,8 @@ import org.opentripplanner.routing.services.AlertPatchService;
 @XmlRootElement
 public class AlertPatcher {
 
-    @Context AlertPatchService alertPatchService; // FIXME inject Application
+    @Context
+    AlertPatchService alertPatchService; // FIXME inject Application
 
     /**
      * Return a list of all patches that apply to a given stop
@@ -54,7 +55,8 @@ public class AlertPatcher {
             @QueryParam("id") String id) {
 
         AlertPatchResponse response = new AlertPatchResponse();
-        Collection<AlertPatch> alertPatches = alertPatchService.getStopPatches(new AgencyAndId(agency, id));
+        Collection<AlertPatch> alertPatches = alertPatchService.getStopPatches(new AgencyAndId(
+                agency, id));
         for (AlertPatch alertPatch : alertPatches) {
             response.addAlertPatch(alertPatch);
         }
@@ -74,8 +76,8 @@ public class AlertPatcher {
             @QueryParam("id") String id) {
 
         AlertPatchResponse response = new AlertPatchResponse();
-        Collection<AlertPatch> alertPatches =
-                alertPatchService.getRoutePatches(new AgencyAndId(agency, id));
+        Collection<AlertPatch> alertPatches = alertPatchService.getRoutePatches(new AgencyAndId(
+                agency, id));
         for (AlertPatch alertPatch : alertPatches) {
             response.addAlertPatch(alertPatch);
         }

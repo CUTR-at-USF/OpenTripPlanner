@@ -19,12 +19,13 @@ import org.opentripplanner.routing.vertextype.IntersectionVertex;
 /**
  * An interface to a model that computes the costs of turns.
  * 
- * Turn costs are in units of seconds - they represent the expected amount of time it would take to make a turn.
+ * Turn costs are in units of seconds - they represent the expected amount of time it would take to
+ * make a turn.
  * 
  * @author avi
  */
 public interface IntersectionTraversalCostModel {
-    
+
     /**
      * Compute the cost of turning onto "to" from "from".
      * 

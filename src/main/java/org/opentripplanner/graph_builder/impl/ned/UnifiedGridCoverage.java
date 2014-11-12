@@ -28,9 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Stitches together multiple elevation maps into a single elevation map,
- * hackily.  This is horrible, but the geotools way of doing things is
- * too slow.   
+ * Stitches together multiple elevation maps into a single elevation map, hackily. This is horrible,
+ * but the geotools way of doing things is too slow.
+ * 
  * @author novalis
  *
  */
@@ -39,7 +39,7 @@ public class UnifiedGridCoverage extends AbstractCoverage {
     private static final long serialVersionUID = -7798801307087575896L;
 
     private static Logger log = LoggerFactory.getLogger(UnifiedGridCoverage.class);
-    
+
     private ArrayList<Coverage> regions;
 
     private List<VerticalDatum> datums;
@@ -63,7 +63,7 @@ public class UnifiedGridCoverage extends AbstractCoverage {
 
         for (Coverage region : regions) {
             // GeneralEnvelope has a contains method, OpenGIS Envelope does not
-            GeneralEnvelope env = ((GeneralEnvelope)region.getEnvelope());
+            GeneralEnvelope env = ((GeneralEnvelope) region.getEnvelope());
             // avoid incurring exception construction overhead when there are many regions
             if (env.contains(point)) {
                 double[] result;
@@ -77,8 +77,9 @@ public class UnifiedGridCoverage extends AbstractCoverage {
                             return result;
                         }
                     }
-                    //if we get here, all vdatums failed.
-                    log.error("Failed to convert elevation at " + y + ", " + x + " from NAVD88 to NAD83");
+                    // if we get here, all vdatums failed.
+                    log.error("Failed to convert elevation at " + y + ", " + x
+                            + " from NAVD88 to NAD83");
                 } catch (PointOutsideCoverageException e) {
                     continue;
                 }
@@ -87,10 +88,10 @@ public class UnifiedGridCoverage extends AbstractCoverage {
         }
         /* not found */
         log.warn("Point not found: " + point);
-        
+
         return null;
     }
-    
+
     @Override
     public int getNumSampleDimensions() {
         return regions.get(0).getNumSampleDimensions();

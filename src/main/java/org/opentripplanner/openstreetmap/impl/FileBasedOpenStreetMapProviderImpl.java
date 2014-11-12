@@ -38,7 +38,8 @@ public class FileBasedOpenStreetMapProviderImpl implements OpenStreetMapProvider
                 InputStream in = new GZIPInputStream(new FileInputStream(_path));
                 parser.parseMap(in, handler);
             } else if (_path.getName().endsWith(".bz2")) {
-                BZip2CompressorInputStream in = new BZip2CompressorInputStream(new FileInputStream(_path));
+                BZip2CompressorInputStream in = new BZip2CompressorInputStream(new FileInputStream(
+                        _path));
                 parser.parseMap(in, handler);
             } else {
                 parser.parseMap(_path, handler);

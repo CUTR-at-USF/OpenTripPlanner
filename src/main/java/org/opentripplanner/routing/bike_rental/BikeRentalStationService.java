@@ -26,12 +26,12 @@ public class BikeRentalStationService implements Serializable {
     public Collection<BikeRentalStation> getStations() {
         return stations;
     }
-    
+
     public void addStation(BikeRentalStation station) {
         stations.remove(station);
         stations.add(station);
     }
-    
+
     public void removeStation(BikeRentalStation station) {
         stations.remove(station);
     }

@@ -32,7 +32,7 @@ public class TestJoinedList extends TestCase {
         JoinedList<Integer> joined = new JoinedList<Integer>(list1, list2);
         assertTrue(joined.get(0) == 0);
         assertTrue(joined.get(3) == 3);
-        
+
         Iterator<Integer> it = joined.iterator();
         for (int i = 0; i < 6; ++i) {
             assertTrue(it.hasNext());

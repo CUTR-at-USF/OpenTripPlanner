@@ -18,9 +18,10 @@ import lombok.Setter;
 import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.routing.vertextype.TransitStop;
 
-public abstract class AbstractStopTester implements IStopTester{
+public abstract class AbstractStopTester implements IStopTester {
 
-    @Getter @Setter
+    @Getter
+    @Setter
     String type;
 
     @Override

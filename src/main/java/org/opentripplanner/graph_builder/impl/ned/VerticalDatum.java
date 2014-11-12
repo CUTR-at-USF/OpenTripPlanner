@@ -26,7 +26,7 @@ import java.io.InputStream;
  * 
  */
 public class VerticalDatum {
-    
+
     double lowerLeftLatitude;
 
     double lowerLeftLongitude;
@@ -39,7 +39,7 @@ public class VerticalDatum {
 
     public VerticalDatum(double lowerLeftLongitude, double lowerLeftLatitude, double width,
             double height, float[][] datum) {
-        this.lowerLeftLongitude = lowerLeftLongitude; 
+        this.lowerLeftLongitude = lowerLeftLongitude;
         this.lowerLeftLatitude = lowerLeftLatitude;
         this.deltaLongitude = width;
         this.deltaLatitude = height;
@@ -109,13 +109,13 @@ public class VerticalDatum {
         }
         return true;
     }
-        
-    public static VerticalDatum fromGTX (InputStream inputStream) throws IOException {
+
+    public static VerticalDatum fromGTX(InputStream inputStream) throws IOException {
         DataInputStream stream = new DataInputStream(new BufferedInputStream(inputStream));
         double lowerLeftLatitude = stream.readDouble();
         double lowerLeftLongitude = stream.readDouble();
         if (lowerLeftLongitude > 180) {
-            lowerLeftLongitude -= 360; //convert to standard coordinates
+            lowerLeftLongitude -= 360; // convert to standard coordinates
         }
         double deltaLatitude = stream.readDouble();
         double deltaLongitude = stream.readDouble();
@@ -127,7 +127,8 @@ public class VerticalDatum {
                 data[y][x] = stream.readFloat();
             }
         }
-        return new VerticalDatum(lowerLeftLongitude, lowerLeftLatitude, deltaLatitude * nColumns, deltaLongitude * nRows, data);
+        return new VerticalDatum(lowerLeftLongitude, lowerLeftLatitude, deltaLatitude * nColumns,
+                deltaLongitude * nRows, data);
     }
 
 }

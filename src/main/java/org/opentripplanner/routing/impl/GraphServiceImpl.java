@@ -84,8 +84,7 @@ public class GraphServiceImpl implements GraphService {
     public void startup() {
         if (autoRegister != null && !autoRegister.isEmpty()) {
             LOG.info("attempting to automatically register routerIds {}", autoRegister);
-            LOG.info("graph files will be sought in paths relative to {}",
-                    decorated.getBasePath());
+            LOG.info("graph files will be sought in paths relative to {}", decorated.getBasePath());
             for (String routerId : autoRegister) {
                 registerGraph(routerId, true);
             }
@@ -103,7 +102,7 @@ public class GraphServiceImpl implements GraphService {
                     + "You must use the routers API to register one or more graphs before routing.");
         }
     }
-    
+
     /**
      * This is called when the bean gets deleted, that is mainly in case of webapp container
      * application stop or reload. We teardown all loaded graph to stop their background real-time
@@ -163,6 +162,6 @@ public class GraphServiceImpl implements GraphService {
 
     @Override
     public boolean save(String routerId, InputStream is) {
-    	return decorated.save(routerId, is);
+        return decorated.save(routerId, is);
     }
 }

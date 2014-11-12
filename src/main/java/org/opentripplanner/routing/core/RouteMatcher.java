@@ -24,8 +24,8 @@ import org.opentripplanner.gtfs.GtfsLibrary;
 /**
  * A RouteMatcher is a collection of routes based on IDs, short name and/or agency IDs.
  * 
- * We currently support route full IDs (agency ID + route ID), agency ID + route name, or route name only. Support for other matching expression can
- * be easily added later on.
+ * We currently support route full IDs (agency ID + route ID), agency ID + route name, or route name
+ * only. Support for other matching expression can be easily added later on.
  */
 public class RouteMatcher implements Cloneable, Serializable {
     private static final long serialVersionUID = 8066547338465440312L;

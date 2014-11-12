@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 
 public class PackedCoordinateSequenceSerializer extends JsonSerializer<PackedCoordinateSequence> {
     int precision = 2;
-    
+
     @Override
     public void serialize(PackedCoordinateSequence value, JsonGenerator jgen,
             SerializerProvider provider) throws IOException, JsonProcessingException {
@@ -45,7 +45,7 @@ public class PackedCoordinateSequenceSerializer extends JsonSerializer<PackedCoo
         }
         jgen.writeEndArray();
     }
-    
+
     @Override
     public Class<PackedCoordinateSequence> handledType() {
         return PackedCoordinateSequence.class;

@@ -53,8 +53,9 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
 /**
- * Processing applet to show a map of the graph. The user can: - Use mouse wheel to zoom (or right drag, or ctrl-drag) - Left drag to pan around the
- * map - Left click to send a list of nearby vertices to the associated VertexSelectionListener.
+ * Processing applet to show a map of the graph. The user can: - Use mouse wheel to zoom (or right
+ * drag, or ctrl-drag) - Left drag to pan around the map - Left click to send a list of nearby
+ * vertices to the associated VertexSelectionListener.
  */
 public class ShowGraph extends PApplet implements MouseWheelListener {
 
@@ -155,7 +156,8 @@ public class ShowGraph extends PApplet implements MouseWheelListener {
     private int drawOffset = 0;
 
     /*
-     * Constructor. Call processing constructor, and register the listener to notify when the user selects vertices.
+     * Constructor. Call processing constructor, and register the listener to notify when the user
+     * selects vertices.
      */
     public ShowGraph(VertexSelectionListener selector, Graph graph) {
         super();
@@ -225,8 +227,8 @@ public class ShowGraph extends PApplet implements MouseWheelListener {
     }
 
     /*
-     * Zoom in/out. Translate the viewing window such that the place under the mouse pointer is a fixed point. If p is null, zoom around the center of
-     * the viewport.
+     * Zoom in/out. Translate the viewing window such that the place under the mouse pointer is a
+     * fixed point. If p is null, zoom around the center of the viewport.
      */
     void zoom(double f, Point p) {
         double ex = modelBounds.getWidth() * f;
@@ -290,14 +292,14 @@ public class ShowGraph extends PApplet implements MouseWheelListener {
     }
 
     /*
-     * Iterate through all vertices and their (outgoing) edges. If they are of 'interesting' types, 
+     * Iterate through all vertices and their (outgoing) edges. If they are of 'interesting' types,
      * add them to the corresponding spatial index.
      */
     public synchronized void buildSpatialIndex() {
         vertexIndex = new STRtree();
         edgeIndex = new STRtree();
         Envelope env;
-        
+
         // int xminx, xmax, ymin, ymax;
         for (Vertex v : graph.getVertices()) {
             Coordinate c = v.getCoordinate();
@@ -327,11 +329,10 @@ public class ShowGraph extends PApplet implements MouseWheelListener {
         for (Edge de : (Iterable<Edge>) edgeIndex.query(modelBounds)) {
             if (de instanceof PatternEdge) {
                 visibleTransitEdges.add(de);
-            }
-            else if (de instanceof PathwayEdge || de instanceof StreetTransitLink || de instanceof SimpleTransfer) {
+            } else if (de instanceof PathwayEdge || de instanceof StreetTransitLink
+                    || de instanceof SimpleTransfer) {
                 visibleLinkEdges.add(de);
-            }
-            else if (de instanceof StreetEdge) {
+            } else if (de instanceof StreetEdge) {
                 visibleStreetEdges.add(de);
             }
         }
@@ -444,7 +445,7 @@ public class ShowGraph extends PApplet implements MouseWheelListener {
 
     public synchronized void draw() {
         // how many edges to draw before checking whether we need to move on to the next frame
-        final int BLOCK_SIZE = 1000; 
+        final int BLOCK_SIZE = 1000;
         // how many edges to skip over (to ensure a sampling of edges throughout the visible area)
         final long DECIMATE = 40;
         // 800 instead of 1000 msec, leaving 20% of the time for work other than drawing.
@@ -711,7 +712,8 @@ public class ShowGraph extends PApplet implements MouseWheelListener {
     }
 
     /**
-     * A version of ellipse that takes double args, because apparently Java is too stupid to downgrade automatically.
+     * A version of ellipse that takes double args, because apparently Java is too stupid to
+     * downgrade automatically.
      * 
      * @param d
      * @param e

@@ -120,7 +120,8 @@ class DisplayVertex {
 }
 
 /**
- * This is a ListModel that holds Edges. It gets its edges from a PatternBoard/PatternAlight, hence the iterable.
+ * This is a ListModel that holds Edges. It gets its edges from a PatternBoard/PatternAlight, hence
+ * the iterable.
  */
 class EdgeListModel extends AbstractListModel {
 
@@ -154,7 +155,8 @@ class TripPatternListModel extends AbstractListModel {
     ArrayList<String> departureTimes = new ArrayList<String>();
 
     public TripPatternListModel(TripPattern pattern, int stopIndex) {
-        Iterator<Integer> departureTimeIterator = null; // TODO pattern.getDepartureTimes(stopIndex);
+        Iterator<Integer> departureTimeIterator = null; // TODO
+                                                        // pattern.getDepartureTimes(stopIndex);
         while (departureTimeIterator.hasNext()) {
             int dt = departureTimeIterator.next();
 
@@ -202,10 +204,10 @@ class VertexList extends AbstractListModel {
 };
 
 /**
- * A simple visualizer for graphs. It shows (using ShowGraph) a map of the graph, intersections and 
- * TransitStops only, and allows a user to select stops, examine incoming and outgoing edges, and 
- * examine trip patterns. It's meant mainly for debugging, so it's totally OK if it develops (say) 
- * a bunch of weird buttons designed to debug specific cases.
+ * A simple visualizer for graphs. It shows (using ShowGraph) a map of the graph, intersections and
+ * TransitStops only, and allows a user to select stops, examine incoming and outgoing edges, and
+ * examine trip patterns. It's meant mainly for debugging, so it's totally OK if it develops (say) a
+ * bunch of weird buttons designed to debug specific cases.
  */
 public class GraphVisualizer extends JFrame implements VertexSelectionListener {
 
@@ -256,11 +258,11 @@ public class GraphVisualizer extends JFrame implements VertexSelectionListener {
     private JList annotationMatches;
 
     private JLabel serviceIdLabel;
-    
+
     private RetryingPathServiceImpl pathservice;
-    
+
     private ShortestPathTreeFactory sptFactory = new DefaultShortestPathTreeFactory();
-    
+
     private GenericAStar sptService = new GenericAStar();
 
     private DefaultListModel metadataModel;
@@ -276,81 +278,79 @@ public class GraphVisualizer extends JFrame implements VertexSelectionListener {
     private JList metadataList;
 
     private final GraphService graphService;
-    
+
     private final Graph graph;
 
-	private JRadioButton opQuick;
+    private JRadioButton opQuick;
 
-	private JRadioButton opSafe;
+    private JRadioButton opSafe;
 
-	private JRadioButton opFlat;
+    private JRadioButton opFlat;
 
-	private JRadioButton opGreenways;
+    private JRadioButton opGreenways;
 
-	private ButtonGroup optimizeTypeGrp;
+    private ButtonGroup optimizeTypeGrp;
 
-	private JTextField maxWalkField;
+    private JTextField maxWalkField;
 
-	private JTextField walkSpeed;
+    private JTextField walkSpeed;
 
-	private JTextField bikeSpeed;
+    private JTextField bikeSpeed;
 
-	private JTextField heuristicWeight;
+    private JTextField heuristicWeight;
 
-	private JCheckBox softWalkLimiting;
+    private JCheckBox softWalkLimiting;
 
-	private JTextField softWalkPenalty;
+    private JTextField softWalkPenalty;
 
-	private JTextField softWalkOverageRate;
+    private JTextField softWalkOverageRate;
 
-	private JCheckBox arriveByCheckBox;
+    private JCheckBox arriveByCheckBox;
 
-	private JLabel searchTimeElapsedLabel;
+    private JLabel searchTimeElapsedLabel;
 
-	private JCheckBox dontUseGraphicalCallbackCheckBox;
+    private JCheckBox dontUseGraphicalCallbackCheckBox;
 
     public GraphVisualizer(GraphService graphService) {
         super();
         LOG.info("Starting up graph visualizer...");
-        
+
         this.graphService = graphService;
         this.graph = graphService.getGraph();
         sptService.setShortestPathTreeFactory(sptFactory);
         this.pathservice = new RetryingPathServiceImpl(graphService, sptService);
         setTitle("GraphVisualizer");
-        
+
         init();
     }
 
-    public void run () {
+    public void run() {
         this.setVisible(true);
     }
-    
+
     public void init() {
         JTabbedPane tabbedPane = new JTabbedPane();
-         
-        tabbedPane.addTab("Main", null, initMainTab(),
-                "Pretty much everything");
-         
-        tabbedPane.addTab("Prefs", null, makePrefsPanel(),
-                "Routing preferences");
-         
-        //Add the tabbed pane to this panel.
+
+        tabbedPane.addTab("Main", null, initMainTab(), "Pretty much everything");
+
+        tabbedPane.addTab("Prefs", null, makePrefsPanel(), "Routing preferences");
+
+        // Add the tabbed pane to this panel.
         add(tabbedPane);
-         
-        //The following line enables to use scrolling tabs.
+
+        // The following line enables to use scrolling tabs.
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-        
+
         // startup the graphical pane; ensure closing works; draw the window
         showGraph.init();
         addWindowListener(new ExitListener());
         pack();
     }
 
-	private Container initMainTab() {
-		Container pane = new JPanel();
-    	pane.setLayout(new BorderLayout());
-    	
+    private Container initMainTab() {
+        Container pane = new JPanel();
+        pane.setLayout(new BorderLayout());
+
         // init center graphical panel
         showGraph = new ShowGraph(this, getGraph());
         pane.add(showGraph, BorderLayout.CENTER);
@@ -368,14 +368,14 @@ public class GraphVisualizer extends JFrame implements VertexSelectionListener {
 
         // init right panel
         initRightPanel(pane);
-		return pane;
-	}
-	
-	private JComponent makePrefsPanel(){
-		/* ROUTING SUBPANEL */
+        return pane;
+    }
+
+    private JComponent makePrefsPanel() {
+        /* ROUTING SUBPANEL */
         JPanel pane = new JPanel();
         pane.setLayout(new GridLayout(0, 2));
-        
+
         // 2 rows: transport mode options
         walkCheckBox = new JCheckBox("walk");
         walkCheckBox.setSelected(true);
@@ -395,7 +395,7 @@ public class GraphVisualizer extends JFrame implements VertexSelectionListener {
         pane.add(carCheckBox);
         cmvCheckBox = new JCheckBox("custom vehicle");
         pane.add(cmvCheckBox);
-        
+
         // row: arrive by?
         JLabel arriveByLabel = new JLabel("Arrive by?:");
         pane.add(arriveByLabel);
@@ -407,93 +407,92 @@ public class GraphVisualizer extends JFrame implements VertexSelectionListener {
         pane.add(boardPenaltyLabel);
         boardingPenaltyField = new JTextField("5");
         pane.add(boardingPenaltyField);
-        
+
         // row: max walk
         JLabel maxWalkLabel = new JLabel("Maximum walk (meters):");
         pane.add(maxWalkLabel);
         maxWalkField = new JTextField("5000");
         pane.add(maxWalkField);
-        
+
         // row: walk speed
         JLabel walkSpeedLabel = new JLabel("Walk speed (m/s):");
         pane.add(walkSpeedLabel);
         walkSpeed = new JTextField("1.33");
         pane.add(walkSpeed);
-        
+
         // row: bike speed
         JLabel bikeSpeedLabel = new JLabel("Bike speed (m/s):");
         pane.add(bikeSpeedLabel);
         bikeSpeed = new JTextField("5.0");
         pane.add(bikeSpeed);
-        
+
         // row: heuristic weight
         JLabel heuristicWeightLabel = new JLabel("Heuristic weight:");
         pane.add(heuristicWeightLabel);
         heuristicWeight = new JTextField("1.0");
         pane.add(heuristicWeight);
-        
+
         // row: soft walk?
         JLabel softWalkLimitLabel = new JLabel("Soft walk-limit?:");
         pane.add(softWalkLimitLabel);
         softWalkLimiting = new JCheckBox("soft walk-limiting");
         pane.add(softWalkLimiting);
-        
+
         // row: soft walk-limit penalty
         JLabel softWalkLimitPenaltyLabel = new JLabel("Soft walk-limiting penalty:");
         pane.add(softWalkLimitPenaltyLabel);
         softWalkPenalty = new JTextField("60.0");
         pane.add(softWalkPenalty);
-        
+
         // row: soft walk-limit overage
         JLabel softWalkLimitOverageLabel = new JLabel("Soft walk-limiting overage:");
         pane.add(softWalkLimitOverageLabel);
         softWalkOverageRate = new JTextField("5.0");
         pane.add(softWalkOverageRate);
-        
+
         // radio buttons: optimize type
         JLabel optimizeTypeLabel = new JLabel("Optimize type:");
         pane.add(optimizeTypeLabel);
-        
+
         opQuick = new JRadioButton("Quick");
         opQuick.setSelected(true);
         opSafe = new JRadioButton("Safe");
         opFlat = new JRadioButton("Flat");
-        opGreenways = new  JRadioButton("Greenways");
-        
+        opGreenways = new JRadioButton("Greenways");
+
         optimizeTypeGrp = new ButtonGroup();
         optimizeTypeGrp.add(opQuick);
         optimizeTypeGrp.add(opSafe);
         optimizeTypeGrp.add(opFlat);
         optimizeTypeGrp.add(opGreenways);
-        
+
         JPanel optimizeTypePane = new JPanel();
         optimizeTypePane.add(opQuick);
         optimizeTypePane.add(opSafe);
         optimizeTypePane.add(opFlat);
         optimizeTypePane.add(opGreenways);
-        
+
         pane.add(optimizeTypePane);
-        
-		return pane;
-	}
-	
-	OptimizeType getSelectedOptimizeType(){
-		if(opQuick.isSelected()){
-			return OptimizeType.QUICK;
-		}
-		if(opSafe.isSelected()){
-			return OptimizeType.SAFE;
-		}
-		if(opFlat.isSelected()){
-			return OptimizeType.FLAT;
-		}
-		if(opGreenways.isSelected()){
-			return OptimizeType.GREENWAYS;
-		}
-		return OptimizeType.QUICK;
-	}
-	
-    
+
+        return pane;
+    }
+
+    OptimizeType getSelectedOptimizeType() {
+        if (opQuick.isSelected()) {
+            return OptimizeType.QUICK;
+        }
+        if (opSafe.isSelected()) {
+            return OptimizeType.SAFE;
+        }
+        if (opFlat.isSelected()) {
+            return OptimizeType.FLAT;
+        }
+        if (opGreenways.isSelected()) {
+            return OptimizeType.GREENWAYS;
+        }
+        return OptimizeType.QUICK;
+    }
+
     protected JComponent makeTextPanel(String text) {
         JPanel panel = new JPanel(false);
         JLabel filler = new JLabel(text);
@@ -503,8 +502,8 @@ public class GraphVisualizer extends JFrame implements VertexSelectionListener {
         return panel;
     }
 
-	private void initRightPanel(Container pane) {
-		/* right panel holds trip pattern and stop metadata */
+    private void initRightPanel(Container pane) {
+        /* right panel holds trip pattern and stop metadata */
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BorderLayout());
         pane.add(rightPanel, BorderLayout.LINE_END);
@@ -552,10 +551,10 @@ public class GraphVisualizer extends JFrame implements VertexSelectionListener {
         mdScrollPane.setPreferredSize(size);
         rightPanelTabs.setMaximumSize(size);
         rightPanel.setMaximumSize(size);
-	}
+    }
 
-	private void initControlButtons() {
-		/* buttons at bottom */
+    private void initControlButtons() {
+        /* buttons at bottom */
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new GridLayout(0, 3));
         leftPanel.add(buttonPanel, BorderLayout.PAGE_END);
@@ -702,7 +701,7 @@ public class GraphVisualizer extends JFrame implements VertexSelectionListener {
             }
         });
         buttonPanel.add(findEdgeByIdButton);
-        
+
         JButton snapButton = new JButton("Snap location");
         snapButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -710,16 +709,15 @@ public class GraphVisualizer extends JFrame implements VertexSelectionListener {
                         "");
                 GenericLocation loc = GenericLocation.fromOldStyleString(locString);
                 RoutingRequest rr = new RoutingRequest();
-                Vertex v = graph.streetIndex.getVertexForLocation(
-                        loc, rr);
+                Vertex v = graph.streetIndex.getVertexForLocation(loc, rr);
                 showGraph.highlightVertex(v);
             }
         });
         buttonPanel.add(snapButton);
-	}
+    }
 
-	private void initVertexInfoSubpanel() {
-		/* VERTEX INFO SUBPANEL */
+    private void initVertexInfoSubpanel() {
+        /* VERTEX INFO SUBPANEL */
         JPanel vertexDataPanel = new JPanel();
         vertexDataPanel.setLayout(new BoxLayout(vertexDataPanel, BoxLayout.PAGE_AXIS));
         vertexDataPanel.setPreferredSize(new Dimension(300, 600));
@@ -884,10 +882,10 @@ public class GraphVisualizer extends JFrame implements VertexSelectionListener {
                 }
             }
         });
-	}
+    }
 
-	private void initRoutingSubpanel() {
-		/* ROUTING SUBPANEL */
+    private void initRoutingSubpanel() {
+        /* ROUTING SUBPANEL */
         JPanel routingPanel = new JPanel();
         routingPanel.setLayout(new GridLayout(0, 2));
         leftPanel.add(routingPanel, BorderLayout.NORTH);
@@ -932,8 +930,6 @@ public class GraphVisualizer extends JFrame implements VertexSelectionListener {
         searchDate.setText(dateFormat.format(new Date()));
         routingPanel.add(searchDate);
 
-
-
         // row: launch and clear path search
         JButton routeButton = new JButton("path search");
         routeButton.addActionListener(new ActionListener() {
@@ -952,15 +948,15 @@ public class GraphVisualizer extends JFrame implements VertexSelectionListener {
             }
         });
         routingPanel.add(clearRouteButton);
-        
-        //label: search time elapsed
+
+        // label: search time elapsed
         searchTimeElapsedLabel = new JLabel("search time elapsed:");
         routingPanel.add(searchTimeElapsedLabel);
-        
-        //option: don't use graphical callback. useful for doing a quick profile
+
+        // option: don't use graphical callback. useful for doing a quick profile
         dontUseGraphicalCallbackCheckBox = new JCheckBox("no graphics");
         routingPanel.add(dontUseGraphicalCallbackCheckBox);
-	}
+    }
 
     protected void trace() {
         DisplayVertex selected = (DisplayVertex) nearbyVertices.getSelectedValue();
@@ -1072,11 +1068,14 @@ public class GraphVisualizer extends JFrame implements VertexSelectionListener {
             modeSet.setTransit(true);
         RoutingRequest options = new RoutingRequest(modeSet);
         options.setArriveBy(arriveByCheckBox.isSelected());
-        options.setWalkBoardCost(Integer.parseInt(boardingPenaltyField.getText()) * 60); // override low 2-4 minute values
+        options.setWalkBoardCost(Integer.parseInt(boardingPenaltyField.getText()) * 60); // override
+                                                                                         // low 2-4
+                                                                                         // minute
+                                                                                         // values
         // TODO LG Add ui element for bike board cost (for now bike = 2 * walk)
         options.setBikeBoardCost(Integer.parseInt(boardingPenaltyField.getText()) * 60 * 2);
         // there should be a ui element for walk distance and optimize type
-        options.setOptimize( getSelectedOptimizeType() );
+        options.setOptimize(getSelectedOptimizeType());
         options.setMaxWalkDistance(Integer.parseInt(maxWalkField.getText()));
         options.setDateTime(when);
         options.setFromString(from);
@@ -1084,7 +1083,7 @@ public class GraphVisualizer extends JFrame implements VertexSelectionListener {
         options.setWalkSpeed(Float.parseFloat(walkSpeed.getText()));
         options.setBikeSpeed(Float.parseFloat(bikeSpeed.getText()));
         options.setHeuristicWeight(Float.parseFloat(heuristicWeight.getText()));
-        options.setSoftWalkLimiting( softWalkLimiting.isSelected() );
+        options.setSoftWalkLimiting(softWalkLimiting.isSelected());
         options.setSoftWalkPenalty(Float.parseFloat(softWalkPenalty.getText()));
         options.setSoftWalkOverageRate(Float.parseFloat(this.softWalkOverageRate.getText()));
         options.numItineraries = 1;
@@ -1092,20 +1091,20 @@ public class GraphVisualizer extends JFrame implements VertexSelectionListener {
         System.out.println("Path from " + from + " to " + to + " at " + when);
         System.out.println("\tModes: " + modeSet);
         System.out.println("\tOptions: " + options);
-        
+
         // apply callback if the options call for it
-        if( dontUseGraphicalCallbackCheckBox.isSelected() ){
-        	sptService.setTraverseVisitor(null);
+        if (dontUseGraphicalCallbackCheckBox.isSelected()) {
+            sptService.setTraverseVisitor(null);
         } else {
-        	sptService.setTraverseVisitor(new VisualTraverseVisitor(showGraph));
+            sptService.setTraverseVisitor(new VisualTraverseVisitor(showGraph));
         }
-        
+
         long t0 = System.currentTimeMillis();
         // TODO: check options properly intialized (AMB)
         List<GraphPath> paths = pathservice.getPaths(options);
         long dt = System.currentTimeMillis() - t0;
-        searchTimeElapsedLabel.setText( "search time elapsed: "+dt+"ms" );
-        
+        searchTimeElapsedLabel.setText("search time elapsed: " + dt + "ms");
+
         if (paths == null) {
             System.out.println("no path");
             showGraph.highlightGraphPath(null);
@@ -1116,7 +1115,7 @@ public class GraphVisualizer extends JFrame implements VertexSelectionListener {
             System.out.print(s.toString() + " <- ");
             System.out.println(s.getBackEdge());
         }
-        
+
         showGraph.highlightGraphPath(gp);
         options.cleanup();
     }

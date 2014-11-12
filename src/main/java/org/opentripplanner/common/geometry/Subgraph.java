@@ -26,49 +26,52 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiPoint;
 
-
 public class Subgraph {
 
     private Set<Vertex> streetVertexSet;
+
     private Set<Vertex> stopsVertexSet;
+
     private ArrayList<Coordinate> vertexCoords;
+
     private Geometry convexHullAsGeom = null;
+
     private boolean newVertexAdded = true;
 
-    public Subgraph(){
+    public Subgraph() {
         streetVertexSet = new HashSet<Vertex>();
         stopsVertexSet = new HashSet<Vertex>();
         vertexCoords = new ArrayList<Coordinate>();
     }
 
-    public void addVertex(Vertex vertex){
-        if(vertex instanceof TransitVertex){
+    public void addVertex(Vertex vertex) {
+        if (vertex instanceof TransitVertex) {
             stopsVertexSet.add(vertex);
-        }else{
+        } else {
             streetVertexSet.add(vertex);
         }
         newVertexAdded = true;
         vertexCoords.add(vertex.getCoordinate());
     }
 
-    public boolean contains(Vertex vertex){
+    public boolean contains(Vertex vertex) {
         return (streetVertexSet.contains(vertex) || stopsVertexSet.contains(vertex));
     }
 
-    public boolean containsStreet(Vertex vertex){
+    public boolean containsStreet(Vertex vertex) {
         return streetVertexSet.contains(vertex);
     }
 
-    public int streetSize(){
+    public int streetSize() {
         return streetVertexSet.size();
     }
 
-    public int stopSize(){
+    public int stopSize() {
         return stopsVertexSet.size();
     }
 
-    public Vertex getRepresentativeVertex(){
-        //TODO this is not very smart but good enough at the moment
+    public Vertex getRepresentativeVertex() {
+        // TODO this is not very smart but good enough at the moment
         return streetVertexSet.iterator().next();
     }
 
@@ -81,6 +84,7 @@ public class Subgraph {
     }
 
     private static GeometryFactory gf = new GeometryFactory();
+
     public Geometry getConvexHull() {
         if (newVertexAdded) {
             MultiPoint mp = gf.createMultiPoint(vertexCoords.toArray(new Coordinate[0]));

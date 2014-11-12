@@ -30,13 +30,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A TripTimes represents the arrival and departure times for a single trip in an Timetable. It is carried
- * along by States when routing to ensure that they have a consistent, fast view of the trip when
- * realtime updates have been applied. All times are expressed as seconds since midnight (as in GTFS).
+ * A TripTimes represents the arrival and departure times for a single trip in an Timetable. It is
+ * carried along by States when routing to ensure that they have a consistent, fast view of the trip
+ * when realtime updates have been applied. All times are expressed as seconds since midnight (as in
+ * GTFS).
  */
 public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable {
 
     private static final long serialVersionUID = MavenVersion.VERSION.getUID();
+
     private static final Logger LOG = LoggerFactory.getLogger(TripTimes.class);
 
     /**
@@ -48,8 +50,8 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
     public static final int UNAVAILABLE = -1;
 
     /**
-     * This allows re-using the same scheduled arrival and departure time arrays for many
-     * different TripTimes. It is also used in materializing frequency-based TripTimes.
+     * This allows re-using the same scheduled arrival and departure time arrays for many different
+     * TripTimes. It is also used in materializing frequency-based TripTimes.
      */
     private int timeShift;
 
@@ -59,13 +61,13 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
     /** The code for the service on which this trip runs. For departure search optimizations. */
     // not final because these are set later, after TripTimes construction.
     public int serviceCode = -1;
-    
+
     /**
      * Both trip_headsign and stop_headsign (per stop on a particular trip) are optional GTFS
-     * fields. If the headsigns array is null, we will report the trip_headsign (which may also
-     * be null) at every stop on the trip. If all the stop_headsigns are the same as the
-     * trip_headsign we may also set the headsigns array to null to save space.
-     * Field is private to force use of the getter method which does the necessary fallbacks.
+     * fields. If the headsigns array is null, we will report the trip_headsign (which may also be
+     * null) at every stop on the trip. If all the stop_headsigns are the same as the trip_headsign
+     * we may also set the headsigns array to null to save space. Field is private to force use of
+     * the getter method which does the necessary fallbacks.
      */
     private final String[] headsigns;
 
@@ -76,8 +78,8 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
     private final int[] scheduledArrivalTimes;
 
     /**
-     * The time in seconds after midnight at which the vehicle should leave each stop according
-     * to the original schedule.
+     * The time in seconds after midnight at which the vehicle should leave each stop according to
+     * the original schedule.
      */
     private final int[] scheduledDepartureTimes;
 
@@ -88,8 +90,8 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
     private int[] arrivalTimes;
 
     /**
-     * The time in seconds after midnight at which the vehicle leaves each stop, accounting for
-     * any real-time updates. Non-final to allow updates.
+     * The time in seconds after midnight at which the vehicle leaves each stop, accounting for any
+     * real-time updates. Non-final to allow updates.
      */
     private int[] departureTimes;
 
@@ -108,21 +110,24 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
      * Is this trip cancelled?
      */
     private boolean cancelled = false;
-    //added for debug
+
+    // added for debug
     public String vehicleID = null;
+
     /** A Set of stop indexes that are marked as timepoints in the GTFS input. */
     private final BitSet timepoints;
 
     /**
      * The provided stopTimes are assumed to be pre-filtered, valid, and monotonically increasing.
-     * The non-interpolated stoptimes should already be marked at timepoints by a previous filtering step.
+     * The non-interpolated stoptimes should already be marked at timepoints by a previous filtering
+     * step.
      */
     public TripTimes(Trip trip, List<StopTime> stopTimes, Deduplicator deduplicator) {
         this.trip = trip;
         int nStops = stopTimes.size();
         int[] departures = new int[nStops];
-        int[] arrivals   = new int[nStops];
-        int[] sequences  = new int[nStops];
+        int[] arrivals = new int[nStops];
+        int[] sequences = new int[nStops];
         BitSet timepoints = new BitSet(nStops);
         // Times are always shifted to zero. This is essential for frequencies and deduplication.
         timeShift = stopTimes.get(0).getArrivalTime();
@@ -139,7 +144,8 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
         this.stopSequences = deduplicator.deduplicateIntArray(sequences);
         this.headsigns = deduplicator.deduplicateStringArray(makeHeadsignsArray(stopTimes));
         // We set these to null to indicate that this is a non-updated/scheduled TripTimes.
-        // We cannot point to the scheduled times because they are shifted, and updated times are not.
+        // We cannot point to the scheduled times because they are shifted, and updated times are
+        // not.
         this.arrivalTimes = null;
         this.departureTimes = null;
         this.timepoints = deduplicator.deduplicateBitSet(timepoints);
@@ -161,8 +167,8 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
     }
 
     /**
-     * @return either an array of headsigns (one for each stop on this trip) or null if the
-     * headsign is the same at all stops (including null) and can be found in the Trip object.
+     * @return either an array of headsigns (one for each stop on this trip) or null if the headsign
+     *         is the same at all stops (including null) and can be found in the Trip object.
      */
     private String[] makeHeadsignsArray(List<StopTime> stopTimes) {
         String tripHeadsign = trip.getTripHeadsign();
@@ -171,14 +177,14 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
             useStopHeadsigns = true;
         } else {
             for (StopTime st : stopTimes) {
-                if ( ! (tripHeadsign.equals(st.getStopHeadsign()))) {
+                if (!(tripHeadsign.equals(st.getStopHeadsign()))) {
                     useStopHeadsigns = true;
                     break;
                 }
             }
         }
         if (!useStopHeadsigns) {
-            return null; //defer to trip_headsign
+            return null; // defer to trip_headsign
         }
         boolean allNull = true;
         int i = 0;
@@ -186,7 +192,8 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
         for (StopTime st : stopTimes) {
             String headsign = st.getStopHeadsign();
             hs[i++] = headsign;
-            if (headsign != null) allNull = false;
+            if (headsign != null)
+                allNull = false;
         }
         if (allNull) {
             return null;
@@ -221,43 +228,54 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
 
     /** @return the time in seconds after midnight that the vehicle arrives at the stop. */
     public int getArrivalTime(int stop) {
-        if (arrivalTimes == null) return getScheduledArrivalTime(stop);
-        else return arrivalTimes[stop]; // updated times are not time shifted.
+        if (arrivalTimes == null)
+            return getScheduledArrivalTime(stop);
+        else
+            return arrivalTimes[stop]; // updated times are not time shifted.
     }
-    
-    //backpropagate the delay
-    public void backPropagateDelay(int stop) {   
-    	int dt;
-    	dt = this.scheduledDepartureTimes[stop+1] - this.scheduledDepartureTimes[stop];
-    	arrivalTimes[stop] = getArrivalTime(stop+1) - dt;
+
+    // backpropagate the delay
+    public void backPropagateDelay(int stop) {
+        int dt;
+        dt = this.scheduledDepartureTimes[stop + 1] - this.scheduledDepartureTimes[stop];
+        arrivalTimes[stop] = getArrivalTime(stop + 1) - dt;
     }
-    
-    // estimate arrival time for missing realtime updates.For stops in the head or tail of queue, delay is zero
-    public void estimateArrivaltime(int stop) {   
-    	int dt;
-    	int currentStop;
-    	if (stop != 0){
-    		currentStop = stop;
-//    		dt = this.scheduledDepartureTimes[stop] - this.scheduledDepartureTimes[stop-1];
-//	    	System.out.println("   "+ getArrivalTime(stop-1)/3600 + ":"+ (getArrivalTime(stop-1)%3600)/60 + " , "+ dt/60+ ":" + (dt%60) );
-//    		arrivalTimes[stop] = getArrivalTime(stop-1) + dt;
-    	}else{
-    		currentStop = this.getNumStops()-1;
-//    		dt = this.scheduledDepartureTimes[this.getNumStops()-1];
-//    		arrivalTimes[stop] = getArrivalTime(this.getNumStops()-2) + dt;
-//    		System.out.println(" ** "+ getArrivalTime(this.getNumStops()-2)/3600+ ":"+ (getArrivalTime(this.getNumStops()-2)%3600)/60+ " , " + " , "+ dt/60+ ":" + (dt%60));
-    	}
-    	 
-    	dt = this.scheduledDepartureTimes[currentStop] - this.scheduledDepartureTimes[currentStop-1];
-    	//System.out.println("   "+ getArrivalTime(currentStop-1)/3600 + ":"+ (getArrivalTime(currentStop-1)%3600)/60 + " , "+ dt/60+ ":" + (dt%60) );
-		arrivalTimes[stop] = getArrivalTime(currentStop-1) + dt;
-		
-    	}
+
+    // estimate arrival time for missing realtime updates.For stops in the head or tail of queue,
+    // delay is zero
+    public void estimateArrivaltime(int stop) {
+        int dt;
+        int currentStop;
+        if (stop != 0) {
+            currentStop = stop;
+            // dt = this.scheduledDepartureTimes[stop] - this.scheduledDepartureTimes[stop-1];
+            // System.out.println("   "+ getArrivalTime(stop-1)/3600 + ":"+
+            // (getArrivalTime(stop-1)%3600)/60 + " , "+ dt/60+ ":" + (dt%60) );
+            // arrivalTimes[stop] = getArrivalTime(stop-1) + dt;
+        } else {
+            currentStop = this.getNumStops() - 1;
+            // dt = this.scheduledDepartureTimes[this.getNumStops()-1];
+            // arrivalTimes[stop] = getArrivalTime(this.getNumStops()-2) + dt;
+            // System.out.println(" ** "+ getArrivalTime(this.getNumStops()-2)/3600+ ":"+
+            // (getArrivalTime(this.getNumStops()-2)%3600)/60+ " , " + " , "+ dt/60+ ":" + (dt%60));
+        }
+
+        dt = this.scheduledDepartureTimes[currentStop]
+                - this.scheduledDepartureTimes[currentStop - 1];
+        // System.out.println("   "+ getArrivalTime(currentStop-1)/3600 + ":"+
+        // (getArrivalTime(currentStop-1)%3600)/60 + " , "+ dt/60+ ":" + (dt%60) );
+        arrivalTimes[stop] = getArrivalTime(currentStop - 1) + dt;
+
+    }
+
     /** @return the amount of time in seconds that the vehicle waits at the stop. */
     public int getDepartureTime(int stop) {
-    	//System.out.println("---TripTimes + get DepartureTime, "+ this.trip.getId()+ ", stop = "+ stop);
-        if (departureTimes == null) return getScheduledDepartureTime(stop);
-        else return departureTimes[stop]; // updated times are not time shifted.
+        // System.out.println("---TripTimes + get DepartureTime, "+ this.trip.getId()+ ", stop = "+
+        // stop);
+        if (departureTimes == null)
+            return getScheduledDepartureTime(stop);
+        else
+            return departureTimes[stop]; // updated times are not time shifted.
     }
 
     /** @return the amount of time in seconds that the vehicle waits at the stop. */
@@ -265,27 +283,35 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
         // timeShift is not relevant since this involves updated times and is relative.
         return getDepartureTime(stop) - getArrivalTime(stop);
     }
-    //added for debug
-    public String getVehicleID(){
-    	return vehicleID;
+
+    // added for debug
+    public String getVehicleID() {
+        return vehicleID;
     }
-    public void setVehicleID(String currentVehicleID){
-    	vehicleID = currentVehicleID;
+
+    public void setVehicleID(String currentVehicleID) {
+        vehicleID = currentVehicleID;
     }
+
     /** @return the amount of time in seconds that the vehicle takes to reach the following stop. */
     public int getRunningTime(int stop) {
-    	if (stop != this.getNumStops()-2){
-	    	//System.out.println("---TripTimes + get running time: "+ this.trip.getId().getId() +" , vehicle = "+ this.vehicleID +", stop = "+ stop +" , ari2 = " + getArrivalTime(stop + 1) + " , ari1 = "+ getDepartureTime(stop) +", nStops = "+ this.getNumStops());	      
-	        return getArrivalTime(stop + 1) - getDepartureTime(stop);
-    	}else{
-    		
-	        int dt = getArrivalTime(0) - getDepartureTime(stop);
-	        if (dt < 0)
-	        	dt = this.scheduledDepartureTimes[stop+1] - this.scheduledDepartureTimes[stop];
-	       // System.out.println("tripID: "+ this.trip.getId().getId()+ ", Running time to the first stop" +" , vehicle = "+ this.vehicleID +", stop = "+ stop + " , dt = "+ dt);
-    		return dt;
-    	}
-    		
+        if (stop != this.getNumStops() - 2) {
+            // System.out.println("---TripTimes + get running time: "+ this.trip.getId().getId()
+            // +" , vehicle = "+ this.vehicleID +", stop = "+ stop +" , ari2 = " +
+            // getArrivalTime(stop + 1) + " , ari1 = "+ getDepartureTime(stop) +", nStops = "+
+            // this.getNumStops());
+            return getArrivalTime(stop + 1) - getDepartureTime(stop);
+        } else {
+
+            int dt = getArrivalTime(0) - getDepartureTime(stop);
+            if (dt < 0)
+                dt = this.scheduledDepartureTimes[stop + 1] - this.scheduledDepartureTimes[stop];
+            // System.out.println("tripID: "+ this.trip.getId().getId()+
+            // ", Running time to the first stop" +" , vehicle = "+ this.vehicleID +", stop = "+
+            // stop + " , dt = "+ dt);
+            return dt;
+        }
+
     }
 
     /** @return the difference between the scheduled and actual arrival times at this stop. */
@@ -300,7 +326,7 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
 
     /**
      * @return true if this TripTimes represents an unmodified, scheduled trip from a published
-     * timetable or false if it is a updated, cancelled, or otherwise modified one.
+     *         timetable or false if it is a updated, cancelled, or otherwise modified one.
      */
     public boolean isScheduled() {
         return departureTimes == null && arrivalTimes == null;
@@ -317,8 +343,9 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
 
     /**
      * When creating a scheduled TripTimes or wrapping it in updates, we could potentially imply
-     * negative running or dwell times. We really don't want those being used in routing.
-     * This method check that all times are increasing, and logs errors if this is not the case.
+     * negative running or dwell times. We really don't want those being used in routing. This
+     * method check that all times are increasing, and logs errors if this is not the case.
+     * 
      * @return whether the times were found to be increasing.
      */
     public boolean timesIncreasing() {
@@ -342,8 +369,8 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
 
     /**
      * Once a trip has been found departing or arriving at an appropriate time, check whether that
-     * trip fits other restrictive search criteria such as bicycle and wheelchair accessibility
-     * and transfers with minimum time or forbidden transfers.
+     * trip fits other restrictive search criteria such as bicycle and wheelchair accessibility and
+     * transfers with minimum time or forbidden transfers.
      */
     public boolean tripAcceptable(State state0, int stopIndex) {
         RoutingRequest options = state0.getOptions();
@@ -391,8 +418,8 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
     }
 
     /**
-     * If they don't already exist, create arrays for updated arrival and departure times
-     * that are just time-shifted copies of the zero-based scheduled departure times.
+     * If they don't already exist, create arrays for updated arrival and departure times that are
+     * just time-shifted copies of the zero-based scheduled departure times.
      */
     private void checkCreateTimesArrays() {
         if (arrivalTimes == null) {
@@ -405,7 +432,7 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
         }
     }
 
-    public int getNumStops () {
+    public int getNumStops() {
         return scheduledArrivalTimes.length;
     }
 
@@ -425,18 +452,19 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
         return ret;
     }
 
-   /**
-    * Returns a time-shifted copy of this TripTimes in which the vehicle passes the given stop
-    * index (not stop sequence number) at the given time. We only have a mechanism to shift the
-    * scheduled stoptimes, not the real-time stoptimes. Therefore, this only works on trips
-    * without updates for now (frequency trips don't have updates).
-    */
-    public TripTimes timeShift (int stop, int time, boolean depart) {
-        if (arrivalTimes != null || departureTimes != null) return null;
+    /**
+     * Returns a time-shifted copy of this TripTimes in which the vehicle passes the given stop
+     * index (not stop sequence number) at the given time. We only have a mechanism to shift the
+     * scheduled stoptimes, not the real-time stoptimes. Therefore, this only works on trips without
+     * updates for now (frequency trips don't have updates).
+     */
+    public TripTimes timeShift(int stop, int time, boolean depart) {
+        if (arrivalTimes != null || departureTimes != null)
+            return null;
         TripTimes shifted = this.clone();
         // Adjust 0-based times to match desired stoptime.
         int shift = time - (depart ? getDepartureTime(stop) : getArrivalTime(stop));
-        System.out.println(", shift = " + shift+ ", pre = "+ shifted.timeShift);
+        System.out.println(", shift = " + shift + ", pre = " + shifted.timeShift);
         shifted.timeShift += shift; // existing shift should usually (always?) be 0 on freqs
         return shifted;
     }

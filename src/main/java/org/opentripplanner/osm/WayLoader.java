@@ -7,25 +7,29 @@ import crosby.binary.Osmformat;
 public class WayLoader extends Parser {
 
     public final OSM osm;
+
     NodeTracker nodesInGeom, nodesInWays;
-    
+
     public WayLoader(OSM osm, NodeTracker nodesInGeom) {
         this.osm = osm;
         this.nodesInGeom = nodesInGeom;
         this.nodesInWays = new NodeTracker();
     }
-    
+
     /** Disable parsing relations. */
-    @Override 
-    protected void parseRelations(List<Osmformat.Relation> rels) { }
+    @Override
+    protected void parseRelations(List<Osmformat.Relation> rels) {
+    }
 
     /** Disable parsing nodes. */
-    @Override 
-    protected void parseNodes(List<Osmformat.Node> nodes) { }
+    @Override
+    protected void parseNodes(List<Osmformat.Node> nodes) {
+    }
 
     /** Disable parsing dense nodes. */
     @Override
-    protected void parseDense(Osmformat.DenseNodes nodes) { }
+    protected void parseDense(Osmformat.DenseNodes nodes) {
+    }
 
     /**
      * This method will be called with each new Way object as it is created. We keep all ways that
@@ -35,7 +39,8 @@ public class WayLoader extends Parser {
     @Override
     public void handleWay(long id, Way way) {
         /* Skip ways that have no retained tags. */
-        if (way.tagless()) return;
+        if (way.tagless())
+            return;
         /* Check if any node in this way is marked as being within the geometry. */
         boolean found = false;
         for (long node : way.nodes) {
@@ -48,9 +53,9 @@ public class WayLoader extends Parser {
         if (found) {
             for (long node : way.nodes) {
                 nodesInWays.add(node);
-            }            
+            }
             osm.ways.put(id, way);
         }
     }
-       
+
 }

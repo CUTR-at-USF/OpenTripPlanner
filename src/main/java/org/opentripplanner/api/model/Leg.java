@@ -29,7 +29,7 @@ import org.opentripplanner.util.model.EncodedPolylineBean;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
- /**
+/**
  * One leg of a trip -- that is, a temporally continuous piece of the journey that takes place on a
  * particular vehicle (or on foot).
  */
@@ -40,44 +40,46 @@ public class Leg {
      * The date and time this leg begins.
      */
     public Calendar startTime = null;
-    
+
     /**
      * The date and time this leg ends.
      */
     public Calendar endTime = null;
-    
+
     /**
-     * For transit leg, the offset from the scheduled departure-time of the boarding stop in this leg.
-     * "scheduled time of departure at boarding stop" = startTime - departureDelay
+     * For transit leg, the offset from the scheduled departure-time of the boarding stop in this
+     * leg. "scheduled time of departure at boarding stop" = startTime - departureDelay
      */
     public int departureDelay = 0;
+
     /**
-     * For transit leg, the offset from the scheduled arrival-time of the alighting stop in this leg.
-     * "scheduled time of arrival at alighting stop" = endTime - arrivalDelay
+     * For transit leg, the offset from the scheduled arrival-time of the alighting stop in this
+     * leg. "scheduled time of arrival at alighting stop" = endTime - arrivalDelay
      */
     public int arrivalDelay = 0;
+
     /**
      * Whether there is real-time data about this Leg
      */
     public Boolean realTime = false;
-    
+
     /**
      * Is this a frequency-based trip with non-strict departure times?
      */
     public Boolean isNonExactFrequency = null;
-    
+
     /**
-     * The best estimate of the time between two arriving vehicles. This is particularly important 
-     * for non-strict frequency trips, but could become important for real-time trips, strict 
+     * The best estimate of the time between two arriving vehicles. This is particularly important
+     * for non-strict frequency trips, but could become important for real-time trips, strict
      * frequency trips, and scheduled trips with empirical headways.
      */
     public Integer headway = null;
-    
+
     /**
      * The distance traveled while traversing the leg in meters.
      */
     public Double distance = null;
-    
+
     /**
      * Is this leg a traversing pathways?
      */
@@ -118,18 +120,17 @@ public class Leg {
     public String routeColor = null;
 
     /**
-     * For transit legs, the type of the route. Non transit -1
-     * When 0-7: 0 Tram, 1 Subway, 2 Train, 3 Bus, 4 Ferry, 5 Cable Car, 6 Gondola, 7 Funicular
-     * When equal or highter than 100, it is coded using the Hierarchical Vehicle Type (HVT) codes from the European TPEG standard
-     * Also see http://groups.google.com/group/gtfs-changes/msg/ed917a69cf8c5bef
+     * For transit legs, the type of the route. Non transit -1 When 0-7: 0 Tram, 1 Subway, 2 Train,
+     * 3 Bus, 4 Ferry, 5 Cable Car, 6 Gondola, 7 Funicular When equal or highter than 100, it is
+     * coded using the Hierarchical Vehicle Type (HVT) codes from the European TPEG standard Also
+     * see http://groups.google.com/group/gtfs-changes/msg/ed917a69cf8c5bef
      */
     @XmlAttribute
     @JsonSerialize
     public Integer routeType = null;
-    
+
     /**
-     * For transit legs, the ID of the route.
-     * For non-transit legs, null.
+     * For transit legs, the ID of the route. For non-transit legs, null.
      */
     @XmlAttribute
     @JsonSerialize
@@ -149,7 +150,6 @@ public class Leg {
     @JsonSerialize
     public Boolean interlineWithPreviousLeg;
 
-    
     /**
      * For transit leg, the trip's short name (if one exists). For non-transit legs, null.
      */
@@ -163,7 +163,7 @@ public class Leg {
     @XmlAttribute
     @JsonSerialize
     public String tripBlockId = null;
-    
+
     /**
      * For transit legs, the headsign of the bus or train being used. For non-transit legs, null.
      */
@@ -178,40 +178,38 @@ public class Leg {
     @XmlAttribute
     @JsonSerialize
     public String agencyId = null;
-    
+
     /**
-     * For transit legs, the ID of the trip.
-     * For non-transit legs, null.
+     * For transit legs, the ID of the trip. For non-transit legs, null.
      */
     @XmlAttribute
     @JsonSerialize
     public String tripId = null;
-    
+
     /**
-     * For transit legs, the service date of the trip.
-     * For non-transit legs, null.
+     * For transit legs, the service date of the trip. For non-transit legs, null.
      */
     @XmlAttribute
     @JsonSerialize
     public String serviceDate = null;
-    
+
     /**
      * The Place where the leg originates.
      */
     public Place from = null;
-    
+
     /**
      * The Place where the leg begins.
      */
     public Place to = null;
 
     /**
-     * For transit legs, intermediate stops between the Place where the leg originates and the Place where the leg ends.
-     * For non-transit legs, null.
-     * This field is optional i.e. it is always null unless "showIntermediateStops" parameter is set to "true" in the planner request.
+     * For transit legs, intermediate stops between the Place where the leg originates and the Place
+     * where the leg ends. For non-transit legs, null. This field is optional i.e. it is always null
+     * unless "showIntermediateStops" parameter is set to "true" in the planner request.
      */
     @XmlElementWrapper(name = "intermediateStops")
-    @JsonProperty(value="intermediateStops")
+    @JsonProperty(value = "intermediateStops")
     public List<Place> stop;
 
     /**
@@ -220,15 +218,14 @@ public class Leg {
     public EncodedPolylineBean legGeometry;
 
     /**
-     * A series of turn by turn instructions used for walking, biking and driving. 
+     * A series of turn by turn instructions used for walking, biking and driving.
      */
     @XmlElementWrapper(name = "steps")
-    @JsonProperty(value="steps")
+    @JsonProperty(value = "steps")
     public List<WalkStep> walkSteps;
 
     /**
-     * Deprecated field formerly used for notes -- will be removed.  See
-     * alerts
+     * Deprecated field formerly used for notes -- will be removed. See alerts
      */
     @XmlElement
     @JsonSerialize
@@ -260,24 +257,31 @@ public class Leg {
 
     /**
      * Whether this leg is a transit leg or not.
+     * 
      * @return Boolean true if the leg is a transit leg
      */
     public Boolean isTransitLeg() {
-        if (mode == null) return null;
-        else if (mode.equals(TraverseMode.WALK.toString())) return false;
-        else if (mode.equals(TraverseMode.CAR.toString())) return false;
-        else if (mode.equals(TraverseMode.BICYCLE.toString())) return false;
-        else if (mode.equals(TraverseMode.CUSTOM_MOTOR_VEHICLE.toString())) return false;
-        else return true;
+        if (mode == null)
+            return null;
+        else if (mode.equals(TraverseMode.WALK.toString()))
+            return false;
+        else if (mode.equals(TraverseMode.CAR.toString()))
+            return false;
+        else if (mode.equals(TraverseMode.BICYCLE.toString()))
+            return false;
+        else if (mode.equals(TraverseMode.CUSTOM_MOTOR_VEHICLE.toString()))
+            return false;
+        else
+            return true;
     }
-    
-    /** 
+
+    /**
      * The leg's duration in seconds
      */
     @XmlElement
     @JsonSerialize
     public double getDuration() {
-        return endTime.getTimeInMillis()/1000.0 - startTime.getTimeInMillis()/1000.0;
+        return endTime.getTimeInMillis() / 1000.0 - startTime.getTimeInMillis() / 1000.0;
     }
 
     public void addAlert(Alert alert) {

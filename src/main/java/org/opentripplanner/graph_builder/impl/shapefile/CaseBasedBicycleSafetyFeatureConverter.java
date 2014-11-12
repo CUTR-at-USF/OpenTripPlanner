@@ -26,10 +26,13 @@ import org.opentripplanner.graph_builder.services.shapefile.SimpleFeatureConvert
 public class CaseBasedBicycleSafetyFeatureConverter implements SimpleFeatureConverter<P2<Double>> {
 
     private String safetyAttributeName;
+
     private String directionAttributeName;
 
     private Map<String, Double> safetyFeatures = new HashMap<String, Double>();
+
     private Map<String, Integer> directions = new HashMap<String, Integer>();
+
     public static final P2<Double> oneone = new P2<Double>(1.0, 1.0);
 
     @Override
@@ -42,10 +45,10 @@ public class CaseBasedBicycleSafetyFeatureConverter implements SimpleFeatureConv
         int directionFeature = 3; // Default to applying the safety feature in both directions
                                   // (useful if the dataset doesn't include direction information)
         if (directionAttributeName != null) {
-        	String directionKey = feature.getAttribute(directionAttributeName).toString();
-        	if (directionKey != null) {
-        		directionFeature = directions.get(directionKey.toString());
-        	}
+            String directionKey = feature.getAttribute(directionAttributeName).toString();
+            if (directionKey != null) {
+                directionFeature = directions.get(directionKey.toString());
+            }
         }
 
         return new P2<Double>((directionFeature & 0x1) == 0 ? 1.0 : safetyFeature,
@@ -62,17 +65,16 @@ public class CaseBasedBicycleSafetyFeatureConverter implements SimpleFeatureConv
     }
 
     /**
-     * @param safetyAttributeName
-     *            The name of the attribute used when calculating the feature's safety.
+     * @param safetyAttributeName The name of the attribute used when calculating the feature's
+     *        safety.
      */
     public void setSafetyAttributeName(String safetyAttributeName) {
         this.safetyAttributeName = safetyAttributeName;
     }
 
     /**
-     * @param directionAttributeName
-     *            The name of the attribute used when calculating the direction of the
-     *            street/bikelane for which that the safety feature should apply.
+     * @param directionAttributeName The name of the attribute used when calculating the direction
+     *        of the street/bikelane for which that the safety feature should apply.
      */
     public void setDirectionAttributeName(String directionAttributeName) {
         this.directionAttributeName = directionAttributeName;
@@ -96,6 +98,7 @@ public class CaseBasedBicycleSafetyFeatureConverter implements SimpleFeatureConv
      * Maps the direction value to a number representing the direction that the bike safety feature
      * goes. The number is 1 for a safety feature that goes with the road geometry, 2 for a safety
      * feature that goes against it, and 3 for a safety feature that goes both ways.
+     * 
      * @param directionValues
      */
     public void setDirection(Map<String, String> directionValues) {

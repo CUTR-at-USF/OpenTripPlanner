@@ -32,24 +32,27 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public class NominatimGeocoder implements Geocoder {
     private String nominatimUrl;
+
     private Integer resultLimit;
+
     private String viewBox;
+
     private String emailAddress;
-    
-    private NominatimJsonDeserializer nominatimJsonDeserializer; 
-    
+
+    private NominatimJsonDeserializer nominatimJsonDeserializer;
+
     public NominatimGeocoder() {
         nominatimJsonDeserializer = new NominatimJsonDeserializer();
     }
-    
+
     public String getNominatimUrl() {
         return nominatimUrl;
     }
-    
+
     public void setNominatimUrl(String nominatimUrl) {
-        this.nominatimUrl = nominatimUrl; 
+        this.nominatimUrl = nominatimUrl;
     }
-    
+
     public Integer getResultLimit() {
         return resultLimit;
     }
@@ -74,15 +77,16 @@ public class NominatimGeocoder implements Geocoder {
         this.emailAddress = emailAddress;
     }
 
-    @Override 
+    @Override
     public GeocoderResults geocode(String address, Envelope bbox) {
         String content = null;
         try {
             // make json request
             URL nominatimGeocoderUrl = getNominatimGeocoderUrl(address, bbox);
             URLConnection conn = nominatimGeocoderUrl.openConnection();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
-            
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(),
+                    "utf-8"));
+
             StringBuilder sb = new StringBuilder(128);
             String line = null;
             while ((line = reader.readLine()) != null) {
@@ -96,8 +100,9 @@ public class NominatimGeocoder implements Geocoder {
             e.printStackTrace();
             return noGeocoderResult("Error parsing geocoder response");
         }
-           
-        List<NominatimGeocoderResult> nominatimResults = nominatimJsonDeserializer.parseResults(content);
+
+        List<NominatimGeocoderResult> nominatimResults = nominatimJsonDeserializer
+                .parseResults(content);
         List<GeocoderResult> geocoderResults = new ArrayList<GeocoderResult>();
         for (NominatimGeocoderResult nominatimGeocoderResult : nominatimResults) {
             Double lat = nominatimGeocoderResult.getLatDouble();
@@ -108,13 +113,16 @@ public class NominatimGeocoder implements Geocoder {
         }
         return new GeocoderResults(geocoderResults);
     }
-    
+
     private URL getNominatimGeocoderUrl(String address, Envelope bbox) throws IOException {
         UriBuilder uriBuilder = UriBuilder.fromUri(nominatimUrl);
         uriBuilder.queryParam("q", address);
         uriBuilder.queryParam("format", "json");
         if (bbox != null) {
-            uriBuilder.queryParam("viewbox", bbox.getMinX() + "," + bbox.getMinY() + "," + bbox.getMaxX() + "," + bbox.getMaxY());
+            uriBuilder.queryParam(
+                    "viewbox",
+                    bbox.getMinX() + "," + bbox.getMinY() + "," + bbox.getMaxX() + ","
+                            + bbox.getMaxY());
             uriBuilder.queryParam("bounded", 1);
         } else if (viewBox != null) {
             uriBuilder.queryParam("viewbox", viewBox);
@@ -126,11 +134,11 @@ public class NominatimGeocoder implements Geocoder {
         if (emailAddress != null) {
             uriBuilder.queryParam("email", emailAddress);
         }
-        
+
         URI uri = uriBuilder.build();
         return new URL(uri.toString());
-    }  
-    
+    }
+
     private GeocoderResults noGeocoderResult(String error) {
         return new GeocoderResults(error);
     }

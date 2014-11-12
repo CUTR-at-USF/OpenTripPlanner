@@ -57,7 +57,7 @@ public abstract class Nonterminal {
     public Nonterminal optional() {
         return new NTOptional(this);
     }
-    
+
     public Nonterminal or(Object that) {
         return new NTChoice(this, wrap0(that));
     }

@@ -15,13 +15,17 @@ package org.opentripplanner.routing.util;
 
 public class SlopeCosts {
     public final boolean flattened;
+
     public final double slopeSpeedEffectiveLength;
-    public final double slopeWorkCost; // the cost in watt-seconds at 5 m/s 
+
+    public final double slopeWorkCost; // the cost in watt-seconds at 5 m/s
+
     public final double maxSlope;
-    public final double slopeSafetyCost; //an additional safety cost caused by the slope
-    
-    public SlopeCosts(double slopeSpeedEffectiveLength, double slopeWorkCost, double slopeSafetyCost, 
-                      double maxSlope, boolean flattened) {
+
+    public final double slopeSafetyCost; // an additional safety cost caused by the slope
+
+    public SlopeCosts(double slopeSpeedEffectiveLength, double slopeWorkCost,
+            double slopeSafetyCost, double maxSlope, boolean flattened) {
         this.slopeSpeedEffectiveLength = slopeSpeedEffectiveLength;
         this.slopeWorkCost = slopeWorkCost;
         this.slopeSafetyCost = slopeSafetyCost;

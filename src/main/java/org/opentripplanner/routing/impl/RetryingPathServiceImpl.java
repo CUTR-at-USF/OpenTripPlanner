@@ -39,6 +39,7 @@ public class RetryingPathServiceImpl implements PathService {
     private static final Logger LOG = LoggerFactory.getLogger(RetryingPathServiceImpl.class);
 
     private static final int MAX_TIME_FACTOR = 2;
+
     private static final int MAX_WEIGHT_FACTOR = 2;
 
     private static final double MAX_WALK_MULTIPLE = 16;
@@ -53,31 +54,32 @@ public class RetryingPathServiceImpl implements PathService {
     private SPTService sptService;
 
     private double firstPathTimeout = 0; // seconds
+
     private double multiPathTimeout = 0; // seconds
-    
+
     /** Give up on searching for itineraries after this many seconds have elapsed. */
-    public void setTimeout (double seconds) {
+    public void setTimeout(double seconds) {
         firstPathTimeout = seconds;
         multiPathTimeout = seconds;
     }
 
     /**
-     * Give up on searching for the first itinerary after this many seconds have elapsed.
-     * A negative or zero value means search forever. 
+     * Give up on searching for the first itinerary after this many seconds have elapsed. A negative
+     * or zero value means search forever.
      */
-    public void setFirstPathTimeout (double seconds) {
+    public void setFirstPathTimeout(double seconds) {
         firstPathTimeout = seconds;
     }
-    
+
     /**
-     * Stop searching for additional itineraries (beyond the first one) after this many seconds 
-     * have elapsed, relative to the beginning of the search for the first itinerary. 
-     * A negative or zero value means search forever. 
-     * Setting this lower than the firstPathTimeout will avoid searching for additional
-     * itineraries when finding the first itinerary takes a long time. This helps keep overall 
-     * response time down while assuring that the end user will get at least one response.
+     * Stop searching for additional itineraries (beyond the first one) after this many seconds have
+     * elapsed, relative to the beginning of the search for the first itinerary. A negative or zero
+     * value means search forever. Setting this lower than the firstPathTimeout will avoid searching
+     * for additional itineraries when finding the first itinerary takes a long time. This helps
+     * keep overall response time down while assuring that the end user will get at least one
+     * response.
      */
-    public void setMultiPathTimeout (double seconds) {
+    public void setMultiPathTimeout(double seconds) {
         multiPathTimeout = seconds;
     }
 
@@ -95,7 +97,7 @@ public class RetryingPathServiceImpl implements PathService {
         }
 
         long searchBeginTime = System.currentTimeMillis();
-        
+
         // The list of options specifying various modes, banned routes, etc to try for multiple
         // itineraries
         Queue<RoutingRequest> optionQueue = new LinkedList<RoutingRequest>();
@@ -113,39 +115,40 @@ public class RetryingPathServiceImpl implements PathService {
                 break;
             }
             currOptions.setMaxWalkDistance(maxWalk);
-            
+
             // apply appropriate timeout
             double timeout = paths.isEmpty() ? firstPathTimeout : multiPathTimeout;
-            
+
             // options.worstTime = maxTime;
-            //options.maxWeight = maxWeight;
+            // options.maxWeight = maxWeight;
             long subsearchBeginTime = System.currentTimeMillis();
-            //System.out.println("-------------------------BEGIN SUBSEARCH------------------------\n");
+            // System.out.println("-------------------------BEGIN SUBSEARCH------------------------\n");
             LOG.debug("BEGIN SUBSEARCH");
             ShortestPathTree spt = sptService.getShortestPathTree(currOptions, timeout);
             if (spt == null) {
                 // Serious failure, no paths provided. This could be signaled with an exception.
-                LOG.warn("Aborting search. {} paths found, elapsed time {} sec", 
-                        paths.size(), (System.currentTimeMillis() - searchBeginTime) / 1000.0);
+                LOG.warn("Aborting search. {} paths found, elapsed time {} sec", paths.size(),
+                        (System.currentTimeMillis() - searchBeginTime) / 1000.0);
                 break;
             }
-            List<GraphPath> somePaths = spt.getPaths(); // somePaths may be empty, but is never null.
-            LOG.debug("END SUBSEARCH ({} msec of {} msec total)", 
-                    System.currentTimeMillis() - subsearchBeginTime,
-                    System.currentTimeMillis() - searchBeginTime);
+            List<GraphPath> somePaths = spt.getPaths(); // somePaths may be empty, but is never
+                                                        // null.
+            LOG.debug("END SUBSEARCH ({} msec of {} msec total)", System.currentTimeMillis()
+                    - subsearchBeginTime, System.currentTimeMillis() - searchBeginTime);
             LOG.debug("SPT provides {} paths to target.", somePaths.size());
 
             /* First, accumulate any new paths found into the list of itineraries. */
             for (GraphPath path : somePaths) {
-                if ( ! paths.contains(path)) {
+                if (!paths.contains(path)) {
                     if (path.getWalkDistance() > maxWalk) {
                         maxWalk = path.getWalkDistance() * 1.25;
                     }
                     paths.add(path);
                     LOG.debug("New trips: {}", path.getTrips());
                     // ban the trips in this path
-                    // unless is is a non-transit trip (in which case this would cause a useless retry)
-                    if ( ! path.getTrips().isEmpty()) {
+                    // unless is is a non-transit trip (in which case this would cause a useless
+                    // retry)
+                    if (!path.getTrips().isEmpty()) {
                         RoutingRequest newOptions = currOptions.clone();
                         for (AgencyAndId trip : path.getTrips()) {
                             newOptions.banTrip(trip);
@@ -153,12 +156,12 @@ public class RetryingPathServiceImpl implements PathService {
                         if (!optionQueue.contains(newOptions)) {
                             optionQueue.add(newOptions);
                         }
-                    }           
+                    }
                 }
             }
             LOG.debug("{} / {} itineraries", paths.size(), currOptions.numItineraries);
             if (options.rctx.aborted) {
-                // search was cleanly aborted, probably due to a timeout. 
+                // search was cleanly aborted, probably due to a timeout.
                 // There may be useful paths, but we should stop retrying.
                 break;
             }
@@ -174,8 +177,8 @@ public class RetryingPathServiceImpl implements PathService {
                 long duration = path.getDuration();
                 LOG.debug("Setting max time and weight for subsequent searches.");
                 LOG.debug("First path start time:  {}", path.getStartTime());
-                maxTime = path.getStartTime() + 
-                		  MAX_TIME_FACTOR * (currOptions.isArriveBy() ? -duration : duration);
+                maxTime = path.getStartTime() + MAX_TIME_FACTOR
+                        * (currOptions.isArriveBy() ? -duration : duration);
                 LOG.debug("First path duration:  {}", duration);
                 LOG.debug("Max time set to:  {}", maxTime);
                 maxWeight = path.getWeight() * MAX_WEIGHT_FACTOR;
@@ -185,7 +188,7 @@ public class RetryingPathServiceImpl implements PathService {
                 }
             }
             if (somePaths.isEmpty()) {
-                //try again doubling maxwalk
+                // try again doubling maxwalk
                 LOG.debug("No paths were found.");
                 if (maxWalk > initialMaxWalk * MAX_WALK_MULTIPLE || maxWalk >= Double.MAX_VALUE)
                     break;
@@ -199,7 +202,8 @@ public class RetryingPathServiceImpl implements PathService {
         if (paths.size() == 0) {
             return null;
         }
-        // We order the list of returned paths by the time of arrival or departure (not path duration)
+        // We order the list of returned paths by the time of arrival or departure (not path
+        // duration)
         Collections.sort(paths, new PathComparator(options.isArriveBy()));
         return paths;
     }

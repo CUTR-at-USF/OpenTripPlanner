@@ -20,11 +20,11 @@ public class ConflictingBikeTags extends GraphBuilderAnnotation {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String FMT = "Conflicting tags bicycle:[yes|designated] and cycleway: " +
-    		"dismount on way %s, assuming dismount";
-    
+    public static final String FMT = "Conflicting tags bicycle:[yes|designated] and cycleway: "
+            + "dismount on way %s, assuming dismount";
+
     final long wayId;
-    
+
     @Override
     public String getMessage() {
         return String.format(FMT, wayId);

@@ -30,10 +30,10 @@ import com.vividsolutions.jts.geom.Geometry;
 public class RouterInfo {
     @XmlElement
     public String routerId;
-    
-    @JsonSerialize(using=GeoJSONSerializer.class)
-    @JsonDeserialize(using=GeoJSONDeserializer.class)
-    @XmlJavaTypeAdapter(value=GeometryAdapter.class,type=Geometry.class)
+
+    @JsonSerialize(using = GeoJSONSerializer.class)
+    @JsonDeserialize(using = GeoJSONDeserializer.class)
+    @XmlJavaTypeAdapter(value = GeometryAdapter.class, type = Geometry.class)
     public Geometry polygon;
 
     @XmlElement

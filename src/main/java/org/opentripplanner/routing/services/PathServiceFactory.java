@@ -13,7 +13,6 @@
 
 package org.opentripplanner.routing.services;
 
-
 public interface PathServiceFactory {
 
     /**

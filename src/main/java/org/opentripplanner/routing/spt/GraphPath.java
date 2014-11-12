@@ -52,12 +52,9 @@ public class GraphPath {
      * final itinerary presented to the user. When planning with departure time, the edges will then
      * be re-traversed once more in order to move the waiting time forward in time, towards the end.
      * 
-     * @param s
-     *            - the state for which a path is requested
-     * @param optimize
-     *            - whether excess waiting time should be removed
-     * @param options
-     *            - the traverse options used to reach this state
+     * @param s - the state for which a path is requested
+     * @param optimize - whether excess waiting time should be removed
+     * @param options - the traverse options used to reach this state
      */
     public GraphPath(State s, boolean optimize) {
         // Only optimize transit trips
@@ -70,10 +67,10 @@ public class GraphPath {
             optimize = false;
         }
 
-//        LOG.info("NORMAL");
-//        s.dumpPath();
-//        LOG.info("OPTIMIZED");
-//        s.optimize().dumpPath();
+        // LOG.info("NORMAL");
+        // s.dumpPath();
+        // LOG.info("OPTIMIZED");
+        // s.optimize().dumpPath();
 
         /* Put path in chronological order, and optimize as necessary */
         State lastState;
@@ -95,7 +92,7 @@ public class GraphPath {
         this.edges = new LinkedList<Edge>();
         for (State cur = lastState; cur != null; cur = cur.getBackState()) {
             states.addFirst(cur);
-            
+
             // Record the edge if it exists and this is not the first state in the path.
             if (cur.getBackEdge() != null && cur.getBackState() != null) {
                 edges.addFirst(cur.getBackEdge());
@@ -106,6 +103,7 @@ public class GraphPath {
 
     /**
      * Returns the start time of the trip in seconds since the epoch.
+     * 
      * @return
      */
     public long getStartTime() {
@@ -114,6 +112,7 @@ public class GraphPath {
 
     /**
      * Returns the end time of the trip in seconds since the epoch.
+     * 
      * @return
      */
     public long getEndTime() {
@@ -122,6 +121,7 @@ public class GraphPath {
 
     /**
      * Returns the duration of the trip in seconds.
+     * 
      * @return
      */
     public int getDuration() {
@@ -141,8 +141,10 @@ public class GraphPath {
         return states.getLast().getVertex();
     }
 
-    /** @return A list containing one AgencyAndId (trip_id) for each vehicle boarded in this path,
-     * in the chronological order they are boarded. */
+    /**
+     * @return A list containing one AgencyAndId (trip_id) for each vehicle boarded in this path, in
+     *         the chronological order they are boarded.
+     */
     public List<AgencyAndId> getTrips() {
         List<AgencyAndId> ret = new LinkedList<AgencyAndId>();
         Trip lastTrip = null;
@@ -188,14 +190,14 @@ public class GraphPath {
         for (State s : states)
             System.out.println(s + " via " + s.getBackEdge());
         System.out.println(" --- END GRAPHPATH DUMP ---");
-        System.out.println("Total meters walked in this graphpath: " + 
-               states.getLast().getWalkDistance());
+        System.out.println("Total meters walked in this graphpath: "
+                + states.getLast().getWalkDistance());
     }
 
     public void dumpPathParser() {
         System.out.println(" --- BEGIN GRAPHPATH DUMP ---");
         System.out.println(this.toString());
-        for (State s : states) 
+        for (State s : states)
             System.out.println(s.getPathParserStates() + s + " via " + s.getBackEdge());
         System.out.println(" --- END GRAPHPATH DUMP ---");
     }
@@ -203,7 +205,7 @@ public class GraphPath {
     public double getWalkDistance() {
         return walkDistance;
     }
-    
+
     public RoutingContext getRoutingContext() {
         return rctx;
     }

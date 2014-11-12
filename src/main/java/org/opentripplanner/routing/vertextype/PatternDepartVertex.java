@@ -32,5 +32,4 @@ public class PatternDepartVertex extends PatternStopVertex {
         return String.format("%s_%02d_D", pattern.getCode(), stop);
     }
 
-    
 }

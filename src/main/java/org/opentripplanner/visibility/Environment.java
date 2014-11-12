@@ -195,9 +195,9 @@ public class Environment {
 
         BoundingBox bounding_box = bbox();
         ArrayList<VLPoint> pts_in_environment = new ArrayList<VLPoint>(count);
-        VLPoint pt_temp = new VLPoint(
-                Util.uniform_random_sample(bounding_box.x_min, bounding_box.x_max),
-                Util.uniform_random_sample(bounding_box.y_min, bounding_box.y_max));
+        VLPoint pt_temp = new VLPoint(Util.uniform_random_sample(bounding_box.x_min,
+                bounding_box.x_max), Util.uniform_random_sample(bounding_box.y_min,
+                bounding_box.y_max));
         while (pts_in_environment.size() < count) {
             while (!pt_temp.in(this, epsilon)) {
                 pt_temp.set_x(Util.uniform_random_sample(bounding_box.x_min, bounding_box.x_max));
@@ -210,7 +210,6 @@ public class Environment {
         return pts_in_environment;
     }
 
-    
     BoundingBox bbox() {
         return outer_boundary.bbox();
     }

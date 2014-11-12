@@ -38,6 +38,7 @@ public class Itinerary {
      * Time that the trip departs.
      */
     public Calendar startTime = null;
+
     /**
      * Time that the trip arrives.
      */
@@ -47,10 +48,12 @@ public class Itinerary {
      * How much time is spent walking, in seconds.
      */
     public long walkTime = 0;
+
     /**
      * How much time is spent on transit, in seconds.
      */
     public long transitTime = 0;
+
     /**
      * How much time is spent waiting for transit to arrive, in seconds.
      */
@@ -60,7 +63,7 @@ public class Itinerary {
      * How far the user has to walk, in meters.
      */
     public Double walkDistance = 0.0;
-    
+
     /**
      * Indicates that the walk limit distance has been exceeded for this itinerary when true.
      */
@@ -72,6 +75,7 @@ public class Itinerary {
      * then back down again would have an elevationLost of Everest + K2.
      */
     public Double elevationLost = 0.0;
+
     /**
      * How much elevation is gained, in total, over the course of the trip, in meters. See
      * elevationLost.
@@ -98,30 +102,32 @@ public class Itinerary {
     public List<Leg> legs = new ArrayList<Leg>();
 
     /**
-     * This itinerary has a greater slope than the user requested (but there are no possible 
-     * itineraries with a good slope). 
+     * This itinerary has a greater slope than the user requested (but there are no possible
+     * itineraries with a good slope).
      */
     public boolean tooSloped = false;
 
-    /** 
+    /**
      * adds leg to array list
+     * 
      * @param leg
      */
     public void addLeg(Leg leg) {
-        if(leg != null)
+        if (leg != null)
             legs.add(leg);
     }
 
-    /** 
-     * remove the leg from the list of legs 
+    /**
+     * remove the leg from the list of legs
+     * 
      * @param leg object to be removed
      */
     public void removeLeg(Leg leg) {
-        if(leg != null) {
+        if (leg != null) {
             legs.remove(leg);
         }
     }
-    
+
     public void fixupDates(CalendarServiceData service) {
         TimeZone startTimeZone = null;
         TimeZone timeZone = null;
@@ -135,8 +141,8 @@ public class Itinerary {
             } else {
                 timeZone = service.getTimeZoneForAgencyId(leg.agencyId);
                 if (startTimeZone == null) {
-                    startTimeZone = timeZone; 
-                 }
+                    startTimeZone = timeZone;
+                }
             }
         }
         if (timeZone != null) {

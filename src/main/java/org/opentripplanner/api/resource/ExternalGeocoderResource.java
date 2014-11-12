@@ -35,26 +35,25 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 @Path("/geocode")
 public class ExternalGeocoderResource {
-  
-// uncommenting injectparam will require a specific Geocoder to be instantiated
-//    @InjectParam 
-    @Setter 
+
+    // uncommenting injectparam will require a specific Geocoder to be instantiated
+    // @InjectParam
+    @Setter
     private Geocoder geocoder;
-    
+
     @GET
-    @Produces({MediaType.APPLICATION_JSON + "; charset=UTF-8"})
-    public GeocoderResults geocode(
-            @QueryParam("address") String address,
+    @Produces({ MediaType.APPLICATION_JSON + "; charset=UTF-8" })
+    public GeocoderResults geocode(@QueryParam("address") String address,
             @QueryParam("bbox") BoundingBox bbox) {
         if (address == null) {
-            badRequest ("no address");
+            badRequest("no address");
         }
         Envelope env = (bbox == null) ? null : bbox.envelope();
         return geocoder.geocode(address, env);
     }
 
-    private void badRequest (String message) {
-        throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-                .entity(message).type("text/plain").build());
+    private void badRequest(String message) {
+        throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(message)
+                .type("text/plain").build());
     }
 }

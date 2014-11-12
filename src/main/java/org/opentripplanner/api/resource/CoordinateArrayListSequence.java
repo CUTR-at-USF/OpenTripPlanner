@@ -23,14 +23,14 @@ import com.vividsolutions.jts.geom.Envelope;
 /** An instance of CoordinateSequence that can be efficiently extended */
 public class CoordinateArrayListSequence implements CoordinateSequence, Cloneable {
     ArrayList<Coordinate> coordinates;
-    
+
     public CoordinateArrayListSequence() {
         coordinates = new ArrayList<Coordinate>();
     }
-    
+
     @SuppressWarnings("unchecked")
     public CoordinateArrayListSequence(ArrayList<Coordinate> coordinates) {
-        this.coordinates = (ArrayList<Coordinate>) coordinates.clone(); 
+        this.coordinates = (ArrayList<Coordinate>) coordinates.clone();
     }
 
     @Override
@@ -55,7 +55,6 @@ public class CoordinateArrayListSequence implements CoordinateSequence, Cloneabl
         return clone;
     }
 
-    
     @Override
     public Coordinate getCoordinate(int i) {
         return coordinates.get(i);
@@ -81,7 +80,7 @@ public class CoordinateArrayListSequence implements CoordinateSequence, Cloneabl
     @Override
     public double getOrdinate(int index, int ordinateIndex) {
         // TODO Auto-generated method stub
-        return ordinateIndex == 0 ? coordinates.get(index).x : coordinates.get(index).y; 
+        return ordinateIndex == 0 ? coordinates.get(index).x : coordinates.get(index).y;
     }
 
     @Override
@@ -96,7 +95,7 @@ public class CoordinateArrayListSequence implements CoordinateSequence, Cloneabl
 
     @Override
     public void setOrdinate(int index, int ordinateIndex, double value) {
-        switch(ordinateIndex) {
+        switch (ordinateIndex) {
         case 0:
             coordinates.get(index).x = value;
             break;
@@ -104,7 +103,7 @@ public class CoordinateArrayListSequence implements CoordinateSequence, Cloneabl
             coordinates.get(index).y = value;
             break;
         default:
-            throw new UnsupportedOperationException(); 
+            throw new UnsupportedOperationException();
         }
     }
 
@@ -125,7 +124,7 @@ public class CoordinateArrayListSequence implements CoordinateSequence, Cloneabl
     public void extend(Coordinate[] newCoordinates, int start) {
         extend(newCoordinates, start, newCoordinates.length);
     }
-    
+
     public void extend(Coordinate[] newCoordinates, int start, int end) {
         coordinates.addAll(Arrays.asList(newCoordinates).subList(start, end));
     }
@@ -135,6 +134,6 @@ public class CoordinateArrayListSequence implements CoordinateSequence, Cloneabl
     }
 
     public void clear() {
-    	coordinates = new ArrayList<Coordinate>();
+        coordinates = new ArrayList<Coordinate>();
     }
 }

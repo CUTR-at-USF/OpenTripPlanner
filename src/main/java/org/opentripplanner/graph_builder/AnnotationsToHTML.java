@@ -24,16 +24,16 @@ import org.slf4j.LoggerFactory;
 // TODO just write the annotations out to a log file in the first place.
 public class AnnotationsToHTML {
 
-    private static Logger LOG = LoggerFactory.getLogger(AnnotationsToHTML .class); 
+    private static Logger LOG = LoggerFactory.getLogger(AnnotationsToHTML.class);
 
     public static void main(String[] args) throws IOException {
         // FIXME turn off all logging to avoid mixing log entries and HTML
-//        @SuppressWarnings("unchecked")
-//        List<Logger> loggers = Collections.<Logger>list(LogManager.getCurrentLoggers());
-//        loggers.add(LogManager.getRootLogger());
-//        for ( Logger logger : loggers ) {
-//            logger.setLevel(Level.OFF);
-//        }
+        // @SuppressWarnings("unchecked")
+        // List<Logger> loggers = Collections.<Logger>list(LogManager.getCurrentLoggers());
+        // loggers.add(LogManager.getRootLogger());
+        // for ( Logger logger : loggers ) {
+        // logger.setLevel(Level.OFF);
+        // }
         if (args.length < 1) {
             System.out.println("Usage: AnnotationsToHTML /path/to/graph");
         }
@@ -57,7 +57,7 @@ public class AnnotationsToHTML {
 
         for (GraphBuilderAnnotation annotation : graph.getBuilderAnnotations()) {
             System.out.println("<p>" + annotation.getMessage() + "</p>");
-            
+
         }
         System.out.println("</body></html>");
     }

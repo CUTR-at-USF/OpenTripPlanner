@@ -28,7 +28,8 @@ import org.opentripplanner.routing.edgetype.StreetTraversalPermission;
  * @author rob
  * 
  */
-public class CompositeStreetTraversalPermissionConverter implements SimpleFeatureConverter<P2<StreetTraversalPermission>> {
+public class CompositeStreetTraversalPermissionConverter implements
+        SimpleFeatureConverter<P2<StreetTraversalPermission>> {
 
     private Collection<SimpleFeatureConverter<P2<StreetTraversalPermission>>> converters = new ArrayList<SimpleFeatureConverter<P2<StreetTraversalPermission>>>();
 
@@ -53,8 +54,7 @@ public class CompositeStreetTraversalPermissionConverter implements SimpleFeatur
     /**
      * set the list of converters used to the passed in parameter
      * 
-     * @param converters
-     *            list of converters to use
+     * @param converters list of converters to use
      */
     public void setConverters(
             Collection<SimpleFeatureConverter<P2<StreetTraversalPermission>>> converters) {
@@ -91,6 +91,7 @@ public class CompositeStreetTraversalPermissionConverter implements SimpleFeatur
 
     /**
      * add a converter to the list to be applied
+     * 
      * @param converter the new converter
      */
     public void add(SimpleFeatureConverter<P2<StreetTraversalPermission>> converter) {

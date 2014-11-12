@@ -26,5 +26,5 @@ public class Graphwide extends GraphBuilderAnnotation {
     public String getMessage() {
         return String.format("graph-wide: " + message);
     }
-    
+
 }

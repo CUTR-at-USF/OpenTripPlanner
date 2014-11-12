@@ -28,10 +28,10 @@ import com.vividsolutions.jts.geom.LineString;
  * beginning or ending a path (itinerary) at a parent station.
  * 
  * Currently this edge is only intended for use in the long distance path service. The path parsers
- * should ensure that it is effectively ignored in other path services, and even in the long distance
- * path service anywhere but the beginning or end of a path.
+ * should ensure that it is effectively ignored in other path services, and even in the long
+ * distance path service anywhere but the beginning or end of a path.
  * 
- * Note that when most users specify that they want to depart from a parent stop at 8AM, they 
+ * Note that when most users specify that they want to depart from a parent stop at 8AM, they
  * actually want to leave from any constituent stop at or after exactly 8AM and are accounting for
  * the initial walk access leg themselves. No edge should have zero cost (this can potentially
  * create endless search loops) but the edges can have zero time while having positive cost.

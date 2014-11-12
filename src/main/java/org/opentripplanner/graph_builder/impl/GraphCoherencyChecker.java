@@ -26,13 +26,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Check the every vertex and edge in the graph to make sure the edge lists and from/to
- * members are coherent, and that there are no edgeless vertices. Primarily intended for debugging.
+ * Check the every vertex and edge in the graph to make sure the edge lists and from/to members are
+ * coherent, and that there are no edgeless vertices. Primarily intended for debugging.
  */
 public class GraphCoherencyChecker implements GraphBuilder {
 
-
-    /** An set of ids which identifies what stages this graph builder provides (i.e. streets, elevation, transit) */
+    /**
+     * An set of ids which identifies what stages this graph builder provides (i.e. streets,
+     * elevation, transit)
+     */
     public List<String> provides() {
         return Collections.emptyList();
     }
@@ -41,7 +43,7 @@ public class GraphCoherencyChecker implements GraphBuilder {
     public List<String> getPrerequisites() {
         return Arrays.asList("streets");
     }
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(GraphCoherencyChecker.class);
 
     @Override
@@ -74,12 +76,12 @@ public class GraphCoherencyChecker implements GraphBuilder {
                 }
             }
         }
-        LOG.info("edge lists and from/to members are {}coherent.", coherent ? "": "not ");
+        LOG.info("edge lists and from/to members are {}coherent.", coherent ? "" : "not ");
     }
 
     @Override
     public void checkInputs() {
-        //No inputs other than the graph itself
+        // No inputs other than the graph itself
     }
-    
+
 }

@@ -45,14 +45,13 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 
 /**
- * {@link GraphBuilder} plugin that applies elevation data to street data that has already
- * been loaded into a (@link Graph}, creating elevation profiles for each Street encountered
- * in the Graph. Depending on the {@link ElevationGridCoverageFactory} specified
- * this could be auto-downloaded and cached National Elevation Dataset (NED) raster data or
- * a GeoTIFF file. The elevation profiles are stored as {@link PackedCoordinateSequence} objects,
- * where each (x,y) pair represents one sample, with the x-coord representing the distance along
- * the edge measured from the start, and the y-coord representing the sampled elevation at that
- * point (both in meters).
+ * {@link GraphBuilder} plugin that applies elevation data to street data that has already been
+ * loaded into a (@link Graph}, creating elevation profiles for each Street encountered in the
+ * Graph. Depending on the {@link ElevationGridCoverageFactory} specified this could be
+ * auto-downloaded and cached National Elevation Dataset (NED) raster data or a GeoTIFF file. The
+ * elevation profiles are stored as {@link PackedCoordinateSequence} objects, where each (x,y) pair
+ * represents one sample, with the x-coord representing the distance along the edge measured from
+ * the start, and the y-coord representing the sampled elevation at that point (both in meters).
  */
 public class ElevationGraphBuilderImpl implements GraphBuilder {
     private static final Logger log = LoggerFactory.getLogger(ElevationGraphBuilderImpl.class);
@@ -69,8 +68,9 @@ public class ElevationGraphBuilderImpl implements GraphBuilder {
 
     private DistanceLibrary distanceLibrary = SphericalDistanceLibrary.getInstance();
 
-    public ElevationGraphBuilderImpl() { /* This makes me a "bean" */ };
-    
+    public ElevationGraphBuilderImpl() { /* This makes me a "bean" */
+    };
+
     public ElevationGraphBuilderImpl(ElevationGridCoverageFactory factory) {
         this.setGridCoverageFactory(factory);
     }
@@ -82,7 +82,7 @@ public class ElevationGraphBuilderImpl implements GraphBuilder {
     public List<String> getPrerequisites() {
         return Arrays.asList("streets");
     }
-    
+
     public void setGridCoverageFactory(ElevationGridCoverageFactory factory) {
         gridCoverageFactory = factory;
     }
@@ -110,7 +110,8 @@ public class ElevationGraphBuilderImpl implements GraphBuilder {
                 if (ee instanceof EdgeWithElevation) {
                     EdgeWithElevation edgeWithElevation = (EdgeWithElevation) ee;
                     processEdge(graph, edgeWithElevation);
-                    if (edgeWithElevation.getElevationProfile() != null && !edgeWithElevation.isElevationFlattened()) {
+                    if (edgeWithElevation.getElevationProfile() != null
+                            && !edgeWithElevation.isElevationFlattened()) {
                         edgesWithElevation.add(edgeWithElevation);
                     }
                     nProcessed += 1;
@@ -121,7 +122,8 @@ public class ElevationGraphBuilderImpl implements GraphBuilder {
         }
 
         @SuppressWarnings("unchecked")
-        HashMap<Vertex, Double> extraElevation = (HashMap<Vertex, Double>) extra.get(ElevationPoint.class);
+        HashMap<Vertex, Double> extraElevation = (HashMap<Vertex, Double>) extra
+                .get(ElevationPoint.class);
         assignMissingElevations(graph, edgesWithElevation, extraElevation);
     }
 
@@ -148,10 +150,11 @@ public class ElevationGraphBuilderImpl implements GraphBuilder {
     }
 
     /**
-     * Assign missing elevations by interpolating from nearby points with known
-     * elevation; also handle osm ele tags
+     * Assign missing elevations by interpolating from nearby points with known elevation; also
+     * handle osm ele tags
      */
-    private void assignMissingElevations(Graph graph, List<EdgeWithElevation> edgesWithElevation, HashMap<Vertex, Double> knownElevations) {
+    private void assignMissingElevations(Graph graph, List<EdgeWithElevation> edgesWithElevation,
+            HashMap<Vertex, Double> knownElevations) {
 
         log.debug("Assigning missing elevations");
 
@@ -160,7 +163,7 @@ public class ElevationGraphBuilderImpl implements GraphBuilder {
         // elevation for each vertex (known or interpolated)
         // knownElevations will be null if there are no ElevationPoints in the data
         // for instance, with the Shapefile loader.)
-        HashMap<Vertex, Double> elevations; 
+        HashMap<Vertex, Double> elevations;
         if (knownElevations != null)
             elevations = (HashMap<Vertex, Double>) knownElevations.clone();
         else
@@ -191,11 +194,13 @@ public class ElevationGraphBuilderImpl implements GraphBuilder {
 
         // Grow an SPT outward from vertices with known elevations into regions where the
         // elevation is not known. when a branch hits a region with known elevation, follow the
-        // back pointers through the region of unknown elevation, setting elevations via interpolation.
+        // back pointers through the region of unknown elevation, setting elevations via
+        // interpolation.
         while (!pq.empty()) {
             ElevationRepairState state = pq.extract_min();
 
-            if (closed.contains(state.vertex)) continue;
+            if (closed.contains(state.vertex))
+                continue;
             closed.add(state.vertex);
 
             ElevationRepairState curState = state;
@@ -254,8 +259,8 @@ public class ElevationGraphBuilderImpl implements GraphBuilder {
                 }
             } // end loop over incoming edges
 
-            //limit elevation propagation to at max 2km; this prevents an infinite loop
-            //in the case of islands missing elevation (and some other cases)
+            // limit elevation propagation to at max 2km; this prevents an infinite loop
+            // in the case of islands missing elevation (and some other cases)
             if (bestDistance == Double.MAX_VALUE && state.distance > 2000) {
                 log.warn("While propagating elevations, hit 2km distance limit at " + state.vertex);
                 bestDistance = state.distance;
@@ -267,13 +272,14 @@ public class ElevationGraphBuilderImpl implements GraphBuilder {
                 double totalDistance = bestDistance + state.distance;
                 // trace backwards, setting states as we go
                 while (true) {
-                    // watch out for division by 0 here, which will propagate NaNs 
-                    // all the way out to edge lengths 
+                    // watch out for division by 0 here, which will propagate NaNs
+                    // all the way out to edge lengths
                     if (totalDistance == 0)
                         elevations.put(state.vertex, bestElevation);
                     else {
-                        double elevation = (bestElevation * state.distance + 
-                               state.initialElevation * bestDistance) / totalDistance;
+                        double elevation = (bestElevation * state.distance + state.initialElevation
+                                * bestDistance)
+                                / totalDistance;
                         elevations.put(state.vertex, elevation);
                     }
                     if (state.backState == null)
@@ -311,7 +317,7 @@ public class ElevationGraphBuilderImpl implements GraphBuilder {
 
                     PackedCoordinateSequence profile = new PackedCoordinateSequence.Double(coords);
 
-                    if(edge.setElevationProfile(profile, true)) {
+                    if (edge.setElevationProfile(profile, true)) {
                         log.trace(graph.addBuilderAnnotation(new ElevationFlattened(edge)));
                     }
                 }
@@ -363,7 +369,7 @@ public class ElevationGraphBuilderImpl implements GraphBuilder {
         PackedCoordinateSequence elevPCS = new PackedCoordinateSequence.Double(
                 coordList.toArray(coordArr));
 
-        if(ee.setElevationProfile(elevPCS, false)) {
+        if (ee.setElevationProfile(elevPCS, false)) {
             log.trace(graph.addBuilderAnnotation(new ElevationFlattened(ee)));
         }
     }
@@ -390,7 +396,7 @@ public class ElevationGraphBuilderImpl implements GraphBuilder {
             y2 = innerPt.y;
 
             // percentage of total edge length represented by current segment:
-            double pct = distanceLibrary .distance(y1, x1, y2, x2) / length;
+            double pct = distanceLibrary.distance(y1, x1, y2, x2) / length;
 
             if (pctThrough + pct > t) { // if current segment contains 't,' we're done
                 double pctAlongSeg = (t - pctThrough) / pct;

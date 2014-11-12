@@ -20,12 +20,14 @@ import org.slf4j.LoggerFactory;
 
 public class IntUtils {
     private static final Logger LOG = LoggerFactory.getLogger(IntUtils.class);
-    public  static final String POINT_PREFIX = "POINT("; 
-    
+
+    public static final String POINT_PREFIX = "POINT(";
+
     /** does this string appear to be a coordinate of some sort */
-    public static boolean looksLikeCoordinate(String str)
-    {
-        if(str != null && (str.contains(POINT_PREFIX) || str.matches("[\\s]*[0-9\\-.]+[,\\s]+[0-9\\-.]+[\\s]*")))
+    public static boolean looksLikeCoordinate(String str) {
+        if (str != null
+                && (str.contains(POINT_PREFIX) || str
+                        .matches("[\\s]*[0-9\\-.]+[,\\s]+[0-9\\-.]+[\\s]*")))
             return true;
 
         return false;
@@ -156,7 +158,9 @@ public class IntUtils {
         } catch (Exception e) {
             // not too big a deal if this dies...just return null, as if we couldn't find an int
             // there
-            LOG.info("Not a big deal that we couldn't find an int from substring...going to return null", e);
+            LOG.info(
+                    "Not a big deal that we couldn't find an int from substring...going to return null",
+                    e);
             retVal = null;
         }
 

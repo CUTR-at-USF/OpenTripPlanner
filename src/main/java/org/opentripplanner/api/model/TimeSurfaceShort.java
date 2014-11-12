@@ -15,6 +15,7 @@ import java.util.Map;
 public class TimeSurfaceShort {
 
     public int id;
+
     public Map<String, String> params;
 
     public TimeSurfaceShort(TimeSurface surface) {
@@ -22,7 +23,7 @@ public class TimeSurfaceShort {
         this.params = surface.params;
     }
 
-    public static List<TimeSurfaceShort> list (Collection<TimeSurface> in) {
+    public static List<TimeSurfaceShort> list(Collection<TimeSurface> in) {
         List<TimeSurfaceShort> out = Lists.newArrayList();
         for (TimeSurface surface : in) {
             out.add(new TimeSurfaceShort(surface));

@@ -20,8 +20,11 @@ import java.util.Set;
 public class Namer {
 
     public static final String consonants = "bdfgjklmnprstvz";
+
     public static final String vowels = "aeiou";
+
     public static final List<String> syllables = Lists.newArrayList();
+
     public static final List<String> words = Lists.newArrayList();
     static {
         for (int c = 0; c < consonants.length(); c++) {
@@ -32,9 +35,11 @@ public class Namer {
     }
     static {
         try {
-            CsvReader reader = new CsvReader("/usr/share/dict/british-english", '\'', Charset.forName("UTF8"));
+            CsvReader reader = new CsvReader("/usr/share/dict/british-english", '\'',
+                    Charset.forName("UTF8"));
             while (reader.readRecord()) {
-                if (reader.getColumnCount() > 1) continue;
+                if (reader.getColumnCount() > 1)
+                    continue;
                 words.add(reader.get(0));
             }
             Collections.shuffle(words);
@@ -44,7 +49,9 @@ public class Namer {
     }
 
     Set<String> usedNames = Sets.newHashSet();
+
     int n = 0;
+
     Random random = new Random();
 
     public String generateUniqueName() {
@@ -64,7 +71,7 @@ public class Namer {
         return words.get(n++);
     }
 
-    public static void main (String[] args) {
+    public static void main(String[] args) {
         Namer namer = new Namer();
         for (int i = 0; i < 1000; i++) {
             System.out.println(namer.generateUniqueName());

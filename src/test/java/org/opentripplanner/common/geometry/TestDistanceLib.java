@@ -78,8 +78,8 @@ public class TestDistanceLib extends TestCase {
         assertTrue(Math.abs(d - (a + b)) < 10.0);
     }
 
-    private double runOneTestLineStringFastLength(DistanceLibrary dlib, double dMin,
-            double dMax, double... latlon) {
+    private double runOneTestLineStringFastLength(DistanceLibrary dlib, double dMin, double dMax,
+            double... latlon) {
         double dist = dlib.fastLength(makeLineString(latlon));
         System.out.println("dist=" + dist + ", interval=[" + dMin + "," + dMax + "]");
         assertTrue(dist >= dMin);

@@ -21,15 +21,23 @@ import lombok.ToString;
 import org.opentripplanner.analyst.core.Sample;
 
 /** Individual locations that make up Populations for the purpose of many-to-many searches. */
-@ToString 
+@ToString
 public class Individual {
 
-    @Setter public String label;
-    @Setter public double lon;
-    @Setter public double lat;
-    @Setter public double input;  // not final to allow clamping and scaling by filters
-    public Sample sample= null; // not final, allowing sampling to occur after filterings
-    
+    @Setter
+    public String label;
+
+    @Setter
+    public double lon;
+
+    @Setter
+    public double lat;
+
+    @Setter
+    public double input; // not final to allow clamping and scaling by filters
+
+    public Sample sample = null; // not final, allowing sampling to occur after filterings
+
     public Individual(String label, double lon, double lat, double input) {
         this.label = label;
         this.lon = lon;
@@ -37,9 +45,9 @@ public class Individual {
         this.input = input;
     }
 
-    public Individual() { }
- 
+    public Individual() {
+    }
+
     // public boolean rejected;
 
-    
 }

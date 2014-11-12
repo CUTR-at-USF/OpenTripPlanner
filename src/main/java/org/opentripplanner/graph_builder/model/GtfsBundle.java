@@ -48,18 +48,20 @@ public class GtfsBundle {
 
     private boolean transfersTxtDefinesStationPaths = false;
 
-    /** 
-     * Create direct transfers between the constituent stops of each parent station.
-     * This is different from "linking stops to parent stations" below.
+    /**
+     * Create direct transfers between the constituent stops of each parent station. This is
+     * different from "linking stops to parent stations" below.
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private boolean parentStationTransfers = false;
 
-    /** 
-     * Connect parent station vertices to their constituent stops to allow beginning and 
-     * ending paths (itineraries) at them. 
+    /**
+     * Connect parent station vertices to their constituent stops to allow beginning and ending
+     * paths (itineraries) at them.
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private boolean linkStopsToParentStations = false;
 
     private Map<String, String> agencyIdMappings = new HashMap<String, String>();
@@ -68,15 +70,17 @@ public class GtfsBundle {
 
     private double maxStopToShapeSnapDistance = 150;
 
-    @Getter @Setter 
+    @Getter
+    @Setter
     private Boolean useCached = null; // null means use global default from GtfsGB || true
 
-    @Getter @Setter 
-    private File cacheDirectory = null; // null means use default from GtfsGB || system temp dir 
+    @Getter
+    @Setter
+    private File cacheDirectory = null; // null means use default from GtfsGB || system temp dir
 
     public GtfsBundle() {
     }
-    
+
     public GtfsBundle(File gtfsFile) {
         this.setPath(gtfsFile);
     }
@@ -92,11 +96,11 @@ public class GtfsBundle {
     public void setCsvInputSource(CsvInputSource csvInputSource) {
         this.csvInputSource = csvInputSource;
     }
-    
+
     public String getDataKey() {
         return path + ";" + url + ";" + (csvInputSource != null ? csvInputSource.hashCode() : "");
     }
-    
+
     public CsvInputSource getCsvInputSource() throws IOException {
         if (csvInputSource == null) {
             if (path != null) {
@@ -118,8 +122,8 @@ public class GtfsBundle {
         return csvInputSource;
     }
 
-    public String toString () {
-        String src; 
+    public String toString() {
+        String src;
         if (path != null) {
             src = path.toString();
         } else if (url != null) {
@@ -129,17 +133,17 @@ public class GtfsBundle {
         }
         return "GTFS bundle at " + src;
     }
-    
+
     /**
      * So that you can load multiple gtfs feeds into the same database / system without entity id
      * collisions, everything has an agency id, including entities like stops, shapes, and service
      * ids that don't explicitly have an agency id (as opposed to routes + trips + stop times).
-     * However, the spec doesn't currently have a method to specify which agency a stop
-     * should be assigned to in the case of multiple agencies being specified in the same feed.  
-     * Routes (and thus everything belonging to them) do have an agency id, but stops don't.
-     * The defaultAgencyId allows you to define which agency will be used as the default
-     * when figuring out which agency a stop should be assigned to (also applies to shapes + service
-     * ids as well). If not specified, the first agency in the agency list will be used.
+     * However, the spec doesn't currently have a method to specify which agency a stop should be
+     * assigned to in the case of multiple agencies being specified in the same feed. Routes (and
+     * thus everything belonging to them) do have an agency id, but stops don't. The defaultAgencyId
+     * allows you to define which agency will be used as the default when figuring out which agency
+     * a stop should be assigned to (also applies to shapes + service ids as well). If not
+     * specified, the first agency in the agency list will be used.
      */
     public String getDefaultAgencyId() {
         return defaultAgencyId;
@@ -158,10 +162,9 @@ public class GtfsBundle {
     }
 
     /**
-     * When a trip doesn't contain any bicycle accessibility information, should taking a bike
-     * along a transit trip be permitted?
-     * A trip doesn't contain bicycle accessibility information if both route_short_name and
-     * trip_short_name contain missing/0 values.
+     * When a trip doesn't contain any bicycle accessibility information, should taking a bike along
+     * a transit trip be permitted? A trip doesn't contain bicycle accessibility information if both
+     * route_short_name and trip_short_name contain missing/0 values.
      */
     public Boolean getDefaultBikesAllowed() {
         return defaultBikesAllowed;
@@ -172,12 +175,12 @@ public class GtfsBundle {
     }
 
     /**
-     * Transfers.txt usually specifies where the transit operator prefers people to transfer, 
-     * due to schedule structure and other factors.
+     * Transfers.txt usually specifies where the transit operator prefers people to transfer, due to
+     * schedule structure and other factors.
      * 
-     * However, in systems like the NYC subway system, transfers.txt can partially substitute 
-     * for the missing pathways.txt file.  In this case, transfer edges will be created between
-     * stops where transfers are defined.
+     * However, in systems like the NYC subway system, transfers.txt can partially substitute for
+     * the missing pathways.txt file. In this case, transfer edges will be created between stops
+     * where transfers are defined.
      * 
      * @return
      */
@@ -196,7 +199,7 @@ public class GtfsBundle {
     public void setDefaultStreetToStopTime(int time) {
         defaultStreetToStopTime = time;
     }
-    
+
     public void checkInputs() {
         if (csvInputSource != null) {
             LOG.warn("unknown CSV source type; cannot check inputs");
@@ -215,7 +218,8 @@ public class GtfsBundle {
             } catch (ClientProtocolException e) {
                 throw new RuntimeException("Error connecting to " + url.toExternalForm() + "\n" + e);
             } catch (IOException e) {
-                throw new RuntimeException("GTFS url " + url.toExternalForm() + " cannot be read.\n" + e);
+                throw new RuntimeException("GTFS url " + url.toExternalForm()
+                        + " cannot be read.\n" + e);
             }
         }
 

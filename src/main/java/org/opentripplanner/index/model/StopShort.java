@@ -12,15 +12,20 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class StopShort {
 
     public String agency;
+
     public String id;
+
     public String name;
+
     public double lat;
+
     public double lon;
-    
+
     /** Distance to the stop when it is returned from a location-based query. */
-    @JsonInclude(Include.NON_NULL) public Integer dist;
-    
-    public StopShort (Stop stop) {
+    @JsonInclude(Include.NON_NULL)
+    public Integer dist;
+
+    public StopShort(Stop stop) {
         agency = stop.getId().getAgencyId();
         id = stop.getId().getId();
         name = stop.getName();
@@ -34,10 +39,11 @@ public class StopShort {
         this.dist = distance;
     }
 
-    public static List<StopShort> list (Collection<Stop> in) {
+    public static List<StopShort> list(Collection<Stop> in) {
         List<StopShort> out = Lists.newArrayList();
-        for (Stop stop : in) out.add(new StopShort(stop));
+        for (Stop stop : in)
+            out.add(new StopShort(stop));
         return out;
-    }    
+    }
 
 }

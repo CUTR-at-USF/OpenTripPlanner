@@ -111,6 +111,7 @@ class Context {
 
     /**
      * Create simple transfer edge between two vertices given their labels
+     * 
      * @param from is label of from vertex
      * @param to is label of to vertex
      * @param distance is distance of transfer
@@ -138,6 +139,7 @@ public class TestTransfers extends TestCase {
 
     /**
      * Plan journey without optimization and return list of states and edges
+     * 
      * @param options are options to use for planning the journey
      * @return ordered list of states and edges in the journey
      */
@@ -147,6 +149,7 @@ public class TestTransfers extends TestCase {
 
     /**
      * Plan journey and return list of states and edges
+     * 
      * @param options are options to use for planning the journey
      * @param optimize is true when optimization should be used
      * @return ordered list of states and edges in the journey
@@ -323,7 +326,8 @@ public class TestTransfers extends TestCase {
         // Find state with FrequencyBoard back edge and save time of that state
         long time = -1;
         for (State s : path.states) {
-            if (s.getBackEdge() instanceof TransitBoardAlight && ((TransitBoardAlight)s.getBackEdge()).isBoarding())  {
+            if (s.getBackEdge() instanceof TransitBoardAlight
+                    && ((TransitBoardAlight) s.getBackEdge()).isBoarding()) {
                 time = s.getTimeSeconds(); // find the final board edge, don't break
             }
         }
@@ -346,7 +350,8 @@ public class TestTransfers extends TestCase {
         // Find state with FrequencyBoard back edge and save time of that state
         long newTime = -1;
         for (State s : path.states) {
-            if (s.getBackEdge() instanceof TransitBoardAlight && ((TransitBoardAlight)s.getBackEdge()).isBoarding())  {
+            if (s.getBackEdge() instanceof TransitBoardAlight
+                    && ((TransitBoardAlight) s.getBackEdge()).isBoarding()) {
                 newTime = s.getTimeSeconds(); // find the final board edge, don't break
             }
         }
@@ -386,8 +391,7 @@ public class TestTransfers extends TestCase {
         // Find state with FrequencyBoard back edge and save time of that state
         long time = -1;
         for (State s : path.states) {
-            if (s.getBackEdge() instanceof TransitBoardAlight
-                    && s.getBackState() != null) {
+            if (s.getBackEdge() instanceof TransitBoardAlight && s.getBackState() != null) {
                 time = s.getBackState().getTimeSeconds();
                 break;
             }
@@ -411,8 +415,7 @@ public class TestTransfers extends TestCase {
         // Find state with FrequencyBoard back edge and save time of that state
         long newTime = -1;
         for (State s : path.states) {
-            if (s.getBackEdge() instanceof TransitBoardAlight
-                    && s.getBackState() != null) {
+            if (s.getBackEdge() instanceof TransitBoardAlight && s.getBackState() != null) {
                 newTime = s.getBackState().getTimeSeconds();
                 break;
             }
@@ -453,8 +456,7 @@ public class TestTransfers extends TestCase {
         stopK.setId(new AgencyAndId("agency", "K"));
         Stop stopF = new Stop();
         stopF.setId(new AgencyAndId("agency", "F"));
-        table.addTransferTime(stopK, stopF, null, null, null, null,
-                StopTransfer.FORBIDDEN_TRANSFER);
+        table.addTransferTime(stopK, stopF, null, null, null, null, StopTransfer.FORBIDDEN_TRANSFER);
 
         // Plan journey
         path = planJourney(options);
@@ -495,8 +497,7 @@ public class TestTransfers extends TestCase {
         stopV.setId(new AgencyAndId("agency", "V"));
         Stop stopI = new Stop();
         stopI.setId(new AgencyAndId("agency", "I"));
-        table.addTransferTime(stopV, stopI, null, null, null, null,
-                StopTransfer.FORBIDDEN_TRANSFER);
+        table.addTransferTime(stopV, stopI, null, null, null, null, StopTransfer.FORBIDDEN_TRANSFER);
 
         // Plan journey
         path = planJourney(options);

@@ -102,7 +102,7 @@ public class OnBoardDepartPatternHop extends Edge implements OnboardEdge {
             throw new UnsupportedOperationException(
                     "Cannot (yet) reverse-optimize depart-on-board mode.");
         }
-        
+
         /* Can't be traversed backwards. */
         if (options.isArriveBy())
             return null;
@@ -118,8 +118,8 @@ public class OnBoardDepartPatternHop extends Edge implements OnboardEdge {
         s1.setZone(endStop.getZoneId());
         s1.setRoute(trip.getRoute().getId());
 
-        int remainingTime = (int) Math.round(
-                (1.0 - positionInHop) * tripTimes.getRunningTime(stopIndex));
+        int remainingTime = (int) Math.round((1.0 - positionInHop)
+                * tripTimes.getRunningTime(stopIndex));
 
         s1.incrementTimeInSeconds(remainingTime);
         s1.incrementWeight(remainingTime);

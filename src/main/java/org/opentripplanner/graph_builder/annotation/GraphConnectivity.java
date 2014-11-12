@@ -25,6 +25,7 @@ public class GraphConnectivity extends GraphBuilderAnnotation {
     public static final String FMT = "Removed/depedestrianized disconnected subgraph containing vertex '%s' at (%f, %f), with %d edges";
 
     final Vertex vertex;
+
     final int size;
 
     @Override

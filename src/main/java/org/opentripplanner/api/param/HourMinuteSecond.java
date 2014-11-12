@@ -1,12 +1,14 @@
 package org.opentripplanner.api.param;
 
 public class HourMinuteSecond extends QueryParameter {
-    
+
     public int hour;
+
     public int minute;
+
     public int second;
 
-    public HourMinuteSecond (String value) {
+    public HourMinuteSecond(String value) {
         super(value);
     }
 
@@ -20,9 +22,9 @@ public class HourMinuteSecond extends QueryParameter {
         if (fields.length > 2) {
             second = Integer.parseInt(fields[2]);
         }
-        checkRangeInclusive(hour,   0, 23);
-        checkRangeInclusive(minute, 0, 59);            
-        checkRangeInclusive(second, 0, 59);            
+        checkRangeInclusive(hour, 0, 23);
+        checkRangeInclusive(minute, 0, 59);
+        checkRangeInclusive(second, 0, 59);
     }
 
     @Override

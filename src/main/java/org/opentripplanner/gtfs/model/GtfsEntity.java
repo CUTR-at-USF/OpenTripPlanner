@@ -11,11 +11,13 @@ import org.slf4j.LoggerFactory;
 import com.beust.jcommander.internal.Lists;
 
 /** Annotation for fields that are required in the GTFS spec. */
-@interface Required {}
+@interface Required {
+}
 
 abstract class GtfsEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
     private static final Logger LOG = LoggerFactory.getLogger(GtfsEntity.class);
 
     /**
@@ -55,5 +57,5 @@ abstract class GtfsEntity implements Serializable {
     }
 
     public abstract Object getKey();
-    
+
 }

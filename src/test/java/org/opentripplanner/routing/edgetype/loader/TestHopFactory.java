@@ -48,7 +48,8 @@ public class TestHopFactory extends TestCase {
         graph = new Graph();
         GTFSPatternHopFactory factory = new GTFSPatternHopFactory(context);
         factory.run(graph);
-        graph.putService(CalendarServiceData.class, GtfsLibrary.createCalendarServiceData(context.getDao()));
+        graph.putService(CalendarServiceData.class,
+                GtfsLibrary.createCalendarServiceData(context.getDao()));
     }
 
     public void testBoardAlight() throws Exception {
@@ -105,7 +106,7 @@ public class TestHopFactory extends TestCase {
         Vertex stop_e = graph.getVertex("agency_E");
 
         RoutingRequest options = new RoutingRequest();
-        options.dateTime = TestUtils.dateInSeconds("America/New_York", 2009, 8, 7, 0, 0, 0); 
+        options.dateTime = TestUtils.dateInSeconds("America/New_York", 2009, 8, 7, 0, 0, 0);
 
         ShortestPathTree spt;
         GraphPath path;
@@ -118,7 +119,6 @@ public class TestHopFactory extends TestCase {
         assertNotNull(path);
         assertEquals(extractStopVertices(path), Lists.newArrayList(stop_a, stop_b));
 
-
         // A to C
         options.setRoutingContext(graph, stop_a, stop_c);
         spt = aStar.getShortestPathTree(options);
@@ -126,7 +126,6 @@ public class TestHopFactory extends TestCase {
         path = spt.getPath(stop_c, false);
         assertNotNull(path);
         assertEquals(extractStopVertices(path), Lists.newArrayList(stop_a, stop_c));
-
 
         // A to D
         options.setRoutingContext(graph, stop_a, stop_d);

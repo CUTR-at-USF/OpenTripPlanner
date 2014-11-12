@@ -15,13 +15,18 @@ import org.opentripplanner.routing.spt.GraphPath;
 public class Option {
 
     public List<Segment> segments = Lists.newArrayList();
+
     public int finalWalkTime;
+
     public Stats stats;
+
     public String summary;
+
     public List<WalkStep> walkSteps;
+
     public List<DCFareCalculator.Fare> fares;
 
-    public Option (Ride tail, int finalWalkTime, TimeWindow window, double walkSpeed) {
+    public Option(Ride tail, int finalWalkTime, TimeWindow window, double walkSpeed) {
         stats = new Stats();
         List<Ride> rides = Lists.newArrayList();
         for (Ride ride = tail; ride != null; ride = ride.previous) {
@@ -29,13 +34,14 @@ public class Option {
         }
         Collections.reverse(rides);
         for (Ride ride : rides) {
-            Segment segment = new Segment (ride, window, walkSpeed);
+            Segment segment = new Segment(ride, window, walkSpeed);
             segments.add(segment);
             stats.add(segment.walkTime);
             stats.add(segment.waitStats);
             stats.add(segment.rideStats);
         }
-        // Really should be one per segment, with transfers to the same operator having a price of 0.
+        // Really should be one per segment, with transfers to the same operator having a price of
+        // 0.
         fares = DCFareCalculator.calculateFares(rides);
         this.finalWalkTime = finalWalkTime;
         stats.add(finalWalkTime);
@@ -43,13 +49,14 @@ public class Option {
     }
 
     /** A constructor for an option that includes only a street mode, not transit. */
-    public Option (State state) {
+    public Option(State state) {
         stats = new Stats();
         int time = (int) state.getElapsedTimeSeconds();
         stats.add(time);
         // this might not work if there is a transition to another mode
         TraverseMode mode = state.getNonTransitMode();
-        if (mode == TraverseMode.WALK) this.finalWalkTime = time;
+        if (mode == TraverseMode.WALK)
+            this.finalWalkTime = time;
         summary = mode.toString();
         GraphPath path = new GraphPath(state, false);
         walkSteps = PlanGenerator.generateWalkSteps(path.states.toArray(new State[0]), null);
@@ -61,12 +68,13 @@ public class Option {
         List<String> routeShortNames = Lists.newArrayList();
         List<String> vias = Lists.newArrayList();
         for (Segment segment : segments) {
-            String routeName = segment.routeShortName == null 
-                    ? segment.routeLongName : segment.routeShortName;
+            String routeName = segment.routeShortName == null ? segment.routeLongName
+                    : segment.routeShortName;
             routeShortNames.add(routeName);
             vias.add(segment.toName);
         }
-        if (!vias.isEmpty()) vias.remove(vias.size() - 1);
+        if (!vias.isEmpty())
+            vias.remove(vias.size() - 1);
         sb.append(Joiner.on(", ").join(routeShortNames));
         if (!vias.isEmpty()) {
             sb.append(" via ");

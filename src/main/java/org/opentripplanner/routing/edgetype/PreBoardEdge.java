@@ -42,7 +42,7 @@ public class PreBoardEdge extends FreeEdge implements StationEdge {
     @Override
     public State traverse(State s0) {
         RoutingRequest options = s0.getOptions();
-        
+
         // Ignore this edge if its stop is banned
         if (!options.getBannedStops().isEmpty()) {
             if (options.getBannedStops().matches(((TransitStop) fromv).getStop())) {
@@ -54,13 +54,13 @@ public class PreBoardEdge extends FreeEdge implements StationEdge {
                 return null;
             }
         }
-        
+
         if (options.isArriveBy()) {
             /* Traverse backward: not much to do */
             StateEditor s1 = s0.edit(this);
             TransitStop fromVertex = (TransitStop) getFromVertex();
 
-            //apply board slack
+            // apply board slack
             s1.incrementTimeInSeconds(options.getBoardSlack());
             s1.alightTransit();
             s1.setBackMode(getMode());

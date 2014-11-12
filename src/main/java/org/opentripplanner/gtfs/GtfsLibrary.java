@@ -13,7 +13,6 @@
 
 package org.opentripplanner.gtfs;
 
-
 import java.io.File;
 import java.io.IOException;
 
@@ -34,7 +33,7 @@ public class GtfsLibrary {
 
     public static GtfsContext createContext(GtfsRelationalDao dao) {
         CalendarService calendarService = createCalendarService(dao);
-        return createContext(dao,calendarService);
+        return createContext(dao, calendarService);
     }
 
     public static GtfsContext createContext(GtfsRelationalDao dao, CalendarService calendarService) {
@@ -99,32 +98,33 @@ public class GtfsLibrary {
 
     public static TraverseMode getTraverseMode(Route route) {
         int routeType = route.getType();
-        /* TPEG Extension  https://groups.google.com/d/msg/gtfs-changes/keT5rTPS7Y0/71uMz2l6ke0J */
-        if (routeType >= 100 && routeType < 200){ // Railway Service
+        /* TPEG Extension https://groups.google.com/d/msg/gtfs-changes/keT5rTPS7Y0/71uMz2l6ke0J */
+        if (routeType >= 100 && routeType < 200) { // Railway Service
             return TraverseMode.RAIL;
-        }else if (routeType >= 200 && routeType < 300){ //Coach Service
+        } else if (routeType >= 200 && routeType < 300) { // Coach Service
             return TraverseMode.BUS;
-        }else if (routeType >= 300 && routeType < 500){ //Suburban Railway Service and Urban Railway service
+        } else if (routeType >= 300 && routeType < 500) { // Suburban Railway Service and Urban
+                                                          // Railway service
             return TraverseMode.RAIL;
-        }else if (routeType >= 500 && routeType < 700){ //Metro Service and Underground Service
+        } else if (routeType >= 500 && routeType < 700) { // Metro Service and Underground Service
             return TraverseMode.SUBWAY;
-        }else if (routeType >= 700 && routeType < 900){ //Bus Service and Trolleybus service
+        } else if (routeType >= 700 && routeType < 900) { // Bus Service and Trolleybus service
             return TraverseMode.BUS;
-        }else if (routeType >= 900 && routeType < 1000){ //Tram service
+        } else if (routeType >= 900 && routeType < 1000) { // Tram service
             return TraverseMode.TRAM;
-        }else if (routeType >= 1000 && routeType < 1100){ //Water Transport Service
+        } else if (routeType >= 1000 && routeType < 1100) { // Water Transport Service
             return TraverseMode.FERRY;
-        }else if (routeType >= 1100 && routeType < 1200){ //Air Service
+        } else if (routeType >= 1100 && routeType < 1200) { // Air Service
             throw new IllegalArgumentException("Air transport not supported" + routeType);
-        }else if (routeType >= 1200 && routeType < 1300){ //Ferry Service
+        } else if (routeType >= 1200 && routeType < 1300) { // Ferry Service
             return TraverseMode.FERRY;
-        }else if (routeType >= 1300 && routeType < 1400){ //Telecabin Service
+        } else if (routeType >= 1300 && routeType < 1400) { // Telecabin Service
             return TraverseMode.GONDOLA;
-        }else if (routeType >= 1400 && routeType < 1500){ //Funicalar Service
+        } else if (routeType >= 1400 && routeType < 1500) { // Funicalar Service
             return TraverseMode.FUNICULAR;
-        }else if (routeType >= 1500 && routeType < 1600){ //Taxi Service
+        } else if (routeType >= 1500 && routeType < 1600) { // Taxi Service
             throw new IllegalArgumentException("Taxi service not supported" + routeType);
-        }else if (routeType >= 1600 && routeType < 1700){ //Self drive
+        } else if (routeType >= 1600 && routeType < 1700) { // Self drive
             return TraverseMode.CAR;
         }
         /* Original GTFS route types. Should these be checked before TPEG types? */
@@ -155,7 +155,7 @@ public class GtfsLibrary {
         private GtfsRelationalDao _dao;
 
         private CalendarService _calendar;
-        
+
         public GtfsContextImpl(GtfsRelationalDao dao, CalendarService calendar) {
             _dao = dao;
             _calendar = calendar;

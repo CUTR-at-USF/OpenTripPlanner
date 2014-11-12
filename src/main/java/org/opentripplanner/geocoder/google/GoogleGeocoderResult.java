@@ -14,23 +14,24 @@
 package org.opentripplanner.geocoder.google;
 
 public class GoogleGeocoderResult {
-	private Geometry geometry;
-	private String formatted_address;
+    private Geometry geometry;
 
-	public Geometry getGeometry() {
-		return geometry;
-	}
+    private String formatted_address;
 
-	public void setGeometry(Geometry geometry) {
-		this.geometry = geometry;
-	}
+    public Geometry getGeometry() {
+        return geometry;
+    }
 
-	public String getFormatted_address() {
-		return formatted_address;
-	}
+    public void setGeometry(Geometry geometry) {
+        this.geometry = geometry;
+    }
 
-	public void setFormatted_address(String formattedAddress) {
-		formatted_address = formattedAddress;
-	}
+    public String getFormatted_address() {
+        return formatted_address;
+    }
+
+    public void setFormatted_address(String formattedAddress) {
+        formatted_address = formattedAddress;
+    }
 
 }

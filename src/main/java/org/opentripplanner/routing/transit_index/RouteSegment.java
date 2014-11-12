@@ -23,24 +23,30 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.vividsolutions.jts.geom.Geometry;
 
 /**
- * RouteSegment holds the edges around one stop on particular trip or pattern.
- * We can use this if we patch the graph to remove the stop from the
- * trip/pattern.
+ * RouteSegment holds the edges around one stop on particular trip or pattern. We can use this if we
+ * patch the graph to remove the stop from the trip/pattern.
  */
-public class RouteSegment implements Serializable  {
-	private static final long serialVersionUID = -3486047425509893460L;
-	public Edge hopIn;
-	public Edge hopOut;
-	public Edge board;
-	public Edge alight;
-	public Edge dwell;
-	public AgencyAndId stop;
-	public RouteSegment(AgencyAndId stop) {
-		this.stop = stop;
-	}
+public class RouteSegment implements Serializable {
+    private static final long serialVersionUID = -3486047425509893460L;
 
-	@JsonSerialize(using=GeoJSONSerializer.class)
-	public Geometry getGeometry() {
-	    return hopOut.getGeometry();
-	}
+    public Edge hopIn;
+
+    public Edge hopOut;
+
+    public Edge board;
+
+    public Edge alight;
+
+    public Edge dwell;
+
+    public AgencyAndId stop;
+
+    public RouteSegment(AgencyAndId stop) {
+        this.stop = stop;
+    }
+
+    @JsonSerialize(using = GeoJSONSerializer.class)
+    public Geometry getGeometry() {
+        return hopOut.getGeometry();
+    }
 }

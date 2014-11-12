@@ -23,40 +23,47 @@ import com.beust.jcommander.internal.Lists;
 import com.vividsolutions.jts.geom.Coordinate;
 
 /**
- * A spatial index using a 2D hashtable that wraps around at the edges.
- * Mapping geographic space to a region near the origin using the modulo operator
- * preserves proximity allowing 100 percent recall (no false dismissals) in linear time, 
- * at the cost of false positives (hash collisions) which are filtered out of query results.
+ * A spatial index using a 2D hashtable that wraps around at the edges. Mapping geographic space to
+ * a region near the origin using the modulo operator preserves proximity allowing 100 percent
+ * recall (no false dismissals) in linear time, at the cost of false positives (hash collisions)
+ * which are filtered out of query results.
  * 
- * 2d objects are handled by 'conservatively' rasterizing them into grid cells.
- * It would also be possible to use a hierarchical grid.
+ * 2d objects are handled by 'conservatively' rasterizing them into grid cells. It would also be
+ * possible to use a hierarchical grid.
  * 
- * For more background see:
- * Schornbaum, Florian. Hierarchical Hash Grids for Coarse Collision Detection (2009)
+ * For more background see: Schornbaum, Florian. Hierarchical Hash Grids for Coarse Collision
+ * Detection (2009)
  * 
  * @author andrewbyrd
  *
  * @param <T> The type of objects to be stored in the HashGrid. Must implement the Pointlike
- * interface.
+ *        interface.
  */
-public class HashGrid <T> {
+public class HashGrid<T> {
 
     private static final Logger LOG = LoggerFactory.getLogger(HashGrid.class);
 
     /* Defaults: 200m x 50 bins = 10km square. */
     private static final double DEFAULT_BIN_SIZE = 200; // meters
+
     private static final int DEFAULT_BINS = 50;
-    
+
     private double projectionMeridian = -120.0;
+
     private final double binSizeMeters;
+
     private final int nBinsX, nBinsY;
+
     private final List<T>[][] bins;
+
     private int nBins = 0;
+
     private int nEntries = 0;
+
     private DistanceLibrary distanceLibrary = SphericalDistanceLibrary.getInstance();
-    
+
     @SuppressWarnings("unchecked")
-    public HashGrid (double binSizeMeters, int xBins, int yBins) {
+    public HashGrid(double binSizeMeters, int xBins, int yBins) {
         if (binSizeMeters < 0)
             throw new IllegalStateException("bin size must be positive.");
         this.binSizeMeters = binSizeMeters;
@@ -65,12 +72,12 @@ public class HashGrid <T> {
         bins = (List<T>[][]) new List[xBins][yBins];
     }
 
-    /**Create a HashGrid with the default bin size and dimensions. */
-    public HashGrid () {
-        this (DEFAULT_BIN_SIZE, DEFAULT_BINS, DEFAULT_BINS);
+    /** Create a HashGrid with the default bin size and dimensions. */
+    public HashGrid() {
+        this(DEFAULT_BIN_SIZE, DEFAULT_BINS, DEFAULT_BINS);
     }
-    
-    public void setProjectionMeridian (double longitude) {
+
+    public void setProjectionMeridian(double longitude) {
         if (nEntries > 0) {
             String message = "Setting projection meridian on a HashGrid already containing objects.";
             LOG.error(message);
@@ -78,58 +85,45 @@ public class HashGrid <T> {
         }
         projectionMeridian = longitude;
     }
-    
+
     public void put(Coordinate c, T t) {
         bin(c).add(t);
-        nEntries +=1;
+        nEntries += 1;
     }
 
     private List<T> bin(Coordinate c) {
-        int xBin = xBin(c); 
+        int xBin = xBin(c);
         int yBin = yBin(c);
         return bin(xBin, yBin);
     }
-    
+
     private List<T> bin(int xBin, int yBin) {
         List<T> bin = bins[xBin][yBin];
         if (bin == null) {
             bin = new ArrayList<T>();
-            bins[xBin][yBin] = bin; 
+            bins[xBin][yBin] = bin;
             nBins += 1;
         }
         return bin;
     }
 
     // maybe accumulate objects and then build()
-    
+
     // add Result and Result#Iterator classes
-    
+
     /*
-    // TODO pull class out to library client 
-    public static class RasterizedSegment extends LineSegment {
-        public final Object payload;
-        public final double distAlongLinestring;
-        RasterizedSegment(Coordinate c0, Coordinate c1, double d, Object t) {
-            super(c0, c1);
-            distAlongLinestring = d;
-            payload = t;
-        }
-    }
-    
-    // TODO pull method out to library client
-    public void rasterize(LineString ls, T t) {
-        Coordinate [] coords = ls.getCoordinates();
-        double dist = 0;
-        for (int i = 0; i < coords.length - 1; i++) {
-            Coordinate c0 = coords[i];
-            Coordinate c1 = coords[i+1];
-            RasterizedSegment rs = new RasterizedSegment(c0, c1, dist, t);
-            rasterize(c0, c1, rs);
-            dist += distanceLibrary.fastDistance(coords[i], coords[i+1]);
-        }
-    }
+     * // TODO pull class out to library client public static class RasterizedSegment extends
+     * LineSegment { public final Object payload; public final double distAlongLinestring;
+     * RasterizedSegment(Coordinate c0, Coordinate c1, double d, Object t) { super(c0, c1);
+     * distAlongLinestring = d; payload = t; } }
+     * 
+     * // TODO pull method out to library client public void rasterize(LineString ls, T t) {
+     * Coordinate [] coords = ls.getCoordinates(); double dist = 0; for (int i = 0; i <
+     * coords.length - 1; i++) { Coordinate c0 = coords[i]; Coordinate c1 = coords[i+1];
+     * RasterizedSegment rs = new RasterizedSegment(c0, c1, dist, t); rasterize(c0, c1, rs); dist +=
+     * distanceLibrary.fastDistance(coords[i], coords[i+1]); } }
      */
-    
+
     /** Place the object t into all bins falling on the line between the two coordinates a and b. */
     public int rasterize(Coordinate a, Coordinate b, T t) {
         int n = 0;
@@ -163,7 +157,7 @@ public class HashGrid <T> {
         int xBin = xBin(c0);
         int yBin = yBin(c0);
         boolean done = false;
-        while ( ! done) {
+        while (!done) {
             xSteps += 1;
             // place x marker at right edge of the current bin column
             x = xStartBinFloor + xSteps * binSizeMeters;
@@ -174,7 +168,7 @@ public class HashGrid <T> {
                 done = true;
             } else {
                 // find y value at current x (usually the right edge of the bin)
-                y = (x-x0) * slope + y0;
+                y = (x - x0) * slope + y0;
             }
             // if new y is in a different bin row, advance to that bin row
             if (negSlope) {
@@ -201,15 +195,15 @@ public class HashGrid <T> {
         }
         return n;
     }
-    
+
     private int xBin(Coordinate c) {
         double x = projLon(c.x, c.y);
-        return xWrap( (int) Math.floor(x / binSizeMeters) );
+        return xWrap((int) Math.floor(x / binSizeMeters));
     }
-    
+
     private int yBin(Coordinate c) {
         double y = projLat(c.y);
-        return yWrap( (int) Math.floor(y / binSizeMeters) );
+        return yWrap((int) Math.floor(y / binSizeMeters));
     }
 
     private int xWrap(int xBin) {
@@ -218,18 +212,18 @@ public class HashGrid <T> {
             x += nBinsX;
         return x;
     }
-    
+
     private int yWrap(int yBin) {
         int y = yBin % nBinsY;
         if (y < 0)
             y += nBinsY;
         return y;
     }
-    
+
     public T closest(double x, double y, double radiusMeters) {
         return closest(new Coordinate(x, y), radiusMeters);
     }
-        
+
     public T closest(Coordinate c, double radiusMeters) {
         T closestT = null;
         double closestDistance = Double.POSITIVE_INFINITY;
@@ -242,13 +236,13 @@ public class HashGrid <T> {
         int maxBinY = yBin + radiusBins;
         for (int x = minBinX; x <= maxBinX; x += 1) {
             int wrappedX = xWrap(x);
-            for (int y = minBinY; y <=maxBinY; y += 1) {
+            for (int y = minBinY; y <= maxBinY; y += 1) {
                 int wrappedY = yWrap(y);
                 List<T> bin = bins[wrappedX][wrappedY];
                 if (bin != null) {
                     for (T t : bin) {
-                        //if (t == p)
-                        //    continue;
+                        // if (t == p)
+                        // continue;
                         // FIXME
                         double distance = distanceLibrary.fastDistance(c, c);
                         // bins may contain distant colliding objects
@@ -272,7 +266,7 @@ public class HashGrid <T> {
      * necessarily have a single coordinate. This also avoids calculating the distance twice or
      * creating additional wrapper objects to return the distance alongside the object.
      */
-    public List<T> query (double lon, double lat, double radiusMeters) {
+    public List<T> query(double lon, double lat, double radiusMeters) {
         Coordinate c = new Coordinate(lon, lat);
         List<T> ret = Lists.newArrayList();
         int radiusBins = (int) Math.ceil(radiusMeters / binSizeMeters);
@@ -284,7 +278,7 @@ public class HashGrid <T> {
         int maxBinY = yBin + radiusBins;
         for (int x = minBinX; x <= maxBinX; x += 1) {
             int wrappedX = xWrap(x);
-            for (int y = minBinY; y <=maxBinY; y += 1) {
+            for (int y = minBinY; y <= maxBinY; y += 1) {
                 int wrappedY = yWrap(y);
                 List<T> bin = bins[wrappedX][wrappedY];
                 if (bin != null) {
@@ -295,42 +289,43 @@ public class HashGrid <T> {
         return ret;
     }
 
-    
     static final double M_PER_DEGREE_LAT = 111111.111111;
-    
+
     static double mPerDegreeLon(double lat) {
-        return M_PER_DEGREE_LAT * Math.cos(lat * Math.PI / 180);        
+        return M_PER_DEGREE_LAT * Math.cos(lat * Math.PI / 180);
     }
 
     private static double projLat(double lat) {
-        return M_PER_DEGREE_LAT * lat; 
+        return M_PER_DEGREE_LAT * lat;
     }
-    
+
     private double projLon(double lon, double lat) {
         return mPerDegreeLon(lat) * (lon - projectionMeridian);
     }
 
     public String toString() {
-        return String.format("HashGrid %dx%d at %d meter resolution, %d/%d bins allocated", 
-               nBinsX, nBinsY, (int)binSizeMeters, nBins, nBinsX*nBinsY);
+        return String.format("HashGrid %dx%d at %d meter resolution, %d/%d bins allocated", nBinsX,
+                nBinsY, (int) binSizeMeters, nBins, nBinsX * nBinsY);
     }
-    
+
     public String toStringVerbose() {
-        return String.format("HashGrid %dx%d at %d meter resolution, %d/%d bins allocated (%4.1f%%), load factor %4f, average allocated bin size %2f", 
-               nBinsX, nBinsY, (int)binSizeMeters, nBins, nBinsX*nBinsY, (double)nBins/(nBinsX*nBinsY) * 100.0, 
-               (double)nEntries/(nBinsX*nBinsY), (double)nEntries/nBins);
+        return String
+                .format("HashGrid %dx%d at %d meter resolution, %d/%d bins allocated (%4.1f%%), load factor %4f, average allocated bin size %2f",
+                        nBinsX, nBinsY, (int) binSizeMeters, nBins, nBinsX * nBinsY, (double) nBins
+                                / (nBinsX * nBinsY) * 100.0, (double) nEntries / (nBinsX * nBinsY),
+                        (double) nEntries / nBins);
     }
 
     public String densityMap() {
         final int SATURATE_AT = 10;
-        String[] block = new String[] {"░░", "▒▒", "▓▓", "██"};
+        String[] block = new String[] { "░░", "▒▒", "▓▓", "██" };
         StringBuilder sb = new StringBuilder();
         sb.append("HashGrid:\n");
         // flip map for northern hemisphere
-        for (int y=nBinsY-1; y>=0; y--) {
-            for (int x=0; x<nBinsX; x++) {
+        for (int y = nBinsY - 1; y >= 0; y--) {
+            for (int x = 0; x < nBinsX; x++) {
                 if (bins[x][y] == null) {
-                    sb.append("  "); 
+                    sb.append("  ");
                 } else {
                     int z = bins[x][y].size();
                     int i = z * 3 / SATURATE_AT;
@@ -338,7 +333,7 @@ public class HashGrid <T> {
                         i = 3;
                     sb.append(block[i]);
                 }
-            }    
+            }
             sb.append('\n');
         }
         return sb.toString();

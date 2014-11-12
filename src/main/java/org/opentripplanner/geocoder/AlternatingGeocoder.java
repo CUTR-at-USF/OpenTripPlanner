@@ -15,14 +15,14 @@ package org.opentripplanner.geocoder;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-
 public class AlternatingGeocoder implements Geocoder {
-    
+
     private Geocoder geocoder1;
+
     private Geocoder geocoder2;
+
     private boolean useFirstGeocoder;
 
-    
     public AlternatingGeocoder(Geocoder geocoder1, Geocoder geocoder2) {
         this.geocoder1 = geocoder1;
         this.geocoder2 = geocoder2;

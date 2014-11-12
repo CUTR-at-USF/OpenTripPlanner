@@ -2,7 +2,8 @@ package org.opentripplanner.standalone;
 
 /**
  * Indicates that something went wrong when interpreting command line options, loading properties,
- * or assembling the OTP server based on those settings. 
+ * or assembling the OTP server based on those settings.
+ * 
  * @author abyrd
  */
 public class ConfigurationException extends Exception {

@@ -44,9 +44,9 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 /**
- * This class contains all the transient indexes of graph elements -- those that are not
- * serialized with the graph. Caching these maps is essentially an optimization, but a big one.
- * The index is bootstrapped from the graph's list of edges.
+ * This class contains all the transient indexes of graph elements -- those that are not serialized
+ * with the graph. Caching these maps is essentially an optimization, but a big one. The index is
+ * bootstrapped from the graph's list of edges.
  */
 public class GraphIndex {
 
@@ -54,23 +54,37 @@ public class GraphIndex {
 
     // TODO: consistently key on model object or id string
     public final Map<String, Vertex> vertexForId = Maps.newHashMap();
+
     public final Map<String, Agency> agencyForId = Maps.newHashMap();
+
     public final Map<AgencyAndId, Stop> stopForId = Maps.newHashMap();
+
     public final Map<AgencyAndId, Trip> tripForId = Maps.newHashMap();
+
     public final Map<AgencyAndId, Route> routeForId = Maps.newHashMap();
+
     public final Map<AgencyAndId, String> serviceForId = Maps.newHashMap();
+
     public final Map<String, TripPattern> patternForId = Maps.newHashMap();
+
     public final Map<Stop, TransitStop> stopVertexForStop = Maps.newHashMap();
+
     public final Map<Trip, TripPattern> patternForTrip = Maps.newHashMap();
+
     public final Multimap<Agency, TripPattern> patternsForAgency = ArrayListMultimap.create();
+
     public final Multimap<Route, TripPattern> patternsForRoute = ArrayListMultimap.create();
+
     public final Multimap<Stop, TripPattern> patternsForStop = ArrayListMultimap.create();
+
     public final Multimap<String, Stop> stopsForParentStation = ArrayListMultimap.create();
+
     public final HashGrid<TransitStop> stopSpatialIndex = new HashGrid<TransitStop>();
 
     /* Should eventually be replaced with new serviceId indexes. */
     private final CalendarService calendarService;
-    private final Map<AgencyAndId,Integer> serviceCodes;
+
+    private final Map<AgencyAndId, Integer> serviceCodes;
 
     /* Full-text search extensions */
     public LuceneIndex luceneIndex;
@@ -81,17 +95,23 @@ public class GraphIndex {
     /* This is a workaround, and should probably eventually be removed. */
     public Graph graph;
 
-    /** Used for finding first/last trip of the day. This is the time at which service ends for the day. */
-    public final int overnightBreak = 60 * 60 * 2; // FIXME not being set, this was done in transitIndex
+    /**
+     * Used for finding first/last trip of the day. This is the time at which service ends for the
+     * day.
+     */
+    public final int overnightBreak = 60 * 60 * 2; // FIXME not being set, this was done in
+                                                   // transitIndex
 
-    public GraphIndex (Graph graph) {
+    public GraphIndex(Graph graph) {
         LOG.info("Indexing graph...");
         for (Agency a : graph.getAgencies()) {
             agencyForId.put(a.getId(), a);
         }
         Collection<Edge> edges = graph.getEdges();
-        /* We will keep a separate set of all vertices in case some have the same label. 
-         * Maybe we should just guarantee unique labels. */
+        /*
+         * We will keep a separate set of all vertices in case some have the same label. Maybe we
+         * should just guarantee unique labels.
+         */
         Set<Vertex> vertices = Sets.newHashSet();
         for (Edge edge : edges) {
             vertices.add(edge.getFromVertex());
@@ -123,7 +143,7 @@ public class GraphIndex {
                 patternForTrip.put(trip, pattern);
                 tripForId.put(trip.getId(), trip);
             }
-            for (Stop stop: pattern.getStops()) {
+            for (Stop stop : pattern.getStops()) {
                 patternsForStop.put(stop, pattern);
             }
         }
@@ -148,8 +168,8 @@ public class GraphIndex {
     private static DistanceLibrary distlib = new SphericalDistanceLibrary();
 
     /**
-     * Initialize transfer data needed for profile routing.
-     * Find the best transfers between each pair of routes that pass near one another.
+     * Initialize transfer data needed for profile routing. Find the best transfers between each
+     * pair of routes that pass near one another.
      */
     public void initializeProfileTransfers() {
         transfersForStop = HashMultimap.create();
@@ -165,8 +185,8 @@ public class GraphIndex {
                     for (TripPattern p1 : ps1) {
                         if (p0 == p1)
                             continue;
-                        bestTransfers.putMin(new P2<TripPattern>(p0, p1), new ProfileTransfer(p0, p1,
-                                s0, s1, sd.distance));
+                        bestTransfers.putMin(new P2<TripPattern>(p0, p1), new ProfileTransfer(p0,
+                                p1, s0, s1, sd.distance));
                     }
                 }
             }
@@ -183,8 +203,8 @@ public class GraphIndex {
     }
 
     /**
-     * For profile routing. Actually, now only used for finding transfers.
-     * TODO replace with an on-street search.
+     * For profile routing. Actually, now only used for finding transfers. TODO replace with an
+     * on-street search.
      */
     public List<StopAtDistance> findTransitStops(double lon, double lat, double radius) {
         List<StopAtDistance> ret = Lists.newArrayList();
@@ -198,22 +218,24 @@ public class GraphIndex {
     }
 
     /** An OBA Service Date is a local date without timezone, only year month and day. */
-    public BitSet servicesRunning (ServiceDate date) {
+    public BitSet servicesRunning(ServiceDate date) {
         BitSet services = new BitSet(calendarService.getServiceIds().size());
         for (AgencyAndId serviceId : calendarService.getServiceIdsOnDate(date)) {
             int n = serviceCodes.get(serviceId);
-            if (n < 0) continue;
+            if (n < 0)
+                continue;
             services.set(n);
         }
         return services;
     }
 
     /**
-     * Wraps the other servicesRunning whose parameter is an OBA ServiceDate.
-     * Joda LocalDate is a similar class.
+     * Wraps the other servicesRunning whose parameter is an OBA ServiceDate. Joda LocalDate is a
+     * similar class.
      */
-    public BitSet servicesRunning (LocalDate date) {
-        return servicesRunning(new ServiceDate(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth()));
+    public BitSet servicesRunning(LocalDate date) {
+        return servicesRunning(new ServiceDate(date.getYear(), date.getMonthOfYear(),
+                date.getDayOfMonth()));
     }
 
     /** Dynamically generate the set of Routes passing though a Stop on demand. */
@@ -226,18 +248,18 @@ public class GraphIndex {
     }
 
     /**
-     * Fetch upcoming vehicle arrivals at a stop.
-     * This is a rather convoluted process because all of the departure search functions currently assume the
-     * existence of a State and a routing context. It would be nice to have another function that gives
-     * all departures within a time window at a stop, being careful to get a mix of all patterns passing through
-     * that stop. In fact, such a function could replace the current boarding logic if we want to allow boarding
-     * more than one trip on the same route at once (return more than one state).
-     * The current implementation is a sketch and does not adequately
+     * Fetch upcoming vehicle arrivals at a stop. This is a rather convoluted process because all of
+     * the departure search functions currently assume the existence of a State and a routing
+     * context. It would be nice to have another function that gives all departures within a time
+     * window at a stop, being careful to get a mix of all patterns passing through that stop. In
+     * fact, such a function could replace the current boarding logic if we want to allow boarding
+     * more than one trip on the same route at once (return more than one state). The current
+     * implementation is a sketch and does not adequately
      */
     public Collection<StopTimesInPattern> stopTimesForStop(Stop stop) {
         List<StopTimesInPattern> ret = Lists.newArrayList();
         RoutingRequest req = new RoutingRequest();
-        req.setRoutingContext(graph, (Vertex)null, (Vertex)null);
+        req.setRoutingContext(graph, (Vertex) null, (Vertex) null);
         State state = new State(req);
         for (TripPattern pattern : patternsForStop.get(stop)) {
             StopTimesInPattern times = new StopTimesInPattern(pattern);
@@ -246,7 +268,8 @@ public class GraphIndex {
             // A Stop may occur more than once in a pattern, so iterate over all Stops.
             int sidx = 0;
             for (Stop currStop : table.getPattern().getStopPattern().stops) {
-                if (currStop != stop) continue;
+                if (currStop != stop)
+                    continue;
                 for (ServiceDay sd : req.rctx.serviceDays) {
                     TripTimes tt = table.getNextTrip(state, sd, sidx, true);
                     if (tt != null) {
@@ -255,7 +278,8 @@ public class GraphIndex {
                 }
                 sidx++;
             }
-            if ( ! times.times.isEmpty()) ret.add(times);
+            if (!times.times.isEmpty())
+                ret.add(times);
         }
         return ret;
     }

@@ -9,27 +9,31 @@ public class Relation extends Tagged implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-//    Node nodes;
-//    Way ways;
-//    Relation relations;
+    // Node nodes;
+    // Way ways;
+    // Relation relations;
 
     List<Member> members = Lists.newArrayList();
-    
+
     public static enum Type {
         NODE, WAY, RELATION;
     }
-    
+
     public static class Member implements Serializable {
         private static final long serialVersionUID = 1L;
+
         Type type;
+
         long id;
+
         String role;
+
         @Override
         public String toString() {
             return String.format("%s %s %d", role, type.toString(), id);
         }
     }
-    
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

@@ -8,6 +8,7 @@ public class Node extends Tagged implements Serializable {
 
     // do with int16s
     float lat;
+
     float lon;
-    
+
 }

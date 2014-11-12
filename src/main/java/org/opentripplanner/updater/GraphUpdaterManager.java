@@ -43,16 +43,16 @@ import org.slf4j.LoggerFactory;
 public class GraphUpdaterManager {
 
     private static Logger LOG = LoggerFactory.getLogger(GraphUpdaterManager.class);
-    
+
     /**
      * Text used for naming threads when the graph lacks a routerId.
      */
     private static String DEFAULT_ROUTER_ID = "(default)";
-    
+
     /**
      * Thread factory used to create new threads.
      */
-    
+
     private ThreadFactory threadFactory;
 
     /**
@@ -85,12 +85,13 @@ public class GraphUpdaterManager {
      */
     public GraphUpdaterManager(Graph graph) {
         this.graph = graph;
-        
+
         String routerId = graph.getRouterId();
-        if(routerId == null || routerId.isEmpty())
+        if (routerId == null || routerId.isEmpty())
             routerId = DEFAULT_ROUTER_ID;
-        
-        threadFactory = new ThreadFactoryBuilder().setNameFormat("GraphUpdater-" + routerId + "-%d").build();
+
+        threadFactory = new ThreadFactoryBuilder()
+                .setNameFormat("GraphUpdater-" + routerId + "-%d").build();
         scheduler = Executors.newSingleThreadScheduledExecutor(threadFactory);
         updaterPool = Executors.newCachedThreadPool(threadFactory);
     }
@@ -144,7 +145,8 @@ public class GraphUpdaterManager {
                     try {
                         updater.run();
                     } catch (Exception e) {
-                        LOG.error("Error while running updater {}:", updater.getClass().getName(), e);
+                        LOG.error("Error while running updater {}:", updater.getClass().getName(),
+                                e);
                     }
                 } catch (Exception e) {
                     LOG.error("Error while setting up updater {}:", updater.getClass().getName(), e);
@@ -166,7 +168,7 @@ public class GraphUpdaterManager {
 
     /**
      * This is another method to use to modify the graph from the updaters. It behaves like execute,
-     * but blocks until the runnable has been executed. This might be particularly useful in the 
+     * but blocks until the runnable has been executed. This might be particularly useful in the
      * setup method of an updater.
      * 
      * @param runnable is a graph writer runnable
@@ -190,8 +192,8 @@ public class GraphUpdaterManager {
                 try {
                     runnable.run(graph);
                 } catch (Exception e) {
-                    LOG.error("Error while running graph writer {}:", runnable.getClass().getName(),
-                            e);
+                    LOG.error("Error while running graph writer {}:",
+                            runnable.getClass().getName(), e);
                 }
             }
         });

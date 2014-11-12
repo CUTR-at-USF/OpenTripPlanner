@@ -35,17 +35,18 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 
 /**
- * Check the geometry of every edge in the graph for any bogus geometry --
- * that is, geometry with coordinates of NaN.
- * This is mainly good for debugging, but probably worth keeping on for production
- * because the cost is small compared to the pain of debugging.
+ * Check the geometry of every edge in the graph for any bogus geometry -- that is, geometry with
+ * coordinates of NaN. This is mainly good for debugging, but probably worth keeping on for
+ * production because the cost is small compared to the pain of debugging.
  */
 public class CheckGeometryGraphBuilderImpl implements GraphBuilder {
 
-
     private DistanceLibrary distanceLibrary = SphericalDistanceLibrary.getInstance();
 
-    /** An set of ids which identifies what stages this graph builder provides (i.e. streets, elevation, transit) */
+    /**
+     * An set of ids which identifies what stages this graph builder provides (i.e. streets,
+     * elevation, transit)
+     */
     public List<String> provides() {
         return Collections.emptyList();
     }
@@ -54,8 +55,9 @@ public class CheckGeometryGraphBuilderImpl implements GraphBuilder {
     public List<String> getPrerequisites() {
         return Arrays.asList("streets");
     }
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(CheckGeometryGraphBuilderImpl.class);
+
     private static final double MAX_VERTEX_SHAPE_ERROR = 150;
 
     @Override
@@ -65,7 +67,7 @@ public class CheckGeometryGraphBuilderImpl implements GraphBuilder {
                 LOG.warn("Vertex " + gv + " has NaN location; this will cause doom.");
                 LOG.warn(graph.addBuilderAnnotation(new BogusVertexGeometry(gv)));
             }
-            
+
             // TODO: This was filtered to EdgeNarratives before EdgeNarrative removal
             for (Edge e : gv.getOutgoing()) {
                 Geometry g = e.getGeometry();
@@ -100,7 +102,7 @@ public class CheckGeometryGraphBuilderImpl implements GraphBuilder {
 
     @Override
     public void checkInputs() {
-        //no inputs to check
+        // no inputs to check
     }
 
     public DistanceLibrary getDistanceLibrary() {

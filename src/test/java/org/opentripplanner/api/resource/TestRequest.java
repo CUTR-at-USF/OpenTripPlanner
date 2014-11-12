@@ -258,8 +258,7 @@ class Context {
         HashMap<Class<?>, Object> extra = new HashMap<Class<?>, Object>();
         gtfsBuilder.buildGraph(graph, extra);
 
-        TransitToStreetNetworkGraphBuilderImpl linker =
-                new TransitToStreetNetworkGraphBuilderImpl();
+        TransitToStreetNetworkGraphBuilderImpl linker = new TransitToStreetNetworkGraphBuilderImpl();
         linker.buildGraph(graph, extra);
 
     }
@@ -339,8 +338,8 @@ public class TestRequest extends TestCase {
     }
 
     public void testPlanner() throws Exception {
-        TestPlanner planner = new TestPlanner(
-                "portland", "From::NE 43RD AVE at NE GLISAN ST", "To::NE 43RD AVE at NE ROYAL CT");
+        TestPlanner planner = new TestPlanner("portland", "From::NE 43RD AVE at NE GLISAN ST",
+                "To::NE 43RD AVE at NE ROYAL CT");
 
         Response response = planner.getItineraries();
         Itinerary itinerary = response.getPlan().itinerary.get(0);
@@ -389,8 +388,8 @@ public class TestRequest extends TestCase {
 
     public void testAlerts() throws Exception {
         // SE 47th and Ash, NE 47th and Davis (note that we cross Burnside, this goes from SE to NE)
-        TestPlanner planner = new TestPlanner(
-                "portland", "SE 47TH AVE at SE ASH ST", "NE 47TH AVE at NE COUCH ST");
+        TestPlanner planner = new TestPlanner("portland", "SE 47TH AVE at SE ASH ST",
+                "NE 47TH AVE at NE COUCH ST");
         Response response = planner.getItineraries();
 
         Itinerary itinerary = response.getPlan().itinerary.get(0);
@@ -477,8 +476,10 @@ public class TestRequest extends TestCase {
     public void testPatcher() {
         AlertPatcher p = new AlertPatcher();
         AlertPatchService service = mock(AlertPatchService.class);
-        when(service.getStopPatches(any(AgencyAndId.class))).thenReturn(new ArrayList<AlertPatch>());
-        when(service.getRoutePatches(any(AgencyAndId.class))).thenReturn(new ArrayList<AlertPatch>());
+        when(service.getStopPatches(any(AgencyAndId.class)))
+                .thenReturn(new ArrayList<AlertPatch>());
+        when(service.getRoutePatches(any(AgencyAndId.class))).thenReturn(
+                new ArrayList<AlertPatch>());
 
         p.alertPatchService = service;
         AlertPatchResponse stopPatches = p.getStopPatches("TriMet", "5678");
@@ -510,8 +511,8 @@ public class TestRequest extends TestCase {
 
     public void testBannedTrips() {
         // Plan short trip along NE GLISAN ST
-        TestPlanner planner = new TestPlanner(
-                "portland", "NE 57TH AVE at NE GLISAN ST #2", "NE 30TH AVE at NE GLISAN ST");
+        TestPlanner planner = new TestPlanner("portland", "NE 57TH AVE at NE GLISAN ST #2",
+                "NE 30TH AVE at NE GLISAN ST");
         // Ban trips with ids 190W1280 and 190W1260 from agency with id TriMet
         planner.setBannedTrips(Arrays.asList("TriMet_190W1280,TriMet_190W1260"));
         // Do the planning
@@ -526,8 +527,8 @@ public class TestRequest extends TestCase {
 
     public void testBannedStops() throws ParameterException {
         // Plan short trip along NE GLISAN ST
-        TestPlanner planner = new TestPlanner(
-                "portland", "NE 57TH AVE at NE GLISAN ST #2", "NE 30TH AVE at NE GLISAN ST");
+        TestPlanner planner = new TestPlanner("portland", "NE 57TH AVE at NE GLISAN ST #2",
+                "NE 30TH AVE at NE GLISAN ST");
         // Ban stops with ids 2106 and 2107 from agency with id TriMet
         // These are the two stops near NE 30TH AVE at NE GLISAN ST
         planner.setBannedStops(Arrays.asList("TriMet_2106,TriMet_2107"));
@@ -577,8 +578,8 @@ public class TestRequest extends TestCase {
 
     public void testBannedStopsHard() throws ParameterException {
         // Plan short trip along NE GLISAN ST
-        TestPlanner planner = new TestPlanner(
-                "portland", "NE 57TH AVE at NE GLISAN ST #2", "NE 30TH AVE at NE GLISAN ST");
+        TestPlanner planner = new TestPlanner("portland", "NE 57TH AVE at NE GLISAN ST #2",
+                "NE 30TH AVE at NE GLISAN ST");
 
         // Do the planning
         Response response = planner.getItineraries();
@@ -603,8 +604,8 @@ public class TestRequest extends TestCase {
 
     public void testWalkLimitExceeded() throws ParameterException {
         // Plan short trip
-        TestPlanner planner = new TestPlanner(
-                "portland", "45.501115,-122.738214", "45.469487,-122.500343");
+        TestPlanner planner = new TestPlanner("portland", "45.501115,-122.738214",
+                "45.469487,-122.500343");
         // Do the planning
         Response response = planner.getItineraries();
         // Check itinerary for walkLimitExceeded
@@ -623,8 +624,8 @@ public class TestRequest extends TestCase {
 
     public void testTransferPenalty() {
         // Plan short trip
-        TestPlanner planner = new TestPlanner(
-                "portland", "45.5264892578125,-122.60479259490967", "45.511622,-122.645564");
+        TestPlanner planner = new TestPlanner("portland", "45.5264892578125,-122.60479259490967",
+                "45.511622,-122.645564");
         // Don't use non-preferred transfer penalty
         planner.setNonpreferredTransferPenalty(Arrays.asList(0));
         // Check number of legs when using different transfer penalties
@@ -634,8 +635,8 @@ public class TestRequest extends TestCase {
 
     public void testTransferPenalty2() {
         // Plan short trip
-        TestPlanner planner = new TestPlanner(
-                "portland", "45.514861,-122.612035", "45.483096,-122.540624");
+        TestPlanner planner = new TestPlanner("portland", "45.514861,-122.612035",
+                "45.483096,-122.540624");
         // Don't use non-preferred transfer penalty
         planner.setNonpreferredTransferPenalty(Arrays.asList(0));
         // Check number of legs when using different transfer penalties
@@ -645,11 +646,12 @@ public class TestRequest extends TestCase {
 
     /**
      * Checks the number of legs when using a specific transfer penalty while planning.
+     * 
      * @param planner is the test planner to use
      * @param transferPenalty is the value for the transfer penalty
      * @param expectedLegs is the number of expected legs
-     * @param smaller if true, number of legs should be smaller;
-     *                if false, number of legs should be exact
+     * @param smaller if true, number of legs should be smaller; if false, number of legs should be
+     *        exact
      */
     private void checkLegsWithTransferPenalty(TestPlanner planner, int transferPenalty,
             int expectedLegs, boolean smaller) {
@@ -670,8 +672,8 @@ public class TestRequest extends TestCase {
         ServiceDate serviceDate = new ServiceDate(2009, 10, 01);
 
         // Plan short trip
-        TestPlanner planner = new TestPlanner(
-                "portland", "45.5264892578125,-122.60479259490967", "45.511622,-122.645564");
+        TestPlanner planner = new TestPlanner("portland", "45.5264892578125,-122.60479259490967",
+                "45.511622,-122.645564");
 
         // Replace the transfer table with an empty table
         TransferTable table = new TransferTable();
@@ -686,9 +688,9 @@ public class TestRequest extends TestCase {
         assertEquals("751W1330", itinerary.legs.get(3).tripId);
 
         // Now add a transfer between the two busses of minimal 126 seconds
-        //(transfer was 125 seconds)
-        addTripToTripTransferTimeToTable(
-                table, "2111", "7452", "19", "75", "190W1280", "751W1330", 126);
+        // (transfer was 125 seconds)
+        addTripToTripTransferTimeToTable(table, "2111", "7452", "19", "75", "190W1280", "751W1330",
+                126);
 
         // Do the planning again
         response = planner.getItineraries();
@@ -719,8 +721,8 @@ public class TestRequest extends TestCase {
 
     public void testForbiddenTripToTripTransfer() {
         // Plan short trip
-        TestPlanner planner = new TestPlanner(
-                "portland", "45.5264892578125,-122.60479259490967", "45.511622,-122.645564");
+        TestPlanner planner = new TestPlanner("portland", "45.5264892578125,-122.60479259490967",
+                "45.511622,-122.645564");
 
         // Replace the transfer table with an empty table
         TransferTable table = new TransferTable();
@@ -751,8 +753,8 @@ public class TestRequest extends TestCase {
 
     public void testPreferredTripToTripTransfer() {
         // Plan short trip
-        TestPlanner planner = new TestPlanner(
-                "portland", "45.506077,-122.621139", "45.464637,-122.706061");
+        TestPlanner planner = new TestPlanner("portland", "45.506077,-122.621139",
+                "45.464637,-122.706061");
 
         // Replace the transfer table with an empty table
         TransferTable table = new TransferTable();
@@ -767,8 +769,8 @@ public class TestRequest extends TestCase {
         assertEquals("91W1350", itinerary.legs.get(3).tripId);
 
         // Now add a preferred transfer between two other busses
-        addTripToTripTransferTimeToTable(table, "7528", "9756", "75", "12", "750W1300", "120W1320"
-                , StopTransfer.PREFERRED_TRANSFER);
+        addTripToTripTransferTimeToTable(table, "7528", "9756", "75", "12", "750W1300", "120W1320",
+                StopTransfer.PREFERRED_TRANSFER);
 
         // Do the planning again
         response = planner.getItineraries();
@@ -785,8 +787,8 @@ public class TestRequest extends TestCase {
         ServiceDate serviceDate = new ServiceDate(2009, 10, 01);
 
         // Plan short trip
-        TestPlanner planner = new TestPlanner(
-                "portland", "45.506077,-122.621139", "45.464637,-122.706061");
+        TestPlanner planner = new TestPlanner("portland", "45.506077,-122.621139",
+                "45.464637,-122.706061");
 
         // Replace the transfer table with an empty table
         TransferTable table = new TransferTable();
@@ -801,8 +803,8 @@ public class TestRequest extends TestCase {
         assertEquals("91W1350", itinerary.legs.get(3).tripId);
 
         // Now add a timed transfer between two other busses
-        addTripToTripTransferTimeToTable(table, "7528", "9756", "75", "12", "750W1300", "120W1320"
-                , StopTransfer.TIMED_TRANSFER);
+        addTripToTripTransferTimeToTable(table, "7528", "9756", "75", "12", "750W1300", "120W1320",
+                StopTransfer.TIMED_TRANSFER);
         // Don't forget to also add a TimedTransferEdge
         Vertex fromVertex = graph.getVertex("TriMet_7528_arrive");
         Vertex toVertex = graph.getVertex("TriMet_9756_depart");
@@ -842,8 +844,8 @@ public class TestRequest extends TestCase {
         ServiceDate serviceDate = new ServiceDate(2009, 10, 01);
 
         // Plan short trip
-        TestPlanner planner = new TestPlanner(
-                "portland", "45.506077,-122.621139", "45.464637,-122.706061");
+        TestPlanner planner = new TestPlanner("portland", "45.506077,-122.621139",
+                "45.464637,-122.706061");
 
         // Replace the transfer table with an empty table
         TransferTable table = new TransferTable();
@@ -1015,8 +1017,10 @@ public class TestRequest extends TestCase {
             this.maxTransfers = Arrays.asList(2);
             this.bikeSwitchTime = Arrays.asList(0);
             this.bikeSwitchCost = Arrays.asList(0);
-            this.routerId = routerId; // not a list because this is a path parameter not a query parameter
-            this.numItineraries = Arrays.asList(1); // make results more deterministic by returning only one path
+            this.routerId = routerId; // not a list because this is a path parameter not a query
+                                      // parameter
+            this.numItineraries = Arrays.asList(1); // make results more deterministic by returning
+                                                    // only one path
             this.otpServer = Context.getInstance().otpServer;
         }
 

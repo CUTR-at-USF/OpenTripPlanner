@@ -33,8 +33,8 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 
 /** Reads the GTFS-RT from a local file. */
 public class GtfsRealtimeFileTripUpdateSource implements TripUpdateSource, PreferencesConfigurable {
-    private static final Logger LOG =
-            LoggerFactory.getLogger(GtfsRealtimeFileTripUpdateSource.class);
+    private static final Logger LOG = LoggerFactory
+            .getLogger(GtfsRealtimeFileTripUpdateSource.class);
 
     private File file;
 

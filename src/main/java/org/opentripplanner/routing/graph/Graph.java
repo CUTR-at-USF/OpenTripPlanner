@@ -86,7 +86,8 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
 /**
- * A graph is really just one or more indexes into a set of vertexes. It used to keep edgelists for each vertex, but those are in the vertex now.
+ * A graph is really just one or more indexes into a set of vertexes. It used to keep edgelists for
+ * each vertex, but those are in the vertex now.
  */
 public class Graph implements Serializable {
 
@@ -95,8 +96,9 @@ public class Graph implements Serializable {
     private final MavenVersion mavenVersion = MavenVersion.VERSION;
 
     private static final Logger LOG = LoggerFactory.getLogger(Graph.class);
-    
-    @Setter @Getter
+
+    @Setter
+    @Getter
     private String routerId;
 
     private final Map<Edge, Set<AlertPatch>> alertPatches = new HashMap<Edge, Set<AlertPatch>>(0);
@@ -116,7 +118,7 @@ public class Graph implements Serializable {
 
     /* vertex index by name is reconstructed from edges */
     private transient Map<String, Vertex> vertices;
-    
+
     private transient CalendarService calendarService;
 
     private boolean debugData = true;
@@ -129,24 +131,27 @@ public class Graph implements Serializable {
     public transient StreetVertexIndexService streetIndex;
 
     public transient GraphIndex index;
-    
+
     private transient GeometryIndex geomIndex;
-    
+
     private transient SampleFactory sampleFactory;
-    
+
     public final Deduplicator deduplicator = new Deduplicator();
 
-    /** 
+    /**
      * Map from GTFS ServiceIds to integers close to 0. Allows using BitSets instead of Set<Object>.
-     * An empty Map is created before the Graph is built to allow registering IDs from multiple feeds.   
+     * An empty Map is created before the Graph is built to allow registering IDs from multiple
+     * feeds.
      */
-    public final Map<AgencyAndId,Integer> serviceCodes = Maps.newHashMap();
-    
+    public final Map<AgencyAndId, Integer> serviceCodes = Maps.newHashMap();
+
     @Getter
     @Setter
     private transient TimetableSnapshotSource timetableSnapshotSource = null;
 
-    private transient List<GraphBuilderAnnotation> graphBuilderAnnotations = new LinkedList<GraphBuilderAnnotation>(); // initialize for tests
+    private transient List<GraphBuilderAnnotation> graphBuilderAnnotations = new LinkedList<GraphBuilderAnnotation>(); // initialize
+                                                                                                                       // for
+                                                                                                                       // tests
 
     private Collection<String> agenciesIds = new HashSet<String>();
 
@@ -196,9 +201,10 @@ public class Graph implements Serializable {
         this.edgeById = new ConcurrentHashMap<Integer, Edge>();
         this.vertexById = new ConcurrentHashMap<Integer, Vertex>();
     }
-    
+
     /**
-     * Add the given vertex to the graph. Ideally, only vertices should add themselves to the graph, when they are constructed or deserialized.
+     * Add the given vertex to the graph. Ideally, only vertices should add themselves to the graph,
+     * when they are constructed or deserialized.
      */
     public void addVertex(Vertex v) {
         Vertex old = vertices.put(v.getLabel(), v);
@@ -222,7 +228,7 @@ public class Graph implements Serializable {
             LOG.error(
                     "attempting to remove vertex that is not in graph (or mapping value was null): {}",
                     v);
-        }        
+        }
     }
 
     /* Fetching vertices by label is convenient in tests and such, but avoid using in general. */
@@ -230,12 +236,11 @@ public class Graph implements Serializable {
     public Vertex getVertex(String label) {
         return vertices.get(label);
     }
-    
+
     /**
      * Returns the vertex with the given ID or null if none is present.
      * 
-     * NOTE: you may need to run rebuildVertexAndEdgeIndices() for the indices
-     * to be accurate.
+     * NOTE: you may need to run rebuildVertexAndEdgeIndices() for the indices to be accurate.
      * 
      * @param id
      * @return
@@ -246,17 +251,17 @@ public class Graph implements Serializable {
 
     /**
      * Get all the vertices in the graph.
+     * 
      * @return
      */
     public Collection<Vertex> getVertices() {
         return this.vertices.values();
     }
-    
+
     /**
      * Returns the edge with the given ID or null if none is present.
      * 
-     * NOTE: you may need to run rebuildVertexAndEdgeIndices() for the indices
-     * to be accurate.
+     * NOTE: you may need to run rebuildVertexAndEdgeIndices() for the indices to be accurate.
      * 
      * @param id
      * @return
@@ -264,9 +269,10 @@ public class Graph implements Serializable {
     public Edge getEdgeById(int id) {
         return edgeById.get(id);
     }
-    
+
     /**
      * Return all the edges in the graph.
+     * 
      * @return
      */
     public Collection<Edge> getEdges() {
@@ -279,11 +285,13 @@ public class Graph implements Serializable {
 
     /**
      * Add an {@link AlertPatch} to the {@link AlertPatch} {@link Set} belonging to an {@link Edge}.
+     * 
      * @param edge
      * @param alertPatch
      */
     public void addAlertPatch(Edge edge, AlertPatch alertPatch) {
-        if (edge == null || alertPatch == null) return;
+        if (edge == null || alertPatch == null)
+            return;
         synchronized (alertPatches) {
             Set<AlertPatch> alertPatches = this.alertPatches.get(edge);
             if (alertPatches == null) {
@@ -302,11 +310,13 @@ public class Graph implements Serializable {
     /**
      * Remove an {@link AlertPatch} from the {@link AlertPatch} {@link Set} belonging to an
      * {@link Edge}.
+     * 
      * @param edge
      * @param alertPatch
      */
     public void removeAlertPatch(Edge edge, AlertPatch alertPatch) {
-        if (edge == null || alertPatch == null) return;
+        if (edge == null || alertPatch == null)
+            return;
         synchronized (alertPatches) {
             Set<AlertPatch> alertPatches = this.alertPatches.get(edge);
             if (alertPatches != null && alertPatches.contains(alertPatch)) {
@@ -321,6 +331,7 @@ public class Graph implements Serializable {
 
     /**
      * Get the {@link AlertPatch} {@link Set} that belongs to an {@link Edge} and build a new array.
+     * 
      * @param edge
      * @return The {@link AlertPatch} array that belongs to the {@link Edge}
      */
@@ -338,13 +349,14 @@ public class Graph implements Serializable {
 
     /**
      * Return only the StreetEdges in the graph.
+     * 
      * @return
      */
     public Collection<StreetEdge> getStreetEdges() {
         Collection<Edge> allEdges = this.getEdges();
         return Lists.newArrayList(filter(allEdges, StreetEdge.class));
-    }    
-    
+    }
+
     public boolean containsVertex(Vertex v) {
         return (v != null) && vertices.get(v.getLabel()) == v;
     }
@@ -368,7 +380,7 @@ public class Graph implements Serializable {
         T t = (T) _services.get(serviceType);
         if (t == null) {
             try {
-                t = (T)serviceType.newInstance();
+                t = (T) serviceType.newInstance();
             } catch (InstantiationException e) {
                 throw new RuntimeException(e);
             } catch (IllegalAccessException e) {
@@ -456,7 +468,8 @@ public class Graph implements Serializable {
     }
 
     /**
-     * Find the total number of edges in this Graph. There are assumed to be no Edges in an incoming edge list that are not in an outgoing edge list.
+     * Find the total number of edges in this Graph. There are assumed to be no Edges in an incoming
+     * edge list that are not in an outgoing edge list.
      * 
      * @return number of outgoing edges in the graph
      */
@@ -470,6 +483,7 @@ public class Graph implements Serializable {
 
     /**
      * Add a collection of edges from the edgesById index.
+     * 
      * @param es
      */
     private void addEdgesToIndex(Collection<Edge> es) {
@@ -477,16 +491,16 @@ public class Graph implements Serializable {
             this.edgeById.put(e.getId(), e);
         }
     }
-    
+
     /**
      * Rebuilds any indices on the basis of current vertex and edge IDs.
      * 
-     * If you want the index to be accurate, you must run this every time the 
-     * vertex or edge set changes.
+     * If you want the index to be accurate, you must run this every time the vertex or edge set
+     * changes.
      * 
-     * TODO(flamholz): keep the indices up to date with changes to the graph.
-     * This is not simple because the Vertex constructor may add itself to the graph
-     * before the Vertex has any edges, so updating indices on addVertex is insufficient.
+     * TODO(flamholz): keep the indices up to date with changes to the graph. This is not simple
+     * because the Vertex constructor may add itself to the graph before the Vertex has any edges,
+     * so updating indices on addVertex is insufficient.
      */
     public void rebuildVertexAndEdgeIndices() {
         this.vertexById = new HashMap<Integer, Vertex>(Vertex.getMaxIndex());
@@ -514,12 +528,14 @@ public class Graph implements Serializable {
     }
 
     /**
-     * Add a graph builder annotation to this graph's list of graph builder annotations. The return value of this method is the annotation's message,
-     * which allows for a single-line idiom that creates, registers, and logs a new graph builder annotation:
+     * Add a graph builder annotation to this graph's list of graph builder annotations. The return
+     * value of this method is the annotation's message, which allows for a single-line idiom that
+     * creates, registers, and logs a new graph builder annotation:
      * log.warning(graph.addBuilderAnnotation(new SomeKindOfAnnotation(param1, param2)));
      * 
-     * If the graphBuilderAnnotations field of this graph is null, the annotation is not actually saved, but the message is still returned. This
-     * allows annotation registration to be turned off, saving memory and disk space when the user is not interested in annotations.
+     * If the graphBuilderAnnotations field of this graph is null, the annotation is not actually
+     * saved, but the message is still returned. This allows annotation registration to be turned
+     * off, saving memory and disk space when the user is not interested in annotations.
      */
     public String addBuilderAnnotation(GraphBuilderAnnotation gba) {
         String ret = gba.getMessage();
@@ -560,6 +576,7 @@ public class Graph implements Serializable {
 
     /**
      * Default load. Uses DefaultStreetVertexIndexFactory.
+     * 
      * @param in
      * @param level
      * @return
@@ -570,13 +587,12 @@ public class Graph implements Serializable {
             ClassNotFoundException {
         return load(in, level, new DefaultStreetVertexIndexFactory());
     }
-    
-    /** 
+
+    /**
      * Perform indexing on vertices, edges, and timetables, and create transient data structures.
      * This used to be done in readObject methods upon deserialization, but stand-alone mode now
      * allows passing graphs from graphbuilder to server in memory, without a round trip through
-     * serialization. 
-     * TODO: do we really need a factory for different street vertex indexes?
+     * serialization. TODO: do we really need a factory for different street vertex indexes?
      */
     public void index(StreetVertexIndexFactory indexFactory) {
         temporaryEdges = Collections.newSetFromMap(new ConcurrentHashMap<Edge, Boolean>());
@@ -585,18 +601,22 @@ public class Graph implements Serializable {
         LOG.debug("Rebuilding edge and vertex indices.");
         rebuildVertexAndEdgeIndices();
         Set<TripPattern> tableTripPatterns = Sets.newHashSet();
-        for (PatternArriveVertex pav : IterableLibrary.filter(this.getVertices(), PatternArriveVertex.class)) {
+        for (PatternArriveVertex pav : IterableLibrary.filter(this.getVertices(),
+                PatternArriveVertex.class)) {
             tableTripPatterns.add(pav.getTripPattern());
         }
         for (TripPattern ttp : tableTripPatterns) {
-            if (ttp != null) ttp.getScheduledTimetable().finish(); // skip frequency-based patterns with no table (null)
+            if (ttp != null)
+                ttp.getScheduledTimetable().finish(); // skip frequency-based patterns with no table
+                                                      // (null)
         }
         // TODO: Move this ^ stuff into the graph index
         this.index = new GraphIndex(this);
     }
-    
+
     /**
      * Loading which allows you to specify StreetVertexIndexFactory and inject other implementation.
+     * 
      * @param in
      * @param level
      * @param indexFactory
@@ -619,7 +639,7 @@ public class Graph implements Serializable {
             LOG.debug("Loading edges...");
             List<Edge> edges = (ArrayList<Edge>) in.readObject();
             graph.vertices = new HashMap<String, Vertex>();
-            
+
             for (Edge e : edges) {
                 graph.vertices.put(e.getFromVertex().getLabel(), e.getFromVertex());
                 graph.vertices.put(e.getToVertex().getLabel(), e.getToVertex());
@@ -631,7 +651,7 @@ public class Graph implements Serializable {
             if (level == LoadLevel.FULL) {
                 return graph;
             }
-            
+
             if (graph.debugData) {
                 graph.graphBuilderAnnotations = (List<GraphBuilderAnnotation>) in.readObject();
                 LOG.debug("Debug info read.");
@@ -646,11 +666,12 @@ public class Graph implements Serializable {
     }
 
     /**
-     * Compares the OTP version number stored in the graph with that of the currently running instance. Logs warnings explaining that mismatched
-     * versions can cause problems.
+     * Compares the OTP version number stored in the graph with that of the currently running
+     * instance. Logs warnings explaining that mismatched versions can cause problems.
      * 
-     * @return false if Maven versions match (even if commit ids do not match), true if Maven version of graph does not match this version of OTP or
-     *         graphs are otherwise obviously incompatible.
+     * @return false if Maven versions match (even if commit ids do not match), true if Maven
+     *         version of graph does not match this version of OTP or graphs are otherwise obviously
+     *         incompatible.
      */
     private boolean graphVersionMismatch() {
         MavenVersion v = MavenVersion.VERSION;
@@ -808,10 +829,12 @@ public class Graph implements Serializable {
     }
 
     /**
-     * Returns the time zone for the first agency in this graph. This is used to interpret times in API requests. The JVM default time zone cannot be
-     * used because we support multiple graphs on one server via the routerId. Ideally we would want to interpret times in the time zone of the
-     * geographic location where the origin/destination vertex or board/alight event is located. This may become necessary when we start making graphs
-     * with long distance train, boat, or air services.
+     * Returns the time zone for the first agency in this graph. This is used to interpret times in
+     * API requests. The JVM default time zone cannot be used because we support multiple graphs on
+     * one server via the routerId. Ideally we would want to interpret times in the time zone of the
+     * geographic location where the origin/destination vertex or board/alight event is located.
+     * This may become necessary when we start making graphs with long distance train, boat, or air
+     * services.
      */
     public TimeZone getTimeZone() {
         if (timeZone == null) {
@@ -864,23 +887,22 @@ public class Graph implements Serializable {
         return hull;
 
     }
-   
+
     // lazy-init geom index on an as needed basis
     public GeometryIndex getGeomIndex() {
-    	
-    	if(this.geomIndex == null)
-    		this.geomIndex = new GeometryIndex(this);
-    	
-    	return this.geomIndex;
+
+        if (this.geomIndex == null)
+            this.geomIndex = new GeometryIndex(this);
+
+        return this.geomIndex;
     }
 
- // lazy-init sample factor on an as needed basis
+    // lazy-init sample factor on an as needed basis
     public SampleFactory getSampleFactory() {
-    	if(this.sampleFactory == null)
-    		this.sampleFactory = new SampleFactory(this.getGeomIndex());
-    	
-    	return this.sampleFactory;	
+        if (this.sampleFactory == null)
+            this.sampleFactory = new SampleFactory(this.getGeomIndex());
+
+        return this.sampleFactory;
     }
-    
-   
+
 }

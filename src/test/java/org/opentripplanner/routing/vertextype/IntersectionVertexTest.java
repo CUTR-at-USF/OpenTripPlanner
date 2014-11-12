@@ -30,8 +30,9 @@ public class IntersectionVertexTest {
     private Graph _graph;
 
     private PlainStreetEdge fromEdge;
+
     private PlainStreetEdge straightAheadEdge;
-    
+
     @Before
     public void before() {
         _graph = new Graph();
@@ -77,11 +78,11 @@ public class IntersectionVertexTest {
     public void testFreeFlowing() {
         IntersectionVertex iv = new IntersectionVertex(_graph, "vertex", 1.0, 2.0);
         assertFalse(iv.isFreeFlowing());
-        
+
         iv.setFreeFlowing(true);
         assertTrue(iv.isFreeFlowing());
     }
-    
+
     @Test
     public void testInferredFreeFlowing() {
         IntersectionVertex iv = new IntersectionVertex(_graph, "vertex", 1.0, 2.0);
@@ -89,28 +90,28 @@ public class IntersectionVertexTest {
         assertFalse(iv.inferredFreeFlowing());
         assertEquals(0, iv.getDegreeIn());
         assertEquals(0, iv.getDegreeOut());
-        
-        iv.setTrafficLight(true);  
+
+        iv.setTrafficLight(true);
         assertTrue(iv.isTrafficLight());
         assertFalse(iv.inferredFreeFlowing());
-        
+
         iv.addIncoming(fromEdge);
         assertEquals(1, iv.getDegreeIn());
         assertEquals(0, iv.getDegreeOut());
         assertFalse(iv.inferredFreeFlowing());
-        
+
         iv.addOutgoing(straightAheadEdge);
         assertEquals(1, iv.getDegreeIn());
         assertEquals(1, iv.getDegreeOut());
         assertFalse(iv.inferredFreeFlowing());
-        
-        iv.setTrafficLight(false);  
+
+        iv.setTrafficLight(false);
         assertFalse(iv.isTrafficLight());
         assertTrue(iv.inferredFreeFlowing());
-        
+
         // Set the freeFlowing bit to false.
         iv.setFreeFlowing(false);
-        assertFalse(iv.isFreeFlowing());       
+        assertFalse(iv.isFreeFlowing());
     }
 
     /****

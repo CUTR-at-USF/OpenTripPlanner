@@ -21,9 +21,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.opentripplanner.api.adapters.StopType;
 
-@XmlRootElement(name="StopList")
+@XmlRootElement(name = "StopList")
 public class StopList {
-    @XmlElements(value = { @XmlElement(name="stop") })
+    @XmlElements(value = { @XmlElement(name = "stop") })
     public List<StopType> stops = new ArrayList<StopType>();
 
 }

@@ -26,9 +26,7 @@ import org.opentripplanner.routing.alertpatch.AlertPatch;
 @XmlRootElement
 public class AlertPatchResponse {
     @XmlElementWrapper
-    @XmlElements({
-        @XmlElement(name = "AlertPatch", type = AlertPatch.class)
-        })
+    @XmlElements({ @XmlElement(name = "AlertPatch", type = AlertPatch.class) })
     public List<AlertPatch> alertPatches;
 
     public void addAlertPatch(AlertPatch alertPatch) {

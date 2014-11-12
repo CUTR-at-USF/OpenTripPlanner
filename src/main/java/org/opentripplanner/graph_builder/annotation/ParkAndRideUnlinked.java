@@ -21,11 +21,11 @@ public class ParkAndRideUnlinked extends GraphBuilderAnnotation {
     private static final long serialVersionUID = 1L;
 
     public static final String FMT = "Park and ride '%s' (%d) not linked to any streets; it will not be usable.";
-    
+
     final String name;
-    
+
     final long osmId;
-    
+
     @Override
     public String getMessage() {
         return String.format(FMT, name, osmId);

@@ -18,10 +18,9 @@ import java.io.Serializable;
 import com.vividsolutions.jts.geom.Geometry;
 
 /**
- * A named area is a subset of an area with a certain set of properties
- * (name, safety, etc). Its originalEdges may include some edges which are 
- * crossable (because they separate it from another contiguous and
- * routeable area).
+ * A named area is a subset of an area with a certain set of properties (name, safety, etc). Its
+ * originalEdges may include some edges which are crossable (because they separate it from another
+ * contiguous and routeable area).
  * 
  */
 public class NamedArea implements Serializable {

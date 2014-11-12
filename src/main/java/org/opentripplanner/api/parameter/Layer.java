@@ -12,8 +12,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 package org.opentripplanner.api.parameter;
+
 public enum Layer {
-    TRAVELTIME,
-    DIFFERENCE,
-    HAGERSTRAND
+    TRAVELTIME, DIFFERENCE, HAGERSTRAND
 }

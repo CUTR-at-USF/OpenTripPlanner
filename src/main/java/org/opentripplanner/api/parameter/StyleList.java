@@ -21,7 +21,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 public class StyleList {
-    List<Style> styles = new ArrayList<Style>(); 
+    List<Style> styles = new ArrayList<Style>();
 
     public StyleList(String v) {
         for (String s : v.split(",")) {
@@ -32,10 +32,8 @@ public class StyleList {
             try {
                 styles.add(Style.valueOf(s.toUpperCase()));
             } catch (Exception e) {
-                throw new WebApplicationException(Response
-                    .status(Status.BAD_REQUEST)
-                    .entity("unknown layer style: " + s)
-                    .build());
+                throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
+                        .entity("unknown layer style: " + s).build());
             }
         }
     }

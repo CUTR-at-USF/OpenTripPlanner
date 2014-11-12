@@ -19,10 +19,13 @@ import lombok.Data;
 public class InputClampFilter implements IndividualFilter {
 
     public double rejectMin = 0;
+
     private double rejectMax = Double.MAX_VALUE;
+
     public double clampMin = 0;
+
     public double clampMax = Double.MAX_VALUE;
-    
+
     @Override
     public boolean filter(Individual individual) {
         double input = individual.input;

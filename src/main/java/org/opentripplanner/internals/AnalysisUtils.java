@@ -42,8 +42,7 @@ public class AnalysisUtils {
      *
      * @param dateTime
      */
-    public static List<Geometry> getComponentPolygons(Graph graph, RoutingRequest options,
-                                                      long time) {
+    public static List<Geometry> getComponentPolygons(Graph graph, RoutingRequest options, long time) {
         DisjointSet<Vertex> components = getConnectedComponents(graph);
 
         LinkedListMultimap<Integer, Coordinate> componentCoordinates = LinkedListMultimap.create();
@@ -56,7 +55,8 @@ public class AnalysisUtils {
                     Integer component = components.find(e.getFromVertex());
                     Geometry geometry = s1.getBackEdge().getGeometry();
                     if (geometry != null) {
-                        List<Coordinate> coordinates = new ArrayList<Coordinate>(Arrays.asList(geometry.getCoordinates()));
+                        List<Coordinate> coordinates = new ArrayList<Coordinate>(
+                                Arrays.asList(geometry.getCoordinates()));
                         for (int i = 0; i < coordinates.size(); ++i) {
                             Coordinate coordinate = new Coordinate(coordinates.get(i));
                             coordinate.x = Math.round(coordinate.x * PRECISION) / PRECISION;
@@ -77,7 +77,8 @@ public class AnalysisUtils {
         for (Integer key : componentCoordinates.keySet()) {
             List<Coordinate> coords = componentCoordinates.get(key);
             Coordinate[] coordArray = new Coordinate[coords.size()];
-            ConvexHull hull = new ConvexHull(coords.toArray(coordArray), GeometryUtils.getGeometryFactory());
+            ConvexHull hull = new ConvexHull(coords.toArray(coordArray),
+                    GeometryUtils.getGeometryFactory());
             Geometry geom = hull.getConvexHull();
             // buffer components which are mere lines so that they do not disappear.
             if (geom instanceof LineString) {

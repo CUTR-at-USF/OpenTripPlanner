@@ -54,16 +54,24 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 public abstract class GtfsTest extends TestCase {
 
     public Graph graph;
+
     AlertsUpdateHandler alertsUpdateHandler;
+
     PlanGenerator planGenerator;
+
     PathService pathService;
+
     GenericAStar genericAStar;
+
     TimetableSnapshotSource timetableSnapshotSource;
+
     AlertPatchServiceImpl alertPatchServiceImpl;
 
     public abstract String getFeedName();
 
-    public boolean isLongDistance() { return false; }
+    public boolean isLongDistance() {
+        return false;
+    }
 
     private String agencyId;
 
@@ -101,7 +109,8 @@ public abstract class GtfsTest extends TestCase {
             }
             timetableSnapshotSource.applyTripUpdates(updates, agencyId);
             alertsUpdateHandler.update(feedMessage);
-        } catch (Exception exception) {}
+        } catch (Exception exception) {
+        }
 
         genericAStar = new GenericAStar();
         if (isLongDistance()) {
@@ -114,15 +123,15 @@ public abstract class GtfsTest extends TestCase {
     }
 
     public Leg plan(long dateTime, String fromVertex, String toVertex, String onTripId,
-             boolean wheelchairAccessible, boolean preferLeastTransfers, TraverseMode preferredMode,
-             String excludedRoute, String excludedStop) {
+            boolean wheelchairAccessible, boolean preferLeastTransfers, TraverseMode preferredMode,
+            String excludedRoute, String excludedStop) {
         return plan(dateTime, fromVertex, toVertex, onTripId, wheelchairAccessible,
                 preferLeastTransfers, preferredMode, excludedRoute, excludedStop, 1)[0];
     }
 
     public Leg[] plan(long dateTime, String fromVertex, String toVertex, String onTripId,
-               boolean wheelchairAccessible, boolean preferLeastTransfers, TraverseMode preferredMode,
-               String excludedRoute, String excludedStop, int legCount) {
+            boolean wheelchairAccessible, boolean preferLeastTransfers, TraverseMode preferredMode,
+            String excludedRoute, String excludedStop, int legCount) {
         final TraverseMode mode = preferredMode != null ? preferredMode : TraverseMode.TRANSIT;
         RoutingRequest routingRequest = new RoutingRequest();
 
@@ -164,8 +173,8 @@ public abstract class GtfsTest extends TestCase {
         return itinerary.legs.toArray(new Leg[legCount]);
     }
 
-    public void validateLeg(Leg leg, long startTime, long endTime, String toStopId, String fromStopId,
-                     String alert) {
+    public void validateLeg(Leg leg, long startTime, long endTime, String toStopId,
+            String fromStopId, String alert) {
         assertEquals(startTime, leg.startTime.getTimeInMillis());
         assertEquals(endTime, leg.endTime.getTimeInMillis());
         assertEquals(toStopId, leg.to.stopId.getId());

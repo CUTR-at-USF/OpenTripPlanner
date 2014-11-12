@@ -91,15 +91,15 @@ public class GenericDijkstra {
             }
 
             if (searchTerminationStrategy != null
-                    && !searchTerminationStrategy.shouldSearchContinue(initialState.getVertex(), 
-                    null, u, spt, options))
-                        break;
+                    && !searchTerminationStrategy.shouldSearchContinue(initialState.getVertex(),
+                            null, u, spt, options))
+                break;
 
             for (Edge edge : options.isArriveBy() ? u_vertex.getIncoming() : u_vertex.getOutgoing()) {
 
                 if (skipEdgeStrategy != null
-                        && skipEdgeStrategy.shouldSkipEdge(initialState.getVertex(), null, u, edge, spt,
-                                options))
+                        && skipEdgeStrategy.shouldSkipEdge(initialState.getVertex(), null, u, edge,
+                                spt, options))
                     continue;
 
                 // Iterate over traversal results. When an edge leads nowhere (as indicated by
@@ -107,14 +107,14 @@ public class GenericDijkstra {
                 for (State v = edge.traverse(u); v != null; v = v.getNextResult()) {
 
                     if (skipTraverseResultStrategy != null
-                            && skipTraverseResultStrategy.shouldSkipTraversalResult(initialState.getVertex(),
-                                    null, u, v, spt, options))
+                            && skipTraverseResultStrategy.shouldSkipTraversalResult(
+                                    initialState.getVertex(), null, u, v, spt, options))
                         continue;
 
                     if (verbose)
-                        System.out.printf("  w = %f + %f = %f %s", u.getWeight(), v.getWeightDelta(), 
-                        		v.getWeight(),  v.getVertex());
-                    
+                        System.out.printf("  w = %f + %f = %f %s", u.getWeight(),
+                                v.getWeightDelta(), v.getWeight(), v.getVertex());
+
                     if (v.exceedsWeightLimit(options.maxWeight))
                         continue;
 

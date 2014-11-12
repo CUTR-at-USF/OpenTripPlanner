@@ -44,7 +44,7 @@ public class NetworkLinker {
 
     private NetworkLinkerLibrary networkLinkerLibrary;
 
-    public NetworkLinker(Graph graph, HashMap<Class<?>,Object> extra) {
+    public NetworkLinker(Graph graph, HashMap<Class<?>, Object> extra) {
         this.graph = graph;
         this.networkLinkerLibrary = new NetworkLinkerLibrary(graph, extra);
         networkLinkerLibrary.options = new RoutingRequest(TraverseMode.BICYCLE);
@@ -70,34 +70,37 @@ public class NetworkLinker {
             // if the street is already linked there is no need to linked it again,
             // could happened if using the prune isolated island
             boolean alreadyLinked = false;
-            for(Edge e:ts.getOutgoing()){
-                if(e instanceof StreetTransitLink) {
+            for (Edge e : ts.getOutgoing()) {
+                if (e instanceof StreetTransitLink) {
                     alreadyLinked = true;
                     break;
                 }
             }
-            if(alreadyLinked) continue;
+            if (alreadyLinked)
+                continue;
             // only connect transit stops that (a) are entrances, or (b) have no associated
             // entrances
             if (ts.isEntrance() || !ts.hasEntrances()) {
                 boolean wheelchairAccessible = ts.hasWheelchairEntrance();
-                if (!networkLinkerLibrary.connectVertexToStreets(ts, wheelchairAccessible).getResult()) {
+                if (!networkLinkerLibrary.connectVertexToStreets(ts, wheelchairAccessible)
+                        .getResult()) {
                     LOG.warn(graph.addBuilderAnnotation(new StopUnlinked(ts)));
                 }
             }
         }
-        //remove replaced edges
+        // remove replaced edges
         for (HashSet<StreetEdge> toRemove : networkLinkerLibrary.replacements.keySet()) {
             for (StreetEdge edge : toRemove) {
                 edge.getFromVertex().removeOutgoing(edge);
                 edge.getToVertex().removeIncoming(edge);
             }
         }
-        //and add back in replacements
+        // and add back in replacements
         for (LinkedList<P2<PlainStreetEdge>> toAdd : networkLinkerLibrary.replacements.values()) {
             for (P2<PlainStreetEdge> edges : toAdd) {
                 PlainStreetEdge edge1 = edges.getFirst();
-                if (edge1.getToVertex().getLabel().startsWith("split ") || edge1.getFromVertex().getLabel().startsWith("split ")) {
+                if (edge1.getToVertex().getLabel().startsWith("split ")
+                        || edge1.getFromVertex().getLabel().startsWith("split ")) {
                     continue;
                 }
                 edge1.getFromVertex().addOutgoing(edge1);

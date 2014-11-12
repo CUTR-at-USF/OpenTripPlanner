@@ -59,15 +59,15 @@ import com.vividsolutions.jts.geom.LineString;
  * Route names are intended for very general customer information, but sometimes there is a need to
  * know where a particular trip actually goes.
  * 
- * Route Variant names are guaranteed to be unique (among variants for a single route) but not stable
- * across graph builds especially based on different GTFS inputs. They are
- * machine-generated on a best-effort basis. For instance, if a variant is the
- * only variant of the N that ends at Coney Island, the name will be "N to Coney Island". But if
- * multiple variants end at Coney Island (but have different stops elsewhere), that name would not
- * be chosen. OTP also tries start and intermediate stations ("from Coney Island", or "via
- * Whitehall", or even combinations ("from Coney Island via Whitehall"). But if there is no way to
- * create a unique name from start/end/intermediate stops, then the best we can do is to create a
- * "like [trip id]" name, which at least tells you where in the GTFS you can find a related trip.
+ * Route Variant names are guaranteed to be unique (among variants for a single route) but not
+ * stable across graph builds especially based on different GTFS inputs. They are machine-generated
+ * on a best-effort basis. For instance, if a variant is the only variant of the N that ends at
+ * Coney Island, the name will be "N to Coney Island". But if multiple variants end at Coney Island
+ * (but have different stops elsewhere), that name would not be chosen. OTP also tries start and
+ * intermediate stations ("from Coney Island", or "via Whitehall", or even combinations ("from Coney
+ * Island via Whitehall"). But if there is no way to create a unique name from
+ * start/end/intermediate stops, then the best we can do is to create a "like [trip id]" name, which
+ * at least tells you where in the GTFS you can find a related trip.
  * 
  * @author novalis
  * 
@@ -79,8 +79,9 @@ public class RouteVariant implements Serializable {
     private static final long serialVersionUID = -3110443015998033630L;
 
     /*
-     * This indicates that trips with multipledirection_ids are part of this variant. It should probably never be used, because generally trips making
-     * the same stops in the same order will have the same direction
+     * This indicates that trips with multipledirection_ids are part of this variant. It should
+     * probably never be used, because generally trips making the same stops in the same order will
+     * have the same direction
      */
     private static final String MULTIDIRECTION = "[multidirection]";
 
@@ -97,7 +98,8 @@ public class RouteVariant implements Serializable {
     private ArrayList<RouteSegment> segments;
 
     /**
-     * An ordered list of segments that represents one characteristic trip (or trip pattern) on this variant
+     * An ordered list of segments that represents one characteristic trip (or trip pattern) on this
+     * variant
      */
     @JsonIgnore
     private ArrayList<RouteSegment> exemplarSegments;
@@ -246,7 +248,7 @@ public class RouteVariant implements Serializable {
         }
         return geometry;
     }
-    
+
     /**
      * @param index The index of the segment in the list
      * @return The partial geometry between this segment's stop and the next one.

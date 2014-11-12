@@ -22,8 +22,8 @@ import org.onebusaway.gtfs.model.Stop;
 /**
  * A StopMatcher is a collection of stops based on IDs and agency IDs.
  * 
- * We currently only support full stop IDs (agency ID + stop ID).
- * Support for other matching expression (or other types of stop banning) can be easily added later on.
+ * We currently only support full stop IDs (agency ID + stop ID). Support for other matching
+ * expression (or other types of stop banning) can be easily added later on.
  */
 public class StopMatcher implements Cloneable, Serializable {
     private static final long serialVersionUID = 1274704742132971135L;
@@ -42,9 +42,10 @@ public class StopMatcher implements Cloneable, Serializable {
     public static StopMatcher emptyMatcher() {
         return new StopMatcher();
     }
-    
+
     /**
-     * Returns whether this matcher is empty 
+     * Returns whether this matcher is empty
+     * 
      * @return true when this matcher is empty, false otherwise
      */
     public boolean isEmpty() {
@@ -83,49 +84,51 @@ public class StopMatcher implements Cloneable, Serializable {
     }
 
     /**
-     * Function to determine whether this StopMatcher matches a particular stop.
-     * When a stop has a parent stop, it is also matched when its parent stop is matched.
+     * Function to determine whether this StopMatcher matches a particular stop. When a stop has a
+     * parent stop, it is also matched when its parent stop is matched.
+     * 
      * @param stop is the stop to match using its ID
      * @return true when the stop is matched
      */
     public boolean matches(Stop stop) {
-        // Don't bother with an empty matcher 
+        // Don't bother with an empty matcher
         if (this.isEmpty()) {
             return false;
-        }
-        else if (stop != null) {
+        } else if (stop != null) {
             // Check whether stop is matched
             if (matches(stop.getId())) {
-                return true;    
+                return true;
             }
             // Check whether parent stop is matched
-            else if (stop.getParentStation() != null 
-                    && !stop.getParentStation().isEmpty()) {
+            else if (stop.getParentStation() != null && !stop.getParentStation().isEmpty()) {
                 // This stop has a parent
-                AgencyAndId parentId = new AgencyAndId(stop.getId().getAgencyId(), stop.getParentStation());
+                AgencyAndId parentId = new AgencyAndId(stop.getId().getAgencyId(),
+                        stop.getParentStation());
                 if (matches(parentId)) {
-                    return true;    
+                    return true;
                 }
             }
         }
         return false;
     }
-    
+
     /**
-     * Function to determine whether this StopMatcher matches a particular stop id.
-     * Warning: this function does not check for parent stops.
+     * Function to determine whether this StopMatcher matches a particular stop id. Warning: this
+     * function does not check for parent stops.
+     * 
      * @param stopId is the stop id
-     * @return true when stop id is matched 
+     * @return true when stop id is matched
      */
     private boolean matches(AgencyAndId stopId) {
         if (agencyAndStopIds.contains(stopId)) {
-            return true;    
+            return true;
         }
         return false;
     }
-    
+
     /**
      * Returns string representation of this matcher
+     * 
      * @return string representation of this matcher
      */
     public String asString() {
@@ -143,9 +146,7 @@ public class StopMatcher implements Cloneable, Serializable {
 
     @Override
     public String toString() {
-        return String.format(
-                "StopMatcher<agencyAndStopIds=%s>",
-                agencyAndStopIds);
+        return String.format("StopMatcher<agencyAndStopIds=%s>", agencyAndStopIds);
     }
 
     @Override

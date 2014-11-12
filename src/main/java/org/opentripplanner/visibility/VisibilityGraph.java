@@ -53,8 +53,8 @@ public class VisibilityGraph {
         // visibility polygons
         for (int k1 = 0; k1 < n; k1++) {
             VLPoint point1 = environment.kth_point(k1);
-            if (origins != null && !origins.contains(point1)) 
-                    continue;
+            if (origins != null && !origins.contains(point1))
+                continue;
             VLPolygon polygon_temp = new VisibilityPolygon(point1, environment, epsilon);
             for (int k2 = 0; k2 < n; k2++) {
                 if (k1 == k2)
@@ -95,13 +95,13 @@ public class VisibilityGraph {
     }
 
     public boolean get(int polygon1, int vertex1, int polygon2, int vertex2) {
-        return adjacency_matrix[get_vertex_index(polygon1, vertex1)][get_vertex_index(polygon2, vertex2)];
+        return adjacency_matrix[get_vertex_index(polygon1, vertex1)][get_vertex_index(polygon2,
+                vertex2)];
     }
 
     public boolean get(int k1, int k2) {
         return adjacency_matrix[k1][k2];
     }
-
 
     // original code called this two_to_one, incomprehensibly
     public int get_vertex_index(int polygon, int vertex) {

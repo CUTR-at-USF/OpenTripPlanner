@@ -237,12 +237,12 @@ public final class SparseMatrixZSampleGrid<TZ> implements ZSampleGrid<TZ>,
         return new int[] { (int) Math.round((C.x - center.x - dX / 2) / dX),
                 (int) Math.round((C.y - center.y - dY / 2) / dY) };
     }
-    
+
     @Override
     public Coordinate getCenter() {
         return center;
     }
-    
+
     @Override
     public Coordinate getCellSize() {
         return new Coordinate(dX, dY);
@@ -267,7 +267,7 @@ public final class SparseMatrixZSampleGrid<TZ> implements ZSampleGrid<TZ>,
     public int getYMax() {
         return allSamples.getYMax();
     }
-    
+
     @Override
     public int size() {
         return allSamples.size();

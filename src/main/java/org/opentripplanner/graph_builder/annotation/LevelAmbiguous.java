@@ -20,14 +20,14 @@ public class LevelAmbiguous extends GraphBuilderAnnotation {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String FMT = "Could not infer floor number for layer called '%s' at %s. " +
-    		"Vertical movement will still be possible, but elevator cost might be incorrect. " +
-    		"Consider an OSM level map.";
-    
+    public static final String FMT = "Could not infer floor number for layer called '%s' at %s. "
+            + "Vertical movement will still be possible, but elevator cost might be incorrect. "
+            + "Consider an OSM level map.";
+
     final String layerName;
 
     final long osmNode;
-    
+
     @Override
     public String getMessage() {
         return String.format(FMT, layerName, osmNode);

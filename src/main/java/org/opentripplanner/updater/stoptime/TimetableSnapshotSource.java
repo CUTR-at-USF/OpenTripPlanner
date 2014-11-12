@@ -13,12 +13,8 @@
 
 package org.opentripplanner.updater.stoptime;
 
- 
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -26,22 +22,15 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TimeZone;
- 
-
-
-
-import java.util.TreeSet;
 
 import lombok.Setter;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.opentripplanner.routing.core.ServiceDay;
 import org.opentripplanner.routing.edgetype.Timetable;
 import org.opentripplanner.routing.edgetype.TripPattern;
 import org.opentripplanner.routing.edgetype.TimetableResolver;
-import org.opentripplanner.routing.edgetype.TimetableResolver.SortedTimetableComparator;
 import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.routing.graph.GraphIndex;
 import org.slf4j.Logger;
@@ -57,6 +46,7 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate;
  */
 public class TimetableSnapshotSource {
     private static final Logger LOG = LoggerFactory.getLogger(TimetableSnapshotSource.class);
+
     @Setter
     private int logFrequency = 2000;
 
@@ -67,7 +57,8 @@ public class TimetableSnapshotSource {
      * snapshot, just return the same one. Throttles the potentially resource-consuming task of
      * duplicating a TripPattern -> Timetable map and indexing the new Timetables.
      */
-    @Setter private int maxSnapshotFrequency = 1000; // msec
+    @Setter
+    private int maxSnapshotFrequency = 1000; // msec
 
     /**
      * The last committed snapshot that was handed off to a routing thread. This snapshot may be
@@ -79,7 +70,8 @@ public class TimetableSnapshotSource {
     private TimetableResolver buffer = new TimetableResolver();
 
     /** Should expired realtime data be purged from the graph. */
-    @Setter private boolean purgeExpiredData = true;
+    @Setter
+    private boolean purgeExpiredData = true;
 
     protected ServiceDate lastPurgeDate = null;
 
@@ -88,24 +80,10 @@ public class TimetableSnapshotSource {
     private final TimeZone timeZone;
 
     private GraphIndex graphIndex;
-    //just for test
-    FileWriter logFile;
+
     public TimetableSnapshotSource(Graph graph) {
         timeZone = graph.getTimeZone();
         graphIndex = graph.index;
- 
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();
- 
-		try {
-			logFile = new FileWriter("tripUpdatesLogs.txt", false);
-			logFile.write("      OTP started at "+ dateFormat.format(date));
-			logFile.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
- 
     }
 
     /**
@@ -125,7 +103,7 @@ public class TimetableSnapshotSource {
                 LOG.debug("Committing {}", buffer.toString());
                 snapshot = buffer.commit(force);
             } else {
-                LOG.debug("Buffer was unchanged, keeping old snapshot.");
+                LOG.debug(".......Buffer was unchanged, keeping old snapshot.");
             }
             lastSnapshotTime = System.currentTimeMillis();
         } else {
@@ -136,88 +114,37 @@ public class TimetableSnapshotSource {
 
     /**
      * Method to apply a trip update list to the most recent version of the timetable snapshot.
-     * @throws IOException 
+     * 
+     * @throws IOException
      */
-    public void applyTripUpdates(List<TripUpdate> updates, String agencyId)  {
+    public void applyTripUpdates(List<TripUpdate> updates, String agencyId) {
         if (updates == null) {
             LOG.warn("updates is null");
             return;
         }
-        //Trip trip= graphIndex.tripForId.get(1);
-        
- 
-   	 // this should be executed for only frequency-based trip
-//        for (TripPattern pattern: graphIndex.patternForTrip.values()){   
-//        	System.out.println(pattern.getRoute().getId());
-//         	//check if the pattern belongs to frequencyBased trips
-//        	if (pattern.getScheduledTimetable().getFrequencyEntries().size() != 0 ){
-//	        	SortedSet<Timetable> sortedTimetables = buffer.timetables.get(pattern);
-//	        	if (sortedTimetables != null){
-//		            
-//		            for(Timetable timetable : sortedTimetables) {
-//		            	int currentSize = timetable.getTripTimes().size();
-//		            	System.out.println(timetable.getFrequencyEntries().size());
-//		            	System.out.println(pattern.route.getId().getId()+ ", timetable.getTripTimes size = "+ currentSize);
-//		            	for (int i = 0; i< pattern.noTrips; i++){
-//		            		timetable.getTripTimes(i).vehicleID = null;
-//		            	}
-//		            	for (int i= currentSize - 1;   pattern.noTrips <= i; i--){
-//			        		//pattern.getScheduledTimetable().getTripTimes().remove(i);
-//			        		timetable.getTripTimes().remove(i);
-//			        		 
-//			        	}
-//		            	System.out.println("after: "+ timetable.getTripTimes().size()); 
-//		           }
-//	        	}
-//        	}
-//        }
-      	
-     // this should be executed for only frequency-based trip
-      for (TripPattern pattern: graphIndex.patternForTrip.values()){   
-      	System.out.println(pattern.getRoute().getId());
-       	//check if the pattern belongs to frequencyBased trips
-      	if (pattern.getScheduledTimetable().getFrequencyEntries().size() != 0 ){
-//      		int noTripTimes = pattern.getScheduledTimetable().getTripTimes().size();
-//      		for (int i= noTripTimes - 1;   pattern.noTrips <= i; i--){
-//      			pattern.getScheduledTimetable().getTripTimes().remove(i);
-//      		}
-        	SortedSet<Timetable> sortedTimetables = buffer.timetables.get(pattern);
-        	if (sortedTimetables != null){
-	            
-	            for(Timetable timetable : sortedTimetables) {
-	            	int currentSize = timetable.getTripTimes().size();
-	            	System.out.println(timetable.getFrequencyEntries().size());
-	            	System.out.println(pattern.route.getId().getId()+ ", timetable.getTripTimes size = "+ currentSize);
-	            	for (int i = 0; i< pattern.noTrips; i++){
-	            		timetable.getTripTimes(i).vehicleID = null;
-	            	}
-	            	for (int i= currentSize - 1;   pattern.noTrips <= i; i--){
-		        		//pattern.getScheduledTimetable().getTripTimes().remove(i);
-		        		timetable.getTripTimes().remove(i);
-		        		 
-		        	}
-	            	System.out.println("after: "+ timetable.getTripTimes().size()); 
-	           }
-        	}
-      	}
-      }
-        
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();
-        FileWriter logFile;
-		try {
-			logFile = new FileWriter("tripUpdatesLogs.txt", true);
-			logFile.write("\n====================================================================\n");
-			logFile.write("                New set of TripUpdates     "+ dateFormat.format(date) + "            \n");
-			logFile.write("====================================================================\n");
-			logFile.close();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-        
-	       
-        
+
+        // this remove the tripTimes of the previous time interval update (applies only on
+        // frequencyBased trip)
+        for (TripPattern pattern : graphIndex.patternForTrip.values()) {
+
+            // check if the pattern belongs to frequencyBased trips
+            if (pattern.getScheduledTimetable().getFrequencyEntries().size() != 0) {
+                SortedSet<Timetable> sortedTimetables = buffer.timetables.get(pattern);
+                if (sortedTimetables != null) {
+
+                    for (Timetable timetable : sortedTimetables) {
+                        int currentSize = timetable.getTripTimes().size();
+                        for (int i = 0; i < pattern.noTrips; i++) {
+                            timetable.getTripTimes(i).vehicleID = null;
+                        }
+                        for (int i = currentSize - 1; pattern.noTrips <= i; i--) {
+                            timetable.getTripTimes().remove(i);
+                        }
+                    }
+                }
+            }
+        }
+
         LOG.debug("message contains {} trip updates", updates.size());
         int uIndex = 0;
         for (TripUpdate tripUpdate : updates) {
@@ -239,56 +166,54 @@ public class TimetableSnapshotSource {
             }
 
             uIndex += 1;
-            LOG.debug("trip update #{} ({} updates) :",
-                    uIndex, tripUpdate.getStopTimeUpdateCount());
+            LOG.debug("trip update #{} ({} updates) :", uIndex, tripUpdate.getStopTimeUpdateCount());
             LOG.trace("{}", tripUpdate);
 
             boolean applied = false;
             if (tripDescriptor.hasScheduleRelationship()) {
-                switch(tripDescriptor.getScheduleRelationship()) {
-                    case SCHEDULED:
-                        applied = handleScheduledTrip(tripUpdate, agencyId, serviceDate);
-                        break;
-                    case ADDED:
-                        applied = handleAddedTrip(tripUpdate, agencyId, serviceDate);
-                        break;
-                    case UNSCHEDULED:
-                    	applied = handleScheduledTrip(tripUpdate, agencyId, serviceDate);
-//                        applied = handleUnscheduledTrip(tripUpdate, agencyId, serviceDate);
-                        break;
-                    case CANCELED:
-                        applied = handleCanceledTrip(tripUpdate, agencyId, serviceDate);
-                        break;
-                    case REPLACEMENT:
-                        applied = handleReplacementTrip(tripUpdate, agencyId, serviceDate);
-                        break;
+                switch (tripDescriptor.getScheduleRelationship()) {
+                case SCHEDULED:
+                    applied = handleScheduledTrip(tripUpdate, agencyId, serviceDate);
+                    break;
+                case ADDED:
+                    applied = handleAddedTrip(tripUpdate, agencyId, serviceDate);
+                    break;
+                case UNSCHEDULED:
+                    applied = handleUnscheduledTrip(tripUpdate, agencyId, serviceDate);
+                    break;
+                case CANCELED:
+                    applied = handleCanceledTrip(tripUpdate, agencyId, serviceDate);
+                    break;
+                case REPLACEMENT:
+                    applied = handleReplacementTrip(tripUpdate, agencyId, serviceDate);
+                    break;
                 }
             } else {
                 // Default
                 applied = handleScheduledTrip(tripUpdate, agencyId, serviceDate);
             }
 
-            if(applied) {
+            if (applied) {
                 appliedBlockCount++;
-             } else {
-                 LOG.warn("Failed to apply TripUpdate:\n{}", tripUpdate);
-             }
+            } else {
+                LOG.warn("Failed to apply TripUpdate:\n{}", tripUpdate);
+            }
 
-             if (appliedBlockCount % logFrequency == 0) {
-                 LOG.info("Applied {} trip updates.", appliedBlockCount);
-             }
+            if (appliedBlockCount % logFrequency == 0) {
+                LOG.info("Applied {} trip updates.", appliedBlockCount);
+            }
         }
         LOG.debug("end of update message");
 
         // Make a snapshot after each message in anticipation of incoming requests
         // Purge data if necessary (and force new snapshot if anything was purged)
-        if(purgeExpiredData) {
+        if (purgeExpiredData) {
             boolean modified = purgeExpiredData();
             getTimetableSnapshot(modified);
         } else {
             getTimetableSnapshot();
         }
-         
+
     }
 
     protected boolean handleScheduledTrip(TripUpdate tripUpdate, String agencyId,
@@ -306,10 +231,9 @@ public class TimetableSnapshotSource {
             LOG.warn("TripUpdate contains no updates, skipping.");
             return false;
         }
-      
+
         // we have a message we actually want to apply
-	    return buffer.update(pattern, tripUpdate, agencyId, timeZone, serviceDate);
-	    
+        return buffer.update(pattern, tripUpdate, agencyId, timeZone, serviceDate);
 
     }
 
@@ -322,10 +246,23 @@ public class TimetableSnapshotSource {
 
     protected boolean handleUnscheduledTrip(TripUpdate tripUpdate, String agencyId,
             ServiceDate serviceDate) {
-    
-        // TODO: Handle unscheduled trip
-        LOG.warn("Unscheduled trips are currently unsupported. Skipping TripUpdate.");
-        return false;
+
+        TripDescriptor tripDescriptor = tripUpdate.getTrip();
+        AgencyAndId tripId = new AgencyAndId(agencyId, tripDescriptor.getTripId());
+        TripPattern pattern = getPatternForTripId(tripId);
+
+        if (pattern == null) {
+            LOG.warn("No pattern found for tripId {}, skipping TripUpdate.", tripId);
+            return false;
+        }
+
+        if (tripUpdate.getStopTimeUpdateCount() < 1) {
+            LOG.warn("TripUpdate contains no updates, skipping.");
+            return false;
+        }
+
+        // we have a message we actually want to apply
+        return buffer.update(pattern, tripUpdate, agencyId, timeZone, serviceDate);
     }
 
     protected boolean handleCanceledTrip(TripUpdate tripUpdate, String agencyId,
@@ -353,7 +290,7 @@ public class TimetableSnapshotSource {
         ServiceDate today = new ServiceDate();
         ServiceDate previously = today.previous().previous(); // Just to be safe...
 
-        if(lastPurgeDate != null && lastPurgeDate.compareTo(previously) > 0) {
+        if (lastPurgeDate != null && lastPurgeDate.compareTo(previously) > 0) {
             return false;
         }
 

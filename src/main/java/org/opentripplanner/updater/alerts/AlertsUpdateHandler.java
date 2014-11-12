@@ -35,6 +35,7 @@ import com.google.transit.realtime.GtfsRealtime.TimeRange;
 
 /**
  * This updater only includes GTFS-Realtime Service Alert feeds.
+ * 
  * @author novalis
  *
  */
@@ -70,7 +71,7 @@ public class AlertsUpdateHandler {
         alertText.alertHeaderText = deBuffer(alert.getHeaderText());
         alertText.alertUrl = deBuffer(alert.getUrl());
         ArrayList<TimePeriod> periods = new ArrayList<TimePeriod>();
-        if(alert.getActivePeriodCount() > 0) {
+        if (alert.getActivePeriodCount() > 0) {
             long bestStartTime = Long.MAX_VALUE;
             for (TimeRange activePeriod : alert.getActivePeriodList()) {
                 final long realStart = activePeriod.hasStart() ? activePeriod.getStart() : 0;
@@ -127,7 +128,7 @@ public class AlertsUpdateHandler {
             if (stopId != null) {
                 patch.setStop(new AgencyAndId(agencyId, stopId));
             }
-            if(agencyId != null && routeId == null && tripId == null && stopId == null) {
+            if (agencyId != null && routeId == null && tripId == null && stopId == null) {
                 patch.setAgencyId(agencyId);
             }
             patch.setTimePeriods(periods);
@@ -141,12 +142,11 @@ public class AlertsUpdateHandler {
     }
 
     private String createId(String id, EntitySelector informed) {
-        return id + " "
-            + (informed.hasAgencyId  () ? informed.getAgencyId  () : " null ") + " "
-            + (informed.hasRouteId   () ? informed.getRouteId   () : " null ") + " "
-            + (informed.hasRouteType () ? informed.getRouteType () : " null ") + " "
-            + (informed.hasStopId    () ? informed.getStopId    () : " null ") + " "
-            + (informed.hasTrip() ? informed.getTrip().getTripId() : " null ");
+        return id + " " + (informed.hasAgencyId() ? informed.getAgencyId() : " null ") + " "
+                + (informed.hasRouteId() ? informed.getRouteId() : " null ") + " "
+                + (informed.hasRouteType() ? informed.getRouteType() : " null ") + " "
+                + (informed.hasStopId() ? informed.getStopId() : " null ") + " "
+                + (informed.hasTrip() ? informed.getTrip().getTripId() : " null ");
     }
 
     /**
@@ -165,7 +165,7 @@ public class AlertsUpdateHandler {
     }
 
     public void setDefaultAgencyId(String defaultAgencyId) {
-        if(defaultAgencyId != null)
+        if (defaultAgencyId != null)
             this.defaultAgencyId = defaultAgencyId.intern();
     }
 

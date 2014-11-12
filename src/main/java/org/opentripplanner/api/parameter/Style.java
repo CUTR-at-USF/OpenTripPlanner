@@ -12,11 +12,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 package org.opentripplanner.api.parameter;
+
 public enum Style {
-    GRAY,
-    COLOR30,
-    DIFFERENCE, 
-    TRANSPARENT,
-    MASK,
-    BOARDINGS
+    GRAY, COLOR30, DIFFERENCE, TRANSPARENT, MASK, BOARDINGS
 }

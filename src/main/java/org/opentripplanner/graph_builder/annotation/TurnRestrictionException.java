@@ -21,9 +21,9 @@ public class TurnRestrictionException extends GraphBuilderAnnotation {
     private static final long serialVersionUID = 1L;
 
     public static final String FMT = "Turn restriction with bicycle exception at node %s from %s";
-    
+
     final long node, way;
-    
+
     @Override
     public String getMessage() {
         return String.format(FMT, node, way);

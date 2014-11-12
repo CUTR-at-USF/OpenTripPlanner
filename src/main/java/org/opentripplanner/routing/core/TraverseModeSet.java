@@ -20,8 +20,9 @@ import java.util.List;
 
 /**
  * A set of traverse modes -- typically, one non-transit mode (walking, biking, car) and zero or
- * more transit modes (bus, tram, etc).  This class allows efficiently adding or removing modes
- * from a set.
+ * more transit modes (bus, tram, etc). This class allows efficiently adding or removing modes from
+ * a set.
+ * 
  * @author novalis
  *
  */
@@ -50,17 +51,18 @@ public class TraverseModeSet implements Cloneable, Serializable {
     private static final int MODE_GONDOLA = 1024;
 
     private static final int MODE_FUNICULAR = 2048;
-    
+
     private static final int MODE_CUSTOM_MOTOR_VEHICLE = 4096;
 
-    private static final int MODE_TRAINISH = MODE_TRAM | MODE_RAIL | MODE_SUBWAY | MODE_FUNICULAR | MODE_GONDOLA;
+    private static final int MODE_TRAINISH = MODE_TRAM | MODE_RAIL | MODE_SUBWAY | MODE_FUNICULAR
+            | MODE_GONDOLA;
 
     private static final int MODE_BUSISH = MODE_CABLE_CAR | MODE_BUS;
 
     private static final int MODE_TRANSIT = MODE_TRAINISH | MODE_BUSISH | MODE_FERRY;
-    
+
     private static final int MODE_DRIVING = MODE_CAR | MODE_CUSTOM_MOTOR_VEHICLE;
-    
+
     private static final int MODE_ALL = MODE_TRANSIT | MODE_DRIVING | MODE_WALK | MODE_BICYCLE;
 
     private int modes = 0;
@@ -81,16 +83,16 @@ public class TraverseModeSet implements Cloneable, Serializable {
             this.modes |= getMaskForMode(mode);
         }
     }
-    
+
     /**
      * Returns a mode set containing all modes.
      * 
      * @return
      */
     public static TraverseModeSet allModes() {
-    	TraverseModeSet modes = new TraverseModeSet();
-    	modes.modes = MODE_ALL;
-    	return modes;
+        TraverseModeSet modes = new TraverseModeSet();
+        modes.modes = MODE_ALL;
+        return modes;
     }
 
     private final int getMaskForMode(TraverseMode mode) {
@@ -132,7 +134,7 @@ public class TraverseModeSet implements Cloneable, Serializable {
     public TraverseModeSet(Collection<TraverseMode> modeList) {
         this(modeList.toArray(new TraverseMode[0]));
     }
-    
+
     public int getMask() {
         return modes;
     }
@@ -157,11 +159,11 @@ public class TraverseModeSet implements Cloneable, Serializable {
     public boolean getCar() {
         return (modes & MODE_CAR) != 0;
     }
-    
+
     public boolean getCustomMotorVehicle() {
         return (modes & MODE_CUSTOM_MOTOR_VEHICLE) != 0;
     }
-    
+
     public boolean getDriving() {
         return (modes & MODE_DRIVING) != 0;
     }
@@ -169,27 +171,27 @@ public class TraverseModeSet implements Cloneable, Serializable {
     public boolean getTram() {
         return (modes & MODE_TRAM) != 0;
     }
-    
+
     public boolean getTrainish() {
         return (modes & MODE_TRAINISH) != 0;
     }
-    
+
     public boolean getBusish() {
         return (modes & MODE_BUSISH) != 0;
     }
-    
+
     public boolean getBus() {
         return (modes & MODE_BUS) != 0;
     }
-    
+
     public boolean getGondola() {
         return (modes & MODE_GONDOLA) != 0;
     }
-    
+
     public boolean getFerry() {
         return (modes & MODE_FERRY) != 0;
     }
-    
+
     public boolean getCableCar() {
         return (modes & MODE_CABLE_CAR) != 0;
     }
@@ -197,15 +199,15 @@ public class TraverseModeSet implements Cloneable, Serializable {
     public boolean getFunicular() {
         return (modes & MODE_FUNICULAR) != 0;
     }
-    
+
     public boolean getRail() {
         return (modes & MODE_RAIL) != 0;
     }
-    
+
     public boolean getSubway() {
         return (modes & MODE_SUBWAY) != 0;
     }
-    
+
     public void setBicycle(boolean bicycle) {
         if (bicycle) {
             modes |= MODE_BICYCLE;
@@ -229,7 +231,7 @@ public class TraverseModeSet implements Cloneable, Serializable {
             modes &= ~MODE_CAR;
         }
     }
-    
+
     public void setCustomMotorVehicle(boolean cmv) {
         if (cmv) {
             modes |= MODE_CUSTOM_MOTOR_VEHICLE;
@@ -237,7 +239,7 @@ public class TraverseModeSet implements Cloneable, Serializable {
             modes &= ~MODE_CUSTOM_MOTOR_VEHICLE;
         }
     }
-    
+
     public void setDriving(boolean driving) {
         if (driving) {
             modes |= MODE_DRIVING;
@@ -261,7 +263,7 @@ public class TraverseModeSet implements Cloneable, Serializable {
             modes &= ~MODE_TRAINISH;
         }
     }
-    
+
     public void setBus(boolean bus) {
         if (bus) {
             modes |= MODE_BUS;
@@ -277,7 +279,7 @@ public class TraverseModeSet implements Cloneable, Serializable {
             modes &= ~MODE_BUSISH;
         }
     }
-    
+
     public void setFerry(boolean ferry) {
         if (ferry) {
             modes |= MODE_FERRY;
@@ -285,7 +287,6 @@ public class TraverseModeSet implements Cloneable, Serializable {
             modes &= ~MODE_FERRY;
         }
     }
-
 
     public void setCableCar(boolean cableCar) {
         if (cableCar) {
@@ -318,7 +319,7 @@ public class TraverseModeSet implements Cloneable, Serializable {
             modes &= ~MODE_SUBWAY;
         }
     }
-    
+
     public void setRail(boolean rail) {
         if (rail) {
             modes |= MODE_RAIL;
@@ -410,12 +411,12 @@ public class TraverseModeSet implements Cloneable, Serializable {
             throw new RuntimeException(e);
         }
     }
-    
+
     /**
      * Clear the mode set so that no modes are included.
      */
     public void clear() {
-    	modes = 0;
+        modes = 0;
     }
 
     public int hashCode() {
@@ -424,7 +425,7 @@ public class TraverseModeSet implements Cloneable, Serializable {
 
     public boolean equals(Object other) {
         if (other instanceof TraverseModeSet) {
-            return modes == ((TraverseModeSet)other).modes;
+            return modes == ((TraverseModeSet) other).modes;
         }
         return false;
     }

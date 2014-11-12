@@ -76,7 +76,8 @@ public class DFA extends NFA {
      */
     private int[][] determinize(NFA nfa) {
 
-        int maxTerminal = 0; // track max token value so we know how big to make the transition table
+        int maxTerminal = 0; // track max token value so we know how big to make the transition
+                             // table
         Map<NFAStateSet, AutomatonState> dfaStates = new HashMap<NFAStateSet, AutomatonState>();
         Queue<NFAStateSet> queue = new LinkedList<NFAStateSet>();
 

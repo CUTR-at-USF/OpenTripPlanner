@@ -62,7 +62,7 @@ public class SimpleTransfer extends Edge {
 
     @Override
     public double weightLowerBound(RoutingRequest rr) {
-        int time = (int) (distance / rr.getWalkSpeed()); 
+        int time = (int) (distance / rr.getWalkSpeed());
         return (time * rr.walkReluctance);
     }
 }

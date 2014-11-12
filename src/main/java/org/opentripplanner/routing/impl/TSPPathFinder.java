@@ -28,55 +28,59 @@ import org.opentripplanner.routing.graph.Vertex;
 import org.opentripplanner.routing.spt.GraphPath;
 
 /**
- * The Traveling Salesman Problem
- * Used in searches with 'intermediates'
+ * The Traveling Salesman Problem Used in searches with 'intermediates'
  */
 public class TSPPathFinder {
-	
-	/**
-	 * A TSPPath is an ordered list of endpoints with a total cost to visit those endpoints
-	 * @author novalis
-	 *
-	 */
+
+    /**
+     * A TSPPath is an ordered list of endpoints with a total cost to visit those endpoints
+     * 
+     * @author novalis
+     *
+     */
     static class TSPPath implements Cloneable {
         List<Vertex> vertices;
+
         double cost;
+
         TSPPath(Vertex v, double cost) {
             vertices = new ArrayList<Vertex>();
             vertices.add(v);
             this.cost = cost;
         }
-        
+
         public TSPPath(TSPPath tspPath) {
-        	vertices = new ArrayList<Vertex>(tspPath.vertices);
-        	cost = tspPath.cost;
+            vertices = new ArrayList<Vertex>(tspPath.vertices);
+            cost = tspPath.cost;
         }
 
         public void addVertex(Vertex v, double cost) {
-        	this.vertices.add(v);
-        	this.cost += cost;
+            this.vertices.add(v);
+            this.cost += cost;
         }
-        
-		public TSPPath clone() {
-        	return new TSPPath(this);
+
+        public TSPPath clone() {
+            return new TSPPath(this);
         }
     }
-    
-    public TSPPathFinder() {}
-    
+
+    public TSPPathFinder() {
+    }
+
     private static TSPPath findShortestPathInternal(Vertex toVertex, Vertex fromVertex,
-            Map<Vertex, HashMap<Vertex, GraphPath>> paths, Collection<Vertex> intermediates, double costSoFar) {
-        
+            Map<Vertex, HashMap<Vertex, GraphPath>> paths, Collection<Vertex> intermediates,
+            double costSoFar) {
+
         if (intermediates.size() == 0) {
-            //base case: simply the path from the fromVertex to the toVertex
+            // base case: simply the path from the fromVertex to the toVertex
             TSPPath path = new TSPPath(toVertex, (paths.get(fromVertex).get(toVertex)).getWeight());
             return path;
         }
-        
-        List<Vertex> reducedIntermediates = new ArrayList<Vertex> ();
+
+        List<Vertex> reducedIntermediates = new ArrayList<Vertex>();
         reducedIntermediates.addAll(intermediates);
         TSPPath shortest = null;
-        //find all paths through the remaining intermediate vertices, considering this as the start 
+        // find all paths through the remaining intermediate vertices, considering this as the start
         for (Vertex vertex : intermediates) {
             reducedIntermediates.remove(vertex);
             TSPPath path = findShortestPathInternal(toVertex, vertex, paths, reducedIntermediates,
@@ -89,35 +93,37 @@ public class TSPPathFinder {
         }
         return shortest;
     }
-    
+
     public static GraphPath findShortestPath(Vertex toVertex, Vertex fromVertex,
-            Map<Vertex, HashMap<Vertex, GraphPath>> paths, HashSet<Vertex> vertices, long time, RoutingRequest options) {
+            Map<Vertex, HashMap<Vertex, GraphPath>> paths, HashSet<Vertex> vertices, long time,
+            RoutingRequest options) {
 
         TSPPath shortestPath = findShortestPathInternal(toVertex, fromVertex, paths, vertices, 0);
-        
+
         Vertex firstIntermediate = shortestPath.vertices.get(0);
-        
+
         HashMap<Vertex, GraphPath> pathsFromFV = paths.get(fromVertex);
-        //get the path from the end of the first subpath
-        GraphPath newPath = new GraphPath(pathsFromFV.get(firstIntermediate).states.getLast(), false);
+        // get the path from the end of the first subpath
+        GraphPath newPath = new GraphPath(pathsFromFV.get(firstIntermediate).states.getLast(),
+                false);
         Vertex lastVertex = firstIntermediate;
         for (Vertex v : shortestPath.vertices.subList(1, shortestPath.vertices.size())) {
-               State lastState = newPath.states.getLast();
-               GraphPath subPath = paths.get(lastVertex).get(v);
-               //add a leg-switching state
-               LegSwitchingEdge legSwitchingEdge = new LegSwitchingEdge(lastVertex, lastVertex);
-               lastState = legSwitchingEdge.traverse(lastState);
-               newPath.edges.add(legSwitchingEdge);
-        	   newPath.states.add(lastState);
-               //add the next subpath
-               for (Edge e : subPath.edges) {
-            	   lastState = e.traverse(lastState);
-            	   newPath.edges.add(e);
-            	   newPath.states.add(lastState);
-               }
-               lastVertex = v;
+            State lastState = newPath.states.getLast();
+            GraphPath subPath = paths.get(lastVertex).get(v);
+            // add a leg-switching state
+            LegSwitchingEdge legSwitchingEdge = new LegSwitchingEdge(lastVertex, lastVertex);
+            lastState = legSwitchingEdge.traverse(lastState);
+            newPath.edges.add(legSwitchingEdge);
+            newPath.states.add(lastState);
+            // add the next subpath
+            for (Edge e : subPath.edges) {
+                lastState = e.traverse(lastState);
+                newPath.edges.add(e);
+                newPath.states.add(lastState);
+            }
+            lastVertex = v;
         }
-        
+
         return newPath;
     }
 

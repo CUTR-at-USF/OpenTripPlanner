@@ -23,8 +23,11 @@ import lombok.AllArgsConstructor;
  * @author novalis
  * 
  */
-@Data @NoArgsConstructor @AllArgsConstructor
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class NotePicker {
     private OSMSpecifier specifier;
+
     private NoteProperties noteProperties;
 }

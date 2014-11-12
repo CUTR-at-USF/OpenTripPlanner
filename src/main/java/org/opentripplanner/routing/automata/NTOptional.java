@@ -13,9 +13,9 @@
 
 package org.opentripplanner.routing.automata;
 
-/** 
- * Consume zero or one copies of the specified nonterminal. This is equivalent to the question
- * mark quantifier in regular expressions.
+/**
+ * Consume zero or one copies of the specified nonterminal. This is equivalent to the question mark
+ * quantifier in regular expressions.
  */
 public class NTOptional extends Nonterminal {
 
@@ -29,12 +29,11 @@ public class NTOptional extends Nonterminal {
     public AutomatonState build(AutomatonState in) {
         AutomatonState out = nt.build(in);
         AutomatonState out2 = new AutomatonState();
-        // general rule for nonterminals: 
+        // general rule for nonterminals:
         // never add an epsilon edge leading to (?) a state you did not create.
         out.epsilonTransitions.add(out2);
         in.epsilonTransitions.add(out2);
         return out2;
     }
-
 
 }

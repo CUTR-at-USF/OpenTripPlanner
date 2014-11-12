@@ -194,8 +194,11 @@ public class PolylineEncoder {
     private static class PointAdapterList extends AbstractList<Coordinate> {
 
         private double[] _lat;
+
         private double[] _lon;
+
         private int _offset;
+
         private int _length;
 
         public PointAdapterList(double[] lat, double[] lon) {

@@ -31,27 +31,38 @@ import com.vividsolutions.jts.geom.Point;
 public class SphericalDistanceLibrary implements DistanceLibrary {
 
     private static final DistanceLibrary instance = new SphericalDistanceLibrary();
-    
+
     public static final double RADIUS_OF_EARTH_IN_KM = 6371.01;
+
     public static final double RADIUS_OF_EARTH_IN_M = RADIUS_OF_EARTH_IN_KM * 1000;
-    
+
     // Max admissible lat/lon delta for approximated distance computation
     public static final double MAX_LAT_DELTA_DEG = 4.0;
-    public static final double MAX_LON_DELTA_DEG = 4.0;
-    // 1 / Max over-estimation error of approximated distance, 
-    // for delta lat/lon in given range
-    public static final double MAX_ERR_INV = 0.999462;  
 
-    /* (non-Javadoc)
-     * @see org.opentripplanner.common.geometry.DistanceLibrary#distance(com.vividsolutions.jts.geom.Coordinate, com.vividsolutions.jts.geom.Coordinate)
+    public static final double MAX_LON_DELTA_DEG = 4.0;
+
+    // 1 / Max over-estimation error of approximated distance,
+    // for delta lat/lon in given range
+    public static final double MAX_ERR_INV = 0.999462;
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.opentripplanner.common.geometry.DistanceLibrary#distance(com.vividsolutions.jts.geom.
+     * Coordinate, com.vividsolutions.jts.geom.Coordinate)
      */
     @Override
     public final double distance(Coordinate from, Coordinate to) {
         return distance(from.y, from.x, to.y, to.x);
     }
 
-    /* (non-Javadoc)
-     * @see org.opentripplanner.common.geometry.DistanceLibrary#fastDistance(com.vividsolutions.jts.geom.Coordinate, com.vividsolutions.jts.geom.Coordinate)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.opentripplanner.common.geometry.DistanceLibrary#fastDistance(com.vividsolutions.jts.geom
+     * .Coordinate, com.vividsolutions.jts.geom.Coordinate)
      */
     @Override
     public final double fastDistance(Coordinate from, Coordinate to) {
@@ -86,7 +97,7 @@ public class SphericalDistanceLibrary implements DistanceLibrary {
         double cosLat = FastMath.cos(Math.toRadians(middleY));
         return equirectangularProject(lineString, cosLat).getLength() * RADIUS_OF_EARTH_IN_M;
     }
-    
+
     @Override
     public final double fastLength(LineString lineString, double cosLat) {
         return equirectangularProject(lineString, cosLat).getLength() * RADIUS_OF_EARTH_IN_M;
@@ -94,6 +105,7 @@ public class SphericalDistanceLibrary implements DistanceLibrary {
 
     /**
      * Equirectangular project a polyline.
+     * 
      * @param lineString
      * @param cosLat cos(lat) of the projection center point.
      * @return The projected polyline. Coordinates in radians.
@@ -107,29 +119,31 @@ public class SphericalDistanceLibrary implements DistanceLibrary {
         }
         return GeometryUtils.getGeometryFactory().createLineString(coords2);
     }
-    
+
     /**
-     * @see org.opentripplanner.common.geometry.DistanceLibrary#distance(double, double, double, double)
+     * @see org.opentripplanner.common.geometry.DistanceLibrary#distance(double, double, double,
+     *      double)
      */
     @Override
     public final double distance(double lat1, double lon1, double lat2, double lon2) {
         return distance(lat1, lon1, lat2, lon2, RADIUS_OF_EARTH_IN_M);
     }
-    
+
     /**
-     * @see org.opentripplanner.common.geometry.DistanceLibrary#fastDistance(double, double, double, double)
+     * @see org.opentripplanner.common.geometry.DistanceLibrary#fastDistance(double, double, double,
+     *      double)
      */
     @Override
     public final double fastDistance(double lat1, double lon1, double lat2, double lon2) {
         return fastDistance(lat1, lon1, lat2, lon2, RADIUS_OF_EARTH_IN_M);
     }
-    
+
     /**
-     * @see org.opentripplanner.common.geometry.DistanceLibrary#distance(double, double, double, double, double)
+     * @see org.opentripplanner.common.geometry.DistanceLibrary#distance(double, double, double,
+     *      double, double)
      */
     @Override
-    public final double distance(double lat1, double lon1, double lat2, double lon2,
-            double radius) {
+    public final double distance(double lat1, double lon1, double lat2, double lon2, double radius) {
         // http://en.wikipedia.org/wiki/Great-circle_distance
         lat1 = toRadians(lat1); // Theta-s
         lon1 = toRadians(lon1); // Lambda-s
@@ -142,22 +156,20 @@ public class SphericalDistanceLibrary implements DistanceLibrary {
                 + p2(cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(deltaLon)));
         double x = sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(deltaLon);
 
-        return radius * atan2(y, x);        
+        return radius * atan2(y, x);
     }
-    
 
     /**
-     * Approximated, fast and under-estimated equirectangular distance between two points.
-     * Works only for small delta lat/lon, fall-back on exact distance if not the case.
-     * See: http://www.movable-type.co.uk/scripts/latlong.html
+     * Approximated, fast and under-estimated equirectangular distance between two points. Works
+     * only for small delta lat/lon, fall-back on exact distance if not the case. See:
+     * http://www.movable-type.co.uk/scripts/latlong.html
      */
     public final double fastDistance(double lat1, double lon1, double lat2, double lon2,
             double radius) {
-    	if (abs(lat1 - lat2) > MAX_LAT_DELTA_DEG
-    			|| abs(lon1 - lon2) > MAX_LON_DELTA_DEG)
-    		return distance(lat1, lon1, lat2, lon2, radius);
+        if (abs(lat1 - lat2) > MAX_LAT_DELTA_DEG || abs(lon1 - lon2) > MAX_LON_DELTA_DEG)
+            return distance(lat1, lon1, lat2, lon2, radius);
 
-    	double dLat = toRadians(lat2 - lat1);
+        double dLat = toRadians(lat2 - lat1);
         double dLon = toRadians(lon2 - lon1) * cos(toRadians((lat1 + lat2) / 2));
         return radius * sqrt(dLat * dLat + dLon * dLon) * MAX_ERR_INV;
     }
@@ -171,8 +183,7 @@ public class SphericalDistanceLibrary implements DistanceLibrary {
         return 360 * distance / (2 * Math.PI * RADIUS_OF_EARTH_IN_M);
     }
 
-    public final Envelope bounds(double lat, double lon, double latDistance,
-            double lonDistance) {
+    public final Envelope bounds(double lat, double lon, double latDistance, double lonDistance) {
 
         double radiusOfEarth = RADIUS_OF_EARTH_IN_M;
 
@@ -193,7 +204,7 @@ public class SphericalDistanceLibrary implements DistanceLibrary {
 
         return new Envelope(new Coordinate(lonFrom, latFrom), new Coordinate(lonTo, latTo));
     }
-    
+
     public static DistanceLibrary getInstance() {
         return instance;
     }

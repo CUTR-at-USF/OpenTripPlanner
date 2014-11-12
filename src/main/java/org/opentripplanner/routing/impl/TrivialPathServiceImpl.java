@@ -26,6 +26,7 @@ import org.opentripplanner.routing.spt.ShortestPathTree;
 public class TrivialPathServiceImpl implements PathService {
 
     GraphService graphService;
+
     SPTService sptService;
 
     public TrivialPathServiceImpl(GraphService graphService, SPTService sptService) {

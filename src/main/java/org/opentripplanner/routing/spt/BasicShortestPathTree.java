@@ -35,16 +35,16 @@ import org.opentripplanner.routing.graph.Vertex;
  * @author andrewbyrd
  */
 public class BasicShortestPathTree extends AbstractShortestPathTree {
-    
+
     private static final long serialVersionUID = MavenVersion.VERSION.getUID();
-    
+
     public static final class FactoryImpl implements ShortestPathTreeFactory {
         @Override
         public ShortestPathTree create(RoutingRequest options) {
             return new BasicShortestPathTree(options);
         }
     }
-    
+
     private static final int DEFAULT_CAPACITY = 500;
 
     Map<Vertex, State> states;
@@ -61,8 +61,7 @@ public class BasicShortestPathTree extends AbstractShortestPathTree {
      * Constructor with a parameter indicating the initial capacity of the data structures holding
      * vertices. This can help avoid resizing and rehashing these objects during path searches.
      * 
-     * @param n
-     *            - the initial size of vertex-keyed maps
+     * @param n - the initial size of vertex-keyed maps
      */
     public BasicShortestPathTree(RoutingRequest options, int n) {
         super(options);
@@ -91,7 +90,8 @@ public class BasicShortestPathTree extends AbstractShortestPathTree {
                 PlainStreetEdge pseBack = (PlainStreetEdge) backEdge;
                 if (pseBack.hasExplicitTurnRestrictions()) {
                     // If the previous back edge had turn restrictions, we need to continue
-                    // the search because the previous path may be prevented by from reaching the end by turn restrictions.
+                    // the search because the previous path may be prevented by from reaching the
+                    // end by turn restrictions.
                     return true;
                 }
             }
@@ -122,7 +122,8 @@ public class BasicShortestPathTree extends AbstractShortestPathTree {
             PlainStreetEdge pseBack = (PlainStreetEdge) backEdge;
             if (pseBack.hasExplicitTurnRestrictions()) {
                 // If the previous back edge had turn restrictions, we need to continue
-                // the search because the previous path may be prevented by from reaching the end by turn restrictions.
+                // the search because the previous path may be prevented by from reaching the end by
+                // turn restrictions.
                 return true;
             }
         }

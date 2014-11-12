@@ -137,8 +137,10 @@ public class OSMWithTags {
     }
 
     /**
-     * Returns a name-like value for an entity (if one exists). The otp: namespaced tags are created by
-     * {@link org.opentripplanner.graph_builder.impl.osm.OpenStreetMapGraphBuilderImpl#processRelations processRelations}
+     * Returns a name-like value for an entity (if one exists). The otp: namespaced tags are created
+     * by
+     * {@link org.opentripplanner.graph_builder.impl.osm.OpenStreetMapGraphBuilderImpl#processRelations
+     * processRelations}
      */
     public String getAssumedName() {
         if (_tags.containsKey("name"))
@@ -278,7 +280,7 @@ public class OSMWithTags {
                 || "forestry".equals(access) || "agricultural".equals(access);
         return noThruTraffic;
     }
-    
+
     /**
      * @return True if this node / area is a park and ride.
      */

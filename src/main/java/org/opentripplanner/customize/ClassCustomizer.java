@@ -37,7 +37,7 @@ import javassist.util.proxy.FactoryHelper;
  * any necessary fields
  * 
  * The intended use is to allow optimizations or extensions that require per-edge data to massage an
- * existing graph to meet their needs, without adding additional fields to the core. 
+ * existing graph to meet their needs, without adding additional fields to the core.
  * 
  * @author novalis
  * 
@@ -54,7 +54,7 @@ public class ClassCustomizer {
         this.extraClassPath = file;
     }
 
-    /** 
+    /**
      * 
      * @param iface The interface the new class should implement
      * @param oldlassName The class to be extended
@@ -157,8 +157,9 @@ public class ClassCustomizer {
     }
 
     /**
-     * Add a simple getter with signature "double getFoo()" to the class, which simply returns the value of the 
-     * field fieldName 
+     * Add a simple getter with signature "double getFoo()" to the class, which simply returns the
+     * value of the field fieldName
+     * 
      * @param ctClass
      * @param classFile
      * @param fieldName

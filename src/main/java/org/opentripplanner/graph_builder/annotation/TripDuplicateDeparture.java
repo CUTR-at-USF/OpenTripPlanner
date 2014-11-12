@@ -22,9 +22,9 @@ public class TripDuplicateDeparture extends GraphBuilderAnnotation {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String FMT = "Possible GTFS feed error: Duplicate first departure time. " +
-    		"New trip: %s Existing trip: %s This will be handled correctly but inefficiently.";
-    
+    public static final String FMT = "Possible GTFS feed error: Duplicate first departure time. "
+            + "New trip: %s Existing trip: %s This will be handled correctly but inefficiently.";
+
     final Trip newTrip;
 
     final Trip existingTrip;

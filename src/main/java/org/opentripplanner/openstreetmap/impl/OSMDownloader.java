@@ -93,12 +93,13 @@ public class OSMDownloader {
     }
 
     private String formatNumberWithoutLocale(double number) {
-	return String.format((Locale) null, "%.4f", number);
+        return String.format((Locale) null, "%.4f", number);
     }
 
     private String getKey(double x, double y) {
-        return formatNumberWithoutLocale(y) + "_" + formatNumberWithoutLocale(x) + "_" + formatNumberWithoutLocale(_latYStep)
-                + "_" + formatNumberWithoutLocale(_lonXStep) + "_" + formatNumberWithoutLocale(_overlap);
+        return formatNumberWithoutLocale(y) + "_" + formatNumberWithoutLocale(x) + "_"
+                + formatNumberWithoutLocale(_latYStep) + "_" + formatNumberWithoutLocale(_lonXStep)
+                + "_" + formatNumberWithoutLocale(_overlap);
     }
 
     private File getPathToUpToDateMapTile(double lat, double lon, String key) throws IOException {
@@ -110,7 +111,6 @@ public class OSMDownloader {
                     lat + _latYStep + _overlap);
 
             LOG.debug("downloading osm tile: " + key + " from path " + path + " e " + path.exists());
-            
 
             URL url = constructUrl(r);
             LOG.warn("downloading from " + url.toString());
@@ -131,7 +131,7 @@ public class OSMDownloader {
             } catch (RuntimeException e) {
                 out.close();
                 LOG.info("Removing half-written file " + path);
-                path.delete(); //clean up any half-written files
+                path.delete(); // clean up any half-written files
                 throw e;
             }
         }
@@ -140,9 +140,9 @@ public class OSMDownloader {
     }
 
     private File getPathToMapTile(String key) throws IOException {
-        if( _cacheDirectory == null) {
+        if (_cacheDirectory == null) {
             File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-            _cacheDirectory = new File(tmpDir,"osm-tiles");
+            _cacheDirectory = new File(tmpDir, "osm-tiles");
         }
 
         if (!_cacheDirectory.exists()) {
@@ -171,14 +171,14 @@ public class OSMDownloader {
         double bottom = r.getMinY();
         double top = r.getMaxY();
         try {
-            return new URL(getApiBaseUrl() + "map?bbox=" + left + "," + bottom
-                    + "," + right + "," + top);
+            return new URL(getApiBaseUrl() + "map?bbox=" + left + "," + bottom + "," + right + ","
+                    + top);
         } catch (MalformedURLException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    /** 
+    /**
      * Set the base OSM API URL from which OSM tiles will be downloaded.
      */
     public void setApiBaseUrl(String apiBaseUrl) {

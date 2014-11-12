@@ -35,7 +35,8 @@ public interface SkipTraverseResultStrategy {
      * @param traverseResult the current traverse result to consider for skipping
      * @param spt the shortest path tree
      * @param traverseOptions the current traverse options
-     * @param remainingWeightEstimate the remaining weight estimate from the heuristic (or -1 if no heuristic)
+     * @param remainingWeightEstimate the remaining weight estimate from the heuristic (or -1 if no
+     *        heuristic)
      * @return true if the given traverse result should not be considered further
      */
     public boolean shouldSkipTraversalResult(Vertex origin, Vertex target, State parent,

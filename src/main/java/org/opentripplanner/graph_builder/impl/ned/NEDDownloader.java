@@ -63,7 +63,8 @@ import org.xml.sax.SAXException;
 import com.vividsolutions.jts.geom.Envelope;
 
 /**
- * Downloads tiles from the National Elevation Dataset. 
+ * Downloads tiles from the National Elevation Dataset.
+ * 
  * @author novalis
  *
  */
@@ -76,7 +77,7 @@ public class NEDDownloader implements NEDTileSource {
     private File cacheDirectory;
 
     static String dataset = "ND302XZ"; // 1/3 arcsecond data.
-    
+
     private double _latYStep = 0.16;
 
     private double _lonXStep = 0.16;
@@ -94,7 +95,8 @@ public class NEDDownloader implements NEDTileSource {
     private File getPathToNEDArchive(String key) {
         if (!cacheDirectory.exists()) {
             if (!cacheDirectory.mkdirs()) {
-                throw new RuntimeException("Failed to create cache directory for NED at " + cacheDirectory);
+                throw new RuntimeException("Failed to create cache directory for NED at "
+                        + cacheDirectory);
             }
         }
 
@@ -105,7 +107,8 @@ public class NEDDownloader implements NEDTileSource {
     private File getPathToNEDTile(String key) {
         if (!cacheDirectory.exists()) {
             if (!cacheDirectory.mkdirs()) {
-                throw new RuntimeException("Failed to create cache directory for NED at " + cacheDirectory);
+                throw new RuntimeException("Failed to create cache directory for NED at "
+                        + cacheDirectory);
             }
         }
 
@@ -194,8 +197,7 @@ public class NEDDownloader implements NEDTileSource {
 
                 // hopefully, this will be a list of one.
                 if (nodes.getLength() > 1) {
-                    log
-                            .debug("One of our NED tiles requires more than one tile from the server.  This is slightly inefficient, and sort of yucky.");
+                    log.debug("One of our NED tiles requires more than one tile from the server.  This is slightly inefficient, and sort of yucky.");
                 }
                 for (int i = 0; i < nodes.getLength(); ++i) {
                     Node node = nodes.item(i);
@@ -340,7 +342,8 @@ public class NEDDownloader implements NEDTileSource {
                     sleep(3000);
                     String token = initiateDownload(url);
                     DOWNLOAD: for (int dl_attempt = 0; dl_attempt < 20; ++dl_attempt) {
-                        log.info("Waiting to check if tile is ready for download (try {}).", dl_attempt + 1);
+                        log.info("Waiting to check if tile is ready for download (try {}).",
+                                dl_attempt + 1);
                         sleep(30000);
                         if (downloadReady(token)) {
                             downloadFile(url, token);
@@ -358,7 +361,8 @@ public class NEDDownloader implements NEDTileSource {
                     log.debug("Download ID unrecognized by server, retrying.");
                     continue REQUEST;
                 } catch (Exception e) {
-                    throw new RuntimeException("Error getting data from USGS Download Server while downloading", e);
+                    throw new RuntimeException(
+                            "Error getting data from USGS Download Server while downloading", e);
                 }
             }
             log.error("Unable to download a NED tile after 5 requests.");

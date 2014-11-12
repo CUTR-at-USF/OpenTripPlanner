@@ -26,8 +26,6 @@ import java.util.zip.GZIPInputStream;
 
 import org.junit.Test;
 
-
-
 import org.opentripplanner.openstreetmap.model.OSMMap;
 import org.opentripplanner.openstreetmap.model.OSMNode;
 import org.opentripplanner.openstreetmap.model.OSMWay;

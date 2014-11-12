@@ -27,7 +27,6 @@ import org.opentripplanner.routing.graph.Edge;
 import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.routing.graph.Vertex;
 
-
 /**
  * Allows adding supplemental edges to existing vertices in another graph. Useful for CH, and
  * potentially for "extraEdges".
@@ -200,9 +199,9 @@ public class OverlayGraph implements Serializable {
 
     private void writeObject(ObjectOutputStream out) throws IOException {
         for (List<Edge> le : outgoing.values())
-            ((ArrayList<Edge>)le).trimToSize();
+            ((ArrayList<Edge>) le).trimToSize();
         for (List<Edge> le : incoming.values())
-            ((ArrayList<Edge>)le).trimToSize();
+            ((ArrayList<Edge>) le).trimToSize();
         out.defaultWriteObject();
     }
 

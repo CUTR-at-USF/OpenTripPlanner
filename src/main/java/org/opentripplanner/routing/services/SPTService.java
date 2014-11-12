@@ -25,14 +25,14 @@ import org.opentripplanner.routing.spt.ShortestPathTree;
  * attempt to get additional paths by altering parameters.
  */
 public interface SPTService {
-    
+
     /**
      * Generate a shortest path tree for this RoutingRequest.
      * 
      * @param req
      * @return
      */
-    public ShortestPathTree getShortestPathTree(RoutingRequest req); 
+    public ShortestPathTree getShortestPathTree(RoutingRequest req);
 
     /**
      * Generate SPT, controlling the timeout externally.

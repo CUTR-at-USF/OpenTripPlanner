@@ -104,10 +104,13 @@ import com.vividsolutions.jts.linearref.LocationIndexedLine;
 // or do all the steps within one loop over trips. It would be clearer if there were multiple loops over the trips.
 
 /** A wrapper class for Trips that allows them to be sorted. */
-class InterliningTrip  implements Comparable<InterliningTrip> {
+class InterliningTrip implements Comparable<InterliningTrip> {
     public Trip trip;
+
     public StopTime firstStopTime;
+
     public StopTime lastStopTime;
+
     TripPattern tripPattern;
 
     InterliningTrip(Trip trip, List<StopTime> stopTimes, TripPattern tripPattern) {
@@ -120,12 +123,12 @@ class InterliningTrip  implements Comparable<InterliningTrip> {
     public int getPatternIndex() {
         return tripPattern.getTripIndex(trip);
     }
-    
+
     @Override
     public int compareTo(InterliningTrip o) {
         return firstStopTime.getArrivalTime() - o.firstStopTime.getArrivalTime();
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (o instanceof InterliningTrip) {
@@ -133,21 +136,23 @@ class InterliningTrip  implements Comparable<InterliningTrip> {
         }
         return false;
     }
-    
+
 }
 
-/** 
- * This compound key object is used when grouping interlining trips together by (serviceId, blockId). 
+/**
+ * This compound key object is used when grouping interlining trips together by (serviceId,
+ * blockId).
  */
 class BlockIdAndServiceId {
     public String blockId;
+
     public AgencyAndId serviceId;
 
     BlockIdAndServiceId(Trip trip) {
         this.blockId = trip.getBlockId();
         this.serviceId = trip.getServiceId();
     }
-    
+
     public boolean equals(Object o) {
         if (o instanceof BlockIdAndServiceId) {
             BlockIdAndServiceId other = ((BlockIdAndServiceId) o);
@@ -165,10 +170,15 @@ class BlockIdAndServiceId {
 /* TODO Move this stuff into the geometry library */
 class IndexedLineSegment {
     private static final double RADIUS = SphericalDistanceLibrary.RADIUS_OF_EARTH_IN_M;
+
     int index;
+
     Coordinate start;
+
     Coordinate end;
+
     private DistanceLibrary distanceLibrary = SphericalDistanceLibrary.getInstance();
+
     private double lineLength;
 
     public IndexedLineSegment(int index, Coordinate start, Coordinate end) {
@@ -184,8 +194,8 @@ class IndexedLineSegment {
         double lat1Radians = c1.y * FastMath.PI / 180;
         double lat2Radians = c2.y * FastMath.PI / 180;
         double y = FastMath.sin(deltaLon) * FastMath.cos(lat2Radians);
-        double x = FastMath.cos(lat1Radians)*FastMath.sin(lat2Radians) -
-                FastMath.sin(lat1Radians)*FastMath.cos(lat2Radians)*FastMath.cos(deltaLon);
+        double x = FastMath.cos(lat1Radians) * FastMath.sin(lat2Radians)
+                - FastMath.sin(lat1Radians) * FastMath.cos(lat2Radians) * FastMath.cos(deltaLon);
         return FastMath.atan2(y, x);
     }
 
@@ -194,8 +204,8 @@ class IndexedLineSegment {
         double bearingToCoord = bearing(start, coord);
         double bearingToEnd = bearing(start, end);
         return FastMath.asin(FastMath.sin(distanceFromStart / RADIUS)
-            * FastMath.sin(bearingToCoord - bearingToEnd))
-            * RADIUS;
+                * FastMath.sin(bearingToCoord - bearingToEnd))
+                * RADIUS;
     }
 
     double distance(Coordinate coord) {
@@ -206,21 +216,21 @@ class IndexedLineSegment {
         double distanceToEnd = distanceLibrary.fastDistance(coord, end);
 
         if (distanceToStart < distanceToEnd) {
-            //we might be behind the line start
+            // we might be behind the line start
             if (inverseAtd > lineLength) {
-                //we are behind line start
+                // we are behind line start
                 return distanceToStart;
             } else {
-                //we are within line
+                // we are within line
                 return Math.abs(cte);
             }
         } else {
-            //we might be after line end
+            // we might be after line end
             if (atd > lineLength) {
-                //we are behind line end, so we that's the nearest point
+                // we are behind line end, so we that's the nearest point
                 return distanceToEnd;
             } else {
-                //we are within line
+                // we are within line
                 return Math.abs(cte);
             }
         }
@@ -229,8 +239,8 @@ class IndexedLineSegment {
     private double inverseAlongTrackDistance(Coordinate coord, double inverseCrossTrackError) {
         double distanceFromEnd = distanceLibrary.fastDistance(end, coord);
         double alongTrackDistance = FastMath.acos(FastMath.cos(distanceFromEnd / RADIUS)
-            / FastMath.cos(inverseCrossTrackError / RADIUS))
-            * RADIUS;
+                / FastMath.cos(inverseCrossTrackError / RADIUS))
+                * RADIUS;
         return alongTrackDistance;
     }
 
@@ -254,8 +264,8 @@ class IndexedLineSegment {
     private double alongTrackDistance(Coordinate coord, double crossTrackError) {
         double distanceFromStart = distanceLibrary.fastDistance(start, coord);
         double alongTrackDistance = FastMath.acos(FastMath.cos(distanceFromStart / RADIUS)
-            / FastMath.cos(crossTrackError / RADIUS))
-            * RADIUS;
+                / FastMath.cos(crossTrackError / RADIUS))
+                * RADIUS;
         return alongTrackDistance;
     }
 }
@@ -288,13 +298,13 @@ public class GTFSPatternHopFactory {
     private GtfsRelationalDao _dao;
 
     private CalendarService _calendarService;
-    
+
     private Map<ShapeSegmentKey, LineString> _geometriesByShapeSegmentKey = new HashMap<ShapeSegmentKey, LineString>();
 
     private Map<AgencyAndId, LineString> _geometriesByShapeId = new HashMap<AgencyAndId, LineString>();
 
     private Map<AgencyAndId, double[]> _distancesByShapeId = new HashMap<AgencyAndId, double[]>();
-    
+
     private FareServiceFactory fareServiceFactory;
 
     private Map<StopPattern, TripPattern> tripPatterns = Maps.newHashMap();
@@ -311,7 +321,7 @@ public class GTFSPatternHopFactory {
         this._dao = context.getDao();
         this._calendarService = context.getCalendarService();
     }
-    
+
     public GTFSPatternHopFactory() {
         this._dao = null;
         this._calendarService = null;
@@ -323,60 +333,68 @@ public class GTFSPatternHopFactory {
             fareServiceFactory = new DefaultFareServiceFactory();
         }
         fareServiceFactory.setDao(_dao);
-        
-        // TODO: Why are we loading stops? The Javadoc above says this method assumes stops are aleady loaded.
+
+        // TODO: Why are we loading stops? The Javadoc above says this method assumes stops are
+        // aleady loaded.
         loadStops(graph);
         loadPathways(graph);
         loadAgencies(graph);
-        // TODO: Why is there cached "data", and why are we clearing it? Due to a general lack of comments, I have no idea.
+        // TODO: Why is there cached "data", and why are we clearing it? Due to a general lack of
+        // comments, I have no idea.
         // Perhaps it is to allow name collisions with previously loaded feeds.
-        clearCachedData(); 
+        clearCachedData();
 
         /* Assign 0-based numeric codes to all GTFS service IDs. */
         for (AgencyAndId serviceId : _dao.getAllServiceIds()) {
             // TODO: FIX Service code collision for multiple feeds.
             graph.serviceCodes.put(serviceId, graph.serviceCodes.size());
         }
-        
+
         LOG.debug("building hops from trips");
         Collection<Trip> trips = _dao.getAllTrips();
         int tripCount = 0;
 
-        /* First, record which trips are used by one or more frequency entries.
-         * These trips will be ignored for the purposes of non-frequency routing, and
-         * all the frequency entries referencing the same trip can be added at once to the same
-         * Timetable/TripPattern.
+        /*
+         * First, record which trips are used by one or more frequency entries. These trips will be
+         * ignored for the purposes of non-frequency routing, and all the frequency entries
+         * referencing the same trip can be added at once to the same Timetable/TripPattern.
          */
-        ListMultimap<Trip, Frequency> frequenciesForTrip = ArrayListMultimap.create();        
-        for(Frequency freq : _dao.getAllFrequencies()) {
+        ListMultimap<Trip, Frequency> frequenciesForTrip = ArrayListMultimap.create();
+        for (Frequency freq : _dao.getAllFrequencies()) {
             frequenciesForTrip.put(freq.getTrip(), freq);
         }
-        
+
         /* Then loop over all trips, handling each one as a frequency-based or scheduled trip. */
         int freqCount = 0;
         int nonFreqCount = 0;
-        TRIP : for (Trip trip : trips) {
+        TRIP: for (Trip trip : trips) {
 
             if (++tripCount % 100000 == 0) {
                 LOG.debug("loading trips {}/{}", tripCount, trips.size());
             }
 
             // TODO: move to a validator module
-            if ( ! _calendarService.getServiceIds().contains(trip.getServiceId())) {
+            if (!_calendarService.getServiceIds().contains(trip.getServiceId())) {
                 LOG.warn(graph.addBuilderAnnotation(new TripUndefinedService(trip)));
             }
 
             /* Fetch the stop times for this trip. Copy the list since it's immutable. */
             List<StopTime> stopTimes = new ArrayList<StopTime>(_dao.getStopTimesForTrip(trip));
 
-            /* GTFS stop times frequently contain duplicate, missing, or incorrect entries. Repair them. */
+            /*
+             * GTFS stop times frequently contain duplicate, missing, or incorrect entries. Repair
+             * them.
+             */
             if (removeRepeatedStops(stopTimes)) {
                 LOG.warn(graph.addBuilderAnnotation(new RepeatedStops(trip)));
             }
             filterStopTimes(stopTimes, graph);
-            interpolateStopTimes(stopTimes);   
-            
-            /* If after filtering this trip does not contain at least 2 stoptimes, it does not serve any purpose. */
+            interpolateStopTimes(stopTimes);
+
+            /*
+             * If after filtering this trip does not contain at least 2 stoptimes, it does not serve
+             * any purpose.
+             */
             if (stopTimes.size() < 2) {
                 LOG.warn(graph.addBuilderAnnotation(new TripDegenerate(trip)));
                 continue TRIP;
@@ -393,7 +411,10 @@ public class GTFSPatternHopFactory {
             /* Create a TripTimes object for this list of stoptimes, which form one trip. */
             TripTimes tripTimes = new TripTimes(trip, stopTimes, graph.deduplicator);
 
-            /* If this trip is referenced by one or more lines in frequencies.txt, wrap it in a FrequencyEntry. */
+            /*
+             * If this trip is referenced by one or more lines in frequencies.txt, wrap it in a
+             * FrequencyEntry.
+             */
             List<Frequency> frequencies = frequenciesForTrip.get(trip);
             if (frequencies != null && !(frequencies.isEmpty())) {
                 for (Frequency freq : frequencies) {
@@ -403,14 +424,18 @@ public class GTFSPatternHopFactory {
                 // TODO replace: createGeometry(graph, trip, stopTimes, hops);
             }
 
-            /* This trip was not frequency-based. Add the TripTimes directly to the TripPattern's scheduled timetable. */
+            /*
+             * This trip was not frequency-based. Add the TripTimes directly to the TripPattern's
+             * scheduled timetable.
+             */
             else {
                 tripPattern.add(tripTimes);
                 nonFreqCount++;
             }
 
         } // end foreach TRIP
-        LOG.info("Added {} frequency-based and {} single-trip timetable entries.", freqCount, nonFreqCount);
+        LOG.info("Added {} frequency-based and {} single-trip timetable entries.", freqCount,
+                nonFreqCount);
 
         /* Generate unique human-readable names for all the TableTripPatterns. */
         TripPattern.generateUniqueNames(tripPatterns.values());
@@ -424,10 +449,10 @@ public class GTFSPatternHopFactory {
             tripPattern.setServiceCodes(graph.serviceCodes); // TODO this could be more elegant
             for (Trip trip : tripPattern.getTrips()) {
                 // FIXME: Compute geometry sanely, preferably for each trip individually.
-                if (trip.getShapeId() != null && trip.getShapeId().getId() != null &&
-                        !trip.getShapeId().getId().equals("")) {
+                if (trip.getShapeId() != null && trip.getShapeId().getId() != null
+                        && !trip.getShapeId().getId().equals("")) {
                     createGeometry(graph, trip, tripPattern.hopEdges);
-                    break;  // We can only store one geometry per pattern, so this one has to be it.
+                    break; // We can only store one geometry per pattern, so this one has to be it.
                 }
             }
         }
@@ -438,28 +463,36 @@ public class GTFSPatternHopFactory {
         /* Interpret the transfers explicitly defined in transfers.txt. */
         loadTransfers(graph);
 
-        /* Is this the wrong place to do this? It should be done on all feeds at once, or at deserialization. */
-        // it is already done at deserialization, but standalone mode allows using graphs without serializing them.
+        /*
+         * Is this the wrong place to do this? It should be done on all feeds at once, or at
+         * deserialization.
+         */
+        // it is already done at deserialization, but standalone mode allows using graphs without
+        // serializing them.
         for (TripPattern tableTripPattern : tripPatterns.values()) {
             tableTripPattern.getScheduledTimetable().finish();
         }
-        
+
         clearCachedData(); // eh?
         graph.putService(FareService.class, fareServiceFactory.makeFareService());
         graph.putService(OnBoardDepartService.class, new OnBoardDepartServiceImpl());
     }
 
     /**
-     * Identify interlined trips (where a physical vehicle continues on to another logical trip)
-     * and update the TripPatterns accordingly. This must be called after all the pattern edges and vertices
-     * are already created, because it creates interline dwell edges between existing pattern arrive/depart vertices.
+     * Identify interlined trips (where a physical vehicle continues on to another logical trip) and
+     * update the TripPatterns accordingly. This must be called after all the pattern edges and
+     * vertices are already created, because it creates interline dwell edges between existing
+     * pattern arrive/depart vertices.
      */
-    private void interline (Collection<TripPattern> tripPatterns) {
+    private void interline(Collection<TripPattern> tripPatterns) {
 
         /* Record which Pattern each interlined TripTimes belongs to. */
         Map<TripTimes, TripPattern> patternForTripTimes = Maps.newHashMap();
 
-        /* TripTimes grouped by the block ID and service ID of their trips. Must be a ListMultimap to allow sorting. */
+        /*
+         * TripTimes grouped by the block ID and service ID of their trips. Must be a ListMultimap
+         * to allow sorting.
+         */
         ListMultimap<BlockIdAndServiceId, TripTimes> tripTimesForBlock = ArrayListMultimap.create();
 
         LOG.info("Finding interlining trips based on block IDs.");
@@ -468,7 +501,7 @@ public class GTFSPatternHopFactory {
             /* TODO: Block semantics seem undefined for frequency trips, so skip them? */
             for (TripTimes tripTimes : timetable.getTripTimes()) {
                 Trip trip = tripTimes.trip;
-                if ( ! Strings.isNullOrEmpty(trip.getBlockId())) {
+                if (!Strings.isNullOrEmpty(trip.getBlockId())) {
                     tripTimesForBlock.put(new BlockIdAndServiceId(trip), tripTimes);
                     // For space efficiency, only record times that are part of a block.
                     patternForTripTimes.put(tripTimes, pattern);
@@ -476,36 +509,40 @@ public class GTFSPatternHopFactory {
             }
         }
 
-        /* Associate pairs of TripPatterns with lists of trips that continue from one pattern to the other. */
+        /*
+         * Associate pairs of TripPatterns with lists of trips that continue from one pattern to the
+         * other.
+         */
         Multimap<P2<TripPattern>, P2<Trip>> interlines = ArrayListMultimap.create();
 
         /*
-          Sort trips within each block by first departure time, then iterate over trips in this block and service,
-          linking them. Has no effect on single-trip blocks.
+         * Sort trips within each block by first departure time, then iterate over trips in this
+         * block and service, linking them. Has no effect on single-trip blocks.
          */
-        SERVICE_BLOCK :
-        for (BlockIdAndServiceId block : tripTimesForBlock.keySet()) {
+        SERVICE_BLOCK: for (BlockIdAndServiceId block : tripTimesForBlock.keySet()) {
             List<TripTimes> blockTripTimes = tripTimesForBlock.get(block);
             Collections.sort(blockTripTimes);
             TripTimes prev = null;
             for (TripTimes curr : blockTripTimes) {
                 if (prev != null) {
                     if (prev.getDepartureTime(prev.getNumStops() - 1) > curr.getArrivalTime(0)) {
-                        LOG.error("Trip times within block {} on service {} are not increasing on service {} after trip {}.",
+                        LOG.error(
+                                "Trip times within block {} on service {} are not increasing on service {} after trip {}.",
                                 block.blockId, block.serviceId, prev.trip.getId());
                         continue SERVICE_BLOCK;
                     }
                     TripPattern prevPattern = patternForTripTimes.get(prev);
                     TripPattern currPattern = patternForTripTimes.get(curr);
-                    interlines.put(new P2<TripPattern>(prevPattern, currPattern), new P2<Trip>(prev.trip, curr.trip));
+                    interlines.put(new P2<TripPattern>(prevPattern, currPattern), new P2<Trip>(
+                            prev.trip, curr.trip));
                 }
                 prev = curr;
             }
         }
 
         /*
-          Create the PatternInterlineDwell edges linking together TripPatterns.
-          All the pattern vertices and edges must already have been created.
+         * Create the PatternInterlineDwell edges linking together TripPatterns. All the pattern
+         * vertices and edges must already have been created.
          */
         for (P2<TripPattern> patterns : interlines.keySet()) {
             TripPattern prevPattern = patterns.getFirst();
@@ -522,14 +559,15 @@ public class GTFSPatternHopFactory {
     private void createGeometry(Graph graph, Trip trip, PatternHop hops[]) {
         AgencyAndId shapeId = trip.getShapeId();
         List<StopTime> stopTimes = _dao.getStopTimesForTrip(trip);
-        
+
         /* Detect presence or absence of shape_dist_traveled on a per-trip basis */
         StopTime st0 = stopTimes.get(0);
         boolean hasShapeDist = st0.isShapeDistTraveledSet();
-        if (hasShapeDist) { 
+        if (hasShapeDist) {
             // this trip has shape_dist in stop_times
             for (int i = 0; i < hops.length; ++i) {
-                if (hops[i] == null) continue;
+                if (hops[i] == null)
+                    continue;
                 st0 = stopTimes.get(i);
                 StopTime st1 = stopTimes.get(i + 1);
                 hops[i].setGeometry(getHopGeometryViaShapeDistTraveled(graph, shapeId, st0, st1,
@@ -551,13 +589,14 @@ public class GTFSPatternHopFactory {
         }
         // This trip does not have shape_dist in stop_times, but does have an associated shape.
         ArrayList<IndexedLineSegment> segments = new ArrayList<IndexedLineSegment>();
-        for (int i = 0 ; i < shape.getNumPoints() - 1; ++i) {
-            segments.add(new IndexedLineSegment(i, shape.getCoordinateN(i), shape.getCoordinateN(i + 1)));
+        for (int i = 0; i < shape.getNumPoints() - 1; ++i) {
+            segments.add(new IndexedLineSegment(i, shape.getCoordinateN(i), shape
+                    .getCoordinateN(i + 1)));
         }
         // Find possible segment matches for each stop.
         List<List<IndexedLineSegment>> possibleSegmentsForStop = new ArrayList<List<IndexedLineSegment>>();
         int minSegmentIndex = 0;
-        for (int i = 0; i < stopTimes.size() ; ++i) {
+        for (int i = 0; i < stopTimes.size(); ++i) {
             Stop stop = stopTimes.get(i).getStop();
             Coordinate coord = new Coordinate(stop.getLon(), stop.getLat());
             List<IndexedLineSegment> stopSegments = new ArrayList<IndexedLineSegment>();
@@ -567,7 +606,7 @@ public class GTFSPatternHopFactory {
             int index = -1;
             int minSegmentIndexForThisStop = -1;
             for (IndexedLineSegment segment : segments) {
-                index ++;
+                index++;
                 if (segment.index < minSegmentIndex) {
                     continue;
                 }
@@ -586,8 +625,8 @@ public class GTFSPatternHopFactory {
                 }
             }
             if (stopSegments.size() == 0) {
-                //no segments within 150m
-                //fall back to nearest segment
+                // no segments within 150m
+                // fall back to nearest segment
                 stopSegments.add(bestSegment);
                 minSegmentIndex = bestSegment.index;
             } else {
@@ -595,8 +634,9 @@ public class GTFSPatternHopFactory {
                 Collections.sort(stopSegments, new IndexedLineSegmentComparator(coord));
             }
 
-            for (int j = i - 1; j >= 0; j --) {
-                for (Iterator<IndexedLineSegment> it = possibleSegmentsForStop.get(j).iterator(); it.hasNext(); ) {
+            for (int j = i - 1; j >= 0; j--) {
+                for (Iterator<IndexedLineSegment> it = possibleSegmentsForStop.get(j).iterator(); it
+                        .hasNext();) {
                     IndexedLineSegment segment = it.next();
                     if (segment.index > maxSegmentIndex) {
                         it.remove();
@@ -614,13 +654,15 @@ public class GTFSPatternHopFactory {
             // linking, even though theoretically we could do better.
 
             for (int i = 0; i < stopTimes.size() - 1; ++i) {
-                if (hops[i] == null) continue;
+                if (hops[i] == null)
+                    continue;
                 st0 = stopTimes.get(i);
                 StopTime st1 = stopTimes.get(i + 1);
                 LineString geometry = createSimpleGeometry(st0.getStop(), st1.getStop());
                 hops[i].setGeometry(geometry);
-                //this warning is not strictly correct, but will do
-                LOG.warn(graph.addBuilderAnnotation(new BogusShapeGeometryCaught(shapeId, st0, st1)));
+                // this warning is not strictly correct, but will do
+                LOG.warn(graph
+                        .addBuilderAnnotation(new BogusShapeGeometryCaught(shapeId, st0, st1)));
             }
             return;
         }
@@ -630,13 +672,14 @@ public class GTFSPatternHopFactory {
         double distanceSoFar = 0;
         int last = 0;
         for (int i = 0; i < hops.length; ++i) {
-            if (hops[i] == null) continue;
+            if (hops[i] == null)
+                continue;
             LinearLocation startLocation = endLocation;
             endLocation = locationIt.next();
 
-            //convert from LinearLocation to distance
-            //advance distanceSoFar up to start of segment containing startLocation;
-            //it does not matter at all if this is accurate so long as it is consistent
+            // convert from LinearLocation to distance
+            // advance distanceSoFar up to start of segment containing startLocation;
+            // it does not matter at all if this is accurate so long as it is consistent
             for (int j = last; j < startLocation.getSegmentIndex(); ++j) {
                 Coordinate from = shape.getCoordinateN(j);
                 Coordinate to = shape.getCoordinateN(j + 1);
@@ -646,8 +689,9 @@ public class GTFSPatternHopFactory {
             }
             last = startLocation.getSegmentIndex();
 
-            double startIndex = distanceSoFar + startLocation.getSegmentFraction() * startLocation.getSegmentLength(shape);
-            //advance distanceSoFar up to start of segment containing endLocation
+            double startIndex = distanceSoFar + startLocation.getSegmentFraction()
+                    * startLocation.getSegmentLength(shape);
+            // advance distanceSoFar up to start of segment containing endLocation
             for (int j = last; j < endLocation.getSegmentIndex(); ++j) {
                 Coordinate from = shape.getCoordinateN(j);
                 Coordinate to = shape.getCoordinateN(j + 1);
@@ -656,7 +700,8 @@ public class GTFSPatternHopFactory {
                 distanceSoFar += FastMath.sqrt(xd * xd + yd * yd);
             }
             last = startLocation.getSegmentIndex();
-            double endIndex = distanceSoFar + endLocation.getSegmentFraction() * endLocation.getSegmentLength(shape);
+            double endIndex = distanceSoFar + endLocation.getSegmentFraction()
+                    * endLocation.getSegmentLength(shape);
 
             ShapeSegmentKey key = new ShapeSegmentKey(shapeId, startIndex, endIndex);
             LineString geometry = _geometriesByShapeSegmentKey.get(key);
@@ -666,8 +711,8 @@ public class GTFSPatternHopFactory {
                 geometry = (LineString) locationIndexed.extractLine(startLocation, endLocation);
 
                 // Pack the resulting line string
-                CoordinateSequence sequence = new PackedCoordinateSequence.Double(geometry
-                        .getCoordinates(), 2);
+                CoordinateSequence sequence = new PackedCoordinateSequence.Double(
+                        geometry.getCoordinates(), 2);
                 geometry = _geometryFactory.createLineString(sequence);
             }
             hops[i].setGeometry(geometry);
@@ -677,10 +722,12 @@ public class GTFSPatternHopFactory {
     /**
      * Find a consistent, increasing list of LinearLocations along a shape for a set of stops.
      * Handles loops routes.
+     * 
      * @return
      */
-    private List<LinearLocation> getStopLocations(List<List<IndexedLineSegment>> possibleSegmentsForStop,
-            List<StopTime> stopTimes, int index, int prevSegmentIndex) {
+    private List<LinearLocation> getStopLocations(
+            List<List<IndexedLineSegment>> possibleSegmentsForStop, List<StopTime> stopTimes,
+            int index, int prevSegmentIndex) {
 
         if (index == stopTimes.size()) {
             return new LinkedList<LinearLocation>();
@@ -692,14 +739,16 @@ public class GTFSPatternHopFactory {
 
         for (IndexedLineSegment segment : possibleSegmentsForStop.get(index)) {
             if (segment.index < prevSegmentIndex) {
-                //can't go backwards along line
+                // can't go backwards along line
                 continue;
             }
-            List<LinearLocation> locations = getStopLocations(possibleSegmentsForStop, stopTimes, index + 1, segment.index);
+            List<LinearLocation> locations = getStopLocations(possibleSegmentsForStop, stopTimes,
+                    index + 1, segment.index);
             if (locations != null) {
-                LinearLocation location = new LinearLocation(0, segment.index, segment.fraction(stopCoord));
+                LinearLocation location = new LinearLocation(0, segment.index,
+                        segment.fraction(stopCoord));
                 locations.add(0, location);
-                return locations; //we found one!
+                return locations; // we found one!
             }
         }
 
@@ -717,8 +766,9 @@ public class GTFSPatternHopFactory {
      * @param graph the graph where annotations will be registered
      */
     private void filterStopTimes(List<StopTime> stopTimes, Graph graph) {
-        
-        if (stopTimes.size() < 2) return;
+
+        if (stopTimes.size() < 2)
+            return;
         StopTime st0 = stopTimes.get(0);
 
         /* Set departure time if it is missing */
@@ -726,7 +776,10 @@ public class GTFSPatternHopFactory {
             st0.setDepartureTime(st0.getArrivalTime());
         }
 
-        /* If the feed does not specify any timepoints, we want to mark all times that are present as timepoints. */
+        /*
+         * If the feed does not specify any timepoints, we want to mark all times that are present
+         * as timepoints.
+         */
         boolean hasTimepoints = false;
         for (StopTime stopTime : stopTimes) {
             if (stopTime.getTimepoint() == 1) {
@@ -735,17 +788,21 @@ public class GTFSPatternHopFactory {
             }
         }
         // TODO verify that the first (and last?) stop should always be considered a timepoint.
-        if (!hasTimepoints) st0.setTimepoint(1);
+        if (!hasTimepoints)
+            st0.setTimepoint(1);
 
         /* Indicates that stop times in this trip are being shifted forward one day. */
         boolean midnightCrossed = false;
-        
+
         for (int i = 1; i < stopTimes.size(); i++) {
             boolean st1bogus = false;
             StopTime st1 = stopTimes.get(i);
 
-            /* If the feed did not specify any timepoints, mark all times that are present as timepoints. */
-            if ( !hasTimepoints && (st1.isDepartureTimeSet() || st1.isArrivalTimeSet())) {
+            /*
+             * If the feed did not specify any timepoints, mark all times that are present as
+             * timepoints.
+             */
+            if (!hasTimepoints && (st1.isDepartureTimeSet() || st1.isArrivalTimeSet())) {
                 st1.setTimepoint(1);
             }
 
@@ -760,15 +817,20 @@ public class GTFSPatternHopFactory {
             if (!st1.isDepartureTimeSet() && st1.isArrivalTimeSet()) {
                 st1.setDepartureTime(st1.getArrivalTime());
             }
-            /* Do not process (skip over) non-timepoint stoptimes, leaving them in place for interpolation. */ 
-            // All non-timepoint stoptimes in a series will have identical arrival and departure values of MISSING_VALUE.
-            if ( ! (st1.isArrivalTimeSet() && st1.isDepartureTimeSet())) {
+            /*
+             * Do not process (skip over) non-timepoint stoptimes, leaving them in place for
+             * interpolation.
+             */
+            // All non-timepoint stoptimes in a series will have identical arrival and departure
+            // values of MISSING_VALUE.
+            if (!(st1.isArrivalTimeSet() && st1.isDepartureTimeSet())) {
                 continue;
             }
-            int dwellTime = st0.getDepartureTime() - st0.getArrivalTime(); 
+            int dwellTime = st0.getDepartureTime() - st0.getArrivalTime();
             if (dwellTime < 0) {
                 LOG.warn(graph.addBuilderAnnotation(new NegativeDwellTime(st0)));
-                if (st0.getArrivalTime() > 23 * SECONDS_IN_HOUR && st0.getDepartureTime() < 1 * SECONDS_IN_HOUR) {
+                if (st0.getArrivalTime() > 23 * SECONDS_IN_HOUR
+                        && st0.getDepartureTime() < 1 * SECONDS_IN_HOUR) {
                     midnightCrossed = true;
                     st0.setDepartureTime(st0.getDepartureTime() + 24 * SECONDS_IN_HOUR);
                 } else {
@@ -778,56 +840,57 @@ public class GTFSPatternHopFactory {
             int runningTime = st1.getArrivalTime() - st0.getDepartureTime();
 
             if (runningTime < 0) {
-                LOG.warn(graph.addBuilderAnnotation(new NegativeHopTime(new StopTime(st0), new StopTime(st1))));
+                LOG.warn(graph.addBuilderAnnotation(new NegativeHopTime(new StopTime(st0),
+                        new StopTime(st1))));
                 // negative hops are usually caused by incorrect coding of midnight crossings
                 midnightCrossed = true;
-                if (st0.getDepartureTime() > 23 * SECONDS_IN_HOUR && st1.getArrivalTime() < 1 * SECONDS_IN_HOUR) {
+                if (st0.getDepartureTime() > 23 * SECONDS_IN_HOUR
+                        && st1.getArrivalTime() < 1 * SECONDS_IN_HOUR) {
                     st1.setArrivalTime(st1.getArrivalTime() + 24 * SECONDS_IN_HOUR);
                 } else {
                     st1.setArrivalTime(st0.getDepartureTime());
                 }
             }
-            double hopDistance = distanceLibrary.fastDistance(
-                   st0.getStop().getLat(), st0.getStop().getLon(),
-                   st1.getStop().getLat(), st1.getStop().getLon());
-            double hopSpeed = hopDistance/runningTime;
-            /* zero-distance hops are probably not harmful, though they could be better 
-             * represented as dwell times
-            if (hopDistance == 0) {
-                LOG.warn(GraphBuilderAnnotation.register(graph, 
-                        Variety.HOP_ZERO_DISTANCE, runningTime, 
-                        st1.getTrip().getId(), 
-                        st1.getStopSequence()));
-            } 
-            */
+            double hopDistance = distanceLibrary.fastDistance(st0.getStop().getLat(), st0.getStop()
+                    .getLon(), st1.getStop().getLat(), st1.getStop().getLon());
+            double hopSpeed = hopDistance / runningTime;
+            /*
+             * zero-distance hops are probably not harmful, though they could be better represented
+             * as dwell times if (hopDistance == 0) {
+             * LOG.warn(GraphBuilderAnnotation.register(graph, Variety.HOP_ZERO_DISTANCE,
+             * runningTime, st1.getTrip().getId(), st1.getStopSequence())); }
+             */
             // sanity-check the hop
-            if (st0.getArrivalTime() == st1.getArrivalTime() ||
-                st0.getDepartureTime() == st1.getDepartureTime()) {
+            if (st0.getArrivalTime() == st1.getArrivalTime()
+                    || st0.getDepartureTime() == st1.getDepartureTime()) {
                 LOG.trace("{} {}", st0, st1);
                 // series of identical stop times at different stops
-                LOG.trace(graph.addBuilderAnnotation(new HopZeroTime((float) hopDistance, 
-                          st1.getTrip(), st1.getStopSequence())));
+                LOG.trace(graph.addBuilderAnnotation(new HopZeroTime((float) hopDistance, st1
+                        .getTrip(), st1.getStopSequence())));
                 // clear stoptimes that are obviously wrong, causing them to later be interpolated
-/* FIXME (lines commented out because they break routability in multi-feed NYC for some reason -AMB) */
-//                st1.clearArrivalTime();
-//                st1.clearDepartureTime();
+                /*
+                 * FIXME (lines commented out because they break routability in multi-feed NYC for
+                 * some reason -AMB)
+                 */
+                // st1.clearArrivalTime();
+                // st1.clearDepartureTime();
                 st1bogus = true;
             } else if (hopSpeed > 45) {
                 // 45 m/sec ~= 100 miles/hr
                 // elapsed time of 0 will give speed of +inf
-                LOG.trace(graph.addBuilderAnnotation(new HopSpeedFast((float) hopSpeed, 
+                LOG.trace(graph.addBuilderAnnotation(new HopSpeedFast((float) hopSpeed,
                         (float) hopDistance, st0.getTrip(), st0.getStopSequence())));
             } else if (hopSpeed < 0.1) {
                 // 0.1 m/sec ~= 0.2 miles/hr
-                LOG.trace(graph.addBuilderAnnotation(new HopSpeedSlow((float) hopSpeed, 
+                LOG.trace(graph.addBuilderAnnotation(new HopSpeedSlow((float) hopSpeed,
                         (float) hopDistance, st0.getTrip(), st0.getStopSequence())));
             }
             // st0 should reflect the last stoptime that was not clearly incorrect
-            if ( ! st1bogus)  
+            if (!st1bogus)
                 st0 = st1;
         } // END for loop over stop times
     }
-    
+
     private void loadAgencies(Graph graph) {
         for (Agency agency : _dao.getAllAgencies()) {
             graph.addAgency(agency);
@@ -839,7 +902,8 @@ public class GTFSPatternHopFactory {
             Vertex fromVertex = context.stationStopNodes.get(pathway.getFromStop());
             Vertex toVertex = context.stationStopNodes.get(pathway.getToStop());
             if (pathway.isWheelchairTraversalTimeSet()) {
-                new PathwayEdge(fromVertex, toVertex, pathway.getTraversalTime(), pathway.getWheelchairTraversalTime());
+                new PathwayEdge(fromVertex, toVertex, pathway.getTraversalTime(),
+                        pathway.getWheelchairTraversalTime());
             } else {
                 new PathwayEdge(fromVertex, toVertex, pathway.getTraversalTime());
             }
@@ -849,14 +913,15 @@ public class GTFSPatternHopFactory {
     private void loadStops(Graph graph) {
         for (Stop stop : _dao.getAllStops()) {
             if (context.stops.contains(stop.getId())) {
-                LOG.error("Skipping stop {} because we already loaded an identical ID.", stop.getId());
+                LOG.error("Skipping stop {} because we already loaded an identical ID.",
+                        stop.getId());
                 continue;
             }
             context.stops.add(stop.getId());
 
             int locationType = stop.getLocationType();
 
-            //add a vertex representing the stop
+            // add a vertex representing the stop
             if (locationType == 1) {
                 context.stationStopNodes.put(stop, new TransitStation(graph, stop));
             } else {
@@ -867,13 +932,15 @@ public class GTFSPatternHopFactory {
                 if (locationType != 2) {
                     // Add a vertex representing arriving at the stop
                     TransitStopArrive arrive = new TransitStopArrive(graph, stop, stopVertex);
-                    // FIXME no need for this context anymore, we just put references to these nodes in the stop vertices themselves.
+                    // FIXME no need for this context anymore, we just put references to these nodes
+                    // in the stop vertices themselves.
                     context.stopArriveNodes.put(stop, arrive);
                     stopVertex.arriveVertex = arrive;
 
                     // Add a vertex representing departing from the stop
                     TransitStopDepart depart = new TransitStopDepart(graph, stop, stopVertex);
-                    // FIXME no need for this context anymore, we just put references to these nodes in the stop vertices themselves.
+                    // FIXME no need for this context anymore, we just put references to these nodes
+                    // in the stop vertices themselves.
                     context.stopDepartNodes.put(stop, depart);
                     stopVertex.departVertex = depart;
 
@@ -886,12 +953,12 @@ public class GTFSPatternHopFactory {
     }
 
     /**
-     * Scan through the given list of stoptimes, interpolating the missing (unset) ones.
-     * This is currently done by assuming equidistant stops and constant speed.
-     * While we may not be able to improve the constant speed assumption, we can
-     * TODO: use route matching (or shape distance etc.) to improve inter-stop distances
-     *  
-     * @param stopTimes the stoptimes (from a single trip) to be interpolated 
+     * Scan through the given list of stoptimes, interpolating the missing (unset) ones. This is
+     * currently done by assuming equidistant stops and constant speed. While we may not be able to
+     * improve the constant speed assumption, we can TODO: use route matching (or shape distance
+     * etc.) to improve inter-stop distances
+     * 
+     * @param stopTimes the stoptimes (from a single trip) to be interpolated
      */
     private void interpolateStopTimes(List<StopTime> stopTimes) {
         int lastStop = stopTimes.size() - 1;
@@ -922,7 +989,7 @@ public class GTFSPatternHopFactory {
                 if (j == lastStop + 1) {
                     throw new RuntimeException(
                             "Could not interpolate arrival/departure time on stop " + i
-                            + " (missing final stop time) on trip " + st0.getTrip());
+                                    + " (missing final stop time) on trip " + st0.getTrip());
                 }
                 numInterpStops = j - i;
                 int arrivalTime;
@@ -933,11 +1000,11 @@ public class GTFSPatternHopFactory {
                 }
                 interpStep = (arrivalTime - prevDepartureTime) / (numInterpStops + 1);
                 if (interpStep < 0) {
-                    throw new RuntimeException(
-                            "trip goes backwards for some reason");
+                    throw new RuntimeException("trip goes backwards for some reason");
                 }
                 for (j = i; j < i + numInterpStops; ++j) {
-                    //System.out.println("interpolating " + j + " between " + prevDepartureTime + " and " + arrivalTime);
+                    // System.out.println("interpolating " + j + " between " + prevDepartureTime +
+                    // " and " + arrivalTime);
                     departureTime = prevDepartureTime + interpStep * (j - i + 1);
                     st = stopTimes.get(j);
                     if (st.isArrivalTimeSet()) {
@@ -976,10 +1043,10 @@ public class GTFSPatternHopFactory {
             Vertex toVertex = context.stopDepartNodes.get(toStop);
             switch (t.getTransferType()) {
             case 1:
-                // timed (synchronized) transfer 
+                // timed (synchronized) transfer
                 // Handle with edges that bypass the street network.
                 // from and to vertex here are stop_arrive and stop_depart vertices
-                
+
                 // only add edge when it doesn't exist already
                 boolean hasTimedTransferEdge = false;
                 for (Edge outgoingEdge : fromVertex.getOutgoing()) {
@@ -994,28 +1061,31 @@ public class GTFSPatternHopFactory {
                     new TimedTransferEdge(fromVertex, toVertex);
                 }
                 // add to transfer table to handle specificity
-                transferTable.addTransferTime(fromStop, toStop, fromRoute, toRoute, fromTrip, toTrip, StopTransfer.TIMED_TRANSFER);
+                transferTable.addTransferTime(fromStop, toStop, fromRoute, toRoute, fromTrip,
+                        toTrip, StopTransfer.TIMED_TRANSFER);
                 break;
             case 2:
                 // min transfer time
-                transferTable.addTransferTime(fromStop, toStop, fromRoute, toRoute, fromTrip, toTrip, t.getMinTransferTime());
+                transferTable.addTransferTime(fromStop, toStop, fromRoute, toRoute, fromTrip,
+                        toTrip, t.getMinTransferTime());
                 break;
             case 3:
                 // forbidden transfer
-                transferTable.addTransferTime(fromStop, toStop, fromRoute, toRoute, fromTrip, toTrip, StopTransfer.FORBIDDEN_TRANSFER);
+                transferTable.addTransferTime(fromStop, toStop, fromRoute, toRoute, fromTrip,
+                        toTrip, StopTransfer.FORBIDDEN_TRANSFER);
                 break;
             case 0:
-            default: 
+            default:
                 // preferred transfer
-                transferTable.addTransferTime(fromStop, toStop, fromRoute, toRoute, fromTrip, toTrip, StopTransfer.PREFERRED_TRANSFER);
+                transferTable.addTransferTime(fromStop, toStop, fromRoute, toRoute, fromTrip,
+                        toTrip, StopTransfer.PREFERRED_TRANSFER);
                 break;
             }
         }
     }
 
-    
-    private LineString getHopGeometryViaShapeDistTraveled(Graph graph, AgencyAndId shapeId, StopTime st0, StopTime st1,
-            Vertex startJourney, Vertex endJourney) {
+    private LineString getHopGeometryViaShapeDistTraveled(Graph graph, AgencyAndId shapeId,
+            StopTime st0, StopTime st1, Vertex startJourney, Vertex endJourney) {
 
         double startDistance = st0.getShapeDistTraveled();
         double endDistance = st1.getShapeDistTraveled();
@@ -1035,7 +1105,7 @@ public class GTFSPatternHopFactory {
             LinearLocation endIndex = getSegmentFraction(distances, endDistance);
 
             if (equals(startIndex, endIndex)) {
-                //bogus shape_dist_traveled 
+                // bogus shape_dist_traveled
                 graph.addBuilderAnnotation(new BogusShapeDistanceTraveled(st1));
                 return createSimpleGeometry(st0.getStop(), st1.getStop());
             }
@@ -1057,14 +1127,12 @@ public class GTFSPatternHopFactory {
 
     /** create a 2-point linestring (a straight line segment) between the two stops */
     private LineString createSimpleGeometry(Stop s0, Stop s1) {
-        
-        Coordinate[] coordinates = new Coordinate[] {
-                new Coordinate(s0.getLon(), s0.getLat()),
-                new Coordinate(s1.getLon(), s1.getLat())
-        };
+
+        Coordinate[] coordinates = new Coordinate[] { new Coordinate(s0.getLon(), s0.getLat()),
+                new Coordinate(s1.getLon(), s1.getLat()) };
         CoordinateSequence sequence = new PackedCoordinateSequence.Double(coordinates, 2);
-        
-        return _geometryFactory.createLineString(sequence);        
+
+        return _geometryFactory.createLineString(sequence);
     }
 
     private boolean isValid(Geometry geometry, Stop s0, Stop s1) {
@@ -1082,7 +1150,7 @@ public class GTFSPatternHopFactory {
         }
         Coordinate geometryStartCoord = coordinates[0];
         Coordinate geometryEndCoord = coordinates[coordinates.length - 1];
-        
+
         Coordinate startCoord = new Coordinate(s0.getLon(), s0.getLat());
         Coordinate endCoord = new Coordinate(s1.getLon(), s1.getLat());
         if (distanceLibrary.fastDistance(startCoord, geometryStartCoord) > maxStopToShapeSnapDistance) {
@@ -1095,8 +1163,8 @@ public class GTFSPatternHopFactory {
 
     private LineString getSegmentGeometry(Graph graph, AgencyAndId shapeId,
             LocationIndexedLine locationIndexedLine, LinearLocation startIndex,
-            LinearLocation endIndex, double startDistance, double endDistance, 
-            StopTime st0, StopTime st1) {
+            LinearLocation endIndex, double startDistance, double endDistance, StopTime st0,
+            StopTime st1) {
 
         ShapeSegmentKey key = new ShapeSegmentKey(shapeId, startDistance, endDistance);
 
@@ -1106,13 +1174,14 @@ public class GTFSPatternHopFactory {
             geometry = (LineString) locationIndexedLine.extractLine(startIndex, endIndex);
 
             // Pack the resulting line string
-            CoordinateSequence sequence = new PackedCoordinateSequence.Double(geometry
-                    .getCoordinates(), 2);
+            CoordinateSequence sequence = new PackedCoordinateSequence.Double(
+                    geometry.getCoordinates(), 2);
             geometry = _geometryFactory.createLineString(sequence);
-            
+
             if (!isValid(geometry, st0.getStop(), st1.getStop())) {
-                LOG.warn(graph.addBuilderAnnotation(new BogusShapeGeometryCaught(shapeId, st0, st1)));
-                //fall back to trivial geometry
+                LOG.warn(graph
+                        .addBuilderAnnotation(new BogusShapeGeometryCaught(shapeId, st0, st1)));
+                // fall back to trivial geometry
                 geometry = createSimpleGeometry(st0.getStop(), st1.getStop());
             }
             _geometriesByShapeSegmentKey.put(key, (LineString) geometry);
@@ -1120,13 +1189,12 @@ public class GTFSPatternHopFactory {
 
         return geometry;
     }
-    
-    /* 
-     * If a shape appears in more than one feed, the shape points will be loaded several
-     * times, and there will be duplicates in the DAO. Filter out duplicates and repeated
-     * coordinates because 1) they are unnecessary, and 2) they define 0-length line segments
-     * which cause JTS location indexed line to return a segment location of NaN, 
-     * which we do not want.
+
+    /*
+     * If a shape appears in more than one feed, the shape points will be loaded several times, and
+     * there will be duplicates in the DAO. Filter out duplicates and repeated coordinates because
+     * 1) they are unnecessary, and 2) they define 0-length line segments which cause JTS location
+     * indexed line to return a segment location of NaN, which we do not want.
      */
     private List<ShapePoint> getUniqueShapePointsForShapeId(AgencyAndId shapeId) {
         List<ShapePoint> points = _dao.getShapePointsForShapeId(shapeId);
@@ -1134,9 +1202,7 @@ public class GTFSPatternHopFactory {
         ShapePoint last = null;
         for (ShapePoint sp : points) {
             if (last == null || last.getSequence() != sp.getSequence()) {
-                if (last != null && 
-                    last.getLat() == sp.getLat() && 
-                    last.getLon() == sp.getLon()) {
+                if (last != null && last.getLat() == sp.getLat() && last.getLon() == sp.getLon()) {
                     LOG.trace("pair of identical shape points (skipping): {} {}", last, sp);
                 } else {
                     filtered.add(sp);
@@ -1156,7 +1222,7 @@ public class GTFSPatternHopFactory {
 
         LineString geometry = _geometriesByShapeId.get(shapeId);
 
-        if (geometry != null) 
+        if (geometry != null)
             return geometry;
 
         List<ShapePoint> points = getUniqueShapePointsForShapeId(shapeId);
@@ -1212,8 +1278,7 @@ public class GTFSPatternHopFactory {
         if (prevDistance == distances[index]) {
             return new LinearLocation(index - 1, 1.0);
         }
-        double indexPart = (distance - distances[index - 1])
-                / (distances[index] - prevDistance);
+        double indexPart = (distance - distances[index - 1]) / (distances[index] - prevDistance);
         return new LinearLocation(index - 1, indexPart);
     }
 
@@ -1222,12 +1287,12 @@ public class GTFSPatternHopFactory {
      * an array-backed list, but we are assuming that this is a rare occurrence. The alternative is
      * to copy every list of stop times during filtering.
      * 
-     * TODO: OBA GFTS makes the stoptime lists unmodifiable, so this will not work.
-     * We need to copy any modified list. 
+     * TODO: OBA GFTS makes the stoptime lists unmodifiable, so this will not work. We need to copy
+     * any modified list.
      * 
      * @return whether any repeated stops were filtered out.
      */
-    private boolean removeRepeatedStops (List<StopTime> stopTimes) {
+    private boolean removeRepeatedStops(List<StopTime> stopTimes) {
         boolean filtered = false;
         StopTime prev = null;
         Iterator<StopTime> it = stopTimes.iterator();
@@ -1250,18 +1315,18 @@ public class GTFSPatternHopFactory {
         this.fareServiceFactory = fareServiceFactory;
     }
 
-    /** 
-     * Create bidirectional, "free" edges (zero-time, low-cost edges) between stops and their 
-     * parent stations. This is used to produce implicit transfers between all stops that are
-     * part of the same parent station. It was introduced as a workaround to allow in-station 
-     * transfers for underground/grade-separated transportation systems like the NYC subway (where
-     * it's important to provide in-station transfers for fare computation).
+    /**
+     * Create bidirectional, "free" edges (zero-time, low-cost edges) between stops and their parent
+     * stations. This is used to produce implicit transfers between all stops that are part of the
+     * same parent station. It was introduced as a workaround to allow in-station transfers for
+     * underground/grade-separated transportation systems like the NYC subway (where it's important
+     * to provide in-station transfers for fare computation).
      * 
-     * This step used to be automatically applied whenever transfers.txt was used to create 
-     * transfers (rathen than or in addition to transfers through the street netowrk), 
-     * but has been separated out since it is really a separate process.
+     * This step used to be automatically applied whenever transfers.txt was used to create
+     * transfers (rathen than or in addition to transfers through the street netowrk), but has been
+     * separated out since it is really a separate process.
      */
-    public void createParentStationTransfers () {
+    public void createParentStationTransfers() {
         for (Stop stop : _dao.getAllStops()) {
             String parentStation = stop.getParentStation();
             if (parentStation != null) {
@@ -1297,7 +1362,7 @@ public class GTFSPatternHopFactory {
             }
         }
     }
-    
+
     /**
      * Links the vertices representing parent stops to their child stops bidirectionally. This is
      * not intended to provide implicit transfers (i.e. child stop to parent station to another
@@ -1315,23 +1380,23 @@ public class GTFSPatternHopFactory {
                 String agencyId = stop.getId().getAgencyId();
                 AgencyAndId parentStationId = new AgencyAndId(agencyId, parentStation);
                 Stop parentStop = _dao.getStopForId(parentStationId);
-                if(context.stationStopNodes.get(parentStop) instanceof TransitStation) {
-                    TransitStation parentStopVertex = (TransitStation)
-                            context.stationStopNodes.get(parentStop);
+                if (context.stationStopNodes.get(parentStop) instanceof TransitStation) {
+                    TransitStation parentStopVertex = (TransitStation) context.stationStopNodes
+                            .get(parentStop);
                     new StationStopEdge(parentStopVertex, stopVertex);
                     new StationStopEdge(stopVertex, parentStopVertex);
                 } else {
                     LOG.warn(graph.addBuilderAnnotation(new NonStationParentStation(stopVertex)));
                 }
             }
-        }        
+        }
     }
-    
+
     /**
      * Create transfer edges between stops which are listed in transfers.txt.
      * 
-     * NOTE: this method is only called when transfersTxtDefinesStationPaths is set to
-     * True for a given GFTS feed. 
+     * NOTE: this method is only called when transfersTxtDefinesStationPaths is set to True for a
+     * given GFTS feed.
      */
     public void createTransfersTxtTransfers() {
 
@@ -1375,11 +1440,9 @@ public class GTFSPatternHopFactory {
         this.context = context;
     }
 
-
     public double getMaxStopToShapeSnapDistance() {
         return maxStopToShapeSnapDistance;
     }
-
 
     public void setMaxStopToShapeSnapDistance(double maxStopToShapeSnapDistance) {
         this.maxStopToShapeSnapDistance = maxStopToShapeSnapDistance;

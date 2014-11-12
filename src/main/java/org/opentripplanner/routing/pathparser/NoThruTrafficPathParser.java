@@ -28,7 +28,9 @@ import org.opentripplanner.routing.edgetype.PlainStreetEdge;
 public class NoThruTrafficPathParser extends PathParser {
 
     private static final int TRANSIT = 1;
+
     private static final int NOTRAFFIC = 2;
+
     private static final int REGULAR = 3;
 
     // 3,4,5 come from StreetEdge.java
@@ -36,8 +38,9 @@ public class NoThruTrafficPathParser extends PathParser {
     private static final DFA DFA;
     static {
 
-        //T*I*N*I*(T+I*N*I*)*
-        Nonterminal rule = seq(star(TRANSIT), star(NOTRAFFIC), star(REGULAR), star(NOTRAFFIC), star(plus(TRANSIT), star(NOTRAFFIC), star(REGULAR), star(NOTRAFFIC)));
+        // T*I*N*I*(T+I*N*I*)*
+        Nonterminal rule = seq(star(TRANSIT), star(NOTRAFFIC), star(REGULAR), star(NOTRAFFIC),
+                star(plus(TRANSIT), star(NOTRAFFIC), star(REGULAR), star(NOTRAFFIC)));
         DFA = rule.toDFA().minimize();
         // System.out.println(DFA.toGraphViz());
         // System.out.println(DFA.dumpTable());
@@ -51,7 +54,7 @@ public class NoThruTrafficPathParser extends PathParser {
     @Override
     public int terminalFor(State state) {
         if (state.getBackEdge() instanceof PlainStreetEdge) {
-            if (((PlainStreetEdge)state.getBackEdge()).isNoThruTraffic()) {
+            if (((PlainStreetEdge) state.getBackEdge()).isNoThruTraffic()) {
                 return NOTRAFFIC;
             } else {
                 return REGULAR;

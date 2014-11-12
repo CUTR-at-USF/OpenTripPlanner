@@ -31,12 +31,13 @@ import org.slf4j.LoggerFactory;
 import lombok.Data;
 
 /**
- * Information given to the GraphBuilder about how to assign permissions, safety values, names, etc. to edges based on OSM tags.
- * TODO rename so that the connection with OSM tags is obvious
+ * Information given to the GraphBuilder about how to assign permissions, safety values, names, etc.
+ * to edges based on OSM tags. TODO rename so that the connection with OSM tags is obvious
  *
- * WayPropertyPickers, CreativeNamePickers, SlopeOverridePickers, and SpeedPickers are applied to ways based on how well
- * their OSMSpecifiers match a given OSM way. Generally one OSMSpecifier will win out over all the others based on the
- * number of exact, partial, and wildcard tag matches. See OSMSpecifier for more details on the matching process.
+ * WayPropertyPickers, CreativeNamePickers, SlopeOverridePickers, and SpeedPickers are applied to
+ * ways based on how well their OSMSpecifiers match a given OSM way. Generally one OSMSpecifier will
+ * win out over all the others based on the number of exact, partial, and wildcard tag matches. See
+ * OSMSpecifier for more details on the matching process.
  */
 @Data
 public class WayPropertySet {
@@ -48,15 +49,15 @@ public class WayPropertySet {
     private List<CreativeNamerPicker> creativeNamers;
 
     private List<SlopeOverridePicker> slopeOverrides;
-    
+
     /** Assign automobile speeds based on OSM tags. */
     private List<SpeedPicker> speedPickers;
-    
+
     /** The automobile speed for street segments that do not match any SpeedPicker. */
     private Float defaultSpeed;
 
     private List<NotePicker> notes;
-    
+
     private Pattern maxSpeedPattern;
 
     /** The WayProperties applied to all ways that do not match any WayPropertyPicker. */
@@ -77,22 +78,23 @@ public class WayPropertySet {
         notes = new ArrayList<NotePicker>();
         // regex courtesy http://wiki.openstreetmap.org/wiki/Key:maxspeed
         // and edited
-        maxSpeedPattern = Pattern.compile("^([0-9][\\.0-9]+?)(?:[ ]?(kmh|km/h|kmph|kph|mph|knots))?$");
+        maxSpeedPattern = Pattern
+                .compile("^([0-9][\\.0-9]+?)(?:[ ]?(kmh|km/h|kmph|kph|mph|knots))?$");
     }
 
     public void setBase(WayPropertySetSource base) {
-       this.base = base;
-       WayPropertySet props = base.getWayPropertySet();
-       creativeNamers = props.getCreativeNamers();
-       defaultProperties = props.defaultProperties;
-       notes = props.notes;
-       slopeOverrides = props.slopeOverrides;
-       wayProperties = props.wayProperties;
+        this.base = base;
+        WayPropertySet props = base.getWayPropertySet();
+        creativeNamers = props.getCreativeNamers();
+        defaultProperties = props.defaultProperties;
+        notes = props.notes;
+        slopeOverrides = props.slopeOverrides;
+        wayProperties = props.wayProperties;
     }
 
     /**
-     * Applies the WayProperties whose OSMPicker best matches this way. In addition, WayProperties that are mixins
-     * will have their safety values applied if they match at all.
+     * Applies the WayProperties whose OSMPicker best matches this way. In addition, WayProperties
+     * that are mixins will have their safety values applied if they match at all.
      */
     public WayProperties getDataForWay(OSMWithTags way) {
         WayProperties leftResult = defaultProperties;
@@ -194,7 +196,7 @@ public class WayPropertySet {
         }
         return bestNamer.generateCreativeName(way);
     }
-    
+
     /**
      * Calculate the automobile speed, in meters per second, for this way.
      */
@@ -202,16 +204,16 @@ public class WayPropertySet {
         // first, check for maxspeed tags
         Float speed = null;
         Float currentSpeed;
-        
+
         if (way.hasTag("maxspeed:motorcar"))
             speed = getMetersSecondFromSpeed(way.getTag("maxspeed:motorcar"));
-        
+
         if (speed == null && !back && way.hasTag("maxspeed:forward"))
             speed = getMetersSecondFromSpeed(way.getTag("maxspeed:forward"));
-        
+
         if (speed == null && back && way.hasTag("maxspeed:reverse"))
-            speed = getMetersSecondFromSpeed(way.getTag("maxspeed:reverse")); 
-            
+            speed = getMetersSecondFromSpeed(way.getTag("maxspeed:reverse"));
+
         if (speed == null && way.hasTag("maxspeed:lanes")) {
             for (String lane : way.getTag("maxspeed:lanes").split("\\|")) {
                 currentSpeed = getMetersSecondFromSpeed(lane);
@@ -221,26 +223,26 @@ public class WayPropertySet {
                     speed = currentSpeed;
             }
         }
-        
+
         if (way.hasTag("maxspeed") && speed == null)
             speed = getMetersSecondFromSpeed(way.getTag("maxspeed"));
-        
+
         // this would be bad, as the segment could never be traversed by an automobile
         // The small epsilon is to account for possible rounding errors
         if (speed != null && speed < 0.0001)
-            LOG.warn("Zero or negative automobile speed detected at {} based on OSM " +
-            		"maxspeed tags; ignoring these tags", this);
-        
+            LOG.warn("Zero or negative automobile speed detected at {} based on OSM "
+                    + "maxspeed tags; ignoring these tags", this);
+
         // if there was a defined speed and it's not 0, we're done
         if (speed != null)
             return speed;
-                    
+
         // otherwise, we use the speedPickers
-        
+
         int bestScore = 0;
         Float bestSpeed = null;
         int score;
-        
+
         // SpeedPickers are constructed in DefaultWayPropertySetSource with an OSM specifier
         // (e.g. highway=motorway) and a default speed for that segment.
         for (SpeedPicker picker : speedPickers) {
@@ -251,7 +253,7 @@ public class WayPropertySet {
                 bestSpeed = picker.getSpeed();
             }
         }
-        
+
         if (bestSpeed != null)
             return bestSpeed;
         else
@@ -326,12 +328,12 @@ public class WayPropertySet {
     public void addSpeedPicker(SpeedPicker picker) {
         this.speedPickers.add(picker);
     }
-    
+
     public Float getMetersSecondFromSpeed(String speed) {
         Matcher m = maxSpeedPattern.matcher(speed);
         if (!m.matches())
             return null;
-        
+
         float originalUnits;
         try {
             originalUnits = (float) Double.parseDouble(m.group(1));
@@ -339,16 +341,16 @@ public class WayPropertySet {
             LOG.warn("Could not parse max speed {}", m.group(1));
             return null;
         }
-        
+
         String units = m.group(2);
         if (units == null || units.equals(""))
             units = "kmh";
-        
+
         // we'll be doing quite a few string comparisons here
         units = units.intern();
-        
+
         float metersSecond;
-        
+
         if (units == "kmh" || units == "km/h" || units == "kmph" || units == "kph")
             metersSecond = 0.277778f * originalUnits;
         else if (units == "mph")
@@ -357,7 +359,7 @@ public class WayPropertySet {
             metersSecond = 0.514444f * originalUnits;
         else
             return null;
-        
+
         return metersSecond;
     }
 }

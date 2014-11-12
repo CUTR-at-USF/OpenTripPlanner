@@ -19,25 +19,24 @@ public class OSM {
     private static final Logger LOG = LoggerFactory.getLogger(OSM.class);
 
     public Map<Long, Node> nodes;
+
     public Map<Long, Way> ways;
+
     public Map<Long, Relation> relations;
 
     /** The nodes which are referenced more than once by ways in this OSM. */
     NodeTracker intersections;
-    
+
     /** The MapDB backing this OSM, if any. */
     DB db = null; // db.close(); ?
-            
+
     public OSM(boolean diskBacked) {
         // Using DB TreeMaps is observed not to be slower than memory.
         // It lets you run in 400MB instead of a few GB.
         if (diskBacked) {
             LOG.info("OSM backed by temporary file.");
-            DB db = DBMaker.newTempFileDB()
-                    .transactionDisable()
-                    .asyncWriteEnable()
-                    .compressionEnable()
-                    .make();
+            DB db = DBMaker.newTempFileDB().transactionDisable().asyncWriteEnable()
+                    .compressionEnable().make();
             nodes = db.getTreeMap("nodes");
             ways = db.getTreeMap("ways");
             relations = db.getTreeMap("relations");
@@ -45,10 +44,10 @@ public class OSM {
             // In-memory version
             nodes = Maps.newHashMap();
             ways = Maps.newHashMap();
-            relations = Maps.newHashMap();            
+            relations = Maps.newHashMap();
         }
     }
-    
+
     // boolean filterTags
     public static OSM fromPBF(String pbfFile) {
         LOG.info("Reading entire PBF file '{}'", pbfFile);
@@ -72,7 +71,7 @@ public class OSM {
         LOG.info("Loading relations (which ones?)");
         return osm;
     }
-    
+
     /**
      * Find nodes referenced by more than one way. NodeTracker intersections will be null until this
      * is called. MapDB TreeSets are much faster than MapDB HashSets, but in-memory NodeTrackers are
@@ -91,7 +90,7 @@ public class OSM {
                 }
             }
         }
-        LOG.info("Done finding intersections.");        
+        LOG.info("Done finding intersections.");
     }
 
 }

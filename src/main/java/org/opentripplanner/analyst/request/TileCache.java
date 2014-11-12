@@ -28,43 +28,44 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.Weigher;
 
-public class TileCache extends CacheLoader<TileRequest, Tile> 
-    implements  Weigher<TileRequest, Tile> { 
-    
+public class TileCache extends CacheLoader<TileRequest, Tile> implements Weigher<TileRequest, Tile> {
+
     private static final Logger LOG = LoggerFactory.getLogger(TileCache.class);
 
     private GraphService graphService;
 
     public TileCache(GraphService graphService) {
         this.graphService = graphService;
-        this.tileCache = CacheBuilder.newBuilder()
-                .concurrencyLevel(concurrency)
-                .maximumSize(size)
+        this.tileCache = CacheBuilder.newBuilder().concurrencyLevel(concurrency).maximumSize(size)
                 .build(this);
     }
 
     private LoadingCache<TileRequest, Tile> tileCache;
-    @Setter private int size = 200;
-    @Setter private int concurrency = 16;
+
+    @Setter
+    private int size = 200;
+
+    @Setter
+    private int concurrency = 16;
 
     @Override
     /** completes the abstract CacheLoader superclass */
     public Tile load(TileRequest req) throws Exception {
         LOG.debug("tile cache miss; cache size is {}", this.tileCache.size());
         return new TemplateTile(req, graphService);
-        //return new TemplateTile(req, hashSampler);
-        //return new DynamicTile(req, hashSampler);
-        //return new DynamicTile(req, sampleFactory);
+        // return new TemplateTile(req, hashSampler);
+        // return new DynamicTile(req, hashSampler);
+        // return new DynamicTile(req, sampleFactory);
     }
 
     /** delegate to the tile LoadingCache */
     public Tile get(TileRequest req) throws Exception {
         return tileCache.get(req);
     }
-    
+
     @Override
     public int weigh(TileRequest req, Tile tile) {
         return tile.getSamples().length;
     }
-    
+
 }

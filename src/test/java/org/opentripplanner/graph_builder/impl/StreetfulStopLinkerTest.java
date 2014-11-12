@@ -86,14 +86,14 @@ public class StreetfulStopLinkerTest {
         new StreetTransitLink(intersectionD, transitStopD, true);
         new StreetTransitLink(intersectionA, transitStopE, true);
 
-        PackedCoordinateSequence coordinatesAB = new PackedCoordinateSequence.Double(
-                new double[]{1, 1, 1, 2}, 2);
-        PackedCoordinateSequence coordinatesBC = new PackedCoordinateSequence.Double(
-                new double[]{1, 2, 2, 2}, 2);
-        PackedCoordinateSequence coordinatesCD = new PackedCoordinateSequence.Double(
-                new double[]{2, 2, 2, 1}, 2);
-        PackedCoordinateSequence coordinatesAD = new PackedCoordinateSequence.Double(
-                new double[]{1, 1, 2, 1}, 2);
+        PackedCoordinateSequence coordinatesAB = new PackedCoordinateSequence.Double(new double[] {
+                1, 1, 1, 2 }, 2);
+        PackedCoordinateSequence coordinatesBC = new PackedCoordinateSequence.Double(new double[] {
+                1, 2, 2, 2 }, 2);
+        PackedCoordinateSequence coordinatesCD = new PackedCoordinateSequence.Double(new double[] {
+                2, 2, 2, 1 }, 2);
+        PackedCoordinateSequence coordinatesAD = new PackedCoordinateSequence.Double(new double[] {
+                1, 1, 2, 1 }, 2);
 
         GeometryFactory geometryFactory = new GeometryFactory();
 
@@ -177,6 +177,6 @@ public class StreetfulStopLinkerTest {
             }
         }
 
-        assertArrayEquals(new Boolean[] {true, true, true, true}, results);
+        assertArrayEquals(new Boolean[] { true, true, true, true }, results);
     }
 }

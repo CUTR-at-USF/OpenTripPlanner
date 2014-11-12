@@ -72,7 +72,7 @@ public class ExampleGraphUpdater implements GraphUpdater {
     @Override
     public void setup() {
         LOG.info("Setup example updater");
-        
+
         // Execute anonymous graph writer runnable and wait for its termination
         try {
             updaterManager.executeBlocking(new GraphWriterRunnable() {

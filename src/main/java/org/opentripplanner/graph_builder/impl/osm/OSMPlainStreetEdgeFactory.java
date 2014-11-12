@@ -33,10 +33,9 @@ public interface OSMPlainStreetEdgeFactory {
             String name, double length, StreetTraversalPermission permissions, boolean back,
             float carSpeed);
 
-    public AreaEdge createAreaEdge(OSMNode nodeI, OSMNode nodeJ,
-            OSMWithTags areaEntity, IntersectionVertex startEndpoint,
-            IntersectionVertex endEndpoint, LineString geometry, String name,
-            double length, StreetTraversalPermission permissions, boolean back,
+    public AreaEdge createAreaEdge(OSMNode nodeI, OSMNode nodeJ, OSMWithTags areaEntity,
+            IntersectionVertex startEndpoint, IntersectionVertex endEndpoint, LineString geometry,
+            String name, double length, StreetTraversalPermission permissions, boolean back,
             float carSpeed, AreaEdgeList area);
 
 }

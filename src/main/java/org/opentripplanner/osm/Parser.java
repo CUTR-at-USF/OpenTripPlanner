@@ -37,18 +37,19 @@ public abstract class Parser extends BinaryParser {
     protected static final Logger LOG = LoggerFactory.getLogger(Parser.class);
 
     OSM osm;
+
     // no need to internalize strings. they will be serialized out to disk anyway.
-    // private Map<String, String> stringTable = new HashMap<String, String>();    
+    // private Map<String, String> stringTable = new HashMap<String, String>();
     int nodeCount = 0;
+
     int wayCount = 0;
-    
-    private static final String[] retainKeys = new String[] {
-        "highway", "parking", "bicycle"
-    };
+
+    private static final String[] retainKeys = new String[] { "highway", "parking", "bicycle" };
 
     private boolean retainTag(String key) {
         for (String s : retainKeys) {
-            if (s.equals(key)) return true;
+            if (s.equals(key))
+                return true;
         }
         // Accepting all tags increases size by < 1/10
         // when storing all elements.
@@ -64,9 +65,10 @@ public abstract class Parser extends BinaryParser {
     // move to Tagged
     private void addTag(StringBuilder sb, String key, String val) {
         if (retainTag(key)) {
-            if (sb.length() > 0) sb.append(';');
+            if (sb.length() > 0)
+                sb.append(';');
             sb.append(key);
-            if (val != null && ! val.isEmpty()) {
+            if (val != null && !val.isEmpty()) {
                 sb.append('=');
                 sb.append(val);
             }
@@ -105,10 +107,10 @@ public abstract class Parser extends BinaryParser {
                 LOG.info("node {}", human(nodeCount));
             }
             Node node = new Node();
-            long id  = nodes.getId(n)  + lastId;
+            long id = nodes.getId(n) + lastId;
             long lat = nodes.getLat(n) + lastLat;
             long lon = nodes.getLon(n) + lastLon;
-            lastId  = id;
+            lastId = id;
             lastLat = lat;
             lastLon = lon;
             node.lat = (float) parseLat(lat);
@@ -235,29 +237,29 @@ public abstract class Parser extends BinaryParser {
             throw new RuntimeException("Error parsing OSM PBF.", e);
         }
     }
-    
-    /** 
-     * Override this method to tell the parser what to do to with each node,
-     * once it has been parsed into OTP's internal OSM model.
+
+    /**
+     * Override this method to tell the parser what to do to with each node, once it has been parsed
+     * into OTP's internal OSM model.
      */
     public void handleNode(long id, Node node) {
         osm.nodes.put(id, node);
     };
 
-    /** 
-     * Override this method to tell the parser what to do to with each way,
-     * once it has been parsed into OTP's internal OSM model.
+    /**
+     * Override this method to tell the parser what to do to with each way, once it has been parsed
+     * into OTP's internal OSM model.
      */
     public void handleWay(long id, Way way) {
         osm.ways.put(id, way);
     };
 
-    /** 
-     * Override this method to tell the parser what to do to with each relation,
-     * once it has been parsed into OTP's internal OSM model.
+    /**
+     * Override this method to tell the parser what to do to with each relation, once it has been
+     * parsed into OTP's internal OSM model.
      */
     public void handleRelation(long id, Relation relation) {
         osm.relations.put(id, relation);
     };
-    
+
 }

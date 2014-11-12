@@ -32,7 +32,7 @@ public class ElevationAdapter extends XmlAdapter<String, List<P2<Double>>> {
             str.append(Math.round(pair.getSecond() * 10.0) / 10.0);
             str.append(",");
         }
-        if (str.length() > 0) 
+        if (str.length() > 0)
             str.setLength(str.length() - 1);
         return str.toString();
     }

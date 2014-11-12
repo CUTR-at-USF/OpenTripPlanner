@@ -24,18 +24,18 @@ import org.opentripplanner.routing.vertextype.PatternDepartVertex;
 
 import com.vividsolutions.jts.geom.LineString;
 
-
 /**
- *  Models waiting in a station on a vehicle.  The vehicle is not permitted to change 
- *  names during this time -- PatternInterlineDwell represents that case.
+ * Models waiting in a station on a vehicle. The vehicle is not permitted to change names during
+ * this time -- PatternInterlineDwell represents that case.
  */
 public class PatternDwell extends TablePatternEdge implements OnboardEdge, DwellEdge {
-    
+
     private static final long serialVersionUID = 1L;
 
     private int stopIndex;
-    
-    public PatternDwell(PatternArriveVertex from, PatternDepartVertex to, int stopIndex, TripPattern tripPattern) {
+
+    public PatternDwell(PatternArriveVertex from, PatternDepartVertex to, int stopIndex,
+            TripPattern tripPattern) {
         super(from, to);
         this.stopIndex = stopIndex;
     }
@@ -47,7 +47,7 @@ public class PatternDwell extends TablePatternEdge implements OnboardEdge, Dwell
     public double getDistance() {
         return 0;
     }
-        
+
     public TraverseMode getMode() {
         return GtfsLibrary.getTraverseMode(getPattern().getRoute());
     }
@@ -57,7 +57,7 @@ public class PatternDwell extends TablePatternEdge implements OnboardEdge, Dwell
     }
 
     public State traverse(State state0) {
-        //int trip = state0.getTrip();
+        // int trip = state0.getTrip();
         TripTimes tripTimes = state0.getTripTimes();
         int dwellTime = tripTimes.getDwellTime(stopIndex);
         StateEditor s1 = state0.edit(this);
@@ -76,7 +76,7 @@ public class PatternDwell extends TablePatternEdge implements OnboardEdge, Dwell
         s1.incrementWeight(dwellTime);
         return s1.makeState();
     }
-    
+
     @Override
     public double timeLowerBound(RoutingRequest options) {
         return getPattern().scheduledTimetable.getBestDwellTime(stopIndex);

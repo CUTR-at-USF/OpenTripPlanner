@@ -32,5 +32,4 @@ public class PatternArriveVertex extends PatternStopVertex {
         return String.format("%s_%02d_A", pattern.getCode(), stop);
     }
 
-
 }

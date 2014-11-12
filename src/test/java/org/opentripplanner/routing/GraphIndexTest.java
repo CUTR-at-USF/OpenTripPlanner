@@ -13,8 +13,8 @@ import org.opentripplanner.routing.vertextype.TransitStop;
 import java.util.List;
 
 /**
- * Check that the graph index is created, that GTFS elements can be found in the index, and that
- * the indexes are coherent with one another.
+ * Check that the graph index is created, that GTFS elements can be found in the index, and that the
+ * indexes are coherent with one another.
  *
  * TODO: The old transit index doesn't exist anymore, and the new one needs more tests.
  */
@@ -30,7 +30,7 @@ public class GraphIndexTest extends GtfsTest {
         /* Graph vertices */
         for (Vertex vertex : graph.index.vertexForId.values()) {
             if (vertex instanceof TransitStop) {
-                Stop stop = ((TransitStop)vertex).getStop();
+                Stop stop = ((TransitStop) vertex).getStop();
                 Vertex index_vertex = graph.index.stopVertexForStop.get(stop);
                 assertEquals(index_vertex, vertex);
             }
@@ -48,13 +48,16 @@ public class GraphIndexTest extends GtfsTest {
         graph.index.stopForId.get(new AgencyAndId("X", "Y"));
 
         /* Trips */
-//        graph.index.tripForId;
-//        graph.index.routeForId;
-//        graph.index.serviceForId;
-//        graph.index.patternForId;
+        // graph.index.tripForId;
+        // graph.index.routeForId;
+        // graph.index.serviceForId;
+        // graph.index.patternForId;
     }
 
-    /** Check that bidirectional relationships between TripPatterns and Trips, Routes, and Stops are coherent. */
+    /**
+     * Check that bidirectional relationships between TripPatterns and Trips, Routes, and Stops are
+     * coherent.
+     */
     public void testPatternsCoherent() {
         for (Trip trip : graph.index.tripForId.values()) {
             TripPattern pattern = graph.index.patternForTrip.get(trip);
@@ -81,7 +84,8 @@ public class GraphIndexTest extends GtfsTest {
         TransitStop stopvL = graph.index.stopVertexForStop.get(stopL);
         TransitStop stopvM = graph.index.stopVertexForStop.get(stopM);
         // There are a two other stops within 100 meters of stop J.
-        List<TransitStop> stops = graph.index.stopSpatialIndex.query(stopJ.getLon(), stopJ.getLat(), 100);
+        List<TransitStop> stops = graph.index.stopSpatialIndex.query(stopJ.getLon(),
+                stopJ.getLat(), 100);
         assertTrue(stops.contains(stopvJ));
         assertTrue(stops.contains(stopvL));
         assertTrue(stops.contains(stopvM));

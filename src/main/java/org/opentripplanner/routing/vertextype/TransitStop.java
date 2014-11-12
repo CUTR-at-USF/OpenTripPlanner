@@ -10,7 +10,7 @@
 
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package org.opentripplanner.routing.vertextype;
 
 import org.onebusaway.gtfs.model.Stop;
@@ -36,12 +36,13 @@ public class TransitStop extends TransitStationStop {
     private int streetToStopTime = 0;
 
     /*
-      We sometimes want a reference to a TransitStop's corresponding arrive or depart vertex.
-      Rather than making a Map in the GraphIndex, we just store them here.
-      This should also help make the GTFS-loading context object unnecessary, and eventually help
-      eliminate explicit transit edges.
-    */
+     * We sometimes want a reference to a TransitStop's corresponding arrive or depart vertex.
+     * Rather than making a Map in the GraphIndex, we just store them here. This should also help
+     * make the GTFS-loading context object unnecessary, and eventually help eliminate explicit
+     * transit edges.
+     */
     public TransitStopArrive arriveVertex;
+
     public TransitStopDepart departVertex;
 
     public TransitStop(Graph graph, Stop stop) {
@@ -82,7 +83,7 @@ public class TransitStop extends TransitStationStop {
     public void addMode(TraverseMode mode) {
         modes.setMode(mode, true);
     }
-    
+
     public boolean isStreetLinkable() {
         return isEntrance() || !hasEntrances();
     }

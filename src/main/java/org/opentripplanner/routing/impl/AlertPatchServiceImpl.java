@@ -37,11 +37,14 @@ public class AlertPatchServiceImpl implements AlertPatchService {
 
     private Graph graph;
 
-    @Context // FIXME inject Application
+    @Context
+    // FIXME inject Application
     private GraphService graphService;
 
     private Map<String, AlertPatch> alertPatches = new HashMap<String, AlertPatch>();
+
     private ListMultimap<AgencyAndId, AlertPatch> patchesByRoute = LinkedListMultimap.create();
+
     private ListMultimap<AgencyAndId, AlertPatch> patchesByStop = LinkedListMultimap.create();
 
     protected AlertPatchServiceImpl() {

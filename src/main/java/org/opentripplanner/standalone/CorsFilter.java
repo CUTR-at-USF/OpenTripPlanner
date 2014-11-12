@@ -22,16 +22,14 @@ import javax.ws.rs.core.Response;
  * number.
  * 
  * We used to use JSONP ("JSON with padding") as a way to get around this. Despite being very
- * common, this is of course a big hack to defeat a security policy. Modern
- * browsers respect "Cross Origin Resource Sharing" (CORS) headers, so we
- * have switched to that system.
+ * common, this is of course a big hack to defeat a security policy. Modern browsers respect
+ * "Cross Origin Resource Sharing" (CORS) headers, so we have switched to that system.
  */
 public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
     /**
-     * CORS request filter.
-     * Hijack "preflight" OPTIONS requests before the Jersey resources get them.
-     * The response will then pass through the CORS response filter on its way back out.
+     * CORS request filter. Hijack "preflight" OPTIONS requests before the Jersey resources get
+     * them. The response will then pass through the CORS response filter on its way back out.
      */
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -42,12 +40,12 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
     }
 
     /**
-     * CORS response filter. Allow requests from anywhere.
-     * Just echo back the contents of the Origin header.
-     * Allow credentials if the transport layer is secure.
+     * CORS response filter. Allow requests from anywhere. Just echo back the contents of the Origin
+     * header. Allow credentials if the transport layer is secure.
      */
     @Override
-    public void filter(ContainerRequestContext request, ContainerResponseContext response) throws IOException {
+    public void filter(ContainerRequestContext request, ContainerResponseContext response)
+            throws IOException {
         String origin = request.getHeaderString("Origin"); // case insensitive
         MultivaluedMap<String, Object> headers = response.getHeaders();
         headers.add("Access-Control-Allow-Origin", origin);

@@ -24,9 +24,9 @@ public class VisualTraverseVisitor implements TraverseVisitor {
     private ShowGraph gui;
 
     private final int SLEEP_AFTER = 50;
-    
+
     private int sleepAfter = SLEEP_AFTER;
-    
+
     public VisualTraverseVisitor(ShowGraph gui) {
         this.gui = gui;
     }
@@ -34,7 +34,7 @@ public class VisualTraverseVisitor implements TraverseVisitor {
     @Override
     public void visitEdge(Edge edge, State state) {
         gui.enqueueHighlightedEdge(edge);
-        //gui.highlightVertex(state.getVertex());
+        // gui.highlightVertex(state.getVertex());
     }
 
     @Override
@@ -47,19 +47,19 @@ public class VisualTraverseVisitor implements TraverseVisitor {
                 e.printStackTrace();
             }
         }
-//        seen.add(state.getVertex());
-//        gui.setHighlightedVertices(seen);
-//        gui.highlightVertex(state.getVertex());
+        // seen.add(state.getVertex());
+        // gui.setHighlightedVertices(seen);
+        // gui.highlightVertex(state.getVertex());
     }
 
     @Override
     public void visitEnqueue(State state) {
-//        Edge e = state.getBackEdge();
-//        if (e instanceof Edge) {
-//            gui.enqueueHighlightedEdge((Edge) e);
-//        }
+        // Edge e = state.getBackEdge();
+        // if (e instanceof Edge) {
+        // gui.enqueueHighlightedEdge((Edge) e);
+        // }
     }
-    
+
     public GenericAStarFactory getAStarSearchFactory() {
         return new GenericAStarFactory() {
 

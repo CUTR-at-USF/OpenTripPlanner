@@ -19,8 +19,8 @@ import org.opentripplanner.routing.graph.Vertex;
 import org.opentripplanner.routing.services.RemainingWeightHeuristicFactory;
 
 /**
- * A trivial heuristic that always returns 0, which is always admissible. 
- * For use in testing and troubleshooting.
+ * A trivial heuristic that always returns 0, which is always admissible. For use in testing and
+ * troubleshooting.
  * 
  * @author andrewbyrd
  */
@@ -29,7 +29,8 @@ public class TrivialRemainingWeightHeuristic implements RemainingWeightHeuristic
     private static final long serialVersionUID = 1L;
 
     @Override
-    public void initialize(State s, Vertex target, long abortTime) {}
+    public void initialize(State s, Vertex target, long abortTime) {
+    }
 
     @Override
     public double computeForwardWeight(State s, Vertex target) {
@@ -41,9 +42,9 @@ public class TrivialRemainingWeightHeuristic implements RemainingWeightHeuristic
         return 0;
     }
 
-    /** 
-     * Factory that turns off goal-direction heuristics in OTP for comparison. 
-     * results should be identical when heuristics are switched off.
+    /**
+     * Factory that turns off goal-direction heuristics in OTP for comparison. results should be
+     * identical when heuristics are switched off.
      */
     public static class Factory implements RemainingWeightHeuristicFactory {
         @Override
@@ -53,8 +54,10 @@ public class TrivialRemainingWeightHeuristic implements RemainingWeightHeuristic
     }
 
     @Override
-    public void reset() {}
-    
+    public void reset() {
+    }
+
     @Override
-    public void doSomeWork() {}
+    public void doSomeWork() {
+    }
 }

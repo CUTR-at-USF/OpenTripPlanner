@@ -26,9 +26,9 @@ import com.google.common.collect.Lists;
 /**
  * Holds information to be included in the REST Response for debugging and profiling purposes.
  *
- * startedCalculating is called in the routingContext constructor.
- * finishedCalculating and finishedRendering are all called in PlanGenerator.generate().
- * finishedPrecalculating and foundPaths are called in the SPTService implementations.
+ * startedCalculating is called in the routingContext constructor. finishedCalculating and
+ * finishedRendering are all called in PlanGenerator.generate(). finishedPrecalculating and
+ * foundPaths are called in the SPTService implementations.
  */
 @XmlRootElement
 public class DebugOutput {
@@ -37,25 +37,34 @@ public class DebugOutput {
 
     /* Only public fields are serialized by JAX-RS, make interal ones private? */
     private long startedCalculating;
+
     private long finishedPrecalculating;
+
     private List<Long> foundPaths = Lists.newArrayList();
+
     private long finishedCalculating;
+
     private long finishedRendering;
 
     /* Results, public to cause JAX-RS serialization */
     public long precalculationTime;
+
     public long pathCalculationTime;
+
     public List<Long> pathTimes = Lists.newArrayList();
+
     public long renderingTime;
+
     public long totalTime;
+
     public boolean timedOut;
 
     /**
-     * Record the time when we first began calculating a path for this request
-     * (before any heuristic pre-calculation). Note that timings will not
-     * include network and server request queue overhead, which is what we want.
-     * finishedPrecalculating is also set because some heuristics will not mark any precalculation
-     * step, and path times are measured from when precalculation ends.
+     * Record the time when we first began calculating a path for this request (before any heuristic
+     * pre-calculation). Note that timings will not include network and server request queue
+     * overhead, which is what we want. finishedPrecalculating is also set because some heuristics
+     * will not mark any precalculation step, and path times are measured from when precalculation
+     * ends.
      */
     public void startedCalculating() {
         startedCalculating = finishedPrecalculating = System.currentTimeMillis();

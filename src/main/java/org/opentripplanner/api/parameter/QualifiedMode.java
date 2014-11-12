@@ -10,8 +10,9 @@ import com.beust.jcommander.internal.Sets;
 public class QualifiedMode {
 
     public final TraverseMode mode;
+
     public final Set<Qualifier> qualifiers = Sets.newHashSet();
-    
+
     public QualifiedMode(String qMode) {
         String[] elements = qMode.split("_");
         mode = TraverseMode.valueOf(elements[0].trim());

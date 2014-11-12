@@ -50,10 +50,10 @@ public class RegionBasedOpenStreetMapProviderImpl implements OpenStreetMapProvid
     @Override
     public void readOSM(OpenStreetMapContentHandler handler) {
 
-        if( _cacheDirectory != null)
+        if (_cacheDirectory != null)
             downloader.setCacheDirectory(_cacheDirectory);
 
-        if( _apiBaseUrl != null)
+        if (_apiBaseUrl != null)
             downloader.setApiBaseUrl(_apiBaseUrl);
 
         DownloadHandler downloadHandler = new DownloadHandler(handler);
@@ -73,7 +73,8 @@ public class RegionBasedOpenStreetMapProviderImpl implements OpenStreetMapProvid
     }
 
     /**
-     * Set a custom OSM downloader 
+     * Set a custom OSM downloader
+     * 
      * @param downloader
      */
     public void setDownloader(OSMDownloader downloader) {
@@ -99,7 +100,7 @@ public class RegionBasedOpenStreetMapProviderImpl implements OpenStreetMapProvid
         @Override
         public void handleMapTile(String key, double lat, double lon, File pathToMapTile) {
             try {
-                if( _visitedMapTiles.add(key))
+                if (_visitedMapTiles.add(key))
                     _parser.parseMap(pathToMapTile, _contentHandler);
             } catch (IOException ex) {
                 throw new IllegalStateException("error reading osm file " + pathToMapTile, ex);

@@ -22,17 +22,17 @@ public class HopSpeedFast extends GraphBuilderAnnotation {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String FMT = "Excessive speed of %f m/sec over %fm on route %s trip %s " +
-    		"stop sequence %d.";
-    
+    public static final String FMT = "Excessive speed of %f m/sec over %fm on route %s trip %s "
+            + "stop sequence %d.";
+
     final float speed;
 
     final float distance;
-    
+
     final Trip trip;
-    
+
     final int seq;
-    
+
     @Override
     public String getMessage() {
         return String.format(FMT, speed, distance, trip.getRoute(), trip, seq);

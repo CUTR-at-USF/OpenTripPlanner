@@ -31,8 +31,8 @@ import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 
 public class GtfsRealtimeHttpTripUpdateSource implements TripUpdateSource, PreferencesConfigurable {
-    private static final Logger LOG =
-            LoggerFactory.getLogger(GtfsRealtimeHttpTripUpdateSource.class);
+    private static final Logger LOG = LoggerFactory
+            .getLogger(GtfsRealtimeHttpTripUpdateSource.class);
 
     /**
      * Default agency id that is used for the trip ids in the TripUpdates

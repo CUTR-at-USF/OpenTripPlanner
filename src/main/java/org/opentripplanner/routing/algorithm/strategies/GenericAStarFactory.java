@@ -27,5 +27,5 @@ import org.opentripplanner.routing.core.RoutingRequest;
 public interface GenericAStarFactory {
 
     public GenericAStar createAStarInstance();
-    
+
 }

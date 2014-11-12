@@ -43,7 +43,7 @@ public class RouteData {
 
     @XmlElementWrapper
     public List<String> directions;
-    
+
     @XmlElement(name = "route")
     public RouteType route;
 }

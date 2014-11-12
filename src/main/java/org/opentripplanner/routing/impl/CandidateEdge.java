@@ -23,7 +23,7 @@ public class CandidateEdge {
     private static final double SIDEWALK_PREFERENCE = 1.5;
 
     // Massive preference for streets that allow cars, also applied to platforms for vehicles of
-    // the specified mode. 
+    // the specified mode.
     private static final double CAR_PREFERENCE = 100;
 
     private static final double MAX_DIRECTION_DIFFERENCE = 180.0;
@@ -53,7 +53,7 @@ public class CandidateEdge {
     private double nearestSegmentFraction;
 
     /**
-     * Set when to the closest endpoint of the edge when the input location is really sitting on 
+     * Set when to the closest endpoint of the edge when the input location is really sitting on
      * that endpoint (within some tolerance).
      */
     @Getter
@@ -75,7 +75,10 @@ public class CandidateEdge {
     @Getter
     protected double directionOfEdge;
 
-    /** Difference in direction between heading and nearest subsegment of edge. Null if no heading given. */
+    /**
+     * Difference in direction between heading and nearest subsegment of edge. Null if no heading
+     * given.
+     */
     @Getter
     protected Double directionDifference;
 
@@ -98,13 +101,13 @@ public class CandidateEdge {
             } else if (score1 < score2) {
                 return -1;
             }
-            return 1;        
+            return 1;
         }
     }
-    
-    /** 
-     * Construct CandidateEdge based on a GenericLocation. 
-     * The edge's score is calculated as the final step of construction. 
+
+    /**
+     * Construct CandidateEdge based on a GenericLocation. The edge's score is calculated as the
+     * final step of construction.
      */
     public CandidateEdge(StreetEdge e, GenericLocation loc, double pref, TraverseModeSet mode) {
         preference = pref;
@@ -206,16 +209,16 @@ public class CandidateEdge {
         return retV;
     }
 
-    /** 
-     * Get the platform mask for the given mode. 
-     * This is compatible with the bit flags from StreetEdge.getStreetClass(). 
+    /**
+     * Get the platform mask for the given mode. This is compatible with the bit flags from
+     * StreetEdge.getStreetClass().
      */
     private int calcPlatform(TraverseModeSet mode) {
         int out = 0;
         if (mode.getTrainish()) {
             out |= StreetEdge.CLASS_TRAIN_PLATFORM;
         }
-        if (mode.getBusish() ) { 
+        if (mode.getBusish()) {
             // includes CABLE_CAR
             out |= StreetEdge.CLASS_OTHER_PLATFORM;
         }
@@ -236,7 +239,7 @@ public class CandidateEdge {
             // this is a hack, but there's not really a better way to do it
             myScore /= SIDEWALK_PREFERENCE;
         }
-        // apply strong preference to car edges and to platforms for the specified modes 
+        // apply strong preference to car edges and to platforms for the specified modes
         if (edge.getPermission().allows(StreetTraversalPermission.CAR)
                 || (edge.getStreetClass() & platform) != 0) {
             // we're subtracting here because no matter how close we are to a

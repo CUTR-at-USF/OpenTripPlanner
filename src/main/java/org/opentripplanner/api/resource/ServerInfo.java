@@ -29,34 +29,36 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.opentripplanner.common.MavenVersion;
 
 @Path("/")
-@XmlRootElement 
+@XmlRootElement
 public class ServerInfo {
     static final String Q = ";qs=0.5";
-    
+
     private static final ServerInfo SERVER_INFO = new ServerInfo();
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML + Q, MediaType.TEXT_XML + Q })
     public static ServerInfo getServerInfo() {
         return SERVER_INFO;
-    }    
-    
-    /* Fields must be public or have a public getter to be auto-serialized to JSON;
-    they are annotated with @XmlElement to be serialized to XML elements (as opposed to attributes).
-    Adding Lombok @Getter does not work because the name of the auto-generated getNCores getter 
-    function confuses JSON field capitalization. */
+    }
 
-    @XmlElement 
-    public MavenVersion serverVersion = MavenVersion.VERSION; 
-    
-    @XmlElement 
+    /*
+     * Fields must be public or have a public getter to be auto-serialized to JSON; they are
+     * annotated with @XmlElement to be serialized to XML elements (as opposed to attributes).
+     * Adding Lombok @Getter does not work because the name of the auto-generated getNCores getter
+     * function confuses JSON field capitalization.
+     */
+
+    @XmlElement
+    public MavenVersion serverVersion = MavenVersion.VERSION;
+
+    @XmlElement
     public String cpuName = "unknown";
-    
-    @XmlElement 
+
+    @XmlElement
     public int nCores = 0;
 
     /* It would make sense to have one object containing maven, git, and hardware subobjects. */
-    
+
     /**
      * Determine the OTP version and CPU type of the running server. This information should not
      * change while the server is up, so it can safely be cached at startup.
@@ -64,7 +66,8 @@ public class ServerInfo {
     public ServerInfo() {
         try {
             InputStream fis = new FileInputStream("/proc/cpuinfo");
-            BufferedReader br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis,
+                    Charset.forName("UTF-8")));
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.startsWith("model name")) {
@@ -73,8 +76,7 @@ public class ServerInfo {
                 }
             }
             fis.close();
-        } 
-        catch (Exception e) {
+        } catch (Exception e) {
             cpuName = "unknown";
             nCores = 0;
         }

@@ -68,7 +68,8 @@ public class TimeGridWs extends RoutingResource {
     @SuppressWarnings("unused")
     private static final Logger LOG = LoggerFactory.getLogger(TimeGridWs.class);
 
-    @Context // FIXME use Application injection
+    @Context
+    // FIXME use Application injection
     private SampleGridRenderer sampleGridRenderer;
 
     @QueryParam("maxTimeSec")

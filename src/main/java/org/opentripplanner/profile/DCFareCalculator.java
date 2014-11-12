@@ -11,30 +11,44 @@ import java.util.List;
  */
 public class DCFareCalculator {
 
-    private static final FareTable METRORAIL = new FareTable("org/opentripplanner/profile/fares/metrorail.csv");
-    private static final FareTable MARC = new FareTable("org/opentripplanner/profile/fares/marc.csv");
+    private static final FareTable METRORAIL = new FareTable(
+            "org/opentripplanner/profile/fares/metrorail.csv");
+
+    private static final FareTable MARC = new FareTable(
+            "org/opentripplanner/profile/fares/marc.csv");
+
     private static final FareTable VRE = new FareTable("org/opentripplanner/profile/fares/vre.csv");
 
-    private static final String[] metroExpress = { "J7", "J9", "P17", "P19", "W13", "W19", "11Y", "17A", "17B", "17G",
-        "17H", "17K", "17L", "17M", "18E", "18G", "18H", "18P", "29E", "29G", "29H", "29X" };
+    private static final String[] metroExpress = { "J7", "J9", "P17", "P19", "W13", "W19", "11Y",
+            "17A", "17B", "17G", "17H", "17K", "17L", "17M", "18E", "18G", "18H", "18P", "29E",
+            "29G", "29H", "29X" };
 
-    private static RideType classify (Ride ride) {
-        // NOTE the agencyId string of the route's agencyAndId is not the same as the one given by route.getAgency.
-        // The former is the same for all routes in the feed. The latter is the true agency of the feed.
+    private static RideType classify(Ride ride) {
+        // NOTE the agencyId string of the route's agencyAndId is not the same as the one given by
+        // route.getAgency.
+        // The former is the same for all routes in the feed. The latter is the true agency of the
+        // feed.
         String agency = ride.route.getAgency().getId();
-        String agency_url = ride.route.getAgency().getUrl(); // this is used in single-agency feeds so it should work
+        String agency_url = ride.route.getAgency().getUrl(); // this is used in single-agency feeds
+                                                             // so it should work
         String short_name = ride.route.getShortName();
         String long_name = ride.route.getLongName();
         if ("MET".equals(agency)) {
-            if (ride.route.getType() == 1) return RideType.METRO_RAIL;
-            if ("5A".equals(short_name) || "B30".equals(short_name)) return RideType.METRO_BUS_AIRPORT;
-            for (String sn : metroExpress) if (sn.equals(short_name)) return RideType.METRO_BUS_EXPRESS;
+            if (ride.route.getType() == 1)
+                return RideType.METRO_RAIL;
+            if ("5A".equals(short_name) || "B30".equals(short_name))
+                return RideType.METRO_BUS_AIRPORT;
+            for (String sn : metroExpress)
+                if (sn.equals(short_name))
+                    return RideType.METRO_BUS_EXPRESS;
             return RideType.METRO_BUS_LOCAL;
         } else if ("DC".equals(agency)) {
             return RideType.DC_CIRCULATOR_BUS;
         } else if ("MCRO".equals(agency)) {
-            if (short_name.equals("70")) return RideType.MCRO_BUS_EXPRESS;
-            else return RideType.MCRO_BUS_LOCAL;
+            if (short_name.equals("70"))
+                return RideType.MCRO_BUS_EXPRESS;
+            else
+                return RideType.MCRO_BUS_LOCAL;
         } else if (agency_url != null) {
             if (agency_url.contains("fairfaxconnector.com")) {
                 return RideType.FAIRFAX_CONNECTOR_BUS;
@@ -49,18 +63,21 @@ public class DCFareCalculator {
                 return RideType.VRE_BUS;
             }
             if (agency_url.contains("mtamaryland.com")) {
-                if (ride.route.getType() == 2) return RideType.MARC_RAIL;
-                else return RideType.DASH_BUS; // FIXME this is probably wrong
+                if (ride.route.getType() == 2)
+                    return RideType.MARC_RAIL;
+                else
+                    return RideType.DASH_BUS; // FIXME this is probably wrong
             }
         }
         return null;
     }
 
     /**
-     * Should we have exactly one fare per ride, where some fares may have zero cost if they are transfers from the same operator?
-     * ...except that this doesn't work for MetroRail, where two legs combine into one.
+     * Should we have exactly one fare per ride, where some fares may have zero cost if they are
+     * transfers from the same operator? ...except that this doesn't work for MetroRail, where two
+     * legs combine into one.
      */
-    public static List<Fare> calculateFares (List<Ride> rides) {
+    public static List<Fare> calculateFares(List<Ride> rides) {
         List<FareRide> fareRides = Lists.newArrayList();
         FareRide prev = null;
         for (Ride ride : rides) {
@@ -82,12 +99,18 @@ public class DCFareCalculator {
 
     static class FareRide {
         Stop from;
+
         Stop to;
+
         Route route;
+
         RideType type;
+
         Fare fare;
+
         FareRide prev;
-        public FareRide (Ride ride, FareRide prevRide) {
+
+        public FareRide(Ride ride, FareRide prevRide) {
             from = ride.from;
             to = ride.to;
             route = ride.route;
@@ -95,17 +118,21 @@ public class DCFareCalculator {
             prev = prevRide;
             calcFare();
         }
+
         private void setFare(double base, boolean transferReduction) {
             fare = new Fare(base);
             fare.transferReduction = transferReduction;
         }
+
         private void setFare(double low, double peak, double senior, boolean transferReduction) {
             fare = new Fare(peak);
             fare.low = low;
             fare.senior = senior;
             fare.transferReduction = transferReduction;
         }
-        // TODO store rule-based Fares in a table keyed on (type, prevtype) instead of doing on the fly
+
+        // TODO store rule-based Fares in a table keyed on (type, prevtype) instead of doing on the
+        // fly
         // automatically compose string using 'free' or 'discounted' and route name
         private void calcFare() {
             RideType prevType = (prev == null) ? null : prev.type;
@@ -114,17 +141,23 @@ public class DCFareCalculator {
             switch (type) {
             case METRO_RAIL:
                 fare = METRORAIL.lookup(from, to);
-                if (prevType == RideType.METRO_BUS_LOCAL || prevType == RideType.METRO_BUS_EXPRESS || // TODO merge local and express categories
-                    prevType == RideType.MCRO_BUS_LOCAL  || prevType == RideType.MCRO_BUS_EXPRESS) {  // TODO merge local and express categories
+                if (prevType == RideType.METRO_BUS_LOCAL
+                        || prevType == RideType.METRO_BUS_EXPRESS
+                        || // TODO merge local and express categories
+                        prevType == RideType.MCRO_BUS_LOCAL
+                        || prevType == RideType.MCRO_BUS_EXPRESS) { // TODO merge local and express
+                                                                    // categories
                     fare.discount(0.50);
                 }
                 break;
             case METRO_BUS_LOCAL:
                 if (prevType == RideType.DASH_BUS) {
                     setFare(0.00, true);
-                } else if (prevType == RideType.METRO_BUS_EXPRESS || prevType == RideType.METRO_BUS_AIRPORT) {
+                } else if (prevType == RideType.METRO_BUS_EXPRESS
+                        || prevType == RideType.METRO_BUS_AIRPORT) {
                     setFare(0.00, true);
-                } else if (prevType == RideType.MCRO_BUS_LOCAL || prevType == RideType.MCRO_BUS_EXPRESS) {
+                } else if (prevType == RideType.MCRO_BUS_LOCAL
+                        || prevType == RideType.MCRO_BUS_EXPRESS) {
                     setFare(0.00, true);
                 } else if (prevType == RideType.METRO_RAIL) {
                     setFare(1.10, true);
@@ -144,9 +177,9 @@ public class DCFareCalculator {
             case METRO_BUS_AIRPORT:
                 setFare(6.00, false);
                 break;
-            case DC_CIRCULATOR_BUS :
-                if (prevType == RideType.METRO_BUS_LOCAL || prevType == RideType.METRO_BUS_EXPRESS ||
-                    prevType == RideType.METRO_BUS_AIRPORT || prevType == RideType.ART_BUS) {
+            case DC_CIRCULATOR_BUS:
+                if (prevType == RideType.METRO_BUS_LOCAL || prevType == RideType.METRO_BUS_EXPRESS
+                        || prevType == RideType.METRO_BUS_AIRPORT || prevType == RideType.ART_BUS) {
                     setFare(0.00, true);
                 } else if (prevType == RideType.METRO_RAIL) {
                     setFare(0.50, true);
@@ -219,43 +252,48 @@ public class DCFareCalculator {
             default:
                 setFare(0.00, false);
             }
-            if (fare != null) fare.type = type;
+            if (fare != null)
+                fare.type = type;
         }
     }
 
     public static class Fare {
 
         public RideType type;
+
         public double low;
+
         public double peak;
+
         public double senior;
+
         public boolean transferReduction;
 
-        public Fare (Fare other) {
+        public Fare(Fare other) {
             this.accumulate(other);
         }
 
-        public Fare (double base) {
+        public Fare(double base) {
             low = peak = senior = base;
         }
 
-        public Fare (double low, double peak, double senior) {
+        public Fare(double low, double peak, double senior) {
             this.low = low;
             this.peak = peak;
             this.senior = senior;
         }
 
-        public void accumulate (Fare other) {
+        public void accumulate(Fare other) {
             if (other != null) {
-                low    += other.low;
-                peak   += other.peak;
+                low += other.low;
+                peak += other.peak;
                 senior += other.senior;
             }
         }
 
         public void discount(double amount) {
-            low    -= amount;
-            peak   -= amount;
+            low -= amount;
+            peak -= amount;
             senior -= amount;
             transferReduction = true;
         }
@@ -263,19 +301,7 @@ public class DCFareCalculator {
     }
 
     enum RideType {
-        METRO_RAIL,
-        METRO_BUS_LOCAL,
-        METRO_BUS_EXPRESS,
-        METRO_BUS_AIRPORT,
-        DC_CIRCULATOR_BUS,
-        ART_BUS,
-        DASH_BUS,
-        MARC_RAIL,
-        VRE_BUS,
-        MCRO_BUS_LOCAL,
-        MCRO_BUS_EXPRESS,
-        FAIRFAX_CONNECTOR_BUS,
-        PRTC_BUS
+        METRO_RAIL, METRO_BUS_LOCAL, METRO_BUS_EXPRESS, METRO_BUS_AIRPORT, DC_CIRCULATOR_BUS, ART_BUS, DASH_BUS, MARC_RAIL, VRE_BUS, MCRO_BUS_LOCAL, MCRO_BUS_EXPRESS, FAIRFAX_CONNECTOR_BUS, PRTC_BUS
     }
 
 }

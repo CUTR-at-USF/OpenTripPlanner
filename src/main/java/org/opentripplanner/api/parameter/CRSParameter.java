@@ -29,7 +29,7 @@ public class CRSParameter {
 
     public CoordinateReferenceSystem crs = null;
 
-    public CRSParameter (String name) {
+    public CRSParameter(String name) {
         try {
             crs = CRS.decode(name, true);
         } catch (Exception e) {
@@ -42,9 +42,9 @@ public class CRSParameter {
     }
 
     protected String getErrorMessage(String param, Throwable e) {
-        return String.format("<H1>400 Bad Request</H1> " +
-                "While parsing parameter %s as %s: <BR> %s",
-                param, CoordinateReferenceSystem.class, e.getMessage());
+        return String.format("<H1>400 Bad Request</H1> "
+                + "While parsing parameter %s as %s: <BR> %s", param,
+                CoordinateReferenceSystem.class, e.getMessage());
     }
 
 }

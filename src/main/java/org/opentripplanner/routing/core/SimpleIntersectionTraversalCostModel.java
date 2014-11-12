@@ -50,8 +50,9 @@ public class SimpleIntersectionTraversalCostModel extends AbstractIntersectionTr
     private Double expectedLeftNoLightTimeSec = 8.0;
 
     @Override
-    public double computeTraversalCost(IntersectionVertex v, PlainStreetEdge from, PlainStreetEdge to, TraverseMode mode,
-                                       RoutingRequest options, float fromSpeed, float toSpeed) {
+    public double computeTraversalCost(IntersectionVertex v, PlainStreetEdge from,
+            PlainStreetEdge to, TraverseMode mode, RoutingRequest options, float fromSpeed,
+            float toSpeed) {
 
         // If the vertex is free-flowing then (by definition) there is no cost to traverse it.
         if (v.inferredFreeFlowing()) {
@@ -77,8 +78,8 @@ public class SimpleIntersectionTraversalCostModel extends AbstractIntersectionTr
             }
         } else {
 
-            //assume highway vertex
-            if(from.getCarSpeed()>25 && to.getCarSpeed()>25) {
+            // assume highway vertex
+            if (from.getCarSpeed() > 25 && to.getCarSpeed() > 25) {
                 return 0;
             }
 

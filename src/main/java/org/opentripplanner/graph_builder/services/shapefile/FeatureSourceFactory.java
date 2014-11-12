@@ -21,7 +21,7 @@ public interface FeatureSourceFactory {
     public FeatureSource<SimpleFeatureType, SimpleFeature> getFeatureSource();
 
     public void cleanup();
-    
+
     /** @see GraphBuilder.checkInputs() */
     public void checkInputs();
 }

@@ -27,15 +27,15 @@ import com.vividsolutions.jts.linearref.LocationIndexedLine;
 
 public class GeometryUtils {
 
-    private static CoordinateSequenceFactory csf =
-            new Serializable2DPackedCoordinateSequenceFactory();
+    private static CoordinateSequenceFactory csf = new Serializable2DPackedCoordinateSequenceFactory();
+
     private static GeometryFactory gf = new GeometryFactory(csf);
 
     public static LineString makeLineString(double... coords) {
         GeometryFactory factory = getGeometryFactory();
-        Coordinate [] coordinates = new Coordinate[coords.length / 2];
-        for (int i = 0; i < coords.length; i+=2) {
-            coordinates[i / 2] = new Coordinate(coords[i], coords[i+1]);
+        Coordinate[] coordinates = new Coordinate[coords.length / 2];
+        for (int i = 0; i < coords.length; i += 2) {
+            coordinates[i / 2] = new Coordinate(coords[i], coords[i + 1]);
         }
         return factory.createLineString(coordinates);
     }
@@ -43,7 +43,7 @@ public class GeometryUtils {
     public static GeometryFactory getGeometryFactory() {
         return gf;
     }
-    
+
     /**
      * Splits the input geometry into two LineStrings at the given point.
      */
@@ -57,7 +57,7 @@ public class GeometryUtils {
 
         return new P2<LineString>(beginning, ending);
     }
-    
+
     /**
      * Splits the input geometry into two LineStrings at a fraction of the distance covered.
      */
@@ -67,9 +67,12 @@ public class GeometryUtils {
         CoordinateSequence sequence = gf.getCoordinateSequenceFactory().create(coordinates);
         LineString total = new LineString(sequence, gf);
 
-        if (coordinates.length < 2) return new P2<LineString>(empty, empty);
-        if (fraction <= 0) return new P2<LineString>(empty, total);
-        if (fraction >= 1) return new P2<LineString>(total, empty);
+        if (coordinates.length < 2)
+            return new P2<LineString>(empty, empty);
+        if (fraction <= 0)
+            return new P2<LineString>(empty, total);
+        if (fraction >= 1)
+            return new P2<LineString>(total, empty);
 
         double totalDistance = total.getLength();
         double requestedDistance = totalDistance * fraction;
@@ -97,11 +100,11 @@ public class GeometryUtils {
     }
 
     /**
-     * Adapted from com.vividsolutions.jts.geom.LineSegment 
-     * Combines segmentFraction and projectionFactor methods.
+     * Adapted from com.vividsolutions.jts.geom.LineSegment Combines segmentFraction and
+     * projectionFactor methods.
      */
-    public static double segmentFraction(double x0, double y0, double x1, double y1, 
-            double xp, double yp, double xscale) {
+    public static double segmentFraction(double x0, double y0, double x1, double y1, double xp,
+            double yp, double xscale) {
         // Use comp.graphics.algorithms Frequently Asked Questions method
         double dx = (x1 - x0) * xscale;
         double dy = y1 - y0;
@@ -109,11 +112,11 @@ public class GeometryUtils {
         // this fixes a (reported) divide by zero bug in JTS when line segment has 0 length
         if (len2 == 0)
             return 0;
-        double r = ( (xp - x0) * xscale * dx + (yp - y0) * dy ) / len2;
+        double r = ((xp - x0) * xscale * dx + (yp - y0) * dy) / len2;
         if (r < 0.0)
             return 0.0;
         else if (r > 1.0)
             return 1.0;
         return r;
-      }
+    }
 }

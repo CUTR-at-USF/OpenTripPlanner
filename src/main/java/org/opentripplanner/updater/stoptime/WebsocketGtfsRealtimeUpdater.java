@@ -179,7 +179,8 @@ public class WebsocketGtfsRealtimeUpdater implements GraphUpdater {
                 feedEntityList = feedMessage.getEntityList();
                 updates = new ArrayList<TripUpdate>(feedEntityList.size());
                 for (FeedEntity feedEntity : feedEntityList) {
-                    if (feedEntity.hasTripUpdate()) updates.add(feedEntity.getTripUpdate());
+                    if (feedEntity.hasTripUpdate())
+                        updates.add(feedEntity.getTripUpdate());
                 }
             } catch (InvalidProtocolBufferException e) {
                 LOG.error("Could not decode gtfs-rt message:", e);
@@ -187,8 +188,8 @@ public class WebsocketGtfsRealtimeUpdater implements GraphUpdater {
 
             if (updates != null && updates.size() > 0) {
                 // Handle trip updates via graph writer runnable
-                TripUpdateGraphWriterRunnable runnable =
-                        new TripUpdateGraphWriterRunnable(updates, agencyId);
+                TripUpdateGraphWriterRunnable runnable = new TripUpdateGraphWriterRunnable(updates,
+                        agencyId);
                 updaterManager.execute(runnable);
             }
         }

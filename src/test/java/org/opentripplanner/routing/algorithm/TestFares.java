@@ -37,18 +37,20 @@ import org.opentripplanner.util.TestUtils;
 public class TestFares extends TestCase {
 
     private GenericAStar aStar = new GenericAStar();
-    
+
     public void testBasic() throws Exception {
 
         Graph gg = new Graph();
         GtfsContext context = GtfsLibrary.readGtfs(new File(ConstantsForTests.CALTRAIN_GTFS));
         GTFSPatternHopFactory factory = new GTFSPatternHopFactory(context);
         factory.run(gg);
-        gg.putService(CalendarServiceData.class, GtfsLibrary.createCalendarServiceData(context.getDao()));
+        gg.putService(CalendarServiceData.class,
+                GtfsLibrary.createCalendarServiceData(context.getDao()));
         RoutingRequest options = new RoutingRequest();
         long startTime = TestUtils.dateInSeconds("America/Los_Angeles", 2009, 8, 7, 12, 0, 0);
         options.dateTime = startTime;
-        options.setRoutingContext(gg, "Caltrain_Millbrae Caltrain", "Caltrain_Mountain View Caltrain");
+        options.setRoutingContext(gg, "Caltrain_Millbrae Caltrain",
+                "Caltrain_Mountain View Caltrain");
         ShortestPathTree spt;
         GraphPath path = null;
         spt = aStar.getShortestPathTree(options);
@@ -56,7 +58,7 @@ public class TestFares extends TestCase {
         path = spt.getPath(gg.getVertex("Caltrain_Mountain View Caltrain"), true);
 
         FareService fareService = gg.getService(FareService.class);
-        
+
         Fare cost = fareService.getCost(path);
         assertEquals(cost.getFare(FareType.regular), new Money(new WrappedCurrency("USD"), 425));
     }
@@ -92,9 +94,9 @@ public class TestFares extends TestCase {
         path = spt.getPath(gg.getVertex("TriMet_1252"), true);
         assertNotNull(path);
         cost = fareService.getCost(path);
-        
-        //assertEquals(cost.getFare(FareType.regular), new Money(new WrappedCurrency("USD"), 460));
-        
+
+        // assertEquals(cost.getFare(FareType.regular), new Money(new WrappedCurrency("USD"), 460));
+
         // complex trip
         options.maxTransfers = 5;
         startTime = TestUtils.dateInSeconds("America/Los_Angeles", 2009, 11, 1, 14, 0, 0);

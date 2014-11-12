@@ -17,34 +17,35 @@ package org.opentripplanner.openstreetmap.model;
 
 public class OSMTag {
 
-  private String k;
-  private String v;
+    private String k;
 
-  public OSMTag() {
-  }
+    private String v;
 
-  public OSMTag(String k, String v) {
-    this.k = k;
-    this.v = v;
-  }
+    public OSMTag() {
+    }
 
-  public String getK() {
-    return k;
-  }
+    public OSMTag(String k, String v) {
+        this.k = k;
+        this.v = v;
+    }
 
-  public void setK(String k) {
-    this.k = k;
-  }
+    public String getK() {
+        return k;
+    }
 
-  public String getV() {
-    return v;
-  }
+    public void setK(String k) {
+        this.k = k;
+    }
 
-  public void setV(String v) {
-    this.v = v;
-  }
+    public String getV() {
+        return v;
+    }
 
-  public String toString() {
-    return k + "=" + v;
-  }
+    public void setV(String v) {
+        this.v = v;
+    }
+
+    public String toString() {
+        return k + "=" + v;
+    }
 }

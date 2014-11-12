@@ -39,8 +39,9 @@ public class DownloadableGtfsInputSource implements CsvInputSource {
     private File _cacheDirectory;
 
     private String _defaultAgencyId;
-    
-    @Setter private boolean useCached = true;
+
+    @Setter
+    private boolean useCached = true;
 
     // Pattern: Decorator
     private ZipFileCsvInputSource _zip;
@@ -70,7 +71,8 @@ public class DownloadableGtfsInputSource implements CsvInputSource {
         if (_cacheDirectory != null) {
             if (!_cacheDirectory.exists()) {
                 if (!_cacheDirectory.mkdirs()) {
-                    throw new RuntimeException("Failed to create cache directory " + _cacheDirectory);
+                    throw new RuntimeException("Failed to create cache directory "
+                            + _cacheDirectory);
                 }
             }
             return _cacheDirectory;

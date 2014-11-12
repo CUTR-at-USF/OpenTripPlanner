@@ -36,9 +36,9 @@ public class TestVisibilityGraph extends TestCase {
 
     // test the polygon.reverse() function
     public void testPolygonReverse() {
-        VLPolygon poly = poly(12.3402039, 45.4342526, 12.3401691, 45.4343433, 12.3401433, 45.4343973,
-                12.3402433, 45.4344174, 12.3402845, 45.4344296, 12.3404923, 45.4338996, 12.3401159,
-                45.4338161, 12.339956, 45.43421);
+        VLPolygon poly = poly(12.3402039, 45.4342526, 12.3401691, 45.4343433, 12.3401433,
+                45.4343973, 12.3402433, 45.4344174, 12.3402845, 45.4344296, 12.3404923, 45.4338996,
+                12.3401159, 45.4338161, 12.339956, 45.43421);
         VLPolygon poly2 = poly(12.3402039, 45.4342526, 12.339956, 45.43421, 12.3401159, 45.4338161,
                 12.3404923, 45.4338996, 12.3402845, 45.4344296, 12.3402433, 45.4344174, 12.3401433,
                 45.4343973, 12.3401691, 45.4343433);
@@ -56,14 +56,14 @@ public class TestVisibilityGraph extends TestCase {
         environment.enforce_standard_form();
         VisibilityGraph vg = new VisibilityGraph(environment, 0.0000001);
 
-        boolean expected[][] = {{ true,  true,  true, false, false, false, false,  true},
-                                { true,  true,  true,  true,  true, false, false,  true},
-                                { true,  true,  true,  true,  true,  true,  true,  true},
-                                {false,  true,  true,  true,  true, false,  true,  true},
-                                {false,  true,  true,  true,  true,  true,  true,  true},
-                                {false, false,  true, false,  true,  true,  true, false},
-                                {false, false,  true,  true,  true,  true,  true,  true},
-                                { true,  true,  true,  true,  true, false,  true,  true}};
+        boolean expected[][] = { { true, true, true, false, false, false, false, true },
+                { true, true, true, true, true, false, false, true },
+                { true, true, true, true, true, true, true, true },
+                { false, true, true, true, true, false, true, true },
+                { false, true, true, true, true, true, true, true },
+                { false, false, true, false, true, true, true, false },
+                { false, false, true, true, true, true, true, true },
+                { true, true, true, true, true, false, true, true } };
 
         for (int i = 0; i < expected.length; ++i) {
             for (int j = 0; j < expected[i].length; ++j) {
@@ -74,14 +74,14 @@ public class TestVisibilityGraph extends TestCase {
 
     // The Piazza San Marco in Venice, from OSM.
     public void testSanMarco() {
-        VLPolygon poly = poly(12.3389861, 45.4339415, 12.3389153, 45.4340763, 12.3390769, 45.4341172,
-                12.3391694, 45.4341388, 12.3392136, 45.4340533, 12.3397036, 45.434177, 12.339797,
-                45.4341939, 12.3397873, 45.4342286, 12.339706, 45.4342158, 12.3396866, 45.4342575,
-                12.3393905, 45.434195, 12.3391779, 45.4346848, 12.3391272, 45.4347845, 12.3390937,
-                45.4347676, 12.3389625, 45.4347071, 12.3386095, 45.4345509, 12.3379792, 45.4342771,
-                12.3378901, 45.4342367, 12.3376881, 45.4341478, 12.337471, 45.4340513, 12.3373322,
-                45.4339869, 12.3371759, 45.4339216, 12.3372951, 45.4336885, 12.3374061, 45.4334649,
-                12.3374185, 45.4334486, 12.3391652, 45.4339348, 12.3391453, 45.4339861);
+        VLPolygon poly = poly(12.3389861, 45.4339415, 12.3389153, 45.4340763, 12.3390769,
+                45.4341172, 12.3391694, 45.4341388, 12.3392136, 45.4340533, 12.3397036, 45.434177,
+                12.339797, 45.4341939, 12.3397873, 45.4342286, 12.339706, 45.4342158, 12.3396866,
+                45.4342575, 12.3393905, 45.434195, 12.3391779, 45.4346848, 12.3391272, 45.4347845,
+                12.3390937, 45.4347676, 12.3389625, 45.4347071, 12.3386095, 45.4345509, 12.3379792,
+                45.4342771, 12.3378901, 45.4342367, 12.3376881, 45.4341478, 12.337471, 45.4340513,
+                12.3373322, 45.4339869, 12.3371759, 45.4339216, 12.3372951, 45.4336885, 12.3374061,
+                45.4334649, 12.3374185, 45.4334486, 12.3391652, 45.4339348, 12.3391453, 45.4339861);
 
         Environment environment = new Environment(Arrays.asList(poly));
         environment.enforce_standard_form();
@@ -89,34 +89,87 @@ public class TestVisibilityGraph extends TestCase {
         VisibilityGraph vg = new VisibilityGraph(environment, 0.0000001);
 
         boolean expected[][] = {
-                { true,  true, false,  true,  true, false,  true,  true,  true,  true, false, false, false, false,  true, false,  true,  true, false, false, false, false, false, false, false, false,  true},
-                { true,  true,  true,  true,  true, false,  true,  true,  true, false, false, false, false, false, false, false,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true},
-                {false,  true,  true,  true,  true,  true,  true,  true, false, false, false, false, false, false, false, false, false,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true},
-                { true,  true,  true,  true,  true,  true,  true,  true, false, false, false, false, false, false, false, false, false,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true},
-                { true,  true,  true,  true,  true,  true,  true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,  true},
-                {false, false,  true,  true,  true,  true,  true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false},
-                { true,  true,  true,  true,  true,  true,  true,  true, false, false, false, false, false, false, false, false, false, false, false, false, false,  true,  true,  true,  true,  true,  true},
-                { true,  true,  true,  true, false, false,  true,  true,  true, false, false, false, false, false, false, false, false,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true},
-                { true,  true, false, false, false, false, false,  true,  true,  true, false, false, false, false, false, false,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true},
-                { true, false, false, false, false, false, false, false,  true,  true,  true,  true,  true, false,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true},
-                {false, false, false, false, false, false, false, false, false,  true,  true,  true, false,  true,  true,  true,  true,  true,  true,  true,  true, false, false, false, false, false, false},
-                {false, false, false, false, false, false, false, false, false,  true,  true,  true,  true,  true,  true,  true,  true, false, false, false, false, false, false,  true,  true,  true, false},
-                {false, false, false, false, false, false, false, false, false,  true, false,  true,  true,  true,  true, false,  true, false, false, false, false, false, false, false,  true,  true,  true},
-                {false, false, false, false, false, false, false, false, false, false,  true,  true,  true,  true,  true, false, false, false, false, false, false, false, false, false, false, false, false},
-                { true, false, false, false, false, false, false, false, false,  true,  true,  true,  true,  true,  true,  true,  true, false, false, false, false, false, false, false, false,  true,  true},
-                {false, false, false, false, false, false, false, false, false,  true,  true,  true, false, false,  true,  true,  true, false, false, false, false, false, false, false, false, false, false},
-                { true,  true, false, false, false, false, false, false,  true,  true,  true,  true,  true, false,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true},
-                { true,  true,  true,  true, false, false, false,  true,  true,  true,  true, false, false, false, false, false,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true},
-                {false,  true,  true,  true, false, false, false,  true,  true,  true,  true, false, false, false, false, false,  true,  true,  true,  true, false, false, false, false, false, false, false},
-                {false,  true,  true,  true, false, false, false,  true,  true,  true,  true, false, false, false, false, false,  true,  true,  true,  true,  true, false, false, false, false, false, false},
-                {false,  true,  true,  true, false, false, false,  true,  true,  true,  true, false, false, false, false, false,  true,  true, false,  true,  true,  true, false, false, false, false, false},
-                {false,  true,  true,  true, false, false,  true,  true,  true,  true, false, false, false, false, false, false,  true,  true, false, false,  true,  true,  true,  true,  true,  true,  true},
-                {false,  true,  true,  true, false, false,  true,  true,  true,  true, false, false, false, false, false, false,  true,  true, false, false, false,  true,  true,  true, false, false, false},
-                {false,  true,  true,  true, false, false,  true,  true,  true,  true, false,  true, false, false, false, false,  true,  true, false, false, false,  true,  true,  true,  true,  true,  true},
-                {false,  true,  true,  true, false, false,  true,  true,  true,  true, false,  true,  true, false, false, false,  true,  true, false, false, false,  true, false,  true,  true,  true,  true},
-                {false,  true,  true,  true, false, false,  true,  true,  true,  true, false,  true,  true, false,  true, false,  true,  true, false, false, false,  true, false,  true,  true,  true,  true},
-                { true,  true,  true,  true,  true, false,  true,  true,  true,  true, false, false,  true, false,  true, false,  true,  true, false, false, false,  true, false,  true,  true,  true,  true}
-        };
+                { true, true, false, true, true, false, true, true, true, true, false, false,
+                        false, false, true, false, true, true, false, false, false, false, false,
+                        false, false, false, true },
+                { true, true, true, true, true, false, true, true, true, false, false, false,
+                        false, false, false, false, true, true, true, true, true, true, true, true,
+                        true, true, true },
+                { false, true, true, true, true, true, true, true, false, false, false, false,
+                        false, false, false, false, false, true, true, true, true, true, true,
+                        true, true, true, true },
+                { true, true, true, true, true, true, true, true, false, false, false, false,
+                        false, false, false, false, false, true, true, true, true, true, true,
+                        true, true, true, true },
+                { true, true, true, true, true, true, true, false, false, false, false, false,
+                        false, false, false, false, false, false, false, false, false, false,
+                        false, false, false, false, true },
+                { false, false, true, true, true, true, true, false, false, false, false, false,
+                        false, false, false, false, false, false, false, false, false, false,
+                        false, false, false, false, false },
+                { true, true, true, true, true, true, true, true, false, false, false, false,
+                        false, false, false, false, false, false, false, false, false, true, true,
+                        true, true, true, true },
+                { true, true, true, true, false, false, true, true, true, false, false, false,
+                        false, false, false, false, false, true, true, true, true, true, true,
+                        true, true, true, true },
+                { true, true, false, false, false, false, false, true, true, true, false, false,
+                        false, false, false, false, true, true, true, true, true, true, true, true,
+                        true, true, true },
+                { true, false, false, false, false, false, false, false, true, true, true, true,
+                        true, false, true, true, true, true, true, true, true, true, true, true,
+                        true, true, true },
+                { false, false, false, false, false, false, false, false, false, true, true, true,
+                        false, true, true, true, true, true, true, true, true, false, false, false,
+                        false, false, false },
+                { false, false, false, false, false, false, false, false, false, true, true, true,
+                        true, true, true, true, true, false, false, false, false, false, false,
+                        true, true, true, false },
+                { false, false, false, false, false, false, false, false, false, true, false, true,
+                        true, true, true, false, true, false, false, false, false, false, false,
+                        false, true, true, true },
+                { false, false, false, false, false, false, false, false, false, false, true, true,
+                        true, true, true, false, false, false, false, false, false, false, false,
+                        false, false, false, false },
+                { true, false, false, false, false, false, false, false, false, true, true, true,
+                        true, true, true, true, true, false, false, false, false, false, false,
+                        false, false, true, true },
+                { false, false, false, false, false, false, false, false, false, true, true, true,
+                        false, false, true, true, true, false, false, false, false, false, false,
+                        false, false, false, false },
+                { true, true, false, false, false, false, false, false, true, true, true, true,
+                        true, false, true, true, true, true, true, true, true, true, true, true,
+                        true, true, true },
+                { true, true, true, true, false, false, false, true, true, true, true, false,
+                        false, false, false, false, true, true, true, true, true, true, true, true,
+                        true, true, true },
+                { false, true, true, true, false, false, false, true, true, true, true, false,
+                        false, false, false, false, true, true, true, true, false, false, false,
+                        false, false, false, false },
+                { false, true, true, true, false, false, false, true, true, true, true, false,
+                        false, false, false, false, true, true, true, true, true, false, false,
+                        false, false, false, false },
+                { false, true, true, true, false, false, false, true, true, true, true, false,
+                        false, false, false, false, true, true, false, true, true, true, false,
+                        false, false, false, false },
+                { false, true, true, true, false, false, true, true, true, true, false, false,
+                        false, false, false, false, true, true, false, false, true, true, true,
+                        true, true, true, true },
+                { false, true, true, true, false, false, true, true, true, true, false, false,
+                        false, false, false, false, true, true, false, false, false, true, true,
+                        true, false, false, false },
+                { false, true, true, true, false, false, true, true, true, true, false, true,
+                        false, false, false, false, true, true, false, false, false, true, true,
+                        true, true, true, true },
+                { false, true, true, true, false, false, true, true, true, true, false, true, true,
+                        false, false, false, true, true, false, false, false, true, false, true,
+                        true, true, true },
+                { false, true, true, true, false, false, true, true, true, true, false, true, true,
+                        false, true, false, true, true, false, false, false, true, false, true,
+                        true, true, true },
+                { true, true, true, true, true, false, true, true, true, true, false, false, true,
+                        false, true, false, true, true, false, false, false, true, false, true,
+                        true, true, true } };
 
         for (int i = 0; i < expected.length; ++i) {
             for (int j = 0; j < expected[i].length; ++j) {

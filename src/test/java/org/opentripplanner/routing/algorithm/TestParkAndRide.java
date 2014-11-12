@@ -85,7 +85,7 @@ public class TestParkAndRide extends TestCase {
         tree = aStar.getShortestPathTree(options);
         path = tree.getPath(C, false);
         assertNull(path);
-        
+
         // Or CAR only (BC is WALK only).
         options = new RoutingRequest("CAR");
         options.freezeTraverseMode();

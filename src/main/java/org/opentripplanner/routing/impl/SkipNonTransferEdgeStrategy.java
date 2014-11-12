@@ -50,7 +50,7 @@ public class SkipNonTransferEdgeStrategy implements SkipEdgeStrategy {
         final Vertex toVertex = edge.getToVertex();
         if (distanceLibrary.fastDistance(toVertex.getCoordinate(), finalTarget)
                 + current.getWalkDistance() > maxWalkDistance)
-            
+
             return !transitLocalStreets.transferrable(toVertex);
         else
             return false;

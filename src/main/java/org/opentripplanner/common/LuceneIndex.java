@@ -40,18 +40,22 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Lucene based index of streets, stops, etc.
- * For reference see:
- * https://svn.apache.org/repos/asf/lucene/dev/trunk/lucene/demo/src/java/org/apache/lucene/demo/IndexFiles.java
+ * Lucene based index of streets, stops, etc. For reference see:
+ * https://svn.apache.org/repos/asf/lucene
+ * /dev/trunk/lucene/demo/src/java/org/apache/lucene/demo/IndexFiles.java
  */
 public class LuceneIndex {
 
     private static final Logger LOG = LoggerFactory.getLogger(LuceneIndex.class);
 
     private Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_47);
+
     private QueryParser parser = new QueryParser(Version.LUCENE_47, "name", analyzer);
+
     private GraphIndex graphIndex;
+
     private Directory directory;
+
     private IndexSearcher searcher; // Will be null until index is built.
 
     public LuceneIndex(final GraphIndex graphIndex, boolean background) {
@@ -71,13 +75,15 @@ public class LuceneIndex {
             long startTime = System.currentTimeMillis();
             directory = FSDirectory.open(new File("/var/otp/lucene"));
             // TODO reuse the index if it exists?
-            //directory = new RAMDirectory(); // only a little faster
-            IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_47, analyzer).setOpenMode(OpenMode.CREATE);
+            // directory = new RAMDirectory(); // only a little faster
+            IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_47, analyzer)
+                    .setOpenMode(OpenMode.CREATE);
             final IndexWriter writer = new IndexWriter(directory, config);
             for (Stop stop : graphIndex.stopForId.values()) {
                 addStop(writer, stop);
             }
-            for (StreetVertex sv : Iterables.filter(graphIndex.vertexForId.values(), StreetVertex.class)) {
+            for (StreetVertex sv : Iterables.filter(graphIndex.vertexForId.values(),
+                    StreetVertex.class)) {
                 addCorner(writer, sv);
             }
             writer.close();
@@ -108,11 +114,15 @@ public class LuceneIndex {
         String crossStreet = null;
         // TODO score based on OSM street type, using intersection nodes instead of vertices.
         for (PlainStreetEdge pse : Iterables.filter(sv.getOutgoing(), PlainStreetEdge.class)) {
-            if (mainStreet == null) mainStreet = pse.getName();
-            else crossStreet = pse.getName();
+            if (mainStreet == null)
+                mainStreet = pse.getName();
+            else
+                crossStreet = pse.getName();
         }
-        if (mainStreet == null || crossStreet == null) return;
-        if (mainStreet.equals(crossStreet)) return;
+        if (mainStreet == null || crossStreet == null)
+            return;
+        if (mainStreet.equals(crossStreet))
+            return;
         Document doc = new Document();
         doc.add(new TextField("name", mainStreet + " & " + crossStreet, Field.Store.YES));
         doc.add(new DoubleField("lat", sv.getLat(), Field.Store.YES));
@@ -129,8 +139,11 @@ public class LuceneIndex {
         }
     }
 
-    /** Return a list of results in in the format expected by GeocoderBuiltin.js in the OTP Leaflet client. */
-    public List<LuceneResult> query (String queryString) {
+    /**
+     * Return a list of results in in the format expected by GeocoderBuiltin.js in the OTP Leaflet
+     * client.
+     */
+    public List<LuceneResult> query(String queryString) {
         /* Turn the query string into a Lucene query. Terms are fuzzy and should all be present. */
         BooleanQuery query = new BooleanQuery();
         for (String term : queryString.split(" ")) {
@@ -162,10 +175,13 @@ public class LuceneIndex {
     /** This class matches the structure of the Geocoder responses expected by the OTP client. */
     public static class LuceneResult {
         public double lat;
+
         public double lng;
+
         public String description;
     }
 
-    public static enum Category { STOP, CORNER; }
+    public static enum Category {
+        STOP, CORNER;
+    }
 }
-

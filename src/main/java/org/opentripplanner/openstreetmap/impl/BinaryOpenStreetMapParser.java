@@ -30,9 +30,13 @@ import crosby.binary.Osmformat;
  */
 public class BinaryOpenStreetMapParser extends BinaryParser {
     private OpenStreetMapContentHandler _handler;
+
     private boolean _parseWays = true;
+
     private boolean _parseRelations = true;
+
     private boolean _parseNodes = true;
+
     private Map<String, String> stringTable = new HashMap<String, String>();
 
     public BinaryOpenStreetMapParser(OpenStreetMapContentHandler handler) {
@@ -41,14 +45,14 @@ public class BinaryOpenStreetMapParser extends BinaryParser {
 
     // The strings are already being pulled from a string table in the PBF file,
     // but there appears to be a separate string table per 8k-entry PBF file block.
-    // String.intern grinds to a halt on large PBF files (as it did on GTFS import), so 
-    // we implement our own. 
+    // String.intern grinds to a halt on large PBF files (as it did on GTFS import), so
+    // we implement our own.
     public String internalize(String s) {
         String fromTable = stringTable.get(s);
         if (fromTable == null) {
             stringTable.put(s, s);
             return s;
-        } 
+        }
         return fromTable;
     }
 
@@ -58,7 +62,7 @@ public class BinaryOpenStreetMapParser extends BinaryParser {
 
     @Override
     protected void parseNodes(List<Osmformat.Node> nodes) {
-        if(!_parseNodes) {
+        if (!_parseNodes) {
             return;
         }
 
@@ -87,7 +91,7 @@ public class BinaryOpenStreetMapParser extends BinaryParser {
         long lastId = 0, lastLat = 0, lastLon = 0;
         int j = 0; // Index into the keysvals array.
 
-        if(!_parseNodes) {
+        if (!_parseNodes) {
             return;
         }
 
@@ -128,7 +132,7 @@ public class BinaryOpenStreetMapParser extends BinaryParser {
 
     @Override
     protected void parseWays(List<Osmformat.Way> ways) {
-        if(!_parseWays) {
+        if (!_parseWays) {
             return;
         }
 
@@ -160,7 +164,7 @@ public class BinaryOpenStreetMapParser extends BinaryParser {
 
     @Override
     protected void parseRelations(List<Osmformat.Relation> rels) {
-        if(!_parseRelations) {
+        if (!_parseRelations) {
             return;
         }
 

@@ -25,30 +25,33 @@ public class FareRuleSet implements Serializable {
     private static final long serialVersionUID = 7218355718876553028L;
 
     private Set<AgencyAndId> routes;
+
     private Set<P2<String>> originDestinations;
+
     private Set<String> contains;
-    
+
     public FareRuleSet() {
         routes = new HashSet<AgencyAndId>();
-        originDestinations= new HashSet<P2<String>>();
+        originDestinations = new HashSet<P2<String>>();
         contains = new HashSet<String>();
     }
 
     public void addOriginDestination(String origin, String destination) {
-        originDestinations.add(new P2<String>(origin, destination));        
+        originDestinations.add(new P2<String>(origin, destination));
     }
 
     public void addContains(String containsId) {
         contains.add(containsId);
     }
-    
+
     public void addRoute(AgencyAndId route) {
         routes.add(route);
     }
 
     public boolean matches(String startZone, String endZone, Set<String> zonesVisited,
             Set<AgencyAndId> routesVisited) {
-        //check for matching origin/destination, if this ruleset has any origin/destination restrictions
+        // check for matching origin/destination, if this ruleset has any origin/destination
+        // restrictions
         if (originDestinations.size() > 0) {
             P2<String> od = new P2<String>(startZone, endZone);
             if (!originDestinations.contains(od)) {
@@ -62,14 +65,14 @@ public class FareRuleSet implements Serializable {
             }
         }
 
-        //check for matching contains, if this ruleset has any containment restrictions
+        // check for matching contains, if this ruleset has any containment restrictions
         if (contains.size() > 0) {
             if (!zonesVisited.equals(contains)) {
                 return false;
             }
         }
 
-        //check for matching routes
+        // check for matching routes
         if (routes.size() != 0) {
             if (!routes.containsAll(routesVisited)) {
                 return false;
@@ -79,4 +82,3 @@ public class FareRuleSet implements Serializable {
         return true;
     }
 }
-

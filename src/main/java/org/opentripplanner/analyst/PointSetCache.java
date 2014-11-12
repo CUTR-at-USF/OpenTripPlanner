@@ -16,15 +16,15 @@ import java.util.Map;
 public abstract class PointSetCache {
 
     private static final Logger LOG = LoggerFactory.getLogger(PointSetCache.class);
-    
+
     protected LoadingCache<String, PointSet> pointSets;
-        
-    public PointSetCache () {
+
+    public PointSetCache() {
     }
 
-    public  PointSet get(String pointSetId) {
-    	return pointSets.getUnchecked(pointSetId);
+    public PointSet get(String pointSetId) {
+        return pointSets.getUnchecked(pointSetId);
     };
-	
-	public abstract List<String> getPointSetIds();
+
+    public abstract List<String> getPointSetIds();
 }

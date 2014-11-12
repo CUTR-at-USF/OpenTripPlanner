@@ -187,9 +187,9 @@ public class VLPolygon {
 
         BoundingBox bounding_box = bbox();
         ArrayList<VLPoint> pts_in_polygon = new ArrayList<VLPoint>(count);
-        VLPoint pt_temp = new VLPoint(
-                Util.uniform_random_sample(bounding_box.x_min, bounding_box.x_max),
-                Util.uniform_random_sample(bounding_box.y_min, bounding_box.y_max));
+        VLPoint pt_temp = new VLPoint(Util.uniform_random_sample(bounding_box.x_min,
+                bounding_box.x_max), Util.uniform_random_sample(bounding_box.y_min,
+                bounding_box.y_max));
         while (pts_in_polygon.size() < count) {
             while (!pt_temp.in(this, epsilon)) {
                 pt_temp.set_x(Util.uniform_random_sample(bounding_box.x_min, bounding_box.x_max));
@@ -264,7 +264,7 @@ public class VLPolygon {
         int n = n();
         if (n > 2) {
             // reverse, leaving the first point in its place
-            for (int i = 1; i < (n+1) / 2; ++i) {
+            for (int i = 1; i < (n + 1) / 2; ++i) {
                 VLPoint temp = vertices.get(i);
                 vertices.set(i, vertices.get((n - i)));
                 vertices.set((n - i), temp);

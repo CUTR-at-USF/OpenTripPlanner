@@ -29,7 +29,7 @@ public class P2<E> extends T2<E, E> {
     public P2(E first, E second) {
         super(first, second);
     }
-    
+
     public P2(E[] entries) {
         super(entries[0], entries[1]);
         if (entries.length != 2) {

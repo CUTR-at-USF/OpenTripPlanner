@@ -119,7 +119,7 @@ public class CityBikesBikeRentalDataSource implements BikeRentalDataSource, Pref
     public String toString() {
         return getClass().getName() + "(" + url + ")";
     }
-    
+
     @Override
     public void configure(Graph graph, Preferences preferences) {
         String url = preferences.get("url", null);

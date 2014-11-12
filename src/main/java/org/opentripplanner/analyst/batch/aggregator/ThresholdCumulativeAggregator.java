@@ -17,9 +17,10 @@ import org.opentripplanner.analyst.batch.Individual;
 import org.opentripplanner.analyst.batch.ResultSet;
 
 /**
- * An aggregator that approximates the integral of a cumulative opportunity curve up to a certain threshold distance from the origin. This is vaguely
- * inspired by the Lorenz curve and the Gini coefficient, and is intended to be a measure of urban centrality. Opportunities that are closer to the
- * search origin will be weighted much more heavily than those nearer to the threshold.
+ * An aggregator that approximates the integral of a cumulative opportunity curve up to a certain
+ * threshold distance from the origin. This is vaguely inspired by the Lorenz curve and the Gini
+ * coefficient, and is intended to be a measure of urban centrality. Opportunities that are closer
+ * to the search origin will be weighted much more heavily than those nearer to the threshold.
  * 
  * @author andrewbyrd
  */

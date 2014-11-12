@@ -24,6 +24,7 @@ import com.vividsolutions.jts.geom.LineString;
 
 /**
  * A relatively low cost edge for travelling one level in an elevator.
+ * 
  * @author mattwigway
  *
  */
@@ -39,7 +40,7 @@ public class ElevatorHopEdge extends Edge implements ElevatorEdge {
         super(from, to);
         this.permission = permission;
     }
-    
+
     @Override
     public State traverse(State s0) {
         RoutingRequest options = s0.getOptions();
@@ -47,21 +48,18 @@ public class ElevatorHopEdge extends Edge implements ElevatorEdge {
         if (options.wheelchairAccessible && !wheelchairAccessible) {
             return null;
         }
-        
+
         TraverseMode mode = s0.getNonTransitMode();
 
-        if (mode == TraverseMode.WALK && 
-            !permission.allows(StreetTraversalPermission.PEDESTRIAN)) {
+        if (mode == TraverseMode.WALK && !permission.allows(StreetTraversalPermission.PEDESTRIAN)) {
             return null;
         }
 
-        if (mode == TraverseMode.BICYCLE && 
-            !permission.allows(StreetTraversalPermission.BICYCLE)) {
+        if (mode == TraverseMode.BICYCLE && !permission.allows(StreetTraversalPermission.BICYCLE)) {
             return null;
         }
         // there are elevators which allow cars
-        if (mode == TraverseMode.CAR
-            && !permission.allows(StreetTraversalPermission.CAR)) {
+        if (mode == TraverseMode.CAR && !permission.allows(StreetTraversalPermission.CAR)) {
             return null;
         }
 
@@ -86,7 +84,7 @@ public class ElevatorHopEdge extends Edge implements ElevatorEdge {
     public String getName() {
         return null;
     }
-    
+
     public String toString() {
         return "ElevatorHopEdge(" + fromv + " -> " + tov + ")";
     }

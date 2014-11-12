@@ -178,9 +178,9 @@ public class GraphServiceFileImpl implements GraphService {
             ex.printStackTrace();
             return null;
         }
-        
+
         graph.setRouterId(routerId);
-        
+
         // Decorate the graph. Even if a config file is not present
         // one could be bundled inside.
         try {

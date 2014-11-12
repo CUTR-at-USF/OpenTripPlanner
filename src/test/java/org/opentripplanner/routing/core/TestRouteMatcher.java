@@ -87,7 +87,7 @@ public class TestRouteMatcher extends TestCase {
             thrown = true;
         }
         assertTrue(thrown);
-        
+
         Route r1c = new Route();
         r1c.setId(new AgencyAndId("A_1", "R_42"));
         r1c.setShortName("R_42");

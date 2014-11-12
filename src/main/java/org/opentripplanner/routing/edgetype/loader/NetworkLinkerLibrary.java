@@ -35,19 +35,21 @@ import org.opentripplanner.routing.vertextype.TransitStop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class NetworkLinkerLibrary {
 
     private static Logger LOG = LoggerFactory.getLogger(NetworkLinkerLibrary.class);
 
-    /* for each original bundle of (turn)edges making up a street, a list of 
-       edge pairs that will replace it */
-    HashMap<HashSet<StreetEdge>, LinkedList<P2<PlainStreetEdge>>> replacements = 
-        new HashMap<HashSet<StreetEdge>, LinkedList<P2<PlainStreetEdge>>>();
-    
-    /* a map to track which vertices were associated with each transit stop, to avoid repeat splitting */
-    HashMap<Vertex, Collection<StreetVertex>> splitVertices = 
-            new HashMap<Vertex, Collection<StreetVertex>> (); 
+    /*
+     * for each original bundle of (turn)edges making up a street, a list of edge pairs that will
+     * replace it
+     */
+    HashMap<HashSet<StreetEdge>, LinkedList<P2<PlainStreetEdge>>> replacements = new HashMap<HashSet<StreetEdge>, LinkedList<P2<PlainStreetEdge>>>();
+
+    /*
+     * a map to track which vertices were associated with each transit stop, to avoid repeat
+     * splitting
+     */
+    HashMap<Vertex, Collection<StreetVertex>> splitVertices = new HashMap<Vertex, Collection<StreetVertex>>();
 
     /* by default traverse options allow walking only, which is what we want */
     RoutingRequest options = new RoutingRequest();
@@ -94,7 +96,7 @@ public class NetworkLinkerLibrary {
     }
 
     public DistanceLibrary getDistanceLibrary() {
-        return distanceLibrary ;
+        return distanceLibrary;
     }
 
 }

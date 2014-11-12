@@ -19,9 +19,8 @@ import org.junit.Test;
 import org.opentripplanner.routing.util.IncrementingIdGenerator;
 import org.opentripplanner.routing.util.UniqueIdGenerator;
 
-
 public class IncrementingIdGeneratorTest {
-    
+
     @Test
     public void testConstruct() {
         UniqueIdGenerator<String> gen = new IncrementingIdGenerator<String>();
@@ -29,7 +28,7 @@ public class IncrementingIdGeneratorTest {
         assertEquals(1, gen.getId("fake"));
         assertEquals(2, gen.getId("foo"));
     }
-    
+
     @Test
     public void testConstructWithStart() {
         int start = 102;

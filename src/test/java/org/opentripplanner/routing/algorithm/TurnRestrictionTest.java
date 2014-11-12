@@ -45,7 +45,7 @@ public class TurnRestrictionTest {
     private Vertex topRight;
 
     private Vertex bottomLeft;
-    
+
     private PlainStreetEdge maple_main1, broad1_2;
 
     @Before
@@ -103,7 +103,7 @@ public class TurnRestrictionTest {
         assertTrue(this.maple_main1.hasExplicitTurnRestrictions());
         assertFalse(this.broad1_2.hasExplicitTurnRestrictions());
     }
-    
+
     @Test
     public void testForwardDefault() {
         RoutingRequest options = new RoutingRequest();
@@ -122,19 +122,19 @@ public class TurnRestrictionTest {
 
         List<State> states = path.states;
         assertEquals(5, states.size());
-        
+
         assertEquals("maple_1st", states.get(0).getVertex().getLabel());
         assertEquals("main_1st", states.get(1).getVertex().getLabel());
         assertEquals("main_2nd", states.get(2).getVertex().getLabel());
         assertEquals("broad_2nd", states.get(3).getVertex().getLabel());
         assertEquals("broad_3rd", states.get(4).getVertex().getLabel());
     }
-    
+
     @Test
     public void testForwardAsPedestrian() {
         RoutingRequest options = new RoutingRequest(TraverseMode.WALK);
         options.setWalkSpeed(1.0);
-        
+
         options.setRoutingContext(_graph, topRight, bottomLeft);
         ShortestPathTree tree = new GenericAStar().getShortestPathTree(options);
 
@@ -154,7 +154,7 @@ public class TurnRestrictionTest {
         assertEquals("broad_2nd", states.get(3).getVertex().getLabel());
         assertEquals("broad_3rd", states.get(4).getVertex().getLabel());
     }
-    
+
     @Test
     public void testForwardAsCar() {
         RoutingRequest options = new RoutingRequest(TraverseMode.CAR);
@@ -239,7 +239,8 @@ public class TurnRestrictionTest {
 
     private void DisallowTurn(PlainStreetEdge from, PlainStreetEdge to) {
         TurnRestrictionType rType = TurnRestrictionType.NO_TURN;
-        TraverseModeSet restrictedModes = new TraverseModeSet(TraverseMode.CAR, TraverseMode.CUSTOM_MOTOR_VEHICLE);
+        TraverseModeSet restrictedModes = new TraverseModeSet(TraverseMode.CAR,
+                TraverseMode.CUSTOM_MOTOR_VEHICLE);
         TurnRestriction restrict = new TurnRestriction(from, to, rType, restrictedModes);
         from.addTurnRestriction(restrict);
     }

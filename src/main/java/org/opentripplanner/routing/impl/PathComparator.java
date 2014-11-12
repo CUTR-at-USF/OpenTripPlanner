@@ -20,14 +20,14 @@ import org.opentripplanner.routing.spt.GraphPath;
 public class PathComparator implements Comparator<GraphPath> {
 
     boolean compareStartTimes;
-    
+
     public PathComparator(boolean compareStartTimes) {
         this.compareStartTimes = compareStartTimes;
     }
-    
+
     /**
-     * For depart-after search results sort by arrival time ascending
-     * For arrive-before search results sort by departure time descending
+     * For depart-after search results sort by arrival time ascending For arrive-before search
+     * results sort by departure time descending
      */
     @Override
     public int compare(GraphPath o1, GraphPath o2) {

@@ -19,9 +19,8 @@ import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.routing.graph.Vertex;
 
 /**
- * A vertex for a bike rental station.
- * It is connected to the streets by a StreetBikeRentalLink.
- * To allow transitions on and off a bike, it has RentABike* loop edges.
+ * A vertex for a bike rental station. It is connected to the streets by a StreetBikeRentalLink. To
+ * allow transitions on and off a bike, it has RentABike* loop edges.
  *
  * @author laurent
  * 
@@ -35,7 +34,7 @@ public class BikeRentalStationVertex extends Vertex {
     private int spacesAvailable;
 
     private String id;
-    
+
     public BikeRentalStationVertex(Graph g, BikeRentalStation station) {
         super(g, "bike rental station " + station.id, station.x, station.y, station.name);
         this.setId(station.id);

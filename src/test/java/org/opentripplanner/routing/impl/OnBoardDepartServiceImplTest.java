@@ -81,8 +81,8 @@ public class OnBoardDepartServiceImplTest {
         when(graph.getTimeZone()).thenReturn(TimeZone.getTimeZone("GMT"));
 
         GeometryFactory geometryFactory = GeometryUtils.getGeometryFactory();
-        CoordinateSequenceFactory coordinateSequenceFactory =
-                geometryFactory.getCoordinateSequenceFactory();
+        CoordinateSequenceFactory coordinateSequenceFactory = geometryFactory
+                .getCoordinateSequenceFactory();
         CoordinateSequence coordinateSequence = coordinateSequenceFactory.create(coordinates);
         LineString geometry = new LineString(coordinateSequence, geometryFactory);
         ArrayList<Edge> hops = new ArrayList<Edge>(2);
@@ -98,8 +98,8 @@ public class OnBoardDepartServiceImplTest {
         Stop stopArrive = new Stop();
         Trip trip = new Trip();
 
-        routingContext.serviceDays =
-                new ArrayList<ServiceDay>(Collections.singletonList(serviceDay));
+        routingContext.serviceDays = new ArrayList<ServiceDay>(
+                Collections.singletonList(serviceDay));
         route.setId(agencyAndId);
         stopDepart.setId(agencyAndId);
         stopDwell.setId(agencyAndId);
@@ -192,8 +192,8 @@ public class OnBoardDepartServiceImplTest {
         Stop stopArrive = new Stop();
         Trip trip = new Trip();
 
-        routingContext.serviceDays =
-                new ArrayList<ServiceDay>(Collections.singletonList(serviceDay));
+        routingContext.serviceDays = new ArrayList<ServiceDay>(
+                Collections.singletonList(serviceDay));
         route.setId(agencyAndId);
         stopDepart.setId(new AgencyAndId("Station", "0"));
         stopArrive.setId(new AgencyAndId("Station", "1"));
@@ -213,7 +213,7 @@ public class OnBoardDepartServiceImplTest {
 
         PatternHop patternHop = new PatternHop(depart, arrive, stopDepart, stopArrive, 0);
 
-        when(graph.getEdges()).thenReturn(Collections.<Edge>singletonList(patternHop));
+        when(graph.getEdges()).thenReturn(Collections.<Edge> singletonList(patternHop));
         when(depart.getCoordinate()).thenReturn(new Coordinate(0, 0));
         when(arrive.getCoordinate()).thenReturn(new Coordinate(0, 0));
         when(routingRequest.getFrom()).thenReturn(new GenericLocation());
@@ -258,8 +258,8 @@ public class OnBoardDepartServiceImplTest {
         Stop stopArrive = new Stop();
         Trip trip = new Trip();
 
-        routingContext.serviceDays =
-                new ArrayList<ServiceDay>(Collections.singletonList(serviceDay));
+        routingContext.serviceDays = new ArrayList<ServiceDay>(
+                Collections.singletonList(serviceDay));
         route.setId(agencyAndId);
         stopDepart.setId(new AgencyAndId("Station", "0"));
         stopDwell.setId(new AgencyAndId("Station", "1"));

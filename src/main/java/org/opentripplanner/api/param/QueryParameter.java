@@ -8,7 +8,8 @@ public abstract class QueryParameter {
 
     public static void checkRangeInclusive(double x, double min, double max) throws Exception {
         boolean ok = (x >= min && x <= max);
-        if (!ok) throw new Exception(String.format("%f is not in range [%f,%f]", x, min, max));
+        if (!ok)
+            throw new Exception(String.format("%f is not in range [%f,%f]", x, min, max));
     }
 
     protected abstract void parse(String param) throws Throwable;
@@ -22,6 +23,5 @@ public abstract class QueryParameter {
             throw new WebApplicationException(response);
         }
     }
-
 
 }

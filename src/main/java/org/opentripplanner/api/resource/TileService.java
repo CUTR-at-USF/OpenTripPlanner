@@ -40,23 +40,38 @@ import org.slf4j.LoggerFactory;
 // removed component, mixing spring and jersey annotations is bad?
 @Path("/routers/{routerId}/analyst/tile/{z}/{x}/{y}.png")
 public class TileService extends RoutingResource {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(TileService.class);
 
-    @Context // FIXME inject Application context
+    @Context
+    // FIXME inject Application context
     private Renderer renderer;
 
-    @PathParam("x") int x; 
-    @PathParam("y") int y;
-    @PathParam("z") int z;
-    
-    @QueryParam("layers")  @DefaultValue("traveltime") LayerList layers; 
-    @QueryParam("styles")  @DefaultValue("mask")       StyleList styles;
-    @QueryParam("format")  @DefaultValue("image/png")  MIMEImageFormat format;
+    @PathParam("x")
+    int x;
 
-    @GET @Produces("image/*")
-    public Response tileGet() throws Exception { 
-        
+    @PathParam("y")
+    int y;
+
+    @PathParam("z")
+    int z;
+
+    @QueryParam("layers")
+    @DefaultValue("traveltime")
+    LayerList layers;
+
+    @QueryParam("styles")
+    @DefaultValue("mask")
+    StyleList styles;
+
+    @QueryParam("format")
+    @DefaultValue("image/png")
+    MIMEImageFormat format;
+
+    @GET
+    @Produces("image/*")
+    public Response tileGet() throws Exception {
+
         Envelope2D env = SlippyTile.tile2Envelope(x, y, z);
         TileRequest tileRequest = new TileRequest("", env, 256, 256);
         RoutingRequest sptRequestA = buildRequest(0);
@@ -66,7 +81,7 @@ public class TileService extends RoutingResource {
         Style style = styles.get(0);
         RenderRequest renderRequest = new RenderRequest(format, layer, style, true, false);
 
-        return null; //renderer.getResponse(tileRequest, sptRequestA, sptRequestB, renderRequest);
+        return null; // renderer.getResponse(tileRequest, sptRequestA, sptRequestB, renderRequest);
     }
 
 }

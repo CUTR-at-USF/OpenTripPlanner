@@ -69,7 +69,7 @@ public abstract class MatchState {
     }
 
     protected boolean carsCanTraverse(Edge edge) {
-        // should be done with a method on edge (canTraverse already exists on turnEdge) 
+        // should be done with a method on edge (canTraverse already exists on turnEdge)
         State s0 = new State(edge.getFromVertex(), traverseOptions);
         State s1 = edge.traverse(s0);
         return s1 != null;
@@ -86,7 +86,6 @@ public abstract class MatchState {
         }
         return edges;
     }
-
 
     public double getDistanceAlongRoute() {
         return distanceAlongRoute;
@@ -116,14 +115,13 @@ public abstract class MatchState {
             it.next();
             index = it.getLocation();
         }
-        //now, last bit of last segment
+        // now, last bit of last segment
         Coordinate finalCoordinate = endIndex.getCoordinate(geometry);
         total += distanceLibrary.distance(previousCoordinate, finalCoordinate);
 
         return total;
     }
 
-    
     protected static double distance(Coordinate from, Coordinate to) {
         return distanceLibrary.fastDistance(from, to);
     }

@@ -35,8 +35,8 @@ public class CSVPopulationTest {
     public void testCoordinateTransform() throws Exception {
         File csvFile = temporaryFolder.newFile("coordinateTransform.csv");
         // coordinates via OpenStreetMap
-        Files.write("Santa Barbara Botanical Gardens,1,6046688.23,1992920.46\n",
-                csvFile, Charset.forName("utf-8"));
+        Files.write("Santa Barbara Botanical Gardens,1,6046688.23,1992920.46\n", csvFile,
+                Charset.forName("utf-8"));
 
         CSVPopulation pop = new CSVPopulation();
         pop.setSourceFilename(csvFile.getAbsolutePath());
@@ -59,8 +59,7 @@ public class CSVPopulationTest {
     public void testNoCoordinateTransform() throws Exception {
         File csvFile = temporaryFolder.newFile("noCoordinateTransform.csv");
         // coordinates via OpenStreetMap
-        Files.write("Marine Science,1,-119.84330,34.40783\n",
-                csvFile, Charset.forName("utf-8"));
+        Files.write("Marine Science,1,-119.84330,34.40783\n", csvFile, Charset.forName("utf-8"));
 
         CSVPopulation pop = new CSVPopulation();
         pop.setSourceFilename(csvFile.getAbsolutePath());

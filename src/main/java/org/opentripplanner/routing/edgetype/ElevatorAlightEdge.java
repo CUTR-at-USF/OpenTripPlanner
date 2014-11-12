@@ -25,9 +25,10 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineString;
 
 /**
- * A relatively low cost edge for alighting from an elevator.
- * All narrative generation is done by the ElevatorAlightEdge (other edges are silent), because
- * it is the only edge that knows where the user is to get off.
+ * A relatively low cost edge for alighting from an elevator. All narrative generation is done by
+ * the ElevatorAlightEdge (other edges are silent), because it is the only edge that knows where the
+ * user is to get off.
+ * 
  * @author mattwigway
  *
  */
@@ -41,12 +42,11 @@ public class ElevatorAlightEdge extends Edge implements ElevatorEdge {
     private String level;
 
     /**
-     * The polyline geometry of this edge.
-     * It's generally a polyline with two coincident points, but some elevators have horizontal
-     * dimension, e.g. the ones on the Eiffel Tower.
+     * The polyline geometry of this edge. It's generally a polyline with two coincident points, but
+     * some elevators have horizontal dimension, e.g. the ones on the Eiffel Tower.
      */
     private LineString the_geom;
-    
+
     /**
      * @param level It's a float for future expansion.
      */
@@ -60,7 +60,7 @@ public class ElevatorAlightEdge extends Edge implements ElevatorEdge {
         coords[1] = new Coordinate(to.getX(), to.getY());
         the_geom = GeometryUtils.getGeometryFactory().createLineString(coords);
     }
-    
+
     @Override
     public State traverse(State s0) {
         StateEditor s1 = s0.edit(this);
@@ -79,7 +79,7 @@ public class ElevatorAlightEdge extends Edge implements ElevatorEdge {
         return the_geom;
     }
 
-    /** 
+    /**
      * The level from OSM is the name
      */
     @Override
@@ -89,13 +89,14 @@ public class ElevatorAlightEdge extends Edge implements ElevatorEdge {
 
     /**
      * The name is not bogus; it's level n from OSM.
+     * 
      * @author mattwigway
      */
-    @Override 
+    @Override
     public boolean hasBogusName() {
         return false;
     }
-    
+
     public String toString() {
         return "ElevatorAlightEdge(" + fromv + " -> " + tov + ")";
     }

@@ -24,13 +24,10 @@ import java.io.OutputStream;
 /**
  * This Jersey REST Resource creates and lists PointSets.
  *
- * PointSets serve as destinations in web analyst one-to-many indicators.
- * They can also serve as origins in many-to-many indicators.
+ * PointSets serve as destinations in web analyst one-to-many indicators. They can also serve as
+ * origins in many-to-many indicators.
  *
- * PointSets are one of the three main web analyst resources:
- * Pointsets
- * Indicators
- * TimeSurfaces
+ * PointSets are one of the three main web analyst resources: Pointsets Indicators TimeSurfaces
  */
 @Path("/pointsets")
 public class PointSetResource {
@@ -40,17 +37,16 @@ public class PointSetResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllPointSets () {
-        return Response.ok().entity(PointSetShort.list(server.pointSetCache.getPointSetIds())).build();
+    public Response getAllPointSets() {
+        return Response.ok().entity(PointSetShort.list(server.pointSetCache.getPointSetIds()))
+                .build();
     }
 
     @GET
     @Path("/{pointSetId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getPointSet (
-    		@PathParam("pointSetId") String pointSetId) {
-    	
-    	
+    public Response getPointSet(@PathParam("pointSetId") String pointSetId) {
+
         final PointSet pset = server.pointSetCache.get(pointSetId);
         if (pset == null) {
             return Response.status(Status.NOT_FOUND).entity("Invalid PointSet ID.").build();

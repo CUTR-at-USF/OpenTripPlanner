@@ -23,11 +23,11 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 public class QueryScraperFilter implements Filter {
-    
+
     private ReflectiveQueryScraper scraper;
 
     @Override
-    public void init(FilterConfig fc) throws ServletException {        
+    public void init(FilterConfig fc) throws ServletException {
     }
 
     public QueryScraperFilter(Class<?> targetClass) {
@@ -36,12 +36,12 @@ public class QueryScraperFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-        throws IOException, ServletException {
+            throws IOException, ServletException {
         Object obj = scraper.scrape(request);
         if (obj != null)
             request.setAttribute(scraper.targetClass.getSimpleName(), obj);
         // pass request and response through to the next filter/servlet in the chain
-        chain.doFilter(request, response); 
+        chain.doFilter(request, response);
     }
 
     @Override

@@ -33,7 +33,8 @@ import com.vividsolutions.jts.geom.Envelope;
  * 
  * @version 1.7
  */
-public abstract class PackedCoordinateSequence implements CoordinateSequence, Serializable, Cloneable {
+public abstract class PackedCoordinateSequence implements CoordinateSequence, Serializable,
+        Cloneable {
 
     private static final long serialVersionUID = 1L;
 
@@ -141,10 +142,8 @@ public abstract class PackedCoordinateSequence implements CoordinateSequence, Se
     /**
      * Sets the first ordinate of a coordinate in this sequence.
      * 
-     * @param index
-     *            the coordinate index
-     * @param value
-     *            the new ordinate value
+     * @param index the coordinate index
+     * @param value the new ordinate value
      */
     public void setX(int index, double value) {
         coordRef = null;
@@ -154,10 +153,8 @@ public abstract class PackedCoordinateSequence implements CoordinateSequence, Se
     /**
      * Sets the second ordinate of a coordinate in this sequence.
      * 
-     * @param index
-     *            the coordinate index
-     * @param value
-     *            the new ordinate value
+     * @param index the coordinate index
+     * @param value the new ordinate value
      */
     public void setY(int index, double value) {
         coordRef = null;
@@ -172,7 +169,7 @@ public abstract class PackedCoordinateSequence implements CoordinateSequence, Se
      * @return
      */
     protected abstract Coordinate getCoordinateInternal(int index);
-    
+
     /**
      * @see java.lang.Object#clone()
      */
@@ -180,23 +177,20 @@ public abstract class PackedCoordinateSequence implements CoordinateSequence, Se
         try {
             return super.clone();
         } catch (CloneNotSupportedException e) {
-            //unreached
+            // unreached
             throw new RuntimeException(e);
         }
     }
-    
+
     /**
      * Sets the ordinate of a coordinate in this sequence. <br>
      * Warning: for performance reasons the ordinate index is not checked - if it is over dimensions
      * you may not get an exception but a meaningless value.
      * 
-     * @param index
-     *            the coordinate index
-     * @param ordinate
-     *            the ordinate index in the coordinate, 0 based, smaller than the number of
-     *            dimensions
-     * @param value
-     *            the new ordinate value
+     * @param index the coordinate index
+     * @param ordinate the ordinate index in the coordinate, 0 based, smaller than the number of
+     *        dimensions
+     * @param value the new ordinate value
      */
     public abstract void setOrdinate(int index, int ordinate, double value);
 

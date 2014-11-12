@@ -103,13 +103,13 @@ public class TraversalRequirements {
                 return false;
             }
         }
-        
-        return e.getPermission().allows(modes);        
+
+        return e.getPermission().allows(modes);
     }
 
     /**
-     * Returns true if this StreetEdge can be traversed.
-     * Also checks if we can walk our bike on this StreetEdge.
+     * Returns true if this StreetEdge can be traversed. Also checks if we can walk our bike on this
+     * StreetEdge.
      */
     public boolean canBeTraversed(StreetEdge e) {
         if (canBeTraversedInternal(e)) {

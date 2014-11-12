@@ -120,10 +120,9 @@ public class ShapefileStreetSchema {
     }
 
     /**
-     * @param featureSelector
-     *            A featureSelector returns true if a feature is a street, and false otherwise.
-     *            Useful for centerline files that also have non-streets, such as political
-     *            boundaries or coastlines
+     * @param featureSelector A featureSelector returns true if a feature is a street, and false
+     *        otherwise. Useful for centerline files that also have non-streets, such as political
+     *        boundaries or coastlines
      */
     public void setFeatureSelector(SimpleFeatureConverter<Boolean> featureSelector) {
         this.featureSelector = featureSelector;
@@ -137,11 +136,11 @@ public class ShapefileStreetSchema {
         return featureSelector;
     }
 
-	public void setNoteConverter(SimpleFeatureConverter<String> noteConverter) {
-		this.noteConverter = noteConverter;
-	}
+    public void setNoteConverter(SimpleFeatureConverter<String> noteConverter) {
+        this.noteConverter = noteConverter;
+    }
 
-	public SimpleFeatureConverter<String> getNoteConverter() {
-		return noteConverter;
-	}
+    public SimpleFeatureConverter<String> getNoteConverter() {
+        return noteConverter;
+    }
 }

@@ -70,7 +70,9 @@ import com.vividsolutions.jts.geom.Geometry;
 public class TestPatternHopFactory extends TestCase {
 
     private Graph graph;
+
     private GenericAStar aStar = new GenericAStar();
+
     private GtfsContext context;
 
     public void setUp() throws Exception {
@@ -80,17 +82,26 @@ public class TestPatternHopFactory extends TestCase {
 
         GTFSPatternHopFactory factory = new GTFSPatternHopFactory(context);
         factory.run(graph);
-        graph.putService(CalendarServiceData.class, GtfsLibrary.createCalendarServiceData(context.getDao()));
-        
-        String[] stops = {"agency_A", "agency_B", "agency_C", "agency_D", "agency_E"};
+        graph.putService(CalendarServiceData.class,
+                GtfsLibrary.createCalendarServiceData(context.getDao()));
+
+        String[] stops = { "agency_A", "agency_B", "agency_C", "agency_D", "agency_E" };
         for (int i = 0; i < stops.length; ++i) {
             TransitStop stop = (TransitStop) (graph.getVertex(stops[i]));
-            
-            IntersectionVertex front = new IntersectionVertex(graph, "near_1_" + stop.getStopId(), stop.getX() + 0.0001, stop.getY() + 0.0001);
-            IntersectionVertex back =  new IntersectionVertex(graph, "near_2_" + stop.getStopId(), stop.getX() - 0.0001, stop.getY() - 0.0001);
-            
-            PlainStreetEdge street1 = new PlainStreetEdge(front, back, GeometryUtils.makeLineString(stop.getX() + 0.0001, stop.getY() + 0.0001, stop.getX() - 0.0001, stop.getY() - 0.0001), "street", 100, StreetTraversalPermission.ALL, false);
-            PlainStreetEdge street2 = new PlainStreetEdge(back, front, GeometryUtils.makeLineString(stop.getX() - 0.0001, stop.getY() - 0.0001, stop.getX() + 0.0001, stop.getY() + 0.0001), "street", 100, StreetTraversalPermission.ALL, true);
+
+            IntersectionVertex front = new IntersectionVertex(graph, "near_1_" + stop.getStopId(),
+                    stop.getX() + 0.0001, stop.getY() + 0.0001);
+            IntersectionVertex back = new IntersectionVertex(graph, "near_2_" + stop.getStopId(),
+                    stop.getX() - 0.0001, stop.getY() - 0.0001);
+
+            PlainStreetEdge street1 = new PlainStreetEdge(front, back,
+                    GeometryUtils.makeLineString(stop.getX() + 0.0001, stop.getY() + 0.0001,
+                            stop.getX() - 0.0001, stop.getY() - 0.0001), "street", 100,
+                    StreetTraversalPermission.ALL, false);
+            PlainStreetEdge street2 = new PlainStreetEdge(back, front,
+                    GeometryUtils.makeLineString(stop.getX() - 0.0001, stop.getY() - 0.0001,
+                            stop.getX() + 0.0001, stop.getY() + 0.0001), "street", 100,
+                    StreetTraversalPermission.ALL, true);
         }
 
         NetworkLinker nl = new NetworkLinker(graph);
@@ -108,11 +119,11 @@ public class TestPatternHopFactory extends TestCase {
         }
         assertTrue(found);
     }
-    
+
     public void testBoardAlight() throws Exception {
         Vertex stop_a_depart = graph.getVertex("agency_A_depart");
         Vertex stop_b_depart = graph.getVertex("agency_B_depart");
-        
+
         assertEquals(1, stop_a_depart.getDegreeOut());
         assertEquals(3, stop_b_depart.getDegreeOut());
 
@@ -120,7 +131,7 @@ public class TestPatternHopFactory extends TestCase {
             assertEquals(TransitBoardAlight.class, e.getClass());
             assertTrue(((TransitBoardAlight) e).isBoarding());
         }
-        
+
         TransitBoardAlight pb = (TransitBoardAlight) stop_a_depart.getOutgoing().iterator().next();
         Vertex journey_a_1 = pb.getToVertex();
 
@@ -133,23 +144,24 @@ public class TestPatternHopFactory extends TestCase {
                 assertEquals(PatternHop.class, e.getClass());
             }
         }
-        
+
     }
-    
+
     public void testBoardAlightStopIndex() {
         Vertex stop_b_arrive = graph.getVertex("agency_C_arrive");
         Vertex stop_b_depart = graph.getVertex("agency_C_depart");
-        
+
         Map<TripPattern, Integer> stopIndex = new HashMap<TripPattern, Integer>();
-        for(Edge edge : stop_b_depart.getOutgoing()) {
+        for (Edge edge : stop_b_depart.getOutgoing()) {
             TransitBoardAlight tba = (TransitBoardAlight) edge;
             stopIndex.put(tba.getPattern(), tba.getStopIndex());
         }
-        
-        for(Edge edge : stop_b_arrive.getIncoming()) {
+
+        for (Edge edge : stop_b_arrive.getIncoming()) {
             TransitBoardAlight tba = (TransitBoardAlight) edge;
-            if(stopIndex.containsKey(tba.getPattern()))
-                assertEquals((Integer) stopIndex.get(tba.getPattern()), new Integer(tba.getStopIndex()));
+            if (stopIndex.containsKey(tba.getPattern()))
+                assertEquals((Integer) stopIndex.get(tba.getPattern()),
+                        new Integer(tba.getStopIndex()));
         }
     }
 
@@ -157,7 +169,7 @@ public class TestPatternHopFactory extends TestCase {
         List<TransitStop> ret = Lists.newArrayList();
         for (State state : path.states) {
             if (state.getVertex() instanceof TransitStop) {
-                ret.add(((TransitStop)state.getVertex()));
+                ret.add(((TransitStop) state.getVertex()));
             }
         }
         return ret;
@@ -203,7 +215,7 @@ public class TestPatternHopFactory extends TestCase {
 
         path = spt.getPath(stop_d, false);
         assertNotNull(path);
-        // there are two paths of different lengths 
+        // there are two paths of different lengths
         // both arrive at 40 minutes after midnight
         List<TransitStop> stops = extractStopVertices(path);
         assertEquals(stops.size(), 3);
@@ -211,7 +223,7 @@ public class TestPatternHopFactory extends TestCase {
         long endTime = startTime + 40 * 60;
         assertEquals(endTime, path.getEndTime());
 
-        //A to E (change at C)
+        // A to E (change at C)
         options.setRoutingContext(graph, stop_a, stop_e);
         spt = aStar.getShortestPathTree(options);
         path = spt.getPath(stop_e, false);
@@ -233,7 +245,7 @@ public class TestPatternHopFactory extends TestCase {
         RoutingRequest options = new RoutingRequest();
 
         // Friday evening
-        options.dateTime = TestUtils.dateInSeconds("America/New_York", 2009, 8, 18, 23, 20, 0); 
+        options.dateTime = TestUtils.dateInSeconds("America/New_York", 2009, 8, 18, 23, 20, 0);
         options.setRoutingContext(graph, stop_g, stop_h);
         spt = aStar.getShortestPathTree(options);
 
@@ -254,14 +266,17 @@ public class TestPatternHopFactory extends TestCase {
         assertTrue(endTime < startTime + 60 * 60);
     }
 
-    /* Somewhat hackish convenience method to grab a hop edge on a particular route leaving a particular stop. */
+    /*
+     * Somewhat hackish convenience method to grab a hop edge on a particular route leaving a
+     * particular stop.
+     */
     private PatternHop getHopEdge(String stopId, String routeId) {
         Vertex stopDepartVertex = graph.getVertex("agency_" + stopId + "_depart");
         for (Edge edge : stopDepartVertex.getOutgoing()) {
             if (edge instanceof TransitBoardAlight) {
                 TransitBoardAlight tba = ((TransitBoardAlight) edge);
                 if (tba.isBoarding() && tba.getPattern().getRoute().getId().getId().equals(routeId)) {
-                    for (Edge edge2: tba.getToVertex().getOutgoing()) {
+                    for (Edge edge2 : tba.getToVertex().getOutgoing()) {
                         if (edge2 instanceof PatternHop) {
                             return (PatternHop) edge2;
                         }
@@ -315,13 +330,13 @@ public class TestPatternHopFactory extends TestCase {
         spt = aStar.getShortestPathTree(options);
         path = spt.getPath(stop_p, false);
         assertNotNull(path);
-        endTime =  TestUtils.dateInSeconds("America/New_York", 2009, 8, 19, 15, 10, 0);
+        endTime = TestUtils.dateInSeconds("America/New_York", 2009, 8, 19, 15, 10, 0);
         assertEquals(endTime, path.getEndTime());
     }
 
     public void testTransfers() throws Exception {
         TransferTable transferTable = graph.getTransferTable();
-        
+
         // create dummy routes and trips
         Route fromRoute = new Route();
         fromRoute.setId(new AgencyAndId("agency", "1"));
@@ -336,23 +351,27 @@ public class TestPatternHopFactory extends TestCase {
         Trip toTrip2 = new Trip();
         toTrip2.setId(new AgencyAndId("agency", "2.2"));
         toTrip2.setRoute(toRoute);
-        
+
         // find stops
-        Stop stopK = ((TransitStopArrive)graph.getVertex("agency_K_arrive")).getStop();
-        Stop stopN = ((TransitStopDepart)graph.getVertex("agency_N_depart")).getStop();
-        Stop stopM = ((TransitStopDepart)graph.getVertex("agency_M_depart")).getStop();
-        
+        Stop stopK = ((TransitStopArrive) graph.getVertex("agency_K_arrive")).getStop();
+        Stop stopN = ((TransitStopDepart) graph.getVertex("agency_N_depart")).getStop();
+        Stop stopM = ((TransitStopDepart) graph.getVertex("agency_M_depart")).getStop();
+
         assertTrue(transferTable.hasPreferredTransfers());
-        assertEquals(StopTransfer.UNKNOWN_TRANSFER, transferTable.getTransferTime(stopN, stopM, fromTrip, toTrip, true));
-        assertEquals(StopTransfer.FORBIDDEN_TRANSFER, transferTable.getTransferTime(stopK, stopM, fromTrip, toTrip, true));
-        assertEquals(StopTransfer.PREFERRED_TRANSFER, transferTable.getTransferTime(stopN, stopK, toTrip, toTrip2, true));
-        assertEquals(StopTransfer.TIMED_TRANSFER, transferTable.getTransferTime(stopN, stopK, fromTrip, toTrip, true));
+        assertEquals(StopTransfer.UNKNOWN_TRANSFER,
+                transferTable.getTransferTime(stopN, stopM, fromTrip, toTrip, true));
+        assertEquals(StopTransfer.FORBIDDEN_TRANSFER,
+                transferTable.getTransferTime(stopK, stopM, fromTrip, toTrip, true));
+        assertEquals(StopTransfer.PREFERRED_TRANSFER,
+                transferTable.getTransferTime(stopN, stopK, toTrip, toTrip2, true));
+        assertEquals(StopTransfer.TIMED_TRANSFER,
+                transferTable.getTransferTime(stopN, stopK, fromTrip, toTrip, true));
         assertEquals(15, transferTable.getTransferTime(stopN, stopK, fromTrip, toTrip2, true));
-        
+
         TransitStop e_arrive = (TransitStop) graph.getVertex("agency_E");
         TransitStop f_depart = (TransitStop) graph.getVertex("agency_F");
         Edge edge = new TransferEdge(e_arrive, f_depart, 10000, 10000);
-        
+
         long startTime = TestUtils.dateInSeconds("America/New_York", 2009, 8, 18, 0, 50, 0);
         Vertex stop_b = graph.getVertex("agency_B_depart");
         Vertex stop_g = graph.getVertex("agency_G_arrive");
@@ -360,12 +379,13 @@ public class TestPatternHopFactory extends TestCase {
         options.dateTime = startTime;
         options.setRoutingContext(graph, stop_b, stop_g);
         ShortestPathTree spt = aStar.getShortestPathTree(options);
-        
+
         GraphPath path = spt.getPath(stop_g, false);
         assertNotNull(path);
-        
-        assertTrue("expected to use much later trip due to min transfer time", path.getEndTime() - startTime > 4.5 * 60 * 60);
-        
+
+        assertTrue("expected to use much later trip due to min transfer time", path.getEndTime()
+                - startTime > 4.5 * 60 * 60);
+
         /* cleanup */
         e_arrive.removeOutgoing(edge);
         f_depart.removeIncoming(edge);
@@ -381,17 +401,17 @@ public class TestPatternHopFactory extends TestCase {
         options.setModes(new TraverseModeSet("TRAINISH"));
         options.dateTime = TestUtils.dateInSeconds("America/New_York", 2009, 8, 0, 0, 0, 0);
         options.setRoutingContext(graph, stop_a, stop_b);
-        spt = aStar.getShortestPathTree(options );
+        spt = aStar.getShortestPathTree(options);
 
-        //a to b is bus only
+        // a to b is bus only
         assertNull(spt.getPath(stop_b, false));
-        
+
         options.setModes(new TraverseModeSet("TRAINISH,BUSISH"));
         spt = aStar.getShortestPathTree(options);
 
         assertNotNull(spt.getPath(stop_b, false));
     }
-    
+
     public void testTimelessStops() throws Exception {
         Vertex stop_d = graph.getVertex("agency_D");
         Vertex stop_c = graph.getVertex("agency_C");
@@ -402,7 +422,8 @@ public class TestPatternHopFactory extends TestCase {
 
         GraphPath path = spt.getPath(stop_c, false);
         assertNotNull(path);
-        assertEquals(TestUtils.dateInSeconds("America/New_York", 2009, 8, 1, 11, 0, 0), path.getEndTime());
+        assertEquals(TestUtils.dateInSeconds("America/New_York", 2009, 8, 1, 11, 0, 0),
+                path.getEndTime());
     }
 
     public void testTripBikesAllowed() throws Exception {
@@ -452,7 +473,7 @@ public class TestPatternHopFactory extends TestCase {
         for (StreetTransitLink e : filter(stop_d.getOutgoing(), StreetTransitLink.class)) {
             split_d = e.getToVertex();
         }
-        
+
         RoutingRequest options = new RoutingRequest();
         options.wheelchairAccessible = true;
         options.dateTime = TestUtils.dateInSeconds("America/New_York", 2009, 8, 18, 0, 0, 0);
@@ -481,20 +502,20 @@ public class TestPatternHopFactory extends TestCase {
         options.dateTime = TestUtils.toSeconds(time);
         options.setRoutingContext(graph, near_a, split_d);
         spt = aStar.getShortestPathTree(options);
-        
+
         time.add(Calendar.HOUR, 1);
-        time.add(Calendar.SECOND, 1); //for the StreetTransitLink
+        time.add(Calendar.SECOND, 1); // for the StreetTransitLink
         path = spt.getPath(split_d, false);
         assertNotNull(path);
         assertEquals(TestUtils.toSeconds(time), path.getEndTime());
     }
 
     public void testRunForTrain() {
-        /** This is the notorious Byrd bug: we're going from Q to T at 8:30.  
-         *  There's a trip from S to T at 8:50 and a second one at 9:50.  
-         *  To get to S by 8:50, we need to take trip 12.1 from Q to R, and 13.1
-         *  from R to S.  If we take the direct-but-slower 11.1, we'll miss
-         *  the 8:50 and have to catch the 9:50.
+        /**
+         * This is the notorious Byrd bug: we're going from Q to T at 8:30. There's a trip from S to
+         * T at 8:50 and a second one at 9:50. To get to S by 8:50, we need to take trip 12.1 from Q
+         * to R, and 13.1 from R to S. If we take the direct-but-slower 11.1, we'll miss the 8:50
+         * and have to catch the 9:50.
          */
         Vertex destination = graph.getVertex("agency_T");
         RoutingRequest options = new RoutingRequest();
@@ -524,7 +545,7 @@ public class TestPatternHopFactory extends TestCase {
         options.setModes(new TraverseModeSet("TRANSIT"));
         options.dateTime = TestUtils.dateInSeconds("America/New_York", 2009, 8, 7, 0, 0, 0);
         options.setRoutingContext(graph, stop_u, stop_v);
-        
+
         // U to V - original stop times - shouldn't be used
         spt = aStar.getShortestPathTree(options);
         path = spt.getPath(stop_v, false);
@@ -552,33 +573,35 @@ public class TestPatternHopFactory extends TestCase {
         assertEquals(4, path.states.size());
         endTime = TestUtils.dateInSeconds("America/New_York", 2009, 8, 7, 14, 40, 0);
         assertEquals(endTime, path.getEndTime());
-        
+
         // TODO more detailed testing of frequencies
 
     }
-    
+
     public void testFewestTransfers() {
         Vertex stop_c = graph.getVertex("agency_C");
         Vertex stop_d = graph.getVertex("agency_D");
         RoutingRequest options = new RoutingRequest();
         options.optimize = OptimizeType.QUICK;
         options.dateTime = TestUtils.dateInSeconds("America/New_York", 2009, 8, 1, 16, 0, 0);
-        options.setRoutingContext(graph, stop_c, stop_d);  
-                
+        options.setRoutingContext(graph, stop_c, stop_d);
+
         ShortestPathTree spt = aStar.getShortestPathTree(options);
 
-        //when optimizing for speed, take the fast two-bus path
+        // when optimizing for speed, take the fast two-bus path
         GraphPath path = spt.getPath(stop_d, false);
         assertNotNull(path);
-        assertEquals(TestUtils.dateInSeconds("America/New_York", 2009, 8, 1, 16, 20, 0), path.getEndTime());
-        
-        //when optimizing for fewest transfers, take the slow one-bus path
+        assertEquals(TestUtils.dateInSeconds("America/New_York", 2009, 8, 1, 16, 20, 0),
+                path.getEndTime());
+
+        // when optimizing for fewest transfers, take the slow one-bus path
         options.transferPenalty = 1800;
         spt = aStar.getShortestPathTree(options);
 
         path = spt.getPath(stop_d, false);
         assertNotNull(path);
-        assertEquals(TestUtils.dateInSeconds("America/New_York", 2009, 8, 1, 16, 50, 0), path.getEndTime());
+        assertEquals(TestUtils.dateInSeconds("America/New_York", 2009, 8, 1, 16, 50, 0),
+                path.getEndTime());
 
     }
 
@@ -590,12 +613,13 @@ public class TestPatternHopFactory extends TestCase {
         assertNotNull(stop);
 
         RoutingRequest options = new RoutingRequest();
-        options.dateTime = TestUtils.dateInSeconds("America/New_York", 2009, 8, 1, 16, 0, 0); 
+        options.dateTime = TestUtils.dateInSeconds("America/New_York", 2009, 8, 1, 16, 0, 0);
         options.setRoutingContext(graph, entrance, stop);
         ShortestPathTree spt = aStar.getShortestPathTree(options);
-        
+
         GraphPath path = spt.getPath(stop, false);
         assertNotNull(path);
-        assertEquals(TestUtils.dateInSeconds("America/New_York", 2009, 8, 1, 16, 0, 34), path.getEndTime());
+        assertEquals(TestUtils.dateInSeconds("America/New_York", 2009, 8, 1, 16, 0, 34),
+                path.getEndTime());
     }
 }

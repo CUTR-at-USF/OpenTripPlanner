@@ -29,7 +29,7 @@ public class ElevationPoint implements Comparable<ElevationPoint> {
     public int compareTo(ElevationPoint arg0) {
         return (int) Math.signum(distanceAlongShape - arg0.distanceAlongShape);
     }
-    
+
     public String toString() {
         return "ElevationPoint(" + distanceAlongShape + ", " + ele + ")";
     }

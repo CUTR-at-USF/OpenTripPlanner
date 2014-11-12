@@ -31,6 +31,7 @@ public class ConstantsForTests {
     public static final String PORTLAND_GTFS = "src/test/resources/google_transit.zip";
 
     public static final String FAKE_GTFS = "src/test/resources/testagency.zip";
+
     public static final String FAKE_Freq_GTFS = "src/test/resources/testFrequencyGTFS.zip";
 
     public static final String GENERATED_GTFS = "src/test/resources/generated.gtfs.zip";
@@ -83,7 +84,7 @@ public class ConstantsForTests {
             linker.run();
             // TODO: eliminate GTFSContext
             // this is now making a duplicate calendarservicedata but it's oh so practical
-            portlandGraph.putService(CalendarServiceData.class, 
+            portlandGraph.putService(CalendarServiceData.class,
                     GtfsLibrary.createCalendarServiceData(portlandContext.getDao()));
         } catch (Exception e) {
             e.printStackTrace();
@@ -92,7 +93,7 @@ public class ConstantsForTests {
         NetworkLinker nl = new NetworkLinker(portlandGraph);
         nl.createLinkage();
     }
-    
+
     public static Graph buildGraph(String path) {
         GtfsContext context;
         try {
@@ -104,7 +105,8 @@ public class ConstantsForTests {
         Graph graph = new Graph();
         GTFSPatternHopFactory factory = new GTFSPatternHopFactory(context);
         factory.run(graph);
-        graph.putService(CalendarServiceData.class, GtfsLibrary.createCalendarServiceData(context.getDao()));
+        graph.putService(CalendarServiceData.class,
+                GtfsLibrary.createCalendarServiceData(context.getDao()));
         return graph;
     }
 

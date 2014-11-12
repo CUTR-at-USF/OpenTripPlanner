@@ -9,45 +9,75 @@ import com.beust.jcommander.internal.Lists;
 import org.opentripplanner.gtfs.GtfsLibrary;
 
 /**
- * The equivalent of a ride in an API response. All information degenerates to Strings and ints here.
+ * The equivalent of a ride in an API response. All information degenerates to Strings and ints
+ * here.
  */
 public class Segment {
 
     public static class SegmentPattern implements Comparable<SegmentPattern> {
         public String patternId;
+
         public int fromIndex;
+
         public int toIndex;
+
         public int nTrips;
+
         // public Stats stats;
-        public SegmentPattern (PatternRide patternRide) {
+        public SegmentPattern(PatternRide patternRide) {
             this.patternId = patternRide.pattern.getCode();
             this.fromIndex = patternRide.fromIndex;
-            this.toIndex   = patternRide.toIndex;
-            this.nTrips    = patternRide.stats.num; // this stats has time window applied
-            // this.stats     = patternRide.stats;
+            this.toIndex = patternRide.toIndex;
+            this.nTrips = patternRide.stats.num; // this stats has time window applied
+            // this.stats = patternRide.stats;
         }
+
         @Override
-        public int compareTo (SegmentPattern other) {
+        public int compareTo(SegmentPattern other) {
             return other.nTrips - this.nTrips;
         }
     }
-    
-    @Getter int walkTime;
-    @Getter int walkDistance;
-    @Getter Stats waitStats;
 
-    @Getter String route;
-    @Getter String mode;
-    @Getter String from;
-    @Getter String to;
-    @Getter String fromName;
-    @Getter String toName;
-    @Getter String routeShortName;
-    @Getter String routeLongName;
-    @Getter Stats rideStats;
-    @Getter List<SegmentPattern> segmentPatterns = Lists.newArrayList();
+    @Getter
+    int walkTime;
 
-    public Segment (Ride ride, TimeWindow window, double walkSpeed) {
+    @Getter
+    int walkDistance;
+
+    @Getter
+    Stats waitStats;
+
+    @Getter
+    String route;
+
+    @Getter
+    String mode;
+
+    @Getter
+    String from;
+
+    @Getter
+    String to;
+
+    @Getter
+    String fromName;
+
+    @Getter
+    String toName;
+
+    @Getter
+    String routeShortName;
+
+    @Getter
+    String routeLongName;
+
+    @Getter
+    Stats rideStats;
+
+    @Getter
+    List<SegmentPattern> segmentPatterns = Lists.newArrayList();
+
+    public Segment(Ride ride, TimeWindow window, double walkSpeed) {
         route = ride.route.getId().getId();
         mode = GtfsLibrary.getTraverseMode(ride.route).toString();
         routeShortName = ride.route.getShortName();
@@ -64,7 +94,7 @@ public class Segment {
         walkDistance = (int) ride.getTransferDistance();
         walkTime = (int) (ride.getTransferDistance() / walkSpeed);
         /* At this point we know all patterns on rides. Calculate transfer time information. */
-        waitStats = ride.statsForTransfer (window, walkSpeed);
+        waitStats = ride.statsForTransfer(window, walkSpeed);
     }
 
 }

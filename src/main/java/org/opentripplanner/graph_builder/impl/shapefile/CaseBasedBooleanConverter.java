@@ -34,10 +34,9 @@ public class CaseBasedBooleanConverter implements SimpleFeatureConverter<Boolean
         this.attributeName = attributeName;
     }
 
-    public CaseBasedBooleanConverter(String attributeName,
-            Boolean defaultValue) {
+    public CaseBasedBooleanConverter(String attributeName, Boolean defaultValue) {
         this.attributeName = attributeName;
-        this.defaultValue = defaultValue; 
+        this.defaultValue = defaultValue;
     }
 
     public void setAttributeName(String attributeName) {
@@ -49,7 +48,7 @@ public class CaseBasedBooleanConverter implements SimpleFeatureConverter<Boolean
     }
 
     public void setValues(Map<String, Boolean> values) {
-        this.values = values; 
+        this.values = values;
     }
 
     @Override

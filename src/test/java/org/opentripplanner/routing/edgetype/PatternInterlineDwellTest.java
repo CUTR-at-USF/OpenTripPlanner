@@ -49,7 +49,9 @@ import static org.mockito.Mockito.when;
 public class PatternInterlineDwellTest extends GtfsTest {
 
     @Override
-    public boolean isLongDistance() { return true; } // retrying wrecks the tests
+    public boolean isLongDistance() {
+        return true;
+    } // retrying wrecks the tests
 
     @Override
     public String getFeedName() {

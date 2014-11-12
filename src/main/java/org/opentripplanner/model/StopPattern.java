@@ -9,12 +9,12 @@ import org.onebusaway.gtfs.model.StopTime;
 
 /**
  * This class represents what is called a JourneyPattern in Transmodel: the sequence of stops at
- * which a trip (GTFS) or vehicle journey (Transmodel) calls, irrespective of the day on which 
+ * which a trip (GTFS) or vehicle journey (Transmodel) calls, irrespective of the day on which
  * service runs.
  * 
  * An important detail: Routes in GTFS are not a structurally important element, they just serve as
  * user-facing information. It is possible for the same journey pattern to appear in more than one
- * route. 
+ * route.
  * 
  * OTP already has several classes that represent this same thing: A TripPattern in the context of
  * routing. It represents all trips with the same stop pattern A ScheduledStopPattern in the GTFS
@@ -28,31 +28,37 @@ import org.onebusaway.gtfs.model.StopTime;
  * complexity since we only consider the trip that departs soonest for each pattern. AgencyAndId
  * calendarId has been removed. See issue #1320.
  * 
- * A StopPattern is very closely related to a TripPattern -- it essentially serves as the unique key for a TripPattern.
- * Should the route be included in the StopPattern?
+ * A StopPattern is very closely related to a TripPattern -- it essentially serves as the unique key
+ * for a TripPattern. Should the route be included in the StopPattern?
  */
 public class StopPattern implements Serializable {
 
     private static final long serialVersionUID = 20140101L;
-    
+
     /* Constants for the GTFS pick up / drop off type fields. */
     // It would be nice to have an enum for these, but the equivalence with integers is important.
     public static final int PICKDROP_SCHEDULED = 0;
+
     public static final int PICKDROP_NONE = 1;
+
     public static final int PICKDROP_CALL_AGENCY = 2;
+
     public static final int PICKDROP_COORDINATE_WITH_DRIVER = 3;
-    
+
     public final int size; // property could be derived from arrays
+
     public final Stop[] stops;
-    public final int[]  pickups;
-    public final int[]  dropoffs;
+
+    public final int[] pickups;
+
+    public final int[] dropoffs;
 
     public boolean equals(Object other) {
         if (other instanceof StopPattern) {
             StopPattern that = (StopPattern) other;
-            return Arrays.equals(this.stops,    that.stops) && 
-                   Arrays.equals(this.pickups,  that.pickups) && 
-                   Arrays.equals(this.dropoffs, that.dropoffs);
+            return Arrays.equals(this.stops, that.stops)
+                    && Arrays.equals(this.pickups, that.pickups)
+                    && Arrays.equals(this.dropoffs, that.dropoffs);
         } else {
             return false;
         }
@@ -77,17 +83,18 @@ public class StopPattern implements Serializable {
         return sb.toString();
     }
 
-    private StopPattern (int size) {
+    private StopPattern(int size) {
         this.size = size;
-        stops     = new Stop[size];
-        pickups   = new int[size];
-        dropoffs  = new int[size];
+        stops = new Stop[size];
+        pickups = new int[size];
+        dropoffs = new int[size];
     }
 
     /** Assumes that stopTimes are already sorted by time. */
-    public StopPattern (List<StopTime> stopTimes) {
-        this (stopTimes.size());
-        if (size == 0) return;
+    public StopPattern(List<StopTime> stopTimes) {
+        this(stopTimes.size());
+        if (size == 0)
+            return;
         for (int i = 0; i < size; ++i) {
             StopTime stopTime = stopTimes.get(i);
             stops[i] = stopTime.getStop();
@@ -111,9 +118,12 @@ public class StopPattern implements Serializable {
     /**
      * @param stopId in agency_id format
      */
-    public boolean containsStop (String stopId) {
-        if (stopId == null) return false;
-        for (Stop stop : stops) if (stopId.equals(stop.getId().toString())) return true;
+    public boolean containsStop(String stopId) {
+        if (stopId == null)
+            return false;
+        for (Stop stop : stops)
+            if (stopId.equals(stop.getId().toString()))
+                return true;
         return false;
     }
 }

@@ -31,19 +31,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GraphBuilderTask implements Runnable {
-    
-    private static Logger LOG = LoggerFactory.getLogger(GraphBuilderTask.class); 
+
+    private static Logger LOG = LoggerFactory.getLogger(GraphBuilderTask.class);
 
     private List<GraphBuilder> _graphBuilders = new ArrayList<GraphBuilder>();
 
     private File graphFile;
-    
+
     private boolean _alwaysRebuild = true;
 
     private List<RoutingRequest> _modeList;
-    
+
     private String _baseGraph = null;
-    
+
     private Graph graph = new Graph();
 
     /** Should the graph be serialized to disk after being created or not? */
@@ -61,7 +61,7 @@ public class GraphBuilderTask implements Runnable {
     public void setAlwaysRebuild(boolean alwaysRebuild) {
         _alwaysRebuild = alwaysRebuild;
     }
-    
+
     public void setBaseGraph(String baseGraph) {
         this._baseGraph = baseGraph;
         try {
@@ -78,12 +78,12 @@ public class GraphBuilderTask implements Runnable {
     public void setModes(List<RoutingRequest> modeList) {
         _modeList = modeList;
     }
-    
-    public void setPath (String path) {
+
+    public void setPath(String path) {
         graphFile = new File(path.concat("/Graph.obj"));
     }
-    
-    public void setPath (File path) {
+
+    public void setPath(File path) {
         graphFile = new File(path, "Graph.obj");
     }
 
@@ -92,12 +92,12 @@ public class GraphBuilderTask implements Runnable {
     }
 
     public void run() {
-        
+
         if (graphFile == null) {
             throw new RuntimeException("graphBuilderTask has no attribute graphFile.");
         }
 
-        if( graphFile.exists() && ! _alwaysRebuild) {
+        if (graphFile.exists() && !_alwaysRebuild) {
             LOG.info("graph already exists and alwaysRebuild=false => skipping graph build");
             return;
         }
@@ -113,14 +113,15 @@ public class GraphBuilderTask implements Runnable {
             }
         }
 
-        //check prerequisites
+        // check prerequisites
         ArrayList<String> provided = new ArrayList<String>();
         boolean bad = false;
         for (GraphBuilder builder : _graphBuilders) {
             List<String> prerequisites = builder.getPrerequisites();
             for (String prereq : prerequisites) {
                 if (!provided.contains(prereq)) {
-                    LOG.error("Graph builder " + builder + " requires " + prereq + " but no previous stages provide it");
+                    LOG.error("Graph builder " + builder + " requires " + prereq
+                            + " but no previous stages provide it");
                     bad = true;
                 }
             }
@@ -131,11 +132,11 @@ public class GraphBuilderTask implements Runnable {
         else if (bad)
             throw new RuntimeException("Prerequisites unsatisfied");
 
-        //check inputs
+        // check inputs
         for (GraphBuilder builder : _graphBuilders) {
             builder.checkInputs();
         }
-        
+
         HashMap<Class<?>, Object> extra = new HashMap<Class<?>, Object>();
         for (GraphBuilder load : _graphBuilders)
             load.buildGraph(graph, extra);
@@ -151,6 +152,6 @@ public class GraphBuilderTask implements Runnable {
             LOG.info("Not saving graph to disk, as requested.");
             graph.index(new DefaultStreetVertexIndexFactory());
         }
-        
+
     }
 }

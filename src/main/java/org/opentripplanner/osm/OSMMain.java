@@ -19,7 +19,9 @@ import com.vividsolutions.jts.geom.Envelope;
 public class OSMMain {
 
     private static final Logger LOG = LoggerFactory.getLogger(OSMMain.class);
+
     static final String INPUT = "/var/otp/graphs/nl2/netherlands-latest.osm.pbf";
+
     static final Envelope ENV = new Envelope(4.4, 5.5, 52.2, 53.3);
 
     public static void main(String[] args) {
@@ -32,8 +34,9 @@ public class OSMMain {
             for (Edge edge : edges) {
                 Node fromNode = osm.nodes.get(edge.from);
                 Node toNode = osm.nodes.get(edge.to);
-                ps.printf("LINESTRING(%f %f,%f %f))\n", fromNode.lon, fromNode.lat, toNode.lon, toNode.lat);
-            }   
+                ps.printf("LINESTRING(%f %f,%f %f))\n", fromNode.lon, fromNode.lat, toNode.lon,
+                        toNode.lat);
+            }
         } catch (FileNotFoundException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -63,10 +66,10 @@ public class OSMMain {
                 }
             }
         }
-        LOG.info("Done making {} edges from {} ways.", edges.size(), osm.ways.size());        
+        LOG.info("Done making {} edges from {} ways.", edges.size(), osm.ways.size());
         return edges;
     }
-    
+
     /** As a test, find a certain tag on ways. */
     public static void findTracks(OSM osm) {
         for (Entry<Long, Way> e : osm.ways.entrySet()) {
@@ -74,6 +77,6 @@ public class OSMMain {
                 LOG.info("{} is a track.", e.getKey());
             }
         }
-    }    
+    }
 
 }

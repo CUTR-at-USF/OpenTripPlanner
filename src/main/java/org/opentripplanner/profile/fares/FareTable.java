@@ -22,7 +22,7 @@ public class FareTable {
 
     private Map<P2<String>, Fare> fares = Maps.newHashMap();
 
-    public FareTable (String name) {
+    public FareTable(String name) {
         InputStream is = FareTable.class.getClassLoader().getResourceAsStream(name);
         CsvReader reader = new CsvReader(is, ',', Charset.forName("UTF-8"));
         try {
@@ -41,11 +41,12 @@ public class FareTable {
         }
     }
 
-    public Fare lookup (String from, String to) {
-        return new Fare(fares.get(new P2<String>(from, to))); // defensive copy, in case the caller discounts
+    public Fare lookup(String from, String to) {
+        return new Fare(fares.get(new P2<String>(from, to))); // defensive copy, in case the caller
+                                                              // discounts
     }
 
-    public Fare lookup (Stop from, Stop to) {
+    public Fare lookup(Stop from, Stop to) {
         return lookup(from.getId().getId(), to.getId().getId());
     }
 

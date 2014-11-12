@@ -52,14 +52,15 @@ public class StateEditor {
     private boolean defectiveTraversal = false;
 
     private boolean traversingBackward;
-    
+
     // we use our own set of notes and only replace the child notes if they're different
     private Set<Alert> notes = null;
 
     /* CONSTRUCTORS */
 
-    protected StateEditor() {}
-    
+    protected StateEditor() {
+    }
+
     public StateEditor(RoutingRequest options, Vertex v) {
         child = new State(v, options);
     }
@@ -134,8 +135,8 @@ public class StateEditor {
 
             // check that time changes are coherent with edge traversal
             // direction
-            if (traversingBackward ? (child.getTimeDeltaSeconds() > 0)
-                    : (child.getTimeDeltaSeconds() < 0)) {
+            if (traversingBackward ? (child.getTimeDeltaSeconds() > 0) : (child
+                    .getTimeDeltaSeconds() < 0)) {
                 LOG.trace("Time was incremented the wrong direction during state editing. {}",
                         child.backEdge);
                 return null;
@@ -150,7 +151,7 @@ public class StateEditor {
             cloneStateDataAsNeeded();
             child.stateData.notes = this.notes;
         }
-        
+
         spawned = true;
         return child;
     }
@@ -207,13 +208,13 @@ public class StateEditor {
     public void addAlert(Alert notes) {
         if (notes == null)
             return;
-        
+
         if (this.notes == null)
             this.notes = new HashSet<Alert>();
-        
+
         this.notes.add(notes);
     }
-    
+
     /**
      * Convenience function to add multiple alerts
      */
@@ -251,7 +252,7 @@ public class StateEditor {
     public void incrementTimeInSeconds(int seconds) {
         incrementTimeInMilliseconds(seconds * 1000L);
     }
-    
+
     public void incrementTimeInMilliseconds(long milliseconds) {
         if (milliseconds < 0) {
             LOG.warn("A state's time is being incremented by a negative amount while traversing edge "
@@ -260,7 +261,7 @@ public class StateEditor {
             return;
         }
         child.time += (traversingBackward ? -milliseconds : milliseconds);
-    }    
+    }
 
     public void incrementWalkDistance(double length) {
         if (length < 0) {
@@ -302,37 +303,37 @@ public class StateEditor {
         cloneStateDataAsNeeded();
         child.stateData.previousTrip = previousTrip;
     }
-    
+
     /**
-     * Initial wait time is recorded so it can be subtracted out of paths in lieu of "reverse optimization".
-     * This happens in Analyst.
+     * Initial wait time is recorded so it can be subtracted out of paths in lieu of
+     * "reverse optimization". This happens in Analyst.
      */
     public void setInitialWaitTimeSeconds(long initialWaitTimeSeconds) {
         cloneStateDataAsNeeded();
         child.stateData.initialWaitTime = initialWaitTimeSeconds;
     }
-    
+
     public void setBackMode(TraverseMode mode) {
         if (mode == child.stateData.backMode)
             return;
-        
+
         cloneStateDataAsNeeded();
         child.stateData.backMode = mode;
     }
 
-    public void setBackWalkingBike (boolean walkingBike) {
+    public void setBackWalkingBike(boolean walkingBike) {
         if (walkingBike == child.stateData.backWalkingBike)
             return;
-        
+
         cloneStateDataAsNeeded();
         child.stateData.backWalkingBike = walkingBike;
     }
 
-    /** 
-     * The lastNextArrivalDelta is the amount of time between the arrival of the last trip
-     * the planner used and the arrival of the trip after that.
+    /**
+     * The lastNextArrivalDelta is the amount of time between the arrival of the last trip the
+     * planner used and the arrival of the trip after that.
      */
-    public void setLastNextArrivalDelta (int lastNextArrivalDelta) {
+    public void setLastNextArrivalDelta(int lastNextArrivalDelta) {
         cloneStateDataAsNeeded();
         child.stateData.lastNextArrivalDelta = lastNextArrivalDelta;
     }
@@ -364,11 +365,12 @@ public class StateEditor {
         // but do a null check anyway
         if (routeId != null) {
             AgencyAndId[] oldRouteSequence = child.stateData.routeSequence;
-            //LOG.debug("old route seq {}", Arrays.asList(oldRouteSequence));
+            // LOG.debug("old route seq {}", Arrays.asList(oldRouteSequence));
             int oldLength = oldRouteSequence.length;
             child.stateData.routeSequence = Arrays.copyOf(oldRouteSequence, oldLength + 1);
             child.stateData.routeSequence[oldLength] = routeId;
-            //LOG.debug("new route seq {}", Arrays.asList(child.stateData.routeSequence)); // array will be interpreted as varargs
+            // LOG.debug("new route seq {}", Arrays.asList(child.stateData.routeSequence)); // array
+            // will be interpreted as varargs
         }
     }
 
@@ -393,8 +395,8 @@ public class StateEditor {
     }
 
     /**
-     * This has two effects: marks the car as parked, and switches the current mode.
-     * Marking the car parked is important for allowing co-dominance of walking and driving states.
+     * This has two effects: marks the car as parked, and switches the current mode. Marking the car
+     * parked is important for allowing co-dominance of walking and driving states.
      */
     public void setCarParked(boolean carParked) {
         cloneStateDataAsNeeded();
@@ -472,7 +474,7 @@ public class StateEditor {
     public Trip getPreviousTrip() {
         return child.getPreviousTrip();
     }
-    
+
     public String getZone() {
         return child.getZone();
     }
@@ -561,6 +563,7 @@ public class StateEditor {
         cloneStateDataAsNeeded();
         child.stateData.lastPattern = pattern;
     }
+
     public void setOptions(RoutingRequest options) {
         cloneStateDataAsNeeded();
         child.stateData.opt = options;

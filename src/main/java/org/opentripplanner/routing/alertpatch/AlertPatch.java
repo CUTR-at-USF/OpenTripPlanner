@@ -99,20 +99,20 @@ public class AlertPatch implements Serializable {
         if (route != null || trip != null || agency != null) {
             Collection<TripPattern> tripPatterns;
 
-            if(trip != null) {
+            if (trip != null) {
                 tripPatterns = new LinkedList<TripPattern>();
                 TripPattern tripPattern = graph.index.patternForTrip.get(trip);
-                if(tripPattern != null) {
+                if (tripPattern != null) {
                     tripPatterns.add(tripPattern);
                 }
             } else if (route != null) {
-               tripPatterns = graph.index.patternsForRoute.get(route);
+                tripPatterns = graph.index.patternsForRoute.get(route);
             } else {
-               tripPatterns = graph.index.patternsForAgency.get(agency);
+                tripPatterns = graph.index.patternsForAgency.get(agency);
             }
 
             for (TripPattern tripPattern : tripPatterns) {
-                if (direction != null && ! direction.equals(tripPattern.getDirection())) {
+                if (direction != null && !direction.equals(tripPattern.getDirection())) {
                     continue;
                 }
                 for (int i = 0; i < tripPattern.stopPattern.stops.length; i++) {
@@ -150,20 +150,20 @@ public class AlertPatch implements Serializable {
         if (route != null || trip != null || agency != null) {
             Collection<TripPattern> tripPatterns;
 
-            if(trip != null) {
+            if (trip != null) {
                 tripPatterns = new LinkedList<TripPattern>();
                 TripPattern tripPattern = graph.index.patternForTrip.get(trip);
-                if(tripPattern != null) {
+                if (tripPattern != null) {
                     tripPatterns.add(tripPattern);
                 }
             } else if (route != null) {
-               tripPatterns = graph.index.patternsForRoute.get(route);
+                tripPatterns = graph.index.patternsForRoute.get(route);
             } else {
-               tripPatterns = graph.index.patternsForAgency.get(agency);
+                tripPatterns = graph.index.patternsForAgency.get(agency);
             }
 
             for (TripPattern tripPattern : tripPatterns) {
-                if (direction != null && ! direction.equals(tripPattern.getDirection())) {
+                if (direction != null && !direction.equals(tripPattern.getDirection())) {
                     continue;
                 }
                 for (int i = 0; i < tripPattern.stopPattern.stops.length; i++) {
@@ -335,11 +335,9 @@ public class AlertPatch implements Serializable {
     }
 
     public int hashCode() {
-        return ((direction == null ? 0 : direction.hashCode()) +
-                (agency == null ? 0 : agency.hashCode()) +
-                (trip == null ? 0 : trip.hashCode()) +
-                (stop == null ? 0 : stop.hashCode()) +
-                (route == null ? 0 : route.hashCode()) +
-                (alert == null ? 0 : alert.hashCode()));
+        return ((direction == null ? 0 : direction.hashCode())
+                + (agency == null ? 0 : agency.hashCode()) + (trip == null ? 0 : trip.hashCode())
+                + (stop == null ? 0 : stop.hashCode()) + (route == null ? 0 : route.hashCode()) + (alert == null ? 0
+                    : alert.hashCode()));
     }
 }

@@ -100,7 +100,7 @@ public class TestStreetMatcher {
 
     @Test
     public void testStreetMatcher() {
-        
+
         LineString geometry = geometry(-122.385689, 47.669484, -122.387384, 47.669470);
 
         StreetMatcher matcher = new StreetMatcher(_graph);
@@ -125,7 +125,7 @@ public class TestStreetMatcher {
 
         geometry = geometry(-122.384756, 47.669260, -122.384777, 47.667454, -122.383554, 47.666789,
                 -122.3825, 47.666);
-         match = matcher.match(geometry);
+        match = matcher.match(geometry);
         assertNotNull(match);
         System.out.println(match);
         assertEquals(4, match.size());
@@ -175,11 +175,11 @@ public class TestStreetMatcher {
         public SimpleEdge(StreetVertex v1, StreetVertex v2) {
             super(v1, v2);
         }
-        
-        public Set<Alert> getNotes () {
+
+        public Set<Alert> getNotes() {
             return null;
         }
-        
+
         @Override
         public State traverse(State s0) {
             double d = getDistance();
@@ -232,7 +232,7 @@ public class TestStreetMatcher {
         public boolean canTraverse(TraverseModeSet modes) {
             return true;
         }
-        
+
         @Override
         public double getLength() {
             return getDistance();
@@ -251,8 +251,8 @@ public class TestStreetMatcher {
         public String toString() {
             return "SimpleEdge(" + fromv + ", " + tov + ")";
         }
-        
-        public Set<Alert> getWheelchairNotes () {
+
+        public Set<Alert> getWheelchairNotes() {
             return null;
         }
 
@@ -296,7 +296,8 @@ public class TestStreetMatcher {
         }
 
         @Override
-        public void setCarSpeed(float carSpeed) {}
+        public void setCarSpeed(float carSpeed) {
+        }
 
         @Override
         public String getLabel() {

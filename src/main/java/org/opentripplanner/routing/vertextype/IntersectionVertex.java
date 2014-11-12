@@ -33,7 +33,8 @@ public class IntersectionVertex extends StreetVertex {
     private boolean trafficLight;
 
     /**
-     * Is this a free-flowing intersection, i.e. should it have no delay at all? e.g., freeway ramps, &c.
+     * Is this a free-flowing intersection, i.e. should it have no delay at all? e.g., freeway
+     * ramps, &c.
      */
     @Getter
     @Setter
@@ -44,7 +45,7 @@ public class IntersectionVertex extends StreetVertex {
         if (this.freeFlowing) {
             return true;
         }
-        
+
         return getDegreeIn() == 1 && getDegreeOut() == 1 && !this.trafficLight;
     }
 

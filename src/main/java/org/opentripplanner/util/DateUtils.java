@@ -43,20 +43,20 @@ public class DateUtils implements DateConstants {
      * @param time
      */
     static public Date toDate(String date, String time, TimeZone tz) {
-        //LOG.debug("JVM default timezone is {}", TimeZone.getDefault());
+        // LOG.debug("JVM default timezone is {}", TimeZone.getDefault());
         LOG.debug("Parsing date {} and time {}", date, time);
-        LOG.debug( "using timezone {}", tz);
+        LOG.debug("using timezone {}", tz);
         Date retVal = new Date();
         if (date != null) {
             Date d = parseDate(date, tz);
             if (d == null) {
-                return null; //unparseable date
+                return null; // unparseable date
             }
             Calendar cal = new GregorianCalendar(tz);
             cal.setTime(d);
             boolean timed = false;
             if (time != null) {
-                int[] hms = parseTime (time);
+                int[] hms = parseTime(time);
                 if (hms != null) {
                     cal.set(Calendar.HOUR_OF_DAY, hms[0]);
                     cal.set(Calendar.MINUTE, hms[1]);
@@ -66,7 +66,7 @@ public class DateUtils implements DateConstants {
                 }
             }
             if (!timed) {
-                //assume t = now
+                // assume t = now
                 Calendar today = new GregorianCalendar();
                 cal.set(Calendar.HOUR_OF_DAY, today.get(Calendar.HOUR_OF_DAY));
                 cal.set(Calendar.MINUTE, today.get(Calendar.MINUTE));
@@ -75,7 +75,7 @@ public class DateUtils implements DateConstants {
             }
             retVal = cal.getTime();
         } else if (time != null) {
-            int[] hms = parseTime (time);
+            int[] hms = parseTime(time);
             if (hms != null) {
                 Calendar cal = new GregorianCalendar(tz);
 
@@ -86,12 +86,13 @@ public class DateUtils implements DateConstants {
                 retVal = cal.getTime();
             }
         }
-        LOG.debug( "resulting date is {}", retVal);
+        LOG.debug("resulting date is {}", retVal);
         return retVal;
     }
 
     /**
      * Returns H,M,S
+     * 
      * @param time
      * @return
      */
@@ -108,7 +109,8 @@ public class DateUtils implements DateConstants {
             // midnight
             if (hms.length < 2) {
                 int secondsPastMidnight = getIntegerFromString(time);
-                retVal = new int[] { secondsPastMidnight / 3600, (secondsPastMidnight % 3600) / 60, secondsPastMidnight % 60 };
+                retVal = new int[] { secondsPastMidnight / 3600, (secondsPastMidnight % 3600) / 60,
+                        secondsPastMidnight % 60 };
             }
 
             if (hms[1].endsWith("PM") || hms[1].endsWith("AM")) {
@@ -137,7 +139,7 @@ public class DateUtils implements DateConstants {
                 sec = Integer.parseInt(trim(hms[2]));
             }
 
-            retVal = new int[] {hour, min, sec};
+            retVal = new int[] { hour, min, sec };
         } catch (Exception e) {
             LOG.info(time + " didn't parse", e);
             retVal = null;
@@ -150,16 +152,15 @@ public class DateUtils implements DateConstants {
     static public Date parseDate(String input, TimeZone tz) {
         Date retVal = null;
         try {
-            String newString = input.trim().replace('_', '.').replace('-', '.').replace(':', '.').replace(
-                    '/', '.');
+            String newString = input.trim().replace('_', '.').replace('-', '.').replace(':', '.')
+                    .replace('/', '.');
             if (newString != null) {
                 List<String> dl = DF_LIST;
 
                 if (newString.length() <= 8) {
                     if (newString.matches("\\d\\d\\d\\d\\d\\d\\d\\d")) {
                         // Accept dates without punctuation if they consist of exactly eight digits.
-                        newString = newString.substring(0, 4)
-                                + '.' + newString.substring(4, 6)
+                        newString = newString.substring(0, 4) + '.' + newString.substring(4, 6)
                                 + '.' + newString.substring(6, 8);
                     } else if (!(newString.matches(".*20\\d\\d.*"))) {
                         // if it looks like we have a small date format, ala 11.4.09, then use
@@ -200,8 +201,7 @@ public class DateUtils implements DateConstants {
     /**
      * Converts time in seconds to a <code>String</code> in the format h:mm.
      * 
-     * @param time
-     *            the time in seconds.
+     * @param time the time in seconds.
      * @return a <code>String</code> representing the time in the format h:mm
      */
     public static String secondsToString(int time) {
@@ -290,11 +290,11 @@ public class DateUtils implements DateConstants {
         }
         return null;
     }
-    
+
     public static long absoluteTimeout(double relativeTimeoutSeconds) {
         if (relativeTimeoutSeconds <= 0)
             return Long.MAX_VALUE;
         else
-            return System.currentTimeMillis() + (long)(relativeTimeoutSeconds * 1000.0);
+            return System.currentTimeMillis() + (long) (relativeTimeoutSeconds * 1000.0);
     }
 }

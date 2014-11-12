@@ -86,13 +86,13 @@ public class ExamplePollingGraphUpdater extends PollingGraphUpdater {
     public void teardown() {
         LOG.info("Teardown example polling updater");
     }
-    
+
     // This is a private GraphWriterRunnable that can be executed to modify the graph
     private class ExampleGraphWriter implements GraphWriterRunnable {
         @Override
         public void run(Graph graph) {
-            LOG.info("ExampleGraphWriter {} runnable is run on the "
-                            + "graph writer scheduler.", this.hashCode());
+            LOG.info("ExampleGraphWriter {} runnable is run on the " + "graph writer scheduler.",
+                    this.hashCode());
             // Do some writing to the graph here
         }
     }

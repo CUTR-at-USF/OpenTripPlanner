@@ -45,10 +45,13 @@ public class IsoChroneSPTRendererRecursiveGrid implements IsoChroneSPTRenderer {
             .getLogger(IsoChroneSPTRendererRecursiveGrid.class);
 
     private GraphService graphService;
+
     private SPTService sptService;
+
     private SampleSource sampleSource;
 
-    public IsoChroneSPTRendererRecursiveGrid(GraphService graphService, SPTService sptService, SampleSource sampleSource) {
+    public IsoChroneSPTRendererRecursiveGrid(GraphService graphService, SPTService sptService,
+            SampleSource sampleSource) {
         this.graphService = graphService;
         this.sptService = sptService;
         this.sampleSource = sampleSource;

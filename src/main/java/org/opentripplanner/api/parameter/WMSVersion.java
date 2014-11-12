@@ -24,13 +24,10 @@ public class WMSVersion extends ArrayList<Integer> {
 
     private static final long serialVersionUID = 20120130L; // YYYYMMDD
 
-    public static final List<WMSVersion> supported = Arrays.asList(
-                    new WMSVersion(1, 0, 0),
-                    new WMSVersion(1, 1, 0),
-                    new WMSVersion(1, 1, 1),
-                    new WMSVersion(1, 3, 0));
-    
-    public WMSVersion (String s) {
+    public static final List<WMSVersion> supported = Arrays.asList(new WMSVersion(1, 0, 0),
+            new WMSVersion(1, 1, 0), new WMSVersion(1, 1, 1), new WMSVersion(1, 3, 0));
+
+    public WMSVersion(String s) {
         super();
         try {
             for (String v : s.split("\\.", 3)) {
@@ -38,16 +35,12 @@ public class WMSVersion extends ArrayList<Integer> {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new WebApplicationException(Response
-                    .status(Status.BAD_REQUEST)
-                    .entity("error parsing WMS version: " + e.getMessage())
-                    .build());
+            throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
+                    .entity("error parsing WMS version: " + e.getMessage()).build());
         }
-        if (! supported.contains(this)) {
-            throw new WebApplicationException(Response
-                    .status(Status.BAD_REQUEST)
-                    .entity("WMS version unsupported: " + s)
-                    .build());
+        if (!supported.contains(this)) {
+            throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
+                    .entity("WMS version unsupported: " + s).build());
         }
     }
 
@@ -55,5 +48,5 @@ public class WMSVersion extends ArrayList<Integer> {
         for (Integer i : ver)
             this.add(i);
     }
-    
+
 }

@@ -29,10 +29,10 @@ public class TripUpdateGraphWriterRunnableTest {
     @Test
     public void testTripUpdateGraphWriterRunnable() {
         final String agencyId = "Agency ID";
-        final List<TripUpdate> updates =
-                Collections.singletonList(TripUpdate.newBuilder().buildPartial());
-        final TripUpdateGraphWriterRunnable tripUpdateGraphWriterRunnable =
-                new TripUpdateGraphWriterRunnable(updates, agencyId);
+        final List<TripUpdate> updates = Collections.singletonList(TripUpdate.newBuilder()
+                .buildPartial());
+        final TripUpdateGraphWriterRunnable tripUpdateGraphWriterRunnable = new TripUpdateGraphWriterRunnable(
+                updates, agencyId);
 
         Graph graph = mock(Graph.class);
         TimetableSnapshotSource timetableSnapshotSource = mock(TimetableSnapshotSource.class);

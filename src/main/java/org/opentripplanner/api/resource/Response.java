@@ -34,20 +34,23 @@ public class Response {
     @Getter
     @XmlElement
     private HashMap<String, String> requestParameters;
+
     private TripPlan plan;
+
     private PlannerError error = null;
 
     /** Debugging and profiling information */
     public DebugOutput debugOutput = null;
 
-    /** This no-arg constructor exists to make JAX-RS happy. */ 
+    /** This no-arg constructor exists to make JAX-RS happy. */
     @SuppressWarnings("unused")
-    private Response() {};
+    private Response() {
+    };
 
     /** Construct an new response initialized with all the incoming query parameters. */
     public Response(UriInfo info) {
         this.requestParameters = new HashMap<String, String>();
-        if (info == null) { 
+        if (info == null) {
             // in tests where there is no HTTP request, just leave the map empty
             return;
         }
@@ -71,7 +74,7 @@ public class Response {
     }
 
     /** The error (if any) that this response raised. */
-    @XmlElement(required=false)
+    @XmlElement(required = false)
     public PlannerError getError() {
         return error;
     }
@@ -79,5 +82,5 @@ public class Response {
     public void setError(PlannerError error) {
         this.error = error;
     }
-    
+
 }

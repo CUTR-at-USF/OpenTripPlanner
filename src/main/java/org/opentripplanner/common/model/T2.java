@@ -70,7 +70,7 @@ public class T2<E1, E2> implements Serializable {
             return false;
         return true;
     }
-    
+
     public String toString() {
         return "T2(" + _first + ", " + _second + ")";
     }

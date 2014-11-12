@@ -95,7 +95,7 @@ public class TestHalfEdges extends TestCase {
         right = new PlainStreetEdge(br, tr,
                 GeometryUtils.makeLineString(-74.0, 40.0, -74.0, 40.01), "right", 1500,
                 StreetTraversalPermission.PEDESTRIAN, false);
-        
+
         PlainStreetEdge topBack = new PlainStreetEdge(tr, tl, (LineString) top.getGeometry()
                 .reverse(), "topBack", 1500, StreetTraversalPermission.ALL, true);
         PlainStreetEdge bottomBack = new PlainStreetEdge(br, bl, (LineString) bottom.getGeometry()
@@ -121,7 +121,7 @@ public class TestHalfEdges extends TestCase {
         station2 = new TransitStop(graph, s2);
         station1.addMode(TraverseMode.RAIL);
         station2.addMode(TraverseMode.RAIL);
-        
+
         graph.rebuildVertexAndEdgeIndices();
     }
 
@@ -205,8 +205,9 @@ public class TestHalfEdges extends TestCase {
         assertEquals(nEdges, graph.getEdges().size());
 
         /*
-         * Now, the right edge is not bikeable. But the user can walk their bike. So here are some tests that prove (a) that walking bikes works, but
-         * that (b) it is not preferred to riding a tiny bit longer.
+         * Now, the right edge is not bikeable. But the user can walk their bike. So here are some
+         * tests that prove (a) that walking bikes works, but that (b) it is not preferred to riding
+         * a tiny bit longer.
          */
 
         options = new RoutingRequest(new TraverseModeSet(TraverseMode.BICYCLE));
@@ -223,7 +224,8 @@ public class TestHalfEdges extends TestCase {
         path = spt.getPath(start, false);
         assertNotNull("There must be a path from top to bottom along the right", path);
 
-        // the left edge is not part of the shortest path (even though the bike must be walked along the right)
+        // the left edge is not part of the shortest path (even though the bike must be walked along
+        // the right)
         for (State s : path.states) {
             assertNotSame(s.getVertex(), graph.getVertex("left"));
             assertNotSame(s.getVertex(), graph.getVertex("leftBack"));
@@ -258,14 +260,14 @@ public class TestHalfEdges extends TestCase {
         assertEquals(nVertices, graph.getVertices().size());
         assertEquals(nEdges, graph.getEdges().size());
     }
-    
+
     public void testRouteToSameEdge() {
         RoutingRequest options = new RoutingRequest();
 
         HashSet<Edge> turns = new HashSet<Edge>();
         turns.add(left);
         turns.add(leftBack);
-        
+
         StreetLocation start = StreetLocation.createStreetLocation(graph, "start", "start",
                 cast(turns, StreetEdge.class),
                 new LinearLocation(0, 0.4).getCoordinate(left.getGeometry()));
@@ -288,7 +290,7 @@ public class TestHalfEdges extends TestCase {
         ShortestPathTree spt = aStar.getShortestPathTree(options);
 
         GraphPath path = spt.getPath(end, false);
-        assertNotNull("There must be a path from start to end", path);        
+        assertNotNull("There must be a path from start to end", path);
         assertEquals(1, path.edges.size());
     }
 
@@ -302,7 +304,7 @@ public class TestHalfEdges extends TestCase {
         StreetLocation start = StreetLocation.createStreetLocation(graph, "start", "start",
                 cast(turns, StreetEdge.class),
                 new LinearLocation(0, 0.8).getCoordinate(left.getGeometry()));
-        
+
         StreetLocation end = StreetLocation.createStreetLocation(graph, "end", "end",
                 cast(turns, StreetEdge.class),
                 new LinearLocation(0, 0.4).getCoordinate(left.getGeometry()));
@@ -320,13 +322,13 @@ public class TestHalfEdges extends TestCase {
         ShortestPathTree spt = aStar.getShortestPathTree(options);
 
         GraphPath path = spt.getPath(end, false);
-        assertNotNull("There must be a path from start to end", path);        
+        assertNotNull("There must be a path from start to end", path);
         assertTrue(path.edges.size() > 1);
     }
 
     /**
-     * Test that alerts on split streets are preserved, i.e. if there are alerts on the street that is split the same alerts should be present on the
-     * new street.
+     * Test that alerts on split streets are preserved, i.e. if there are alerts on the street that
+     * is split the same alerts should be present on the new street.
      */
     public void testStreetSplittingAlerts() {
         HashSet<Edge> turns = new HashSet<Edge>();

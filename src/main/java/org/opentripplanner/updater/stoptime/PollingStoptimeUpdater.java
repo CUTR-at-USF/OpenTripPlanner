@@ -97,8 +97,7 @@ public class PollingStoptimeUpdater extends PollingGraphUpdater {
 
         // Configure update source
         if (updateSource == null) {
-            throw new IllegalArgumentException(
-                    "Unknown update streamer source type: " + sourceType);
+            throw new IllegalArgumentException("Unknown update streamer source type: " + sourceType);
         } else if (updateSource instanceof PreferencesConfigurable) {
             ((PreferencesConfigurable) updateSource).configure(graph, preferences);
         }
@@ -116,8 +115,8 @@ public class PollingStoptimeUpdater extends PollingGraphUpdater {
             this.purgeExpiredData = preferences.getBoolean("purgeExpiredData", true);
         }
 
-        LOG.info("Creating stop time updater running every {} seconds : {}",
-                getFrequencySec(), updateSource);
+        LOG.info("Creating stop time updater running every {} seconds : {}", getFrequencySec(),
+                updateSource);
     }
 
     @Override
@@ -159,8 +158,8 @@ public class PollingStoptimeUpdater extends PollingGraphUpdater {
 
         if (updates != null && updates.size() > 0) {
             // Handle trip updates via graph writer runnable
-            TripUpdateGraphWriterRunnable runnable =
-                    new TripUpdateGraphWriterRunnable(updates, agencyId);
+            TripUpdateGraphWriterRunnable runnable = new TripUpdateGraphWriterRunnable(updates,
+                    agencyId);
             updaterManager.execute(runnable);
         }
     }

@@ -38,7 +38,7 @@ import org.opentripplanner.routing.vertextype.IntersectionVertex;
 public class TestOpenStreetMapGraphBuilder extends TestCase {
 
     private HashMap<Class<?>, Object> extra;
-    
+
     @Before
     public void setUp() {
         extra = new HashMap<Class<?>, Object>();
@@ -78,7 +78,7 @@ public class TestOpenStreetMapGraphBuilder extends TestCase {
         assertNotNull(v4);
 
         Edge e1 = null, e2 = null, e3 = null;
-        for (Edge e: v2.getOutgoing()) {
+        for (Edge e : v2.getOutgoing()) {
             if (e.getToVertex() == v1) {
                 e1 = e;
             } else if (e.getToVertex() == v3) {
@@ -100,6 +100,7 @@ public class TestOpenStreetMapGraphBuilder extends TestCase {
 
     /**
      * Detailed testing of OSM graph building using a very small chunk of NYC (SOHO-ish).
+     * 
      * @throws Exception
      */
     @Test
@@ -117,7 +118,7 @@ public class TestOpenStreetMapGraphBuilder extends TestCase {
         loader.setProvider(provider);
 
         loader.buildGraph(gg, extra);
-        
+
         // These vertices are labeled in the OSM file as having traffic lights.
         IntersectionVertex iv1 = (IntersectionVertex) gg.getVertex("osm:node:1919595918");
         IntersectionVertex iv2 = (IntersectionVertex) gg.getVertex("osm:node:42442273");
@@ -127,7 +128,7 @@ public class TestOpenStreetMapGraphBuilder extends TestCase {
         assertTrue(iv2.isTrafficLight());
         assertTrue(iv3.isTrafficLight());
         assertTrue(iv4.isTrafficLight());
-        
+
         // These are not.
         IntersectionVertex iv5 = (IntersectionVertex) gg.getVertex("osm:node:42435485");
         IntersectionVertex iv6 = (IntersectionVertex) gg.getVertex("osm:node:42439335");
@@ -137,20 +138,20 @@ public class TestOpenStreetMapGraphBuilder extends TestCase {
         assertFalse(iv6.isTrafficLight());
         assertFalse(iv7.isTrafficLight());
         assertFalse(iv8.isTrafficLight());
-        
+
         Set<P2<Integer>> edgeEndpoints = new HashSet<P2<Integer>>();
         for (StreetEdge se : gg.getStreetEdges()) {
-            P2<Integer> endpoints = new P2<Integer>(se.getFromVertex().getIndex(),
-                    se.getToVertex().getIndex());
-            
+            P2<Integer> endpoints = new P2<Integer>(se.getFromVertex().getIndex(), se.getToVertex()
+                    .getIndex());
+
             // Check that we don't get any duplicate edges on this small graph.
             if (edgeEndpoints.contains(endpoints)) {
                 assertFalse(true);
             }
             edgeEndpoints.add(endpoints);
-            
+
             StreetTraversalPermission perm = se.getPermission();
-            
+
             // CAR and CUSTOM_MOTOR_VEHICLE should always have the same permissions.
             assertEquals(perm.allows(StreetTraversalPermission.CAR),
                     perm.allows(StreetTraversalPermission.CUSTOM_MOTOR_VEHICLE));
@@ -158,7 +159,7 @@ public class TestOpenStreetMapGraphBuilder extends TestCase {
             // Check turn restriction consistency.
             // NOTE(flamholz): currently there don't appear to be any turn restrictions
             // in the OSM file we are loading.
-            for (TurnRestriction tr : se.getTurnRestrictions()) {                
+            for (TurnRestriction tr : se.getTurnRestrictions()) {
                 // All turn restrictions should apply equally to
                 // CAR and CUSTOM_MOTOR_VEHICLE.
                 TraverseModeSet modes = tr.modes;

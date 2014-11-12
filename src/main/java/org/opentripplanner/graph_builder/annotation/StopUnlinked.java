@@ -24,9 +24,9 @@ public class StopUnlinked extends GraphBuilderAnnotation {
     private static final long serialVersionUID = 1L;
 
     public static final String FMT = "Stop %s not near any streets; it will not be usable.";
-    
+
     final TransitStop stop;
-    
+
     @Override
     public String getMessage() {
         return String.format(FMT, stop);
@@ -36,5 +36,5 @@ public class StopUnlinked extends GraphBuilderAnnotation {
     public Vertex getReferencedVertex() {
         return this.stop;
     }
-    
+
 }

@@ -18,8 +18,8 @@ import org.opengis.coverage.Coverage;
 import org.opentripplanner.routing.graph.Graph;
 
 /**
- * Factory interface specifying the ability to generate GeoTools {@link GridCoverage2D} objects 
- * representing National Elevation Dataset (NED) raster data. 
+ * Factory interface specifying the ability to generate GeoTools {@link GridCoverage2D} objects
+ * representing National Elevation Dataset (NED) raster data.
  * 
  * @author demory
  *

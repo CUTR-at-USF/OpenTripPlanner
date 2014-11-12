@@ -37,7 +37,7 @@ public class StateData implements Cloneable {
     protected TripTimes tripTimes;
 
     protected AgencyAndId tripId;
-    
+
     protected Trip previousTrip;
 
     protected double lastTransitWalk = 0;
@@ -53,7 +53,7 @@ public class StateData implements Cloneable {
     protected boolean usingRentedBike;
 
     protected boolean carParked;
-    
+
     protected Stop previousStop;
 
     protected long lastAlightedTime;
@@ -70,29 +70,29 @@ public class StateData implements Cloneable {
 
     protected TraverseMode nonTransitMode;
 
-    /** 
-     * This is the wait time at the beginning of the trip (or at the end of the trip for
-     * reverse searches). In Analyst anyhow, this is is subtracted from total trip length of each
-     * final State in lieu of reverse optimization. It is initially set to zero so that it will be
+    /**
+     * This is the wait time at the beginning of the trip (or at the end of the trip for reverse
+     * searches). In Analyst anyhow, this is is subtracted from total trip length of each final
+     * State in lieu of reverse optimization. It is initially set to zero so that it will be
      * ineffectual on a search that does not ever board a transit vehicle.
      */
     protected long initialWaitTime = 0;
 
     /**
-     * This is the time between the trip that was taken at the previous stop and the next trip
-     * that could have been taken. It is used to determine if a path needs reverse-optimization.
+     * This is the time between the trip that was taken at the previous stop and the next trip that
+     * could have been taken. It is used to determine if a path needs reverse-optimization.
      */
     protected int lastNextArrivalDelta;
-    
+
     /**
-     * This is a list of notes that should be applied to this state.
-     * This means that we clone StateData before and after a notated edge, but notated edges
-     * are rare enough this likely doesn't matter.
+     * This is a list of notes that should be applied to this state. This means that we clone
+     * StateData before and after a notated edge, but notated edges are rare enough this likely
+     * doesn't matter.
      * 
      * @author mattwigway
      */
     protected Set<Alert> notes = null;
-    
+
     /**
      * The mode that was used to traverse the backEdge
      */
@@ -109,7 +109,7 @@ public class StateData implements Cloneable {
         else if (modes.getCustomMotorVehicle())
             nonTransitMode = TraverseMode.CUSTOM_MOTOR_VEHICLE;
         else if (modes.getWalk())
-            nonTransitMode =  TraverseMode.WALK;
+            nonTransitMode = TraverseMode.WALK;
         else if (modes.getBicycle())
             nonTransitMode = TraverseMode.BICYCLE;
         else

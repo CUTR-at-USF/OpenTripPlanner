@@ -17,9 +17,8 @@ import java.util.Collection;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-
 public class GeocoderMultipleResultsStubImpl implements Geocoder {
-    
+
     private Collection<GeocoderResult> results;
 
     public GeocoderMultipleResultsStubImpl(Collection<GeocoderResult> results) {

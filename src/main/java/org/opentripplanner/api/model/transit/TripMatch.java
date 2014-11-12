@@ -24,10 +24,10 @@ public class TripMatch {
 
     @XmlElement
     public double matchDistanceMeter;
-    
+
     @XmlElement
     public double matchTimeSeconds;
-    
+
     @XmlElement
     public double matchFactor;
 }

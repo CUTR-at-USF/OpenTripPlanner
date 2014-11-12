@@ -56,8 +56,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A RoutingContext holds information needed to carry out a search for a particular TraverseOptions, on a specific graph. Includes things like
- * (temporary) endpoint vertices, transfer tables, service day caches, etc.
+ * A RoutingContext holds information needed to carry out a search for a particular TraverseOptions,
+ * on a specific graph. Includes things like (temporary) endpoint vertices, transfer tables, service
+ * day caches, etc.
  * 
  * @author abyrd
  */
@@ -77,12 +78,14 @@ public class RoutingContext implements Cloneable {
 
     public final Vertex toVertex;
 
-    // origin means "where the initial state will be located" not "the beginning of the trip from the user's perspective"
+    // origin means "where the initial state will be located" not
+    // "the beginning of the trip from the user's perspective"
     public final Vertex origin;
 
-    // target means "where this search will terminate" not "the end of the trip from the user's perspective"
+    // target means "where this search will terminate" not
+    // "the end of the trip from the user's perspective"
     public final Vertex target;
-    
+
     // The back edge associated with the origin - i.e. continuing a previous search.
     // NOTE: not final so that it can be modified post-construction for testing.
     // TODO(flamholz): figure out a better way.
@@ -103,17 +106,19 @@ public class RoutingContext implements Cloneable {
     public final TimetableResolver timetableSnapshot;
 
     /**
-     * Cache lists of which transit services run on which midnight-to-midnight periods. This ties a TraverseOptions to a particular start time for the
-     * duration of a search so the same options cannot be used for multiple searches concurrently. To do so this cache would need to be moved into
-     * StateData, with all that entails.
+     * Cache lists of which transit services run on which midnight-to-midnight periods. This ties a
+     * TraverseOptions to a particular start time for the duration of a search so the same options
+     * cannot be used for multiple searches concurrently. To do so this cache would need to be moved
+     * into StateData, with all that entails.
      */
     public ArrayList<ServiceDay> serviceDays;
 
     /**
-     * The search will be aborted if it is still running after this time (in milliseconds since the epoch). A negative or zero value implies no limit.
-     * This provides an absolute timeout, whereas the maxComputationTime is relative to the beginning of an individual search. While the two might
-     * seem equivalent, we trigger search retries in various places where it is difficult to update relative timeout value. The earlier of the two
-     * timeouts is applied.
+     * The search will be aborted if it is still running after this time (in milliseconds since the
+     * epoch). A negative or zero value implies no limit. This provides an absolute timeout, whereas
+     * the maxComputationTime is relative to the beginning of an individual search. While the two
+     * might seem equivalent, we trigger search retries in various places where it is difficult to
+     * update relative timeout value. The earlier of the two timeouts is applied.
      */
     public long searchAbortTime = 0;
 
@@ -126,7 +131,7 @@ public class RoutingContext implements Cloneable {
 
     /** Indicates that the search timed out or was otherwise aborted. */
     public boolean aborted;
-    
+
     /* CONSTRUCTORS */
 
     /**
@@ -155,7 +160,7 @@ public class RoutingContext implements Cloneable {
         for (Edge e : Iterables.concat(u.getIncoming(), u.getOutgoing())) {
             uIds.add(e.getId());
         }
-        
+
         // Intesection of edge IDs between u and v.
         uIds.retainAll(vIds);
         Set<Integer> overlappingIds = uIds;
@@ -209,9 +214,11 @@ public class RoutingContext implements Cloneable {
     /**
      * Flexible constructor which may compute to/from vertices.
      * 
-     * TODO(flamholz): delete this flexible constructor and move the logic to constructors above appropriately.
+     * TODO(flamholz): delete this flexible constructor and move the logic to constructors above
+     * appropriately.
      * 
-     * @param findPlaces if true, compute origin and target from RoutingRequest using spatial indices.
+     * @param findPlaces if true, compute origin and target from RoutingRequest using spatial
+     *        indices.
      */
     private RoutingContext(RoutingRequest routingRequest, Graph graph, Vertex from, Vertex to,
             boolean findPlaces) {
@@ -221,7 +228,6 @@ public class RoutingContext implements Cloneable {
         this.opt = routingRequest;
         this.graph = graph;
         this.debugOutput.startedCalculating();
-
         // the graph's snapshot may be frequently updated.
         // Grab a reference to ensure a coherent view of the timetables throughout this search.
         if (routingRequest.isIgnoreRealtimeUpdates()) {
@@ -253,7 +259,8 @@ public class RoutingContext implements Cloneable {
             }
             if (opt.getStartingTransitTripId() != null && !opt.arriveBy) {
                 // Depart on-board mode: set the from vertex to "on-board" state
-                OnBoardDepartService onBoardDepartService = graph.getService(OnBoardDepartService.class);
+                OnBoardDepartService onBoardDepartService = graph
+                        .getService(OnBoardDepartService.class);
                 if (onBoardDepartService == null)
                     throw new UnsupportedOperationException("Missing OnBoardDepartService");
                 fromVertex = onBoardDepartService.setupDepartOnBoard(this);
@@ -278,9 +285,11 @@ public class RoutingContext implements Cloneable {
             toVertex = to;
         }
 
-        // If the from and to vertices are generated and lie on some of the same edges, we need to wire them
+        // If the from and to vertices are generated and lie on some of the same edges, we need to
+        // wire them
         // up along those edges so that we don't get odd circuitous routes for really short trips.
-        // TODO(flamholz): seems like this might be the wrong place for this code? Can't find a better one.
+        // TODO(flamholz): seems like this might be the wrong place for this code? Can't find a
+        // better one.
         //
         if (fromVertex instanceof StreetLocation && toVertex instanceof StreetLocation) {
             StreetVertex fromStreetVertex = (StreetVertex) fromVertex;
@@ -289,13 +298,16 @@ public class RoutingContext implements Cloneable {
                     toStreetVertex);
 
             for (PlainStreetEdge pse : overlap) {
-                PartialPlainStreetEdge ppse = makePartialEdgeAlong(pse, fromStreetVertex, toStreetVertex);
-                // Register this edge-fragment as a temporary edge so it will be assigned a routing context and cleaned up.
-                // It's connecting the from and to vertices so it could be placed in either vertex's temp edge list.
-                ((StreetLocation)fromVertex).getExtra().add(ppse);
+                PartialPlainStreetEdge ppse = makePartialEdgeAlong(pse, fromStreetVertex,
+                        toStreetVertex);
+                // Register this edge-fragment as a temporary edge so it will be assigned a routing
+                // context and cleaned up.
+                // It's connecting the from and to vertices so it could be placed in either vertex's
+                // temp edge list.
+                ((StreetLocation) fromVertex).getExtra().add(ppse);
             }
         }
-        
+
         if (opt.getStartingTransitStopId() != null) {
             Stop stop = graph.index.stopForId.get(opt.getStartingTransitStopId());
             TransitStop tstop = graph.index.stopVertexForStop.get(stop);
@@ -312,9 +324,9 @@ public class RoutingContext implements Cloneable {
 
         // If any temporary half-street-edges were created, record the fact that they should
         // only be visible to the routing context we are currently constructing.
-        for (Vertex vertex : new Vertex[] {fromVertex, toVertex}) {
+        for (Vertex vertex : new Vertex[] { fromVertex, toVertex }) {
             if (vertex instanceof StreetLocation) {
-                ((StreetLocation)vertex).setTemporaryEdgeVisibility(this);
+                ((StreetLocation) vertex).setTemporaryEdgeVisibility(this);
             }
         }
 
@@ -361,9 +373,10 @@ public class RoutingContext implements Cloneable {
     }
 
     /**
-     * Cache ServiceDay objects representing which services are running yesterday, today, and tomorrow relative to the search time. This information
-     * is very heavily used (at every transit boarding) and Date operations were identified as a performance bottleneck. Must be called after the
-     * TraverseOptions already has a CalendarService set.
+     * Cache ServiceDay objects representing which services are running yesterday, today, and
+     * tomorrow relative to the search time. This information is very heavily used (at every transit
+     * boarding) and Date operations were identified as a performance bottleneck. Must be called
+     * after the TraverseOptions already has a CalendarService set.
      */
     private void setServiceDays() {
         Calendar c = Calendar.getInstance();
@@ -379,11 +392,12 @@ public class RoutingContext implements Cloneable {
         }
 
         for (String agency : graph.getAgencyIds()) {
-//            addIfNotExists(this.serviceDays, new ServiceDay(graph, serviceDate.previous(),
-//                    calendarService, agency));
-            addIfNotExists(this.serviceDays, new ServiceDay(graph, serviceDate, calendarService, agency));
-//            addIfNotExists(this.serviceDays, new ServiceDay(graph, serviceDate.next(),
-//                    calendarService, agency));
+            // addIfNotExists(this.serviceDays, new ServiceDay(graph, serviceDate.previous(),
+            // calendarService, agency));
+            addIfNotExists(this.serviceDays, new ServiceDay(graph, serviceDate, calendarService,
+                    agency));
+            // addIfNotExists(this.serviceDays, new ServiceDay(graph, serviceDate.next(),
+            // calendarService, agency));
         }
     }
 

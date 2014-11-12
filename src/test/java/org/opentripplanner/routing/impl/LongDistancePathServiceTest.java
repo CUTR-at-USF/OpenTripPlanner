@@ -404,8 +404,9 @@ public class LongDistancePathServiceTest {
      * Check whether a "path" is accepted by the long distance path parser.
      * 
      * Assumes that only the back edge is used to determine the terminal, except in the case of
-     * @link{StationStopEdge}. For that special case, the vertex of the first state is specified as
-     * @link{TransitStop} while the vertex of the final state is specified as @link{TransitStation}.
+     * 
+     * @link{StationStopEdge . For that special case, the vertex of the first state is specified as
+     * @link{TransitStop while the vertex of the final state is specified as @link{TransitStation}.
      * 
      * @param parser is the long distance path parser
      * @param path is a list of edge classes that represent a path
@@ -423,9 +424,9 @@ public class LongDistancePathServiceTest {
             State state = mock(State.class);
             Edge edge = mock(edgeClass);
             when(state.getBackEdge()).thenReturn(edge);
-            if (i == 0) {                                                           // First state
+            if (i == 0) { // First state
                 when(state.getVertex()).thenReturn(mock(TransitStop.class));
-            } else if (i == path.size() - 1) {                                      // Final state
+            } else if (i == path.size() - 1) { // Final state
                 when(state.getVertex()).thenReturn(mock(TransitStation.class));
             }
 

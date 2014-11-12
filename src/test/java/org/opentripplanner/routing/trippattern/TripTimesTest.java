@@ -39,16 +39,23 @@ public class TripTimesTest {
     private static final AgencyAndId tripId = new AgencyAndId("agency", "testtrip");
 
     private static final AgencyAndId stop_a = new AgencyAndId("agency", "A"); // 0
+
     private static final AgencyAndId stop_b = new AgencyAndId("agency", "B"); // 1
+
     private static final AgencyAndId stop_c = new AgencyAndId("agency", "C"); // 2
+
     private static final AgencyAndId stop_d = new AgencyAndId("agency", "D"); // 3
+
     private static final AgencyAndId stop_e = new AgencyAndId("agency", "E"); // 4
+
     private static final AgencyAndId stop_f = new AgencyAndId("agency", "F"); // 5
+
     private static final AgencyAndId stop_g = new AgencyAndId("agency", "G"); // 6
+
     private static final AgencyAndId stop_h = new AgencyAndId("agency", "H"); // 7
 
-    private static final AgencyAndId[] stops =
-        {stop_a, stop_b, stop_c, stop_d, stop_e, stop_f, stop_g, stop_h};
+    private static final AgencyAndId[] stops = { stop_a, stop_b, stop_c, stop_d, stop_e, stop_f,
+            stop_g, stop_h };
 
     private static final TripTimes originalTripTimes;
 
@@ -58,7 +65,7 @@ public class TripTimesTest {
 
         List<StopTime> stopTimes = new LinkedList<StopTime>();
 
-        for(int i =  0; i < stops.length; ++i) {
+        for (int i = 0; i < stops.length; ++i) {
             StopTime stopTime = new StopTime();
 
             Stop stop = new Stop();

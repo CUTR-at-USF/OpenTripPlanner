@@ -32,24 +32,24 @@ public class CSVPopulation extends BasicPopulation {
 
     @Setter
     public int yCol = 0;
-    
+
     public void setLatCol(int latCol) {
-    	yCol = latCol;
+        yCol = latCol;
     }
 
     @Setter
     public int xCol = 1;
 
     public void setLonCol(int lonCol) {
-    	xCol = lonCol;
+        xCol = lonCol;
     }
-    
+
     @Setter
     public int labelCol = 2;
 
     @Setter
     public int inputCol = 3;
-    
+
     @Setter
     public String crs = null;
 
@@ -80,8 +80,8 @@ public class CSVPopulation extends BasicPopulation {
                 else if (CRS.getAxisOrder(destCrs) == CRS.AxisOrder.EAST_NORTH)
                     latLon = false;
                 else
-                    throw new UnsupportedOperationException("Coordinate axis order for WGS 84 unknown.");
-
+                    throw new UnsupportedOperationException(
+                            "Coordinate axis order for WGS 84 unknown.");
 
                 if (!destCrs.equals(sourceCrs)) {
                     transform = true;
@@ -101,18 +101,17 @@ public class CSVPopulation extends BasicPopulation {
                     DirectPosition2D transformed = new DirectPosition2D();
                     mathTransform.transform(orig, transformed);
 
-                    // x: lat, y: lon. This seems backwards but is the way Geotools does it. 
+                    // x: lat, y: lon. This seems backwards but is the way Geotools does it.
                     if (latLon) {
                         lon = transformed.getY();
-                        lat = transformed.getX();	
-                    } 
+                        lat = transformed.getX();
+                    }
                     // x: lon, y: lat
                     else {
                         lon = transformed.getX();
                         lat = transformed.getY();
                     }
-                }                	
-                else {
+                } else {
                     lon = x;
                     lat = y;
                 }

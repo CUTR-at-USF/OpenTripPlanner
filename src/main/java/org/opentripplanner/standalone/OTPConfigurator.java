@@ -53,21 +53,21 @@ import com.google.common.collect.Lists;
 public class OTPConfigurator {
 
     private static final Logger LOG = LoggerFactory.getLogger(OTPConfigurator.class);
-    
+
     private final CommandLineParameters params;
-    
+
     private GraphService graphService = null;
-    
-    public OTPConfigurator (CommandLineParameters params) {
+
+    public OTPConfigurator(CommandLineParameters params) {
         this.params = params;
     }
 
     private OTPServer server;
-    
+
     /**
      * We could even do this at Configurator construct time (rather than lazy initializing), using
-     * the inMemory param to create the right kind of GraphService ahead of time. However that
-     * would create indexes even when only a build was going to happen.
+     * the inMemory param to create the right kind of GraphService ahead of time. However that would
+     * create indexes even when only a build was going to happen.
      */
     public OTPServer getServer() {
         if (server == null) {
@@ -85,7 +85,8 @@ public class OTPConfigurator {
                 Preferences config = new PropertiesPreferences(graphConfiguration);
                 this.graphService = new GraphServiceBeanImpl(graph, config);
             } catch (Exception e) {
-                if (params.graphConfigFile != null) LOG.error("Can't read config file", e);
+                if (params.graphConfigFile != null)
+                    LOG.error("Can't read config file", e);
                 this.graphService = new GraphServiceBeanImpl(graph, null);
             }
         } else {
@@ -104,13 +105,13 @@ public class OTPConfigurator {
     }
 
     /** Return the cached, shared GraphService, making one as needed. */
-    public GraphService getGraphService () {
+    public GraphService getGraphService() {
         if (graphService == null) {
             makeGraphService(null);
         }
         return graphService;
     }
-    
+
     public GraphBuilderTask builderFromParameters() {
         if (params.build == null || params.build.isEmpty()) {
             return null;
@@ -118,12 +119,15 @@ public class OTPConfigurator {
         LOG.info("Wiring up and configuring graph builder task.");
         GraphBuilderTask graphBuilder = new GraphBuilderTask();
         List<File> gtfsFiles = Lists.newArrayList();
-        List<File> osmFiles =  Lists.newArrayList();
+        List<File> osmFiles = Lists.newArrayList();
         File configFile = null;
-        /* For now this is adding files from all directories listed, rather than building multiple graphs. */
+        /*
+         * For now this is adding files from all directories listed, rather than building multiple
+         * graphs.
+         */
         for (File dir : params.build) {
             LOG.info("Searching for graph builder input files in {}", dir);
-            if ( ! dir.isDirectory() && dir.canRead()) {
+            if (!dir.isDirectory() && dir.canRead()) {
                 LOG.error("'{}' is not a readable directory.", dir);
                 continue;
             }
@@ -149,26 +153,29 @@ public class OTPConfigurator {
                 }
             }
         }
-        boolean hasOSM  = ! (osmFiles.isEmpty()  || params.noStreets);
-        boolean hasGTFS = ! (gtfsFiles.isEmpty() || params.noTransit);
-        if ( ! (hasOSM || hasGTFS )) {
-            LOG.error("Found no input files from which to build a graph in {}", params.build.toString());
+        boolean hasOSM = !(osmFiles.isEmpty() || params.noStreets);
+        boolean hasGTFS = !(gtfsFiles.isEmpty() || params.noTransit);
+        if (!(hasOSM || hasGTFS)) {
+            LOG.error("Found no input files from which to build a graph in {}",
+                    params.build.toString());
             return null;
         }
-        if ( hasOSM ) {
+        if (hasOSM) {
             List<OpenStreetMapProvider> osmProviders = Lists.newArrayList();
             for (File osmFile : osmFiles) {
-                OpenStreetMapProvider osmProvider = new AnyFileBasedOpenStreetMapProviderImpl(osmFile);
+                OpenStreetMapProvider osmProvider = new AnyFileBasedOpenStreetMapProviderImpl(
+                        osmFile);
                 osmProviders.add(osmProvider);
             }
-            OpenStreetMapGraphBuilderImpl osmBuilder = new OpenStreetMapGraphBuilderImpl(osmProviders); 
+            OpenStreetMapGraphBuilderImpl osmBuilder = new OpenStreetMapGraphBuilderImpl(
+                    osmProviders);
             DefaultWayPropertySetSource defaultWayPropertySetSource = new DefaultWayPropertySetSource();
             osmBuilder.setDefaultWayPropertySetSource(defaultWayPropertySetSource);
             osmBuilder.skipVisibility = params.skipVisibility;
             graphBuilder.addGraphBuilder(osmBuilder);
-            graphBuilder.addGraphBuilder(new PruneFloatingIslands());            
+            graphBuilder.addGraphBuilder(new PruneFloatingIslands());
         }
-        if ( hasGTFS ) {
+        if (hasGTFS) {
             List<GtfsBundle> gtfsBundles = Lists.newArrayList();
             for (File gtfsFile : gtfsFiles) {
                 GtfsBundle gtfsBundle = new GtfsBundle(gtfsFile);
@@ -184,14 +191,14 @@ public class OTPConfigurator {
             // When using the long distance path service, or when there is no street data,
             // link stops to each other based on distance only, unless user has requested linking
             // based on transfers.txt or the street network (if available).
-            if ((!hasOSM ) || params.longDistance) {
+            if ((!hasOSM) || params.longDistance) {
                 if (!params.useTransfersTxt) {
                     if (!hasOSM || !params.useStreetsForLinking) {
                         graphBuilder.addGraphBuilder(new StreetlessStopLinker());
                     }
                 }
-            } 
-            if ( hasOSM ) {
+            }
+            if (hasOSM) {
                 graphBuilder.addGraphBuilder(new TransitToTaggedStopsGraphBuilderImpl());
                 graphBuilder.addGraphBuilder(new TransitToStreetNetworkGraphBuilderImpl());
                 // The stops can be linked to each other once they have links to the street network.
@@ -212,7 +219,7 @@ public class OTPConfigurator {
             GraphBuilder elevationBuilder = new ElevationGraphBuilderImpl(gcf);
             graphBuilder.addGraphBuilder(elevationBuilder);
         }
-        graphBuilder.setSerializeGraph( ! params.inMemory);
+        graphBuilder.setSerializeGraph(!params.inMemory);
         return graphBuilder;
     }
 
@@ -220,16 +227,18 @@ public class OTPConfigurator {
         if (params.server) {
             GrizzlyServer server = new GrizzlyServer(params, getServer());
             return server;
-        } else return null;
+        } else
+            return null;
     }
-    
+
     public GraphVisualizer visualizerFromParameters() {
         if (params.visualize) {
             // FIXME get OTPServer into visualizer.
             getServer();
             GraphVisualizer visualizer = new GraphVisualizer(getGraphService());
             return visualizer;
-        } else return null;
+        } else
+            return null;
     }
 
     private static enum InputFileType {
@@ -241,13 +250,19 @@ public class OTPConfigurator {
                     ZipFile zip = new ZipFile(file);
                     ZipEntry stopTimesEntry = zip.getEntry("stop_times.txt");
                     zip.close();
-                    if (stopTimesEntry != null) return GTFS;
-                } catch (Exception e) { /* fall through */ }
+                    if (stopTimesEntry != null)
+                        return GTFS;
+                } catch (Exception e) { /* fall through */
+                }
             }
-            if (name.endsWith(".pbf")) return OSM;
-            if (name.endsWith(".osm")) return OSM;
-            if (name.endsWith(".osm.xml")) return OSM;
-            if (name.equals("Embed.properties")) return CONFIG;
+            if (name.endsWith(".pbf"))
+                return OSM;
+            if (name.endsWith(".osm"))
+                return OSM;
+            if (name.endsWith(".osm.xml"))
+                return OSM;
+            if (name.equals("Embed.properties"))
+                return CONFIG;
             return OTHER;
         }
     }

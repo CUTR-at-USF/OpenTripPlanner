@@ -35,7 +35,7 @@ public class Alert implements Serializable {
     @XmlElement
     public TranslatedString alertUrl;
 
-    //null means unknown
+    // null means unknown
     @XmlElement
     public Date effectiveStartDate;
 

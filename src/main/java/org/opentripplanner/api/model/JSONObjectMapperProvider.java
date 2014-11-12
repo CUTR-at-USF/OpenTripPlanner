@@ -55,9 +55,8 @@ public class JSONObjectMapperProvider implements ContextResolver<ObjectMapper> {
         // Our module includes a single class-serializer relationship.
         // Constructors are available for both unnamed, unversioned throwaway modules
         // and named, versioned reusable modules.
-        mapper = new ObjectMapper()
-                .registerModule(AgencyAndIdSerializer.makeModule())
-                // .registerModule(new GeoJsonModule()) // serializes GeoJSON properly
+        mapper = new ObjectMapper().registerModule(AgencyAndIdSerializer.makeModule())
+        // .registerModule(new GeoJsonModule()) // serializes GeoJSON properly
                 .setSerializationInclusion(Include.NON_NULL); // skip null fields
     }
 

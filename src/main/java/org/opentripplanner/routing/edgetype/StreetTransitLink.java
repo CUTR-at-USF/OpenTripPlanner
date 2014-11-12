@@ -27,14 +27,14 @@ import org.opentripplanner.routing.vertextype.TransitStop;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineString;
 
-/** 
- * This represents the connection between a street vertex and a transit vertex
- * where going from the street to the vehicle is immediate -- such as at a 
- * curbside bus stop.
+/**
+ * This represents the connection between a street vertex and a transit vertex where going from the
+ * street to the vehicle is immediate -- such as at a curbside bus stop.
  */
 public class StreetTransitLink extends Edge {
 
     private static final long serialVersionUID = -3311099256178798981L;
+
     static final int STL_TRAVERSE_COST = 1;
 
     private boolean wheelchairAccessible;
@@ -42,8 +42,8 @@ public class StreetTransitLink extends Edge {
     private TransitStop transitStop;
 
     public StreetTransitLink(StreetVertex fromv, TransitStop tov, boolean wheelchairAccessible) {
-    	super(fromv, tov);
-    	transitStop = tov;
+        super(fromv, tov);
+        transitStop = tov;
         this.wheelchairAccessible = wheelchairAccessible;
     }
 
@@ -62,7 +62,7 @@ public class StreetTransitLink extends Edge {
     }
 
     public LineString getGeometry() {
-        Coordinate[] coordinates = new Coordinate[] { fromv.getCoordinate(), tov.getCoordinate()};
+        Coordinate[] coordinates = new Coordinate[] { fromv.getCoordinate(), tov.getCoordinate() };
         return GeometryUtils.getGeometryFactory().createLineString(coordinates);
     }
 
@@ -85,7 +85,10 @@ public class StreetTransitLink extends Edge {
         StateEditor s1 = s0.edit(this);
 
         /* Only enter stations in CAR mode if parking is not required (kiss and ride) */
-        /* Note that in arriveBy searches this is double-traversing link edges to fork the state into both WALK and CAR mode. This is an insane hack. */
+        /*
+         * Note that in arriveBy searches this is double-traversing link edges to fork the state
+         * into both WALK and CAR mode. This is an insane hack.
+         */
         if (s0.getNonTransitMode() == TraverseMode.CAR) {
             if (req.kissAndRide && !s0.isCarParked()) {
                 s1.setCarParked(true);
@@ -105,7 +108,7 @@ public class StreetTransitLink extends Edge {
         s1.setBackMode(TraverseMode.LEG_SWITCH);
         return s1.makeState();
     }
-    
+
     // anecdotally, the lower bound search is about 2x faster when you don't reach stops
     // and therefore don't even consider boarding
     @Override
@@ -132,6 +135,5 @@ public class StreetTransitLink extends Edge {
     public String toString() {
         return "StreetTransitLink(" + fromv + " -> " + tov + ")";
     }
-
 
 }

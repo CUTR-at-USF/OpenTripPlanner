@@ -10,17 +10,19 @@ import com.beust.jcommander.internal.Lists;
 public class PatternShort {
 
     public String id;
+
     public String desc;
-    
-    public PatternShort (TripPattern pattern) {
+
+    public PatternShort(TripPattern pattern) {
         id = pattern.getCode();
         desc = pattern.getName();
     }
-    
-    public static List<PatternShort> list (Collection<TripPattern> in) {
+
+    public static List<PatternShort> list(Collection<TripPattern> in) {
         List<PatternShort> out = Lists.newArrayList();
-        for (TripPattern pattern : in) out.add(new PatternShort(pattern));
+        for (TripPattern pattern : in)
+            out.add(new PatternShort(pattern));
         return out;
-    }    
-    
+    }
+
 }

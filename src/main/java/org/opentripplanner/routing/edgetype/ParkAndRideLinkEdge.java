@@ -41,9 +41,9 @@ public class ParkAndRideLinkEdge extends Edge {
      * By how much we have to really walk compared to straight line distance. This is a magic factor
      * as we really can't guess, unless we know 1) where the user will park, and 2) we route inside
      * the parking lot.
-     *
-     * TODO: perhaps all of this obstruction and distance calculation should just be reduced to
-     * a single static cost. Parking lots are not that big, and these are all guesses.
+     * 
+     * TODO: perhaps all of this obstruction and distance calculation should just be reduced to a
+     * single static cost. Parking lots are not that big, and these are all guesses.
      */
     private double WALK_OBSTRUCTION_FACTOR = 2.0;
 
@@ -94,7 +94,7 @@ public class ParkAndRideLinkEdge extends Edge {
     @Override
     public State traverse(State s0) {
         // Do not enter park and ride mechanism if it's not activated in the routing request.
-        if ( ! s0.getOptions().parkAndRide) {
+        if (!s0.getOptions().parkAndRide) {
             return null;
         }
         Edge backEdge = s0.getBackEdge();

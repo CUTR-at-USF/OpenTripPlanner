@@ -39,8 +39,7 @@ public interface ShortestPathTree {
      * be enqueued for later exploration. The method will also perform implementation-specific
      * actions that track dominant or optimal states.
      * 
-     * @param s
-     *            - the State to add to the SPT, if it is deemed non-dominated
+     * @param s - the State to add to the SPT, if it is deemed non-dominated
      * @return a boolean value indicating whether the state was added to the tree and should
      *         therefore be enqueued
      */
@@ -58,8 +57,7 @@ public interface ShortestPathTree {
      * remain in the priority queue after being dominated, such sub-optimal States must be caught as
      * they come out of the queue to avoid unnecessary branching.
      * 
-     * @param s
-     *            - the state about to be visited
+     * @param s - the state about to be visited
      * @return - whether this state is still considered worth visiting.
      */
     public boolean visit(State s);
@@ -70,8 +68,7 @@ public interface ShortestPathTree {
      * even states that are not known to be optimal but are judged interesting by some other
      * criteria.
      * 
-     * @param dest
-     *            - the vertex of interest
+     * @param dest - the vertex of interest
      * @return a collection of 'interesting' states at that vertex
      */
     public List<? extends State> getStates(Vertex dest);
@@ -79,15 +76,14 @@ public interface ShortestPathTree {
     /**
      * Returns the 'best' state for the given Vertex, where 'best' depends on the implementation.
      * 
-     * @param dest
-     *            - the vertex of interest
+     * @param dest - the vertex of interest
      * @return a 'best' state at that vertex
      */
     public State getState(Vertex dest);
 
     /**
-     * This should probably be somewhere else (static method on GraphPath?), 
-     * but leaving it here for now for backward compat.
+     * This should probably be somewhere else (static method on GraphPath?), but leaving it here for
+     * now for backward compat.
      * 
      * @return a list of GraphPaths, sometimes empty but never null.
      */

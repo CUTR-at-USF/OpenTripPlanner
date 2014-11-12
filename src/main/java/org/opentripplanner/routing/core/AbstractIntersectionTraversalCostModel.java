@@ -26,19 +26,21 @@ import org.opentripplanner.routing.vertextype.IntersectionVertex;
 public abstract class AbstractIntersectionTraversalCostModel implements
         IntersectionTraversalCostModel {
 
-    /** Factor by which absolute turn angles are divided to get turn costs for non-driving scenarios. */
+    /**
+     * Factor by which absolute turn angles are divided to get turn costs for non-driving scenarios.
+     */
     @Setter
     protected Double nonDrivingTurnCostFactor = 1.0 / 20.0;
 
     @Setter
     protected Integer minRightTurnAngle = 45;
-    
+
     @Setter
     protected Integer maxRightTurnAngle = 135;
 
     @Setter
     protected Integer minLeftTurnAngle = 225;
-    
+
     @Setter
     protected Integer maxLeftTurnAngle = 315;
 
@@ -79,7 +81,7 @@ public abstract class AbstractIntersectionTraversalCostModel implements
             RoutingRequest options) {
         int angleOutOfIntersection = to.getInAngle();
         int angleIntoIntersection = from.getOutAngle();
-        
+
         // Put out to the right of in; i.e. represent everything as one long right turn
         // Also ensures that turnAngle is always positive.
         if (angleOutOfIntersection < angleIntoIntersection) {

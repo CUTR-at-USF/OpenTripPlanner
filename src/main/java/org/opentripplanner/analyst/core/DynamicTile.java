@@ -26,20 +26,21 @@ import org.slf4j.LoggerFactory;
 public class DynamicTile extends Tile {
 
     private static final Logger LOG = LoggerFactory.getLogger(DynamicTile.class);
+
     final SampleSource ss;
-    
+
     public DynamicTile(TileRequest req, SampleSource sampleSource) {
         super(req);
         this.ss = sampleSource;
     }
-    
+
     public Sample[] getSamples() {
         Sample[] ret = new Sample[width * height];
         long t0 = System.currentTimeMillis();
         CoordinateReferenceSystem crs = gg.getCoordinateReferenceSystem2D();
         try {
             MathTransform tr = CRS.findMathTransform(crs, DefaultGeographicCRS.WGS84);
-            // grid coordinate object to be reused for examining each cell 
+            // grid coordinate object to be reused for examining each cell
             GridCoordinates2D coord = new GridCoordinates2D();
             int i = 0, ns = 0;
             for (int gy = 0; gy < height; gy++) {
@@ -60,7 +61,7 @@ public class DynamicTile extends Tile {
                     i++;
                 }
             }
-            LOG.debug("finished preparing tile. number of samples: {}", ns); 
+            LOG.debug("finished preparing tile. number of samples: {}", ns);
         } catch (Exception e) {
             LOG.error(e.getMessage());
             return null;

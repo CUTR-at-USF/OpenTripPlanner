@@ -54,10 +54,12 @@ import com.vividsolutions.jts.index.quadtree.Quadtree;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
 /**
- * Indexes all edges and transit vertices of the graph spatially. Has a variety of query methods used during network linking and trip planning.
+ * Indexes all edges and transit vertices of the graph spatially. Has a variety of query methods
+ * used during network linking and trip planning.
  * 
- * Creates a StreetLocation representing a location on a street that's not at an intersection, based on input latitude and longitude. Instantiating
- * this class is expensive, because it creates a spatial index of all of the intersections in the graph.
+ * Creates a StreetLocation representing a location on a street that's not at an intersection, based
+ * on input latitude and longitude. Instantiating this class is expensive, because it creates a
+ * spatial index of all of the intersections in the graph.
  */
 public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
 
@@ -79,7 +81,8 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
     protected DistanceLibrary distanceLibrary = SphericalDistanceLibrary.getInstance();
 
     // private static final double SEARCH_RADIUS_M = 100; // meters
-    // private static final double SEARCH_RADIUS_DEG = DistanceLibrary.metersToDegrees(SEARCH_RADIUS_M);
+    // private static final double SEARCH_RADIUS_DEG =
+    // DistanceLibrary.metersToDegrees(SEARCH_RADIUS_M);
 
     /* all distance constants here are plate-carée Euclidean, 0.001 ~= 100m at equator */
 
@@ -171,10 +174,11 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
     }
 
     /**
-     * Returns the closest vertex for this GenericLocation. If necessary, this vertex will be created by splitting nearby edges (non-permanently).
+     * Returns the closest vertex for this GenericLocation. If necessary, this vertex will be
+     * created by splitting nearby edges (non-permanently).
      * 
-     * This method is the heart of the logic that searches for the start and endpoints of RideRequests. As such, it is protected so that subclasses
-     * can override the search behavior.
+     * This method is the heart of the logic that searches for the start and endpoints of
+     * RideRequests. As such, it is protected so that subclasses can override the search behavior.
      */
     protected Vertex getClosestVertex(final GenericLocation location, RoutingRequest options,
             List<Edge> extraEdges) {
@@ -186,21 +190,21 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
         String calculatedName = location.getName();
         if (intersection != null) {
             // We have an intersection vertex. Check that this vertex has edges we can traverse.
-            boolean canEscape = false; 
+            boolean canEscape = false;
             if (options == null) {
                 canEscape = true; // Some tests do not supply options.
             } else {
                 TraversalRequirements reqs = new TraversalRequirements(options);
-                for (StreetEdge e : IterableLibrary.filter ( options.arriveBy ? 
-                        intersection.getIncoming() : intersection.getOutgoing(),
+                for (StreetEdge e : IterableLibrary.filter(
+                        options.arriveBy ? intersection.getIncoming() : intersection.getOutgoing(),
                         StreetEdge.class)) {
                     if (reqs.canBeTraversed(e)) {
                         canEscape = true;
                         break;
                     }
                 }
-            }       
-            if (canEscape) { 
+            }
+            if (canEscape) {
                 // Coordinate is at an intersection or street endpoint, and has traversible edges.
                 if (!location.hasName()) {
                     LOG.debug("found intersection {}. not splitting.", intersection);
@@ -228,8 +232,8 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
                         calculatedName = resources.getString("unnamedStreet");
                     }
                 }
-                StreetLocation closest = new StreetLocation(graph, "corner " + Math.random(), coord,
-                        calculatedName);
+                StreetLocation closest = new StreetLocation(graph, "corner " + Math.random(),
+                        coord, calculatedName);
                 FreeEdge e = new FreeEdge(closest, intersection);
                 closest.getExtra().add(e);
                 e = new FreeEdge(intersection, closest);
@@ -246,7 +250,8 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
         // here we skip examining stops, as they are really only relevant when transit is being used
         if (options != null && options.getModes().isTransit()) {
             for (TransitStop v : getLocalTransitStops(coord, 1000)) {
-                if (!v.isStreetLinkable()) continue;
+                if (!v.isStreetLinkable())
+                    continue;
 
                 double d = distanceLibrary.distance(v.getCoordinate(), coord);
                 if (d < closestStopDistance) {
@@ -347,7 +352,7 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
                     continue;
                 }
 
-                // Ignore those edges we can't traverse. canBeTraversed checks internally if 
+                // Ignore those edges we can't traverse. canBeTraversed checks internally if
                 // walking a bike is possible on this StreetEdge.
                 if (!reqs.canBeTraversed(e)) {
                     continue;
@@ -377,7 +382,7 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
         for (CandidateEdgeBundle bundle : bundles) {
             if (best == null || bundle.best.score < best.best.score) {
                 if (possibleTransitLinksOnly) {
-                    // assuming all platforms are tagged when they are not car streets... #1077 
+                    // assuming all platforms are tagged when they are not car streets... #1077
                     if (!(bundle.allowsCars() || bundle.isPlatform()))
                         continue;
                 }
@@ -400,7 +405,8 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
      * 
      * @param coordinate Point to get edges near
      * @param request RoutingRequest that must be able to traverse the edge (all edges if null)
-     * @param extraEdges Any edges not in the graph that might be included (allows trips within one block)
+     * @param extraEdges Any edges not in the graph that might be included (allows trips within one
+     *        block)
      * @param preferredEdges Any edges to prefer in the search
      * @param possibleTransitLinksOnly only return edges traversable by cars or are platforms
      * @return
@@ -469,7 +475,7 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
         ArrayList<TransitStop> out = new ArrayList<TransitStop>();
         for (Object o : stops) {
             TransitStop stop = (TransitStop) o;
-            if(envelope.contains(stop.getCoordinate())) {
+            if (envelope.contains(stop.getCoordinate())) {
                 out.add(stop);
             }
         }
@@ -482,9 +488,9 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
     }
 
     /**
-     * @param other: non-null when another vertex has already been found. When the from vertex has 
-     * already been made/found, that vertex is passed in when finding/creating the to vertex. 
-     * TODO: This appears to be for reusing the extra edges list -- is this still needed?
+     * @param other: non-null when another vertex has already been found. When the from vertex has
+     *        already been made/found, that vertex is passed in when finding/creating the to vertex.
+     *        TODO: This appears to be for reusing the extra edges list -- is this still needed?
      */
     @Override
     public Vertex getVertexForLocation(GenericLocation loc, RoutingRequest options, Vertex other) {

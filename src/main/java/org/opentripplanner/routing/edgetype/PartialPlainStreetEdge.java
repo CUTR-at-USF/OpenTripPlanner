@@ -28,8 +28,9 @@ import lombok.Setter;
 /**
  * Represents a sub-segment of a StreetEdge.
  *
- * TODO we need a way to make sure all temporary edges are recorded as such and assigned a routingcontext when they are
- * created. That list should probably be in the routingContext itself instead of the created StreetLocation.
+ * TODO we need a way to make sure all temporary edges are recorded as such and assigned a
+ * routingcontext when they are created. That list should probably be in the routingContext itself
+ * instead of the created StreetLocation.
  */
 public class PartialPlainStreetEdge extends PlainStreetEdge {
 
@@ -51,7 +52,7 @@ public class PartialPlainStreetEdge extends PlainStreetEdge {
 
         this.parentEdge = parentEdge;
     }
-    
+
     /**
      * Simplifies construction by copying some stuff from the parentEdge.
      */
@@ -59,7 +60,7 @@ public class PartialPlainStreetEdge extends PlainStreetEdge {
             LineString geometry, String name, double length) {
         this(parentEdge, v1, v2, geometry, name, length, parentEdge.getPermission(), false);
     }
-    
+
     /**
      * Partial edges are always partial.
      */
@@ -67,7 +68,7 @@ public class PartialPlainStreetEdge extends PlainStreetEdge {
     public boolean isPartial() {
         return true;
     }
-    
+
     /**
      * Have the ID of their parent.
      */
@@ -75,47 +76,48 @@ public class PartialPlainStreetEdge extends PlainStreetEdge {
     public int getId() {
         return parentEdge.getId();
     }
-    
+
     /**
-     * Have the inbound angle of  their parent.
+     * Have the inbound angle of their parent.
      */
     @Override
     public int getInAngle() {
         return parentEdge.getInAngle();
     }
-    
+
     /**
-     * Have the outbound angle of  their parent.
+     * Have the outbound angle of their parent.
      */
     @Override
     public int getOutAngle() {
         return parentEdge.getInAngle();
     }
-    
+
     /**
-     * This implementation makes it so that TurnRestrictions on the parent edge are applied to this edge as well.
+     * This implementation makes it so that TurnRestrictions on the parent edge are applied to this
+     * edge as well.
      */
     @Override
     public boolean isEquivalentTo(Edge e) {
         return (e == this || e == parentEdge);
     }
-    
+
     @Override
     public boolean isReverseOf(Edge e) {
         Edge other = e;
         if (e instanceof PartialPlainStreetEdge) {
             other = ((PartialPlainStreetEdge) e).getParentEdge();
         }
-        
+
         // TODO(flamholz): is there a case where a partial edge has a reverse of its own?
         return parentEdge.isReverseOf(other);
     }
-    
+
     @Override
     public boolean isRoundabout() {
         return parentEdge.isRoundabout();
     }
-    
+
     /**
      * Returns true if this edge is trivial - beginning and ending at the same point.
      */
@@ -124,7 +126,7 @@ public class PartialPlainStreetEdge extends PlainStreetEdge {
         Coordinate toCoord = this.getToVertex().getCoordinate();
         return fromCoord.equals(toCoord);
     }
-    
+
     @Override
     public String toString() {
         return "PartialPlainStreetEdge(" + this.getName() + ", " + this.getFromVertex() + " -> "
@@ -136,8 +138,9 @@ public class PartialPlainStreetEdge extends PlainStreetEdge {
     public State traverse(State s0) {
         // Split edges should only be usable by the routing context that created them.
         // This should alleviate the concurrency problem in issue 1025.
-        // In the window of time before the visibleTo field is set, traversal will also fail (which is what we want).
-        if ( ! (this.visibleTo == s0.getOptions().rctx)) {
+        // In the window of time before the visibleTo field is set, traversal will also fail (which
+        // is what we want).
+        if (!(this.visibleTo == s0.getOptions().rctx)) {
             return null;
         }
         return super.traverse(s0);

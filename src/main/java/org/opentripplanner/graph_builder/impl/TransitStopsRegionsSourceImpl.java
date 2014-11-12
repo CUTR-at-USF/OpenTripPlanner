@@ -34,11 +34,12 @@ public class TransitStopsRegionsSourceImpl implements RegionsSource {
     private static Logger LOG = LoggerFactory.getLogger(TransitStopsRegionsSourceImpl.class);
 
     private static final double METERS_PER_DEGREE_LAT = 111111;
+
     private double distance = 2000;
 
     // FIXME replace autowiring
     GraphBuilderTask task;
-    
+
     public void setDistance(double distance) {
         this.distance = distance;
     }
@@ -46,22 +47,22 @@ public class TransitStopsRegionsSourceImpl implements RegionsSource {
     @Override
     public Iterable<Envelope> getRegions() {
 
-    	List<Envelope> regions = new ArrayList<Envelope>();
+        List<Envelope> regions = new ArrayList<Envelope>();
 
         for (Vertex gv : task.getGraph().getVertices()) {
             if (gv instanceof TransitStop) {
                 Coordinate c = gv.getCoordinate();
                 Envelope env = new Envelope(c);
-                double meters_per_degree_lon_here =  
-                    METERS_PER_DEGREE_LAT * Math.cos(Math.toRadians(c.y));
-                env.expandBy(distance / meters_per_degree_lon_here,  
-                        distance / METERS_PER_DEGREE_LAT);
+                double meters_per_degree_lon_here = METERS_PER_DEGREE_LAT
+                        * Math.cos(Math.toRadians(c.y));
+                env.expandBy(distance / meters_per_degree_lon_here, distance
+                        / METERS_PER_DEGREE_LAT);
                 regions.add(env);
             }
         }
 
         LOG.debug("Total regions: " + regions.size());
-        
+
         return regions;
     }
 }

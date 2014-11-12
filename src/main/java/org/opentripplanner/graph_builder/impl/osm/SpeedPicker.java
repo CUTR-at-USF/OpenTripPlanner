@@ -21,5 +21,6 @@ import lombok.Data;
 @Data
 public class SpeedPicker {
     private OSMSpecifier specifier;
+
     private float speed;
 }

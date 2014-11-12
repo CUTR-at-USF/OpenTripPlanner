@@ -61,7 +61,8 @@ public class JoinedFeatureConverter<T> implements SimpleFeatureConverter<T> {
         ensureCached();
         String mainKeyValue = toHashableString(feature.getAttribute(this.mainKey));
         if (mainKeyValue == null) {
-            log.warn("Feature " + feature.getID() + " has null value for its mainKey (" + mainKey + ")");
+            log.warn("Feature " + feature.getID() + " has null value for its mainKey (" + mainKey
+                    + ")");
             return null;
         }
         SimpleFeature joinedFeature = cache.get(mainKeyValue);
@@ -73,8 +74,9 @@ public class JoinedFeatureConverter<T> implements SimpleFeatureConverter<T> {
         }
     }
 
-    /** We have to cache all the features in the supplemental file, because
-     * if we try to load them on the fly, GeoTools wigs out.
+    /**
+     * We have to cache all the features in the supplemental file, because if we try to load them on
+     * the fly, GeoTools wigs out.
      */
     private void ensureCached() {
         if (cache != null) {
@@ -91,7 +93,8 @@ public class JoinedFeatureConverter<T> implements SimpleFeatureConverter<T> {
                 if (joinedKeyValue != null) {
                     cache.put(joinedKeyValue, feature);
                 } else {
-                    log.warn("Feature " + feature.getID() + " has null value for its joinedKey (" + joinedKey + ")");
+                    log.warn("Feature " + feature.getID() + " has null value for its joinedKey ("
+                            + joinedKey + ")");
                 }
             }
             it.close();
@@ -114,11 +117,11 @@ public class JoinedFeatureConverter<T> implements SimpleFeatureConverter<T> {
             return null;
         }
         if (keyValue instanceof Number) {
-            keyValue = ((Number)keyValue).doubleValue();
+            keyValue = ((Number) keyValue).doubleValue();
         }
         return keyValue.toString();
     }
-    
+
     public void setConverter(SimpleFeatureConverter<T> converter) {
         this.converter = converter;
     }

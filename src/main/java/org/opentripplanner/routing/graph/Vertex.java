@@ -45,33 +45,32 @@ public abstract class Vertex implements Serializable, Cloneable {
     private static int maxIndex = 0;
 
     private int index;
-    
+
     private int groupIndex = -1;
 
     /* short debugging name */
     private final String label;
-    
+
     /* Longer human-readable name for the client */
     private String name;
 
     private final double x;
 
     private final double y;
-    
+
     private double distanceToNearestTransitStop = 0;
 
     private transient Set<Edge> incoming = new CopyOnWriteArraySet<Edge>();
 
     private transient Set<Edge> outgoing = new CopyOnWriteArraySet<Edge>();
 
-    
     /* PUBLIC CONSTRUCTORS */
 
     public Vertex(Graph g, String label, double x, double y) {
         this.label = label;
         this.x = x;
         this.y = y;
-        this.index = maxIndex  ++;
+        this.index = maxIndex++;
         // null graph means temporary vertex
         if (g != null)
             g.addVertex(this);
@@ -99,7 +98,6 @@ public abstract class Vertex implements Serializable, Cloneable {
     public int hashCode() {
         return index;
     }
-
 
     /* FIELD ACCESSOR METHODS : READ/WRITE */
 
@@ -160,7 +158,7 @@ public abstract class Vertex implements Serializable, Cloneable {
     public int getDegreeIn() {
         return incoming.size();
     }
-    
+
     // TODO: this is a candidate for no-arg message-passing style
     public void setDistanceToNearestTransitStop(double distance) {
         distanceToNearestTransitStop = distance;
@@ -209,7 +207,6 @@ public abstract class Vertex implements Serializable, Cloneable {
         this.name = name;
     }
 
-
     /* FIELD ACCESSOR METHODS : READ ONLY */
 
     /** Every vertex has a label which is globally unique. */
@@ -246,7 +243,6 @@ public abstract class Vertex implements Serializable, Cloneable {
         return maxIndex;
     }
 
-
     /* SERIALIZATION METHODS */
 
     private void writeObject(ObjectOutputStream out) throws IOException {
@@ -276,8 +272,8 @@ public abstract class Vertex implements Serializable, Cloneable {
     }
 
     /**
-     * Clear this vertex's outgoing and incoming edge lists, and remove all the edges
-     * they contained from this vertex's neighbors.
+     * Clear this vertex's outgoing and incoming edge lists, and remove all the edges they contained
+     * from this vertex's neighbors.
      */
     public void removeAllEdges() {
         for (Edge e : outgoing) {
@@ -296,7 +292,6 @@ public abstract class Vertex implements Serializable, Cloneable {
         outgoing = new CopyOnWriteArraySet<Edge>();
     }
 
-
     /* GRAPH COHERENCY AND TYPE CHECKING */
 
     // Parameterized Class<? extends Edge) gets ugly fast here
@@ -310,13 +305,13 @@ public abstract class Vertex implements Serializable, Cloneable {
 
     @XmlTransient
     public ValidEdgeTypes getValidIncomingEdgeTypes() {
-        return VALID_EDGE_TYPES ;
+        return VALID_EDGE_TYPES;
     }
 
     /**
-     * Check that all of this Vertex's incoming and outgoing edges are of the proper types.
-     * This may not be necessary if edge constructor types are strictly specified
-     * and addOutgoing is protected
+     * Check that all of this Vertex's incoming and outgoing edges are of the proper types. This may
+     * not be necessary if edge constructor types are strictly specified and addOutgoing is
+     * protected
      */
     public boolean edgeTypesValid() {
         ValidEdgeTypes validOutgoingTypes = getValidOutgoingEdgeTypes();
@@ -332,12 +327,14 @@ public abstract class Vertex implements Serializable, Cloneable {
 
     public static final class ValidEdgeTypes {
         private final Class<? extends Edge>[] classes;
+
         // varargs constructor:
         // a loophole in the law against arrays/collections of parameterized generics
-        public ValidEdgeTypes (Class<? extends Edge>... classes) {
+        public ValidEdgeTypes(Class<? extends Edge>... classes) {
             this.classes = classes;
         }
-        public boolean isValid (Edge e) {
+
+        public boolean isValid(Edge e) {
             for (Class<? extends Edge> c : classes) {
                 if (c.isInstance(e))
                     return true;
@@ -348,8 +345,9 @@ public abstract class Vertex implements Serializable, Cloneable {
 
     /**
      * Clean up before garbage collection. Usually this method does nothing, but temporary vertices
-     * must provide a method to remove their associated temporary edges from adjacent vertices'
-     * edge lists, usually by simply calling detach() on them.
+     * must provide a method to remove their associated temporary edges from adjacent vertices' edge
+     * lists, usually by simply calling detach() on them.
+     * 
      * @return the number of edges affected by the cleanup.
      */
     public int removeTemporaryEdges() {

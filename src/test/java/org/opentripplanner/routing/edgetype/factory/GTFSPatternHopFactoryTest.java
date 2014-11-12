@@ -46,7 +46,7 @@ public class GTFSPatternHopFactoryTest {
 
         for (Edge edge : graph.getEdges()) {
             if (edge instanceof TransitBoardAlight) {
-                TripPattern pattern = ((TransitBoardAlight)edge).getPattern();
+                TripPattern pattern = ((TransitBoardAlight) edge).getPattern();
                 // TODO assertTrue(pattern.getBikesAllowed());
             }
         }

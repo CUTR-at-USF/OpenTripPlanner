@@ -17,8 +17,10 @@ import java.util.GregorianCalendar;
 
 public class SPTRequest {
 
-    public final double lon; 
+    public final double lon;
+
     public final double lat;
+
     public final long time;
 
     public SPTRequest(double lon, double lat, GregorianCalendar gcal) {
@@ -26,7 +28,7 @@ public class SPTRequest {
         this.lat = lat;
         if (gcal != null)
             this.time = gcal.getTimeInMillis() / 1000;
-        else 
+        else
             this.time = System.currentTimeMillis() / 1000;
     }
 
@@ -35,17 +37,15 @@ public class SPTRequest {
         this.lat = lat;
         this.time = time;
     }
-    
+
     public int hashCode() {
-        return (int)(lon * 42677 + lat * 1307 + time);
+        return (int) (lon * 42677 + lat * 1307 + time);
     }
-    
+
     public boolean equals(Object other) {
         if (other instanceof SPTRequest) {
             SPTRequest that = (SPTRequest) other;
-            return this.lon  == that.lon &&
-                   this.lat  == that.lat &&
-                   this.time == that.time;
+            return this.lon == that.lon && this.lat == that.lat && this.time == that.time;
         }
         return false;
     }

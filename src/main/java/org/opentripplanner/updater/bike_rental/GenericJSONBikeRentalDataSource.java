@@ -17,15 +17,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
 /**
  * Fetch Bike Rental JSON feeds and pass each record on to the specific rental subclass
  *
  * @see BikeRentalDataSource
  */
-public abstract class GenericJSONBikeRentalDataSource implements BikeRentalDataSource, PreferencesConfigurable {
+public abstract class GenericJSONBikeRentalDataSource implements BikeRentalDataSource,
+        PreferencesConfigurable {
 
-    private static final Logger log = LoggerFactory.getLogger(GenericJSONBikeRentalDataSource.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(GenericJSONBikeRentalDataSource.class);
+
     private String url;
 
     private String jsonParsePath;
@@ -35,14 +37,13 @@ public abstract class GenericJSONBikeRentalDataSource implements BikeRentalDataS
     /**
      * Construct superclass
      *
-     * @param JSON path to get from enclosing elements to nested rental list.
-     *        Separate path levels with '/' For example "d/list"
+     * @param JSON path to get from enclosing elements to nested rental list. Separate path levels
+     *        with '/' For example "d/list"
      *
      */
     public GenericJSONBikeRentalDataSource(String jsonPath) {
         jsonParsePath = jsonPath;
     }
-
 
     /**
      * Construct superclass where rental list is on the top level of JSON code
@@ -75,8 +76,8 @@ public abstract class GenericJSONBikeRentalDataSource implements BikeRentalDataS
         return true;
     }
 
-    private void parseJSON(InputStream dataStream) throws JsonProcessingException, IllegalArgumentException,
-      IOException {
+    private void parseJSON(InputStream dataStream) throws JsonProcessingException,
+            IllegalArgumentException, IOException {
 
         ArrayList<BikeRentalStation> out = new ArrayList<BikeRentalStation>();
 
@@ -88,13 +89,13 @@ public abstract class GenericJSONBikeRentalDataSource implements BikeRentalDataS
         if (!jsonParsePath.equals("")) {
             String delimiter = "/";
             String[] parseElement = jsonParsePath.split(delimiter);
-            for(int i =0; i < parseElement.length ; i++) {
+            for (int i = 0; i < parseElement.length; i++) {
                 rootNode = rootNode.path(parseElement[i]);
             }
 
             if (rootNode.isMissingNode()) {
                 throw new IllegalArgumentException("Could not find jSON elements " + jsonParsePath);
-              }
+            }
         }
 
         for (int i = 0; i < rootNode.size(); i++) {
@@ -106,7 +107,7 @@ public abstract class GenericJSONBikeRentalDataSource implements BikeRentalDataS
             if (brstation != null)
                 out.add(brstation);
         }
-        synchronized(this) {
+        synchronized (this) {
             stations = out;
         }
     }

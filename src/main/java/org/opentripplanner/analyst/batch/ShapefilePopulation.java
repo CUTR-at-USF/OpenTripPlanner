@@ -38,18 +38,21 @@ public class ShapefilePopulation extends BasicPopulation {
 
     private static final Logger LOG = LoggerFactory.getLogger(ShapefilePopulation.class);
 
-    @Setter String labelAttribute;
+    @Setter
+    String labelAttribute;
 
-    @Setter String inputAttribute;
-    
+    @Setter
+    String inputAttribute;
+
     @Override
     public void createIndividuals() {
         String filename = this.sourceFilename;
         LOG.debug("Loading population from shapefile {}", filename);
-        LOG.debug("Feature attributes: input data in {}, labeled with {}", inputAttribute, labelAttribute);
+        LOG.debug("Feature attributes: input data in {}, labeled with {}", inputAttribute,
+                labelAttribute);
         try {
             File file = new File(filename);
-            if ( ! file.exists())
+            if (!file.exists())
                 throw new RuntimeException("Shapefile does not exist.");
             FileDataStore store = FileDataStoreFinder.getDataStore(file);
             SimpleFeatureSource featureSource = store.getFeatureSource();
@@ -86,7 +89,7 @@ public class ShapefilePopulation extends BasicPopulation {
                 double input = 0.0;
                 if (inputAttribute != null) {
                     Number n = (Number) feature.getAttribute(inputAttribute);
-                    input = n.doubleValue(); 
+                    input = n.doubleValue();
                 }
                 Individual individual = new Individual(label, point.getX(), point.getY(), input);
                 this.addIndividual(individual);

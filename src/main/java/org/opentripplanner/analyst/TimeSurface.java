@@ -29,38 +29,47 @@ import java.util.Map;
 import static org.apache.commons.math3.util.FastMath.toRadians;
 
 /**
- * A travel time surface. Timing information from the leaves of a ShortestPathTree.
- * In Portland, one timesurface takes roughly one MB of memory and is also about that size as JSON.
- * However it is proportionate to the graph size not the time cutoff.
+ * A travel time surface. Timing information from the leaves of a ShortestPathTree. In Portland, one
+ * timesurface takes roughly one MB of memory and is also about that size as JSON. However it is
+ * proportionate to the graph size not the time cutoff.
  */
-public class TimeSurface implements Serializable{
+public class TimeSurface implements Serializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(TimeSurface.class);
+
     public static final int UNREACHABLE = -1;
+
     private static int nextId = 0;
 
     public final String routerId;
-    
+
     public final int id;
+
     public final int[] times; // one time in seconds per vertex
+
     public final double lat, lon;
+
     public int cutoffMinutes;
+
     public long dateTime;
+
     public Map<String, String> params; // The query params sent by the user, for reference only
 
-    public SparseMatrixZSampleGrid<WTWD> sampleGrid; // another representation on a regular grid with a triangulation
+    public SparseMatrixZSampleGrid<WTWD> sampleGrid; // another representation on a regular grid
+                                                     // with a triangulation
 
     public TimeSurface(ShortestPathTree spt) {
-    	
-    	params = spt.getOptions().parameters;
-    	
+
+        params = spt.getOptions().parameters;
+
         String routerId = spt.getOptions().routerId;
         if (routerId == null || routerId.isEmpty() || routerId.equalsIgnoreCase("default")) {
             routerId = "default";
         }
-        // Here we use the key "default" unlike the graphservice which substitutes in the default ID.
+        // Here we use the key "default" unlike the graphservice which substitutes in the default
+        // ID.
         // We don't want to keep that default in sync across two modules.
-    	this.routerId = routerId;
+        this.routerId = routerId;
         long t0 = System.currentTimeMillis();
         times = new int[Vertex.getMaxIndex()]; // memory leak due to temp vertices?
         Arrays.fill(times, UNREACHABLE);
@@ -74,7 +83,7 @@ public class TimeSurface implements Serializable{
                 }
             }
         }
-        
+
         // TODO make this work as either to or from query
         GenericLocation from = spt.getOptions().getFrom();
         this.lon = from.getLng();
@@ -95,13 +104,17 @@ public class TimeSurface implements Serializable{
         return id;
     }
 
-    public int size() { return nextId; }
+    public int size() {
+        return nextId;
+    }
 
-    // TODO Lazy-initialize sample grid on demand so initial SPT finishes faster, and only isolines lag behind.
+    // TODO Lazy-initialize sample grid on demand so initial SPT finishes faster, and only isolines
+    // lag behind.
     // however, the existing sampler needs an SPT, not general vertex-time mappings.
-    public void makeSampleGrid (ShortestPathTree spt) {
+    public void makeSampleGrid(ShortestPathTree spt) {
         long t0 = System.currentTimeMillis();
-        final double gridSizeMeters = 300; // Todo: set dynamically and make sure this matches isoline builder params
+        final double gridSizeMeters = 300; // Todo: set dynamically and make sure this matches
+                                           // isoline builder params
         // Off-road max distance MUST be APPROX EQUALS to the grid precision
         // TODO: Loosen this restriction (by adding more closing sample).
         // Change the 0.8 magic factor here with caution.
@@ -111,8 +124,10 @@ public class TimeSurface implements Serializable{
         final double cosLat = FastMath.cos(toRadians(coordinateOrigin.y));
         double dY = Math.toDegrees(gridSizeMeters / SphericalDistanceLibrary.RADIUS_OF_EARTH_IN_M);
         double dX = dY / cosLat;
-        sampleGrid = new SparseMatrixZSampleGrid<WTWD>(16, spt.getVertexCount(), dX, dY, coordinateOrigin);
-        SampleGridRenderer.sampleSPT(spt, sampleGrid, gridSizeMeters * 0.7, gridSizeMeters, V0, spt.getOptions().getMaxWalkDistance(), cosLat);
+        sampleGrid = new SparseMatrixZSampleGrid<WTWD>(16, spt.getVertexCount(), dX, dY,
+                coordinateOrigin);
+        SampleGridRenderer.sampleSPT(spt, sampleGrid, gridSizeMeters * 0.7, gridSizeMeters, V0, spt
+                .getOptions().getMaxWalkDistance(), cosLat);
         long t1 = System.currentTimeMillis();
         LOG.info("Made SampleGrid from SPT in {} msec.", (int) (t1 - t0));
     }

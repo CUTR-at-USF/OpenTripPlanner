@@ -12,13 +12,21 @@ import com.beust.jcommander.internal.Lists;
 public class TripTimeShort {
 
     public static final int UNDEFINED = -1;
+
     public String stopId;
-    public int scheduledArrival = UNDEFINED ;
-    public int scheduledDeparture = UNDEFINED ;
-    public int realtimeArrival = UNDEFINED ;
-    public int realtimeDeparture = UNDEFINED ;
-    public int arrivalDelay = UNDEFINED ;
-    public int departureDelay = UNDEFINED ;
+
+    public int scheduledArrival = UNDEFINED;
+
+    public int scheduledDeparture = UNDEFINED;
+
+    public int realtimeArrival = UNDEFINED;
+
+    public int realtimeDeparture = UNDEFINED;
+
+    public int arrivalDelay = UNDEFINED;
+
+    public int departureDelay = UNDEFINED;
+
     public boolean timepoint = false;
 
     /**
@@ -26,20 +34,20 @@ public class TripTimeShort {
      */
     public TripTimeShort(TripTimes tt, int i, Stop stop) {
         stopId = stop.getId().getId();
-        scheduledArrival   = tt.getScheduledArrivalTime(i);
-        realtimeArrival    = tt.getArrivalTime(i);
-        arrivalDelay       = tt.getArrivalDelay(i);
+        scheduledArrival = tt.getScheduledArrivalTime(i);
+        realtimeArrival = tt.getArrivalTime(i);
+        arrivalDelay = tt.getArrivalDelay(i);
         scheduledDeparture = tt.getScheduledDepartureTime(i);
-        realtimeDeparture  = tt.getDepartureTime(i);
-        departureDelay     = tt.getDepartureDelay(i);
-        timepoint          = tt.isTimepoint(i);
+        realtimeDeparture = tt.getDepartureTime(i);
+        departureDelay = tt.getDepartureDelay(i);
+        timepoint = tt.isTimepoint(i);
     }
 
     /**
      * must pass in both table and trip, because tripTimes do not have stops.
      */
-    public static List<TripTimeShort> fromTripTimes (Timetable table, Trip trip) {
-        TripTimes times = table.getTripTimes(table.getTripIndex(trip.getId()));        
+    public static List<TripTimeShort> fromTripTimes(Timetable table, Trip trip) {
+        TripTimes times = table.getTripTimes(table.getTripIndex(trip.getId()));
         List<TripTimeShort> out = Lists.newArrayList();
         // one per stop, not one per hop, thus the <= operator
         for (int i = 0; i < times.getNumStops(); ++i) {
@@ -47,5 +55,5 @@ public class TripTimeShort {
         }
         return out;
     }
-    
+
 }

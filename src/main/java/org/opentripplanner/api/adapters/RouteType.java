@@ -23,9 +23,9 @@ import org.onebusaway.gtfs.model.Route;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
-   Holds data about a GTFS route from routes.txt.  Data includes id,
-   short name, long name, color, etc.
-*/
+ * Holds data about a GTFS route from routes.txt. Data includes id, short name, long name, color,
+ * etc.
+ */
 
 @XmlRootElement(name = "route")
 public class RouteType {
@@ -58,8 +58,8 @@ public class RouteType {
             this.routeTextColor = route.getTextColor();
         }
     }
-    
-    public AgencyAndId getId(){
+
+    public AgencyAndId getId() {
         return this.id;
     }
 

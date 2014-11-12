@@ -25,7 +25,6 @@ public class TransitType extends AbstractStopTester {
     @Setter
     TraverseMode transitType;
 
-
     /**
      * @retrun return true if a transit type of type transitType is pass through that stop
      */

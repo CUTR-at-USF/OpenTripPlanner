@@ -13,13 +13,15 @@ public class SampleSet {
 
     /* Vertices at the two ends of a road, one per sample. */
     Vertex[] v0s;
+
     Vertex[] v1s;
 
     /* Distances to the vertices at the two ends of a road, one per sample. */
     float[] d0s;
+
     float[] d1s;
 
-    public SampleSet (PointSet pset, SampleFactory sfac) {
+    public SampleSet(PointSet pset, SampleFactory sfac) {
         this.pset = pset;
         v0s = new Vertex[pset.capacity];
         v1s = new Vertex[pset.capacity];
@@ -39,7 +41,7 @@ public class SampleSet {
         }
     }
 
-    public int[] eval (TimeSurface surf) {
+    public int[] eval(TimeSurface surf) {
         final float WALK_SPEED = 1.3f;
         int[] ret = new int[pset.capacity];
         for (int i = 0; i < pset.capacity; i++) {

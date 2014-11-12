@@ -23,7 +23,9 @@ import com.vividsolutions.jts.geom.MultiLineString;
 public class DirectionUtils {
 
     public static DirectionUtils instance;
+
     private static DistanceLibrary distanceLibrary = SphericalDistanceLibrary.getInstance();
+
     /* this is used to calculate angles on a sphere */
     private GeodeticCalculator geodeticCalculator;
 
@@ -41,25 +43,23 @@ public class DirectionUtils {
     }
 
     /**
-     * Returns the azimuth in decimal degrees from (-180° to +180°) between
-     * Coordinates A and B.
+     * Returns the azimuth in decimal degrees from (-180° to +180°) between Coordinates A and B.
      * 
      * @param a
      * @param b
      * @return
      */
     public static synchronized double getAzimuth(Coordinate a, Coordinate b) {
-    	DirectionUtils utils = getInstance();
+        DirectionUtils utils = getInstance();
         utils.geodeticCalculator.setStartingGeographicPoint(a.x, a.y);
         utils.geodeticCalculator.setDestinationGeographicPoint(b.x, b.y);
-    	return utils.geodeticCalculator.getAzimuth();
+        return utils.geodeticCalculator.getAzimuth();
     }
-    
+
     /**
      * Computes the angle of the last segment of a LineString or MultiLineString
      *
-     * @param geometry
-     *            a LineString or a MultiLineString
+     * @param geometry a LineString or a MultiLineString
      * @return
      */
     public static synchronized double getLastAngle(Geometry geometry) {
@@ -74,7 +74,7 @@ public class DirectionUtils {
         Coordinate coord0 = line.getCoordinateN(numPoints - 2);
         Coordinate coord1 = line.getCoordinateN(numPoints - 1);
         int i = numPoints - 3;
-        int minDistance = 10;  // Meters        
+        int minDistance = 10; // Meters
         while (distanceLibrary.fastDistance(coord0, coord1) < minDistance && i >= 0) {
             coord0 = line.getCoordinateN(i--);
         }
@@ -89,8 +89,7 @@ public class DirectionUtils {
     /**
      * Computes the angle of the first segment of a LineString or MultiLineString
      *
-     * @param geometry
-     *            a LineString or a MultiLineString
+     * @param geometry a LineString or a MultiLineString
      * @return
      */
     public static synchronized double getFirstAngle(Geometry geometry) {
@@ -105,7 +104,7 @@ public class DirectionUtils {
         Coordinate coord0 = line.getCoordinateN(0);
         Coordinate coord1 = line.getCoordinateN(1);
         int i = 2;
-        int minDistance = 10;  // Meters 
+        int minDistance = 10; // Meters
         while (distanceLibrary.fastDistance(coord0, coord1) < minDistance
                 && i < line.getNumPoints()) {
             coord1 = line.getCoordinateN(i++);

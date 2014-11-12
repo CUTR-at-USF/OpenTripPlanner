@@ -104,7 +104,7 @@ public class LinearIterator implements Iterable<LinearLocation> {
             return false;
         return true;
     }
-    
+
     public boolean isValidIndex() {
         if (componentIndex >= numLines)
             return false;
@@ -215,16 +215,17 @@ public class LinearIterator implements Iterable<LinearLocation> {
         public void remove() {
             throw new UnsupportedOperationException();
         }
-        
+
     }
+
     @Override
     public Iterator<LinearLocation> iterator() {
         return new LinearIteratorIterator();
     }
 
     public static LinearLocation getEndLocation(Geometry linear) {
-        //the version in LinearLocation is broken
-        
+        // the version in LinearLocation is broken
+
         int lastComponentIndex = linear.getNumGeometries() - 1;
         LineString lastLine = (LineString) linear.getGeometryN(lastComponentIndex);
         int lastSegmentIndex = lastLine.getNumPoints() - 1;

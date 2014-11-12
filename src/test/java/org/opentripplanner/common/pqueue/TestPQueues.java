@@ -22,11 +22,10 @@ import junit.framework.TestCase;
  * Test correctness and relative speed of various
  * priority queue implementations.
  */
-public class TestPQueues extends TestCase { 
+public class TestPQueues extends TestCase {
     private static final int N = 50000;
 
-    public void doQueue(BinHeap<Integer> q,
-                        List<Integer> input, List<Integer> expected) {
+    public void doQueue(BinHeap<Integer> q, List<Integer> input, List<Integer> expected) {
         List<Integer> result = new ArrayList<Integer>(N);
         int expectedSum = 0;
         for (Integer i : input) {
@@ -57,7 +56,7 @@ public class TestPQueues extends TestCase {
         // keep compiler from optimizing out extract
         assertTrue(sum == expectedSum);
     }
-    
+
     public void fillQueue(BinHeap<Integer> q, List<Integer> input) {
         for (Integer i : input) {
             q.insert(i, i * 0.5);
@@ -77,8 +76,9 @@ public class TestPQueues extends TestCase {
     public void testCompareHeaps() throws InterruptedException {
         List<Integer> input, expected;
         input = new ArrayList<Integer>(N);
-        for (int i=0; i<N; i++) input.add((int) (Math.random() * 10000));
-        
+        for (int i = 0; i < N; i++)
+            input.add((int) (Math.random() * 10000));
+
         // First determine the expected results using a plain old PriorityQueue
         expected = new ArrayList<Integer>(N);
         PriorityQueue<Integer> q = new PriorityQueue<Integer>(N);
@@ -93,54 +93,54 @@ public class TestPQueues extends TestCase {
     }
 
     /*
-     * You must be careful to produce unique objects for rekeying,
-     * otherwise the same object might be rekeyed twice or more.
+     * You must be careful to produce unique objects for rekeying, otherwise the same object might
+     * be rekeyed twice or more.
      */
     public void testRekey() throws InterruptedException {
-    	final int N = 5000;
-    	final int ITER = 2;
+        final int N = 5000;
+        final int ITER = 2;
 
-    	List<Double>  keys;
+        List<Double> keys;
         List<Integer> vals;
         keys = new ArrayList<Double>(N);
         vals = new ArrayList<Integer>(N);
-        
+
         BinHeap<Integer> bh = new BinHeap<Integer>(20);
 
         for (int iter = 0; iter < ITER; iter++) {
 
-        	// reuse internal array in binheap
-        	bh.reset();
+            // reuse internal array in binheap
+            bh.reset();
 
-        	// fill both keys and values with random numbers
-		    for (int i=0; i<N; i++) {
-		    	keys.add(i, (Math.random() * 10000));
-		    	vals.add(i, (N - i) * 3);
-		    }        	
-		    
-		    // insert them into the queue
-		    for (int i=0; i<N; i++) {
-		    	bh.insert(vals.get(i), keys.get(i));
-		    }
+            // fill both keys and values with random numbers
+            for (int i = 0; i < N; i++) {
+                keys.add(i, (Math.random() * 10000));
+                vals.add(i, (N - i) * 3);
+            }
 
-		    // requeue every item with a new key that is an 
-		    // order-preserving function of its place in the original list
-		    for (int i=0; i<N; i++) {
-		    	bh.rekey(vals.get(i), i * 2.0D + 10);
-		    	// bh.dump();
-		    }        	
+            // insert them into the queue
+            for (int i = 0; i < N; i++) {
+                bh.insert(vals.get(i), keys.get(i));
+            }
 
-		    // pull everything out of the queue in order
-		    // and check that the order matches the original list
-		    for (int i=0; i<N; i++) {
-		    	Double  qp = bh.peek_min_key();
-		    	Integer qi = bh.extract_min();
-		    	assertEquals(qi, vals.get(i));
-		    }
-		    
-		    // the queue should be empty at the end of each iteration
-		    assertTrue(bh.empty());
+            // requeue every item with a new key that is an
+            // order-preserving function of its place in the original list
+            for (int i = 0; i < N; i++) {
+                bh.rekey(vals.get(i), i * 2.0D + 10);
+                // bh.dump();
+            }
+
+            // pull everything out of the queue in order
+            // and check that the order matches the original list
+            for (int i = 0; i < N; i++) {
+                Double qp = bh.peek_min_key();
+                Integer qi = bh.extract_min();
+                assertEquals(qi, vals.get(i));
+            }
+
+            // the queue should be empty at the end of each iteration
+            assertTrue(bh.empty());
 
         }
-    }    
+    }
 }

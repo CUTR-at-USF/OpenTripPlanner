@@ -16,8 +16,8 @@ package org.opentripplanner.analyst.core;
 import org.opentripplanner.routing.core.State;
 
 /**
- * The basic sample operator: minimize elapsed time with no initial wait removal or path 
- * optimization.  
+ * The basic sample operator: minimize elapsed time with no initial wait removal or path
+ * optimization.
  */
 public class ElapsedTimeSampleOperator extends SampleOperator {
 

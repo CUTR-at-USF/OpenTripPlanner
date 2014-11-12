@@ -26,28 +26,30 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class TripPlan {
 
-    /**  The time and date of travel */
+    /** The time and date of travel */
     public Date date = null;
-    
+
     /** The origin */
     public Place from = null;
-    
+
     /** The destination */
     public Place to = null;
 
     /** A list of possible itineraries */
-    @XmlElementWrapper(name="itineraries") //TODO: why don't we just change the variable name?
-    @JsonProperty(value="itineraries")
+    @XmlElementWrapper(name = "itineraries")
+    // TODO: why don't we just change the variable name?
+    @JsonProperty(value = "itineraries")
     public List<Itinerary> itinerary = new ArrayList<Itinerary>();
 
-    public TripPlan() { }
-    
+    public TripPlan() {
+    }
+
     public TripPlan(Place from, Place to, Date date) {
         this.from = from;
         this.to = to;
         this.date = date;
     }
-    
+
     public void addItinerary(Itinerary itinerary) {
         this.itinerary.add(itinerary);
     }

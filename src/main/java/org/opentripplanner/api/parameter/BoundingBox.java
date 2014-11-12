@@ -8,20 +8,18 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 
 public class BoundingBox {
-    
+
     double minLat, minLon, maxLat, maxLon;
 
-    private static void err (String message) {
-        throw new WebApplicationException(Response
-                .status(Status.BAD_REQUEST)
-                .entity(message)
+    private static void err(String message) {
+        throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(message)
                 .build());
     }
-    
-    public BoundingBox (String s) {
+
+    public BoundingBox(String s) {
         String[] elements = s.split(","); // what about ; between coordinates?
         if (elements.length != 4) {
-            err ("A bounding box must have four coordinates.");
+            err("A bounding box must have four coordinates.");
         }
         try {
             minLat = Double.parseDouble(elements[0]);
@@ -29,28 +27,28 @@ public class BoundingBox {
             maxLat = Double.parseDouble(elements[2]);
             maxLon = Double.parseDouble(elements[3]);
         } catch (NumberFormatException pe) {
-            err ("Unable to parse coordinate: " + pe.getMessage());
-        }        
+            err("Unable to parse coordinate: " + pe.getMessage());
+        }
     }
-    
-    public Coordinate lowerLeft () {
+
+    public Coordinate lowerLeft() {
         return new Coordinate(minLon, minLat);
     }
 
-    public Coordinate upperLeft () {
+    public Coordinate upperLeft() {
         return new Coordinate(minLon, maxLat);
     }
 
-    public Coordinate lowerRight () {
+    public Coordinate lowerRight() {
         return new Coordinate(maxLon, minLat);
     }
 
-    public Coordinate upperRight () {
+    public Coordinate upperRight() {
         return new Coordinate(maxLon, maxLat);
     }
-    
-    public Envelope envelope () {
-        return new Envelope(minLon,  maxLon, minLat, maxLat);
+
+    public Envelope envelope() {
+        return new Envelope(minLon, maxLon, minLat, maxLat);
     }
 
 }

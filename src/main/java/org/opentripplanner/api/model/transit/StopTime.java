@@ -46,7 +46,7 @@ public class StopTime {
     @JsonSerialize
     @XmlAttribute
     public String direction;
-    
+
     @JsonSerialize
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @XmlElement

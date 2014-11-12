@@ -29,7 +29,8 @@ import org.opentripplanner.standalone.OTPServer;
 @XmlRootElement
 public class Metadata {
 
-    @Context OTPServer otpServer;
+    @Context
+    OTPServer otpServer;
 
     /** Returns metadata about the graph -- presently, this is just the extent of the graph. */
     @GET

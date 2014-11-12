@@ -28,7 +28,8 @@ public interface PathService {
      */
 
     /**
-     * TODO: there was a separate method to handle intermediates; now the pathservice should just figure this out from the request.
+     * TODO: there was a separate method to handle intermediates; now the pathservice should just
+     * figure this out from the request.
      * 
      * Here we wish to plan a trip that starts at "fromPlace", travels through the intermediate
      * places in some arbitrary but hopefully optimal order, and eventually end up at "toPlace".

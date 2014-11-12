@@ -44,13 +44,15 @@ public class AlertPatchServiceImplTest {
     }
 
     private TestAlertPatch[] alerts;
+
     private AgencyAndId testStop = new AgencyAndId("A", "A");
+
     private AgencyAndId testRoute = new AgencyAndId("B", "B");
 
     @Before
     public void setup() {
-        alerts = new TestAlertPatch[] {new TestAlertPatch(), new TestAlertPatch(),
-                new TestAlertPatch(), new TestAlertPatch()};
+        alerts = new TestAlertPatch[] { new TestAlertPatch(), new TestAlertPatch(),
+                new TestAlertPatch(), new TestAlertPatch() };
         alerts[0].setRoute(testRoute);
         alerts[0].setStop(testStop);
 
@@ -88,7 +90,7 @@ public class AlertPatchServiceImplTest {
     public void testExpire() {
         Set<String> purge = new HashSet<String>();
         AlertPatchServiceImpl instance = getAlertPatchServiceImpl();
-        for(TestAlertPatch alert : alerts) {
+        for (TestAlertPatch alert : alerts) {
             instance.apply(alert);
         }
 
@@ -108,7 +110,7 @@ public class AlertPatchServiceImplTest {
     public void testExpireAll() {
         Set<String> purge = new HashSet<String>();
         AlertPatchServiceImpl instance = getAlertPatchServiceImpl();
-        for(TestAlertPatch alert : alerts) {
+        for (TestAlertPatch alert : alerts) {
             purge.add(alert.getId());
             instance.apply(alert);
         }
@@ -121,7 +123,7 @@ public class AlertPatchServiceImplTest {
     @Test
     public void testExpireAllExcept() {
         AlertPatchServiceImpl instance = getAlertPatchServiceImpl();
-        for(TestAlertPatch alert : alerts) {
+        for (TestAlertPatch alert : alerts) {
             instance.apply(alert);
         }
 

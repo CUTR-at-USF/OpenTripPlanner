@@ -28,6 +28,7 @@ import org.opentripplanner.routing.graph.Graph;
 public class GeotiffGridCoverageFactoryImpl implements ElevationGridCoverageFactory {
 
     private File path = null;
+
     private GridCoverage2D coverage;
 
     public GeotiffGridCoverageFactoryImpl() {
@@ -69,7 +70,7 @@ public class GeotiffGridCoverageFactoryImpl implements ElevationGridCoverageFact
 
     @Override
     public void setGraph(Graph graph) {
-        //nothing to do here
+        // nothing to do here
     }
 
 }

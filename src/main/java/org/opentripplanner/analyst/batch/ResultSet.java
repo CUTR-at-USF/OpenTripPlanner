@@ -24,8 +24,9 @@ public class ResultSet {
     private static final Logger LOG = LoggerFactory.getLogger(ResultSet.class);
 
     public Population population;
+
     public double[] results;
-    
+
     public static ResultSet forTravelTimes(Population population, ShortestPathTree spt) {
         double[] results = new double[population.size()];
         int i = 0;
@@ -43,12 +44,12 @@ public class ResultSet {
         }
         return new ResultSet(population, results);
     }
-    
+
     public ResultSet(Population population, double[] results) {
         this.population = population;
         this.results = results;
     }
-    
+
     protected ResultSet(Population population) {
         this.population = population;
         this.results = new double[population.size()];
@@ -57,5 +58,5 @@ public class ResultSet {
     public void writeAppropriateFormat(String outFileName) {
         population.writeAppropriateFormat(outFileName, this);
     }
-    
+
 }

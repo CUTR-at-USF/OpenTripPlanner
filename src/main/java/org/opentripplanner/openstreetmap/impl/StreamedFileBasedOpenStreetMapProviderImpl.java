@@ -30,8 +30,12 @@ public class StreamedFileBasedOpenStreetMapProviderImpl implements OpenStreetMap
 
     private File _path;
 
-    /* (non-Javadoc)
-     * @see org.opentripplanner.graph_builder.services.osm.OpenStreetMapProvider#readOSM(org.opentripplanner.graph_builder.services.osm.OpenStreetMapContentHandler)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.opentripplanner.graph_builder.services.osm.OpenStreetMapProvider#readOSM(org.opentripplanner
+     * .graph_builder.services.osm.OpenStreetMapContentHandler)
      */
     @Override
     public void readOSM(OpenStreetMapContentHandler handler) {
@@ -64,7 +68,7 @@ public class StreamedFileBasedOpenStreetMapProviderImpl implements OpenStreetMap
 
                 in = new BZip2CompressorInputStream(new FileInputStream(_path));
                 StreamedOpenStreetMapParser.parseMap(in, handler, 3);
-                
+
                 handler.nodesLoaded();
             } else {
                 StreamedOpenStreetMapParser.parseMap(_path, handler);

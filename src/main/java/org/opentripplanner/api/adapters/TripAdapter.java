@@ -21,7 +21,8 @@ public class TripAdapter extends XmlAdapter<TripType, Trip> {
 
     @Override
     public Trip unmarshal(TripType arg) throws Exception {
-        throw new UnsupportedOperationException("We presently serialize Trip as TripType, and thus cannot deserialize them");
+        throw new UnsupportedOperationException(
+                "We presently serialize Trip as TripType, and thus cannot deserialize them");
     }
 
     @Override

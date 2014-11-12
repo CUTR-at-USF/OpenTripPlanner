@@ -71,27 +71,29 @@ public class GtfsGraphBuilderImpl implements GraphBuilder {
     private FareServiceFactory _fareServiceFactory;
 
     /** will be applied to all bundles which do not have the cacheDirectory property set */
-    @Setter private File cacheDirectory; 
-    
+    @Setter
+    private File cacheDirectory;
+
     /** will be applied to all bundles which do not have the useCached property set */
-    @Setter private Boolean useCached; 
+    @Setter
+    private Boolean useCached;
 
     Set<String> agencyIdsSeen = Sets.newHashSet();
 
     int nAgencies = 0;
 
-    /** 
-     * Construct and set bundles all at once. 
-     * TODO why is there a wrapper class around a list of GTFS files?
-     * TODO why is there a wrapper around GTFS files at all?
+    /**
+     * Construct and set bundles all at once. TODO why is there a wrapper class around a list of
+     * GTFS files? TODO why is there a wrapper around GTFS files at all?
      */
-    public GtfsGraphBuilderImpl (List<GtfsBundle> gtfsBundles) {
+    public GtfsGraphBuilderImpl(List<GtfsBundle> gtfsBundles) {
         GtfsBundles gtfsb = new GtfsBundles();
         gtfsb.setBundles(gtfsBundles);
         this.setGtfsBundles(gtfsb);
     }
-    
-    public GtfsGraphBuilderImpl() { };
+
+    public GtfsGraphBuilderImpl() {
+    };
 
     public List<String> provides() {
         List<String> result = new ArrayList<String>();
@@ -125,10 +127,10 @@ public class GtfsGraphBuilderImpl implements GraphBuilder {
 
         MultiCalendarServiceImpl service = new MultiCalendarServiceImpl();
         GtfsStopContext stopContext = new GtfsStopContext();
-        
+
         try {
             for (GtfsBundle gtfsBundle : _gtfsBundles.getBundles()) {
-                // apply global defaults to individual GTFSBundles (if globals have been set) 
+                // apply global defaults to individual GTFSBundles (if globals have been set)
                 if (cacheDirectory != null && gtfsBundle.getCacheDirectory() == null)
                     gtfsBundle.setCacheDirectory(cacheDirectory);
                 if (useCached != null && gtfsBundle.getUseCached() == null)
@@ -155,7 +157,7 @@ public class GtfsGraphBuilderImpl implements GraphBuilder {
                 }
                 if (gtfsBundle.isLinkStopsToParentStations()) {
                     hf.linkStopsToParentStations(graph);
-                } 
+                }
                 if (gtfsBundle.isParentStationTransfers()) {
                     hf.createParentStationTransfers();
                 }
@@ -197,8 +199,10 @@ public class GtfsGraphBuilderImpl implements GraphBuilder {
             LOG.info("reading entities: " + entityClass.getName());
             reader.readEntities(entityClass);
             store.flush();
-            // NOTE that agencies are first in the list and read before all other entity types, so it is effective to
-            // set the agencyId here. Each feed ("bundle") is loaded by a separate reader, so there is no risk of
+            // NOTE that agencies are first in the list and read before all other entity types, so
+            // it is effective to
+            // set the agencyId here. Each feed ("bundle") is loaded by a separate reader, so there
+            // is no risk of
             // agency mappings accumulating.
             if (entityClass == Agency.class) {
                 nAgencies++;
@@ -206,19 +210,27 @@ public class GtfsGraphBuilderImpl implements GraphBuilder {
                 for (Agency agency : reader.getAgencies()) {
                     String agencyId = agency.getId();
                     LOG.info("This Agency has the ID {}", agencyId);
-                    // TODO Somehow, when the agency's id field is missing, OBA replaces it with the agency's name.
+                    // TODO Somehow, when the agency's id field is missing, OBA replaces it with the
+                    // agency's name.
                     // Figure out how and why this is happening.
-                    if (agencyId == null || agencyIdsSeen.contains(agencyId) || agencyId.length() == 1) {
+                    if (agencyId == null || agencyIdsSeen.contains(agencyId)
+                            || agencyId.length() == 1) {
                         String generatedAgencyId = "AGENCY#" + nAgencies;
-                        LOG.warn("The agency ID '{}' was already seen, or I think it's bad. Replacing with '{}'.", agencyId, generatedAgencyId);
-                        reader.addAgencyIdMapping(agencyId, generatedAgencyId); // NULL key should work
+                        LOG.warn(
+                                "The agency ID '{}' was already seen, or I think it's bad. Replacing with '{}'.",
+                                agencyId, generatedAgencyId);
+                        reader.addAgencyIdMapping(agencyId, generatedAgencyId); // NULL key should
+                                                                                // work
                         agency.setId(generatedAgencyId);
                         agencyId = generatedAgencyId;
                     }
-                    if (agencyId != null) agencyIdsSeen.add(agencyId);
-                    if (defaultAgencyId == null) defaultAgencyId = agencyId;
+                    if (agencyId != null)
+                        agencyIdsSeen.add(agencyId);
+                    if (defaultAgencyId == null)
+                        defaultAgencyId = agencyId;
                 }
-                reader.setDefaultAgencyId(defaultAgencyId); // not sure this is a good idea, setting it to the first-of-many IDs.
+                reader.setDefaultAgencyId(defaultAgencyId); // not sure this is a good idea, setting
+                                                            // it to the first-of-many IDs.
             }
         }
 
@@ -237,7 +249,8 @@ public class GtfsGraphBuilderImpl implements GraphBuilder {
         for (ServiceCalendar serviceCalendar : store.getAllEntitiesForType(ServiceCalendar.class)) {
             serviceCalendar.getServiceId().setAgencyId(reader.getDefaultAgencyId());
         }
-        for (ServiceCalendarDate serviceCalendarDate : store.getAllEntitiesForType(ServiceCalendarDate.class)) {
+        for (ServiceCalendarDate serviceCalendarDate : store
+                .getAllEntitiesForType(ServiceCalendarDate.class)) {
             serviceCalendarDate.getServiceId().setAgencyId(reader.getDefaultAgencyId());
         }
         for (FareAttribute fareAttribute : store.getAllEntitiesForType(FareAttribute.class)) {

@@ -29,20 +29,20 @@ import org.opentripplanner.routing.graph.Vertex;
 public abstract class AbstractShortestPathTree implements ShortestPathTree {
 
     public final RoutingRequest options;
-    
-    protected AbstractShortestPathTree () {
+
+    protected AbstractShortestPathTree() {
         this.options = null;
     }
 
-    protected AbstractShortestPathTree (RoutingRequest options) {
+    protected AbstractShortestPathTree(RoutingRequest options) {
         this.options = options;
     }
-    
+
     @Override
     public List<GraphPath> getPaths() {
         return getPaths(options.getRoutingContext().target, true);
     }
-    
+
     @Override
     public List<GraphPath> getPaths(Vertex dest, boolean optimize) {
         List<? extends State> stateList = getStates(dest);
@@ -68,7 +68,7 @@ public abstract class AbstractShortestPathTree implements ShortestPathTree {
     @Override
     public void postVisit(State u) {
     }
-    
+
     @Override
     public RoutingRequest getOptions() {
         return options;

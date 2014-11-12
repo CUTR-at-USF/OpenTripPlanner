@@ -50,14 +50,15 @@ public class AlertPatchTest extends TestCase {
         graph = new Graph();
         GTFSPatternHopFactory factory = new GTFSPatternHopFactory(context);
         factory.run(graph);
-        graph.putService(CalendarServiceData.class, GtfsLibrary.createCalendarServiceData(context.getDao()));
+        graph.putService(CalendarServiceData.class,
+                GtfsLibrary.createCalendarServiceData(context.getDao()));
         graph.index(new DefaultStreetVertexIndexFactory());
     }
 
     public void testStopAlertPatch() {
         AlertPatch snp1 = new AlertPatch();
-        snp1.setTimePeriods(Collections.singletonList(new TimePeriod(
-                0, 1000L * 60 * 60 * 24 * 365 * 40))); // until ~1/1/2011
+        snp1.setTimePeriods(Collections.singletonList(new TimePeriod(0, 1000L * 60 * 60 * 24 * 365
+                * 40))); // until ~1/1/2011
         Alert note1 = Alert.createSimpleAlerts("The first note");
         snp1.setAlert(note1);
         snp1.setId("id1");
@@ -100,7 +101,8 @@ public class AlertPatchTest extends TestCase {
         LinkedList<TimePeriod> timePeriods = new LinkedList<TimePeriod>();
         long breakTime = TestUtils.dateInSeconds("America/New_York", 2009, 8, 7, 0, 0, 0);
         timePeriods.add(new TimePeriod(0, breakTime)); // until the beginning of the day
-        long secondPeriodStartTime = TestUtils.dateInSeconds("America/New_York", 2009, 8, 7, 7, 0, 0);
+        long secondPeriodStartTime = TestUtils.dateInSeconds("America/New_York", 2009, 8, 7, 7, 0,
+                0);
         long secondPeriodEndTime = TestUtils.dateInSeconds("America/New_York", 2009, 8, 8, 0, 0, 0);
         timePeriods.add(new TimePeriod(secondPeriodStartTime, secondPeriodEndTime));
         snp1.setTimePeriods(timePeriods);
@@ -156,8 +158,8 @@ public class AlertPatchTest extends TestCase {
     public void testRouteNotePatch() {
         AlertPatch rnp1 = new AlertPatch();
 
-        rnp1.setTimePeriods(Collections.singletonList(new TimePeriod(
-                0, 1000L * 60 * 60 * 24 * 365 * 40))); // until ~1/1/2011
+        rnp1.setTimePeriods(Collections.singletonList(new TimePeriod(0, 1000L * 60 * 60 * 24 * 365
+                * 40))); // until ~1/1/2011
         Alert note1 = Alert.createSimpleAlerts("The route note");
         rnp1.setAlert(note1);
         rnp1.setId("id1");

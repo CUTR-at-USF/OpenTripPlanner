@@ -34,9 +34,11 @@ import org.slf4j.LoggerFactory;
 
 public class VisibilityPolygon extends VLPolygon {
     private static Logger log = LoggerFactory.getLogger(VisibilityPolygon.class);
+
     VLPoint observer;
 
-    public boolean is_spike(VLPoint observer, VLPoint point1, VLPoint point2, VLPoint point3, double epsilon) {
+    public boolean is_spike(VLPoint observer, VLPoint point1, VLPoint point2, VLPoint point3,
+            double epsilon) {
 
         return (
         // Make sure observer not colocated with any of the points.
@@ -168,7 +170,7 @@ public class VisibilityPolygon extends VLPolygon {
             for (int j = 0; j < polygon.n(); j++) {
                 ppoint1 = new PolarPoint(observer, polygon.get(j));
                 ppoint2 = new PolarPoint(observer, polygon.get(j + 1));
-                log.debug("contemplating " +  ppoint1 + " and " +  ppoint1);
+                log.debug("contemplating " + ppoint1 + " and " + ppoint1);
 
                 // If the observer is in the relative interior of the edge.
                 if (observer.in_relative_interior_of(new LineSegment(ppoint1, ppoint2), epsilon)) {
@@ -245,9 +247,9 @@ public class VisibilityPolygon extends VLPolygon {
                                 && ppoint2.bearing.equals(ANGLE_ZERO)
                                 && ppoint1.bearing.compareTo(ANGLE_PI) > 0) {
                             ppoint2.set_bearing_to_2pi();
-                        // Filter out edges which run 'against the grain'.
-                        } else if ((ppoint1.bearing.equals(ANGLE_ZERO) && 
-                                ppoint2.bearing.compareTo(ANGLE_PI) > 0)
+                            // Filter out edges which run 'against the grain'.
+                        } else if ((ppoint1.bearing.equals(ANGLE_ZERO) && ppoint2.bearing
+                                .compareTo(ANGLE_PI) > 0)
                                 || ppoint1.bearing.compareTo(ppoint2.bearing) >= 0) {
                             continue;
                         }
@@ -373,7 +375,7 @@ public class VisibilityPolygon extends VLPolygon {
 
             // TYPE 1: current_vertex is the _second_vertex_ of active_edge.
             if (current_vertex.incident_edge.equals(active_edge) && !current_vertex.is_first) {
-                log.debug( "type 1");
+                log.debug("type 1");
 
                 if (!q1.isEmpty()) {
                     // If the next vertex in q1 is contiguous.

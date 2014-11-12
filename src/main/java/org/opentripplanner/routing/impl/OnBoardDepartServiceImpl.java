@@ -87,9 +87,9 @@ public class OnBoardDepartServiceImpl implements OnBoardDepartService {
         Coordinate point = lon == null || lat == null ? null : new Coordinate(lon, lat);
         if (point != null) {
             /*
-             * 2. Get the best hop from the list, given the parameters. Currently look for nearest hop,
-             * taking into account shape if available. If no shape are present, the computed hop and
-             * fraction may be a bit away from what it should be.
+             * 2. Get the best hop from the list, given the parameters. Currently look for nearest
+             * hop, taking into account shape if available. If no shape are present, the computed
+             * hop and fraction may be a bit away from what it should be.
              */
             PatternHop bestHop = null;
             double minDist = Double.MAX_VALUE;
@@ -101,10 +101,12 @@ public class OnBoardDepartServiceImpl implements OnBoardDepartService {
                     bestHop = hop;
                 }
             }
-            if (minDist > 1000) LOG.warn(
-                    "On-board depart: origin point suspiciously away from nearest trip shape ({} meters)",
-                    minDist);
-            else LOG.info("On-board depart: origin point {} meters away from hop shape", minDist);
+            if (minDist > 1000)
+                LOG.warn(
+                        "On-board depart: origin point suspiciously away from nearest trip shape ({} meters)",
+                        minDist);
+            else
+                LOG.info("On-board depart: origin point {} meters away from hop shape", minDist);
 
             /*
              * 3. Compute the fraction covered percentage of the current hop. This assume a constant
@@ -137,8 +139,8 @@ public class OnBoardDepartServiceImpl implements OnBoardDepartService {
 
                 int depTime = tripTimes.getDepartureTime(bestStopIndex);
                 int arrTime = tripTimes.getArrivalTime(bestStopIndex + 1);
-                int estTime = (int) Math.round(
-                        depTime * fractionCovered + arrTime * (1 - fractionCovered));
+                int estTime = (int) Math.round(depTime * fractionCovered + arrTime
+                        * (1 - fractionCovered));
 
                 int time = serviceDay.secondsSinceMidnight(opt.dateTime);
                 /*
@@ -154,12 +156,15 @@ public class OnBoardDepartServiceImpl implements OnBoardDepartService {
                     bestServiceDay = serviceDay;
                 }
             }
-            if (minDelta > 60000) LOG.warn(       // Being more than 1h late should not happen often
-                    "On-board depart: delta between scheduled/real-time and actual time suspiciously large: {} seconds.",
-                    actDelta);
-            else LOG.info(
-                    "On-board depart: delta between scheduled/real-time and actual time is {} seconds.",
-                    actDelta);
+            if (minDelta > 60000)
+                LOG.warn(
+                        // Being more than 1h late should not happen often
+                        "On-board depart: delta between scheduled/real-time and actual time suspiciously large: {} seconds.",
+                        actDelta);
+            else
+                LOG.info(
+                        "On-board depart: delta between scheduled/real-time and actual time is {} seconds.",
+                        actDelta);
         } else {
             /* 2. Compute service day */
             for (ServiceDay serviceDay : ctx.serviceDays) {
@@ -201,7 +206,8 @@ public class OnBoardDepartServiceImpl implements OnBoardDepartService {
                 } else if (depTime < time) {
                     bestHop = hop;
                     bestStopIndex = stopIndex;
-                } else if (time == depTime || bestTripTimes.getArrivalTime(bestStopIndex + 1) < time) {
+                } else if (time == depTime
+                        || bestTripTimes.getArrivalTime(bestStopIndex + 1) < time) {
                     return ctx.graph.getVertex(hop.getBeginStop().getId().toString());
                 } else {
                     break;
@@ -219,10 +225,10 @@ public class OnBoardDepartServiceImpl implements OnBoardDepartService {
              */
             int depTime = bestTripTimes.getDepartureTime(bestStopIndex);
             int arrTime = bestTripTimes.getArrivalTime(bestStopIndex + 1);
-            fractionCovered =  ((double) (time - depTime)) / ((double) (arrTime - depTime));
+            fractionCovered = ((double) (time - depTime)) / ((double) (arrTime - depTime));
 
-            P2<LineString> geomPair =
-                    GeometryUtils.splitGeometryAtFraction(geometry, fractionCovered);
+            P2<LineString> geomPair = GeometryUtils.splitGeometryAtFraction(geometry,
+                    fractionCovered);
             geomRemaining = geomPair.getSecond();
 
             if (geometry.isEmpty()) {

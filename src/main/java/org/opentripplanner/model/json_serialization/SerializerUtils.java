@@ -22,11 +22,11 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 
-
 public class SerializerUtils {
 
     public static SimpleModule getSerializerModule() {
-        SimpleModule module = new SimpleModule("VertexJSONSerializer", new Version(1, 0, 0, null, "com.fasterxml.jackson.module", "jackson-module-jaxb-annotations"));
+        SimpleModule module = new SimpleModule("VertexJSONSerializer", new Version(1, 0, 0, null,
+                "com.fasterxml.jackson.module", "jackson-module-jaxb-annotations"));
         module.addSerializer(new GeoJSONSerializer());
         module.addSerializer(new CoordinateSerializer());
         module.addSerializer(new PackedCoordinateSequenceSerializer());
@@ -35,12 +35,10 @@ public class SerializerUtils {
 
     public static ObjectMapper getMapper() {
         ObjectMapper mapper = new ObjectMapper();
-        AnnotationIntrospector aipair = new AnnotationIntrospectorPair (
-            new JaxbAnnotationIntrospector(),
-            new JacksonAnnotationIntrospector()
-        );
+        AnnotationIntrospector aipair = new AnnotationIntrospectorPair(
+                new JaxbAnnotationIntrospector(), new JacksonAnnotationIntrospector());
         mapper.setAnnotationIntrospector(aipair);
-        //REMOVE: mapper.configure(SerializationConfig.Feature.USE_ANNOTATIONS, true);
+        // REMOVE: mapper.configure(SerializationConfig.Feature.USE_ANNOTATIONS, true);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         return mapper;
 

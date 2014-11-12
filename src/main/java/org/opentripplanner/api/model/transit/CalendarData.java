@@ -29,7 +29,7 @@ public class CalendarData {
     @XmlElementWrapper
     @XmlElements(value = { @XmlElement(name = "calendar") })
     public List<ServiceCalendarType> calendarList;
-    
+
     @XmlElementWrapper
     @XmlElements(value = { @XmlElement(name = "calendarDate") })
     public List<ServiceCalendarDateType> calendarDatesList;

@@ -22,17 +22,17 @@ public class HopSpeedSlow extends GraphBuilderAnnotation {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String FMT = "Very slow speed of %f m/sec over %fm on route %s trip %s " +
-    		"stop sequence %d.";
-    
+    public static final String FMT = "Very slow speed of %f m/sec over %fm on route %s trip %s "
+            + "stop sequence %d.";
+
     final float speed;
 
     final float distance;
-    
+
     final Trip trip;
-    
+
     final int seq;
-    
+
     @Override
     public String getMessage() {
         return String.format(FMT, speed, distance, trip.getRoute().getId(), trip.getId(), seq);

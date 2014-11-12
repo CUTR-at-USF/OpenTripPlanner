@@ -23,7 +23,7 @@ public class KeolisRennesBikeRentalDataSource extends GenericXmlBikeRentalDataSo
     }
 
     public BikeRentalStation makeStation(Map<String, String> attributes) {
-        //FIXME: I have no idea what state actually means
+        // FIXME: I have no idea what state actually means
         if (!"1".equals(attributes.get("state"))) {
             return null;
         }

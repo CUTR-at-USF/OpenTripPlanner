@@ -54,8 +54,8 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
 
 /**
- * This is the original Isochrone class provided by Stefan Steineger.
- * Another implementation has been provided by Laurent Grégoire (isochrone2).
+ * This is the original Isochrone class provided by Stefan Steineger. Another implementation has
+ * been provided by Laurent Grégoire (isochrone2).
  */
 @Path("/routers/{routerId}/isochroneOld")
 @XmlRootElement
@@ -75,19 +75,25 @@ public class SIsochrone extends RoutingResource {
 
     private List tooFastTraversedEdgeGeoms = null;
 
-    @Context // FIXME inject Application context
+    @Context
+    // FIXME inject Application context
     GraphService graphService;
 
-    @Context // FIXME inject Application context
+    @Context
+    // FIXME inject Application context
     private SPTService sptService;
 
-    @Context // FIXME inject Application context
+    @Context
+    // FIXME inject Application context
     private GeometryIndex index;
 
     /** Walkspeed between user indicated position and road 3000 m/h = 0.83333 m/sec */
     public double offRoadWalkspeed = 0.8333;
 
-    /** To decide between edge-based or point-based calculation of sheds, i.e. hulls. Will be set later again. */
+    /**
+     * To decide between edge-based or point-based calculation of sheds, i.e. hulls. Will be set
+     * later again.
+     */
     public long shedCalcMethodSwitchTimeInSec = 60 * 25;
 
     public double angleLimitForUShapeDetection = 20.0 * Math.PI / 180.0;
@@ -95,59 +101,66 @@ public class SIsochrone extends RoutingResource {
     public double distanceToleranceForUShapeDetection = 1.1; // in percent: e.g. 1.1 = 110%
 
     /**
-     * To calculate the length of sub-edges and eventually to detect u-shaped roads, in m/sec (will be set later dependent on mode)
+     * To calculate the length of sub-edges and eventually to detect u-shaped roads, in m/sec (will
+     * be set later dependent on mode)
      */
     public double maxUserSpeed = 1.3;
 
     private boolean usesCar = false;
 
-    /** Parameter for concave hull computation, i.e. the maximal (triangulation) edge length in degrees */
+    /**
+     * Parameter for concave hull computation, i.e. the maximal (triangulation) edge length in
+     * degrees
+     */
     public double concaveHullAlpha = 0.005;
 
-    public boolean doSpeedTest = false; // to detect u-shaped roads etc., as an additional test besides the angle test
+    public boolean doSpeedTest = false; // to detect u-shaped roads etc., as an additional test
+                                        // besides the angle test
 
     private boolean noRoadNearBy = false;
 
     private DistanceLibrary distanceLibrary = SphericalDistanceLibrary.getInstance();
 
     /**
-     * Calculates walksheds for a given location, based on time given to walk and the walk speed. 
+     * Calculates walksheds for a given location, based on time given to walk and the walk speed.
      *
-     * Depending on the value for the "output" parameter (i.e. "POINTS", "SHED" or "EDGES"), a 
-     * different type of GeoJSON geometry is returned. If a SHED is requested, then a ConcaveHull 
-     * of the EDGES/roads is returned. If that fails, a ConvexHull will be returned. 
+     * Depending on the value for the "output" parameter (i.e. "POINTS", "SHED" or "EDGES"), a
+     * different type of GeoJSON geometry is returned. If a SHED is requested, then a ConcaveHull of
+     * the EDGES/roads is returned. If that fails, a ConvexHull will be returned.
      * <p>
-     * The ConcaveHull parameter is set to 0.005 degrees. The offroad walkspeed is assumed to be 
+     * The ConcaveHull parameter is set to 0.005 degrees. The offroad walkspeed is assumed to be
      * 0.83333 m/sec (= 3km/h) until a road is hit.
      * <p>
-     * Note that the set of EDGES/roads returned as well as POINTS returned may contain duplicates. 
-     * If POINTS are requested, then not the end-points are returned at which the max time is 
+     * Note that the set of EDGES/roads returned as well as POINTS returned may contain duplicates.
+     * If POINTS are requested, then not the end-points are returned at which the max time is
      * reached, but instead all the graph nodes/crossings that are within the time limits.
      * <p>
-     * In case there is no road near by within the given time, then a circle for the walktime limit 
-     * is created and returned for the SHED parameter. Otherwise the edge with the direction 
-     * towards the closest road. Note that the circle is calculated in Euclidian 2D coordinates, 
-     * and distortions towards an ellipse will appear if it is transformed/projected to the user location.
+     * In case there is no road near by within the given time, then a circle for the walktime limit
+     * is created and returned for the SHED parameter. Otherwise the edge with the direction towards
+     * the closest road. Note that the circle is calculated in Euclidian 2D coordinates, and
+     * distortions towards an ellipse will appear if it is transformed/projected to the user
+     * location.
      * <p>
      * An example request may look like this:
-     * localhost:8080/otp-rest-servlet/ws/iso?layers=traveltime&styles=mask&batch=true&fromPlace=51.040193121307176
-     * %2C-114.04471635818481&toPlace
-     * =51.09098935%2C-113.95179705&time=2012-06-06T08%3A00%3A00&mode=WALK&maxWalkDistance=10000&walkSpeed=1.38&walkTime=10.7&output=EDGES 
-     * Though the first parameters (i) layer, (ii) styles and (iii) batch could be discarded.
+     * localhost:8080/otp-rest-servlet/ws/iso?layers=traveltime
+     * &styles=mask&batch=true&fromPlace=51.040193121307176 %2C-114.04471635818481&toPlace
+     * =51.09098935
+     * %2C-113.95179705&time=2012-06-06T08%3A00%3A00&mode=WALK&maxWalkDistance=10000&walkSpeed
+     * =1.38&walkTime=10.7&output=EDGES Though the first parameters (i) layer, (ii) styles and (iii)
+     * batch could be discarded.
      * 
      * @param walkmins Maximum number of minutes to walk.
-     * @param output Can be set to "POINTS", "SHED" or "EDGES" to return different types of GeoJSON 
+     * @param output Can be set to "POINTS", "SHED" or "EDGES" to return different types of GeoJSON
      *        geometry. SHED returns a ConcaveHull or ConvexHull of the edges/roads. POINTS returns
-     *        all graph nodes that are within the time limit. 
+     *        all graph nodes that are within the time limit.
      * @return a JSON document containing geometries (either points, lineStrings or a polygon).
      * @throws Exception
      * @author sstein---geo.uzh.ch
      */
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    public String getIsochrone(
-            @QueryParam("walkTime") @DefaultValue("15")     double walkmins,
-            @QueryParam("output")   @DefaultValue("POINTS") String output ) throws Exception {
+    public String getIsochrone(@QueryParam("walkTime") @DefaultValue("15") double walkmins,
+            @QueryParam("output") @DefaultValue("POINTS") String output) throws Exception {
 
         this.debugGeoms = new ArrayList();
         this.tooFastTraversedEdgeGeoms = new ArrayList();
@@ -196,12 +209,14 @@ public class SIsochrone extends RoutingResource {
         } else {
             sptRequestA.worstTime = sptRequestA.dateTime + Math.round(walkInMin * 1.3 * 60);
         }
-        // set the switch-time for shed/area calculation, i.e. to decide if the hull is calculated based on points or on edges
+        // set the switch-time for shed/area calculation, i.e. to decide if the hull is calculated
+        // based on points or on edges
         TraverseModeSet modes = sptRequestA.modes;
         LOG.debug("mode(s): " + modes);
         if ((modes.contains(TraverseMode.TRANSIT)) || (modes.contains(TraverseMode.BUSISH))
                 || (modes.contains(TraverseMode.TRAINISH))) {
-            shedCalcMethodSwitchTimeInSec = 60 * 20; // 20min (use 20min for transit, since buses may not come all the time)
+            shedCalcMethodSwitchTimeInSec = 60 * 20; // 20min (use 20min for transit, since buses
+                                                     // may not come all the time)
         } else if (modes.contains(TraverseMode.CAR)) {
             shedCalcMethodSwitchTimeInSec = 60 * 10; // 10min
         } else if (modes.contains(TraverseMode.BICYCLE)) {
@@ -209,7 +224,8 @@ public class SIsochrone extends RoutingResource {
         } else {
             shedCalcMethodSwitchTimeInSec = 60 * 20; // 20min
         }
-        // set the maxUserSpeed, which is used later to check for u-type streets/crescents when calculating sub-edges;
+        // set the maxUserSpeed, which is used later to check for u-type streets/crescents when
+        // calculating sub-edges;
         // Note, that the car speed depends on the edge itself, so this value may be replaced later
         this.usesCar = false;
         int numberOfModes = modes.getModes().size();
@@ -224,7 +240,8 @@ public class SIsochrone extends RoutingResource {
             }
         } else {// for all other cases (multiple-modes)
                 // sstein: I thought I may set it to 36.111 m/sec = 130 km/h,
-                // but maybe it is better to assume walk speed for transit, i.e. treat it like if the
+                // but maybe it is better to assume walk speed for transit, i.e. treat it like if
+                // the
                 // person gets off the bus on the last crossing and walks the "last mile".
             this.maxUserSpeed = sptRequestA.getWalkSpeed();
         }
@@ -243,7 +260,8 @@ public class SIsochrone extends RoutingResource {
             sptRequestA.setRoutingContext(graphService.getGraph());
         } catch (Exception e) {
             // if we get an exception here, and in particular a VertexNotFoundException,
-            // then it is likely that we chose a (transit) mode without having that (transit) modes data
+            // then it is likely that we chose a (transit) mode without having that (transit) modes
+            // data
             LOG.debug("cannot set RoutingContext: " + e.toString());
             LOG.debug("cannot set RoutingContext: setting mode=WALK");
             sptRequestA.setMode(TraverseMode.WALK); // fall back to walk mode
@@ -271,7 +289,8 @@ public class SIsochrone extends RoutingResource {
         ArrayList<Edge> allConnectingEdges = new ArrayList<Edge>();
         Coordinate coords[] = null;
         long maxTime = (long) walkInSec - offRoadTimeCorrection;
-        // System.out.println("Reducing walktime from: " + (int)(walkmins * 60) + "sec to " + maxTime + "sec due to initial walk of " + distanceToRoad
+        // System.out.println("Reducing walktime from: " + (int)(walkmins * 60) + "sec to " +
+        // maxTime + "sec due to initial walk of " + distanceToRoad
         // + "m");
 
         // if the initial walk is already to long, there is no need to parse...
@@ -291,8 +310,10 @@ public class SIsochrone extends RoutingResource {
             for (State state : sptA.getAllStates()) {
                 long et = state.getElapsedTimeSeconds();
                 if (et <= maxTime) {
-                    // -- filter points, as the same coordinate may be passed several times due to the graph structure
-                    // in a Calgary suburb family homes neighborhood with a 15min walkshed it filtered about
+                    // -- filter points, as the same coordinate may be passed several times due to
+                    // the graph structure
+                    // in a Calgary suburb family homes neighborhood with a 15min walkshed it
+                    // filtered about
                     // 250 points away (while 145 were finally displayed)
                     if (visitedCoords.contains(state.getVertex().getCoordinate())) {
                         continue;
@@ -308,7 +329,8 @@ public class SIsochrone extends RoutingResource {
                         Geometry edgeGeom = edge.getGeometry();
                         if (edgeGeom != null) { // make sure we get only real edges
                             if (edgeGeom instanceof LineString) {
-                                // allConnectingEdges.add(edge); // instead of this, use a map now, so we don't have similar edge many times
+                                // allConnectingEdges.add(edge); // instead of this, use a map now,
+                                // so we don't have similar edge many times
                                 connectingEdgesMap.put(new ReversibleLineStringWrapper(
                                         (LineString) edgeGeom), edge);
                             }
@@ -320,7 +342,8 @@ public class SIsochrone extends RoutingResource {
                         Geometry edgeGeom = edge.getGeometry();
                         if (edgeGeom != null) {
                             if (edgeGeom instanceof LineString) {
-                                // allConnectingEdges.add(edge); // instead of this, use a map now, so we don't similar edge many times
+                                // allConnectingEdges.add(edge); // instead of this, use a map now,
+                                // so we don't similar edge many times
                                 connectingEdgesMap.put(new ReversibleLineStringWrapper(
                                         (LineString) edgeGeom), edge);
                             }
@@ -403,7 +426,8 @@ public class SIsochrone extends RoutingResource {
                             "create concave hull from {} geoms with edge length limit of about {} m (distance on meridian)",
                             geomsArray.length, concaveHullAlpha * 111132);
                     // 1deg at Latitude phi = 45deg is about 111.132km
-                    // (see wikipedia: http://en.wikipedia.org/wiki/Latitude#The_length_of_a_degree_of_latitude)
+                    // (see wikipedia:
+                    // http://en.wikipedia.org/wiki/Latitude#The_length_of_a_degree_of_latitude)
                     try {
                         ConcaveHull hull = new ConcaveHull(gc, concaveHullAlpha);
                         outputHull = hull.getConcaveHull();
@@ -477,12 +501,15 @@ public class SIsochrone extends RoutingResource {
     }
 
     /**
-     * Creates a circle shape, using the JTS buffer algorithm. The method is used when there is no street found within the given traveltime, e.g. when
-     * the pointer is placed on a field or in the woods.<br>
-     * TODO: Note it is actually not correct to do buffer calculation in Euclidian 2D, since the resulting shape will be elliptical when projected.
+     * Creates a circle shape, using the JTS buffer algorithm. The method is used when there is no
+     * street found within the given traveltime, e.g. when the pointer is placed on a field or in
+     * the woods.<br>
+     * TODO: Note it is actually not correct to do buffer calculation in Euclidian 2D, since the
+     * resulting shape will be elliptical when projected.
      * 
      * @param dropPoint the location given by the user
-     * @param pathToStreet the path from the dropPoint to the street, used to retrieve the buffer distance
+     * @param pathToStreet the path from the dropPoint to the street, used to retrieve the buffer
+     *        distance
      * @return a Circle
      */
     private Geometry createCirle(Coordinate dropPoint, LineString pathToStreet) {
@@ -509,16 +536,20 @@ public class SIsochrone extends RoutingResource {
     }
 
     /**
-     * Filters all input edges and returns all those as LineString geometries, that have at least one end point within the time limits. If they have
-     * only one end point inside, then the sub-edge is returned.
+     * Filters all input edges and returns all those as LineString geometries, that have at least
+     * one end point within the time limits. If they have only one end point inside, then the
+     * sub-edge is returned.
      * 
      * @param maxTime the time limit in seconds that defines the size of the walkshed
      * @param allConnectingStateEdges all Edges that have been found to connect all states < maxTime
      * @param spt the ShortestPathTree generated for the pushpin drop point as origin
-     * @param angleLimit the angle tolerance to detect roads with u-shapes, i.e. Pi/2 angles, in Radiant.
-     * @param distanceTolerance in percent (e.g. 1.1 = 110%) for u-shape detection based on distance criteria
+     * @param angleLimit the angle tolerance to detect roads with u-shapes, i.e. Pi/2 angles, in
+     *        Radiant.
+     * @param distanceTolerance in percent (e.g. 1.1 = 110%) for u-shape detection based on distance
+     *        criteria
      * @param hasCar is travel mode by CAR?
-     * @param performSpeedTest if true applies a test to each edge to check if the edge can be traversed in time. The test can detect u-shaped roads.
+     * @param performSpeedTest if true applies a test to each edge to check if the edge can be
+     *        traversed in time. The test can detect u-shaped roads.
      * @return
      */
     ArrayList<LineString> getLinesAndSubEdgesWithinMaxTime(long maxTime,
@@ -601,7 +632,8 @@ public class SIsochrone extends RoutingResource {
                 }
             }// end if(sFrom && sTo != null) start Else
             else {
-                // LOG.debug("could not retrieve state for edge-endpoint"); //for a 6min car ride, there can be (too) many of such messages
+                // LOG.debug("could not retrieve state for edge-endpoint"); //for a 6min car ride,
+                // there can be (too) many of such messages
                 Geometry edgeGeom = edge.getGeometry();
                 if ((edgeGeom != null) && (edgeGeom instanceof LineString)) {
                     otherEdges.add((LineString) edgeGeom);
@@ -671,7 +703,8 @@ public class SIsochrone extends RoutingResource {
             }
             if (diffTo90Azimuths < angleLimit) {
                 // no need to test further if we know its a u-shape
-                // System.out.println("u-shape found, (spherical) angle: " + diffTo90Azimuths* 180/Math.PI);
+                // System.out.println("u-shape found, (spherical) angle: " + diffTo90Azimuths*
+                // 180/Math.PI);
                 return true;
             } else {
                 if (performSpeedTest) {
@@ -693,12 +726,14 @@ public class SIsochrone extends RoutingResource {
     }
 
     /**
-     * Calculates what distance can be traveled with the remaining time and given speeds. For car use the speed limit is taken from the edge itself.
-     * Slopes are accounted for when walking and biking. A minimal slope of 0.06 (6m/100m) is necessary.
+     * Calculates what distance can be traveled with the remaining time and given speeds. For car
+     * use the speed limit is taken from the edge itself. Slopes are accounted for when walking and
+     * biking. A minimal slope of 0.06 (6m/100m) is necessary.
      * 
      * @param maxTime in sec, the time we have left
      * @param fromTime in sec, the time when we enter the edge
-     * @param traverseTime in sec, original edge traverse time needed to adjust the speed based calculation to slope effects
+     * @param traverseTime in sec, original edge traverse time needed to adjust the speed based
+     *        calculation to slope effects
      * @param userSpeed in m/sec, dependent on traversal mode
      * @param edge the edge itself (used to the get the speed in car mode)
      * @param usesCar if we traverse the edge in car mode
@@ -711,7 +746,8 @@ public class SIsochrone extends RoutingResource {
         boolean isTooFast = false;
         String msg = "";
 
-        double originalTravelSpeed = edge.getDistance() / traverseTime; // this may be wrong for u-shapes
+        double originalTravelSpeed = edge.getDistance() / traverseTime; // this may be wrong for
+                                                                        // u-shapes
 
         if (originalTravelSpeed < userSpeed) {
             // we may have slope effects
@@ -724,12 +760,14 @@ public class SIsochrone extends RoutingResource {
                 }
             }
         } else {
-            // in this case we may have a u-shape, or the user speeds are too small, or something else.
+            // in this case we may have a u-shape, or the user speeds are too small, or something
+            // else.
             double vdiff = Math.abs(originalTravelSpeed - userSpeed);
             double vDiffPercent = vdiff / (userSpeed / 100.0);
             if (vDiffPercent > 20) {
                 isTooFast = true;
-                // [sstein Dec 2012]: Note, it seems like most of these edges are indeed of u-shape type,
+                // [sstein Dec 2012]: Note, it seems like most of these edges are indeed of u-shape
+                // type,
                 // i.e. small roads that come from and return from (the same) main road
                 msg = "v_traversed is much faster than (allowed) v_user, edgeName: "
                         + edge.getName() + ", >>> (in m/s): v_traversed="
@@ -766,8 +804,8 @@ public class SIsochrone extends RoutingResource {
     private GeodeticCalculator geodeticCalculator = new GeodeticCalculator();
 
     /**
-     * Computes the angle from the first point to the last point of a LineString or MultiLineString. TODO: put this method into
-     * org.opentripplanner.common.geometry.DirectionUtils
+     * Computes the angle from the first point to the last point of a LineString or MultiLineString.
+     * TODO: put this method into org.opentripplanner.common.geometry.DirectionUtils
      * 
      * @param geometry a LineString or a MultiLineString
      * 

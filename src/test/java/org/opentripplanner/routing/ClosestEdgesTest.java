@@ -182,7 +182,7 @@ public class ClosestEdgesTest {
         TraverseModeSet modes = new TraverseModeSet();
         modes.setCar(true);
         reqs.setModes(modes);
-        
+
         for (double degreeOff = 0.0; degreeOff < 30.0; degreeOff += 3.0) {
             // Location along the top edge, traveling with the forward edge
             // exactly.
@@ -197,7 +197,7 @@ public class ClosestEdgesTest {
             checkBest(reqs, loc, top, 2);
         }
     }
-    
+
     @Test
     public void testSorting() {
         // Lies along the top edge
@@ -207,22 +207,22 @@ public class ClosestEdgesTest {
         TraverseModeSet modes = new TraverseModeSet();
         modes.setCar(true);
         reqs.setModes(modes);
-        
+
         // Location along the top edge, traveling with the forward edge
         // exactly.
         GenericLocation loc = new GenericLocation(c);
         loc.setHeading(top.getAzimuth());
-        
+
         CandidateEdgeBundle candidates = finder.getClosestEdges(loc, reqs);
         Collections.sort(candidates, new CandidateEdge.CandidateEdgeScoreComparator());
-        
+
         // Check that scores are in ascending order.
         double lastScore = candidates.best.getScore();
         for (CandidateEdge ce : candidates) {
             assertTrue(ce.getScore() >= lastScore);
             lastScore = ce.getScore();
         }
-        
+
         assertEquals(candidates.best.getScore(), candidates.get(0).getScore(), 0.0);
-    }    
+    }
 }

@@ -53,8 +53,9 @@ public class TestBanning extends TestCase {
         ShortestPathTree spt = null;
 
         /*
-         * The MAX Red, Blue, and Green lines all run along the same trackage between the stops 8374 and 8371. Together, they form the white line. No,
-         * wait, that's light. They make a pretty good test case for banned routes, since if one is banned, you can always take another.
+         * The MAX Red, Blue, and Green lines all run along the same trackage between the stops 8374
+         * and 8371. Together, they form the white line. No, wait, that's light. They make a pretty
+         * good test case for banned routes, since if one is banned, you can always take another.
          */
         String[][] maxLines = { { "MAX Red Line", null }, { "MAX Blue Line", null },
                 { "MAX Green Line", null }, { null, "90" }, { null, "100" }, { null, "200" } };
@@ -94,12 +95,14 @@ public class TestBanning extends TestCase {
     }
 
     /**
-     * Test trip banning. We compute a set of shortest routes between two random stops in the Portland graph. We then ban, for each route, up to a
-     * certain amount of trips used in this route, one by one, and recompute the path. The banned trips must not appear in the new computed route.
+     * Test trip banning. We compute a set of shortest routes between two random stops in the
+     * Portland graph. We then ban, for each route, up to a certain amount of trips used in this
+     * route, one by one, and recompute the path. The banned trips must not appear in the new
+     * computed route.
      * 
-     * This is using a seeded random generator to easily make a reproducible and arbitrary list 
-     * of start/end points and trip to ban. It allow for a (bit) more coverage than doing a 
-     * single hand-picked test only.
+     * This is using a seeded random generator to easily make a reproducible and arbitrary list of
+     * start/end points and trip to ban. It allow for a (bit) more coverage than doing a single
+     * hand-picked test only.
      * 
      * @param partial True to test partial trip banning, false for complete trip
      * @param seed Value to use for random generator seed -- Keep the same value for consistency.

@@ -27,9 +27,9 @@ import com.vividsolutions.jts.geom.LineString;
 public class TransferEdge extends Edge {
 
     private static final long serialVersionUID = 1L;
-    
+
     int time = 0;
-    
+
     double distance;
 
     private LineString geometry = null;
@@ -42,18 +42,19 @@ public class TransferEdge extends Edge {
     public TransferEdge(TransitStationStop fromv, TransitStationStop tov, double distance) {
         this(fromv, tov, distance, (int) distance);
     }
-    
+
     /**
      * Creates a new Transfer edge.
-     * @param fromv     the Vertex where the transfer originates
-     * @param tov       the Vertex where the transfer ends
-     * @param distance  the distance in meters from the origin Vertex to the destination
-     * @param time      the minimum time in seconds it takes to complete this transfer
+     * 
+     * @param fromv the Vertex where the transfer originates
+     * @param tov the Vertex where the transfer ends
+     * @param distance the distance in meters from the origin Vertex to the destination
+     * @param time the minimum time in seconds it takes to complete this transfer
      */
     public TransferEdge(TransitStationStop fromv, TransitStationStop tov, double distance, int time) {
         super(fromv, tov);
         this.distance = distance;
-        this.time = time; 
+        this.time = time;
     }
 
     public String getDirection() {
@@ -77,11 +78,15 @@ public class TransferEdge extends Edge {
     }
 
     public State traverse(State s0) {
-        /* Disallow chaining of transfer edges. TODO: This should really be guaranteed by the PathParser
-           but the default Pathparser is currently very hard to read because
-           we need a complement operator. */
-        if (s0.getBackEdge() instanceof TransferEdge) return null;
-        if (s0.getOptions().wheelchairAccessible && !wheelchairAccessible) return null;
+        /*
+         * Disallow chaining of transfer edges. TODO: This should really be guaranteed by the
+         * PathParser but the default Pathparser is currently very hard to read because we need a
+         * complement operator.
+         */
+        if (s0.getBackEdge() instanceof TransferEdge)
+            return null;
+        if (s0.getOptions().wheelchairAccessible && !wheelchairAccessible)
+            return null;
         StateEditor s1 = s0.edit(this);
         s1.incrementTimeInSeconds(time);
         s1.incrementWeight(time);
@@ -90,7 +95,7 @@ public class TransferEdge extends Edge {
     }
 
     public void setGeometry(LineString geometry) {
-        this.geometry  = geometry;
+        this.geometry = geometry;
     }
 
     public void setWheelchairAccessible(boolean wheelchairAccessible) {

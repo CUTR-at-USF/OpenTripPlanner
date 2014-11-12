@@ -43,12 +43,13 @@ public class OSMNode extends OSMWithTags {
         if (capacity == null) {
             return 0;
         }
-        
+
         return Integer.parseInt(getTag("capacity"));
     }
 
     /**
-     * Is this a multi-level node that should be decomposed to multiple coincident nodes? Currently returns true only for elevators.
+     * Is this a multi-level node that should be decomposed to multiple coincident nodes? Currently
+     * returns true only for elevators.
      * 
      * @return whether the node is multi-level
      * @author mattwigway
@@ -56,7 +57,7 @@ public class OSMNode extends OSMWithTags {
     public boolean isMultiLevel() {
         return hasTag("highway") && "elevator".equals(getTag("highway"));
     }
-    
+
     public boolean hasTrafficLight() {
         return hasTag("highway") && "traffic_signals".equals(getTag("highway"));
     }

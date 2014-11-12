@@ -79,7 +79,7 @@ public class StreetfulStopLinker implements GraphBuilder {
 
     @Override
     public void buildGraph(Graph graph, HashMap<Class<?>, Object> extra) {
-        final Parser parser[] = new Parser[] {new Parser()};
+        final Parser parser[] = new Parser[] { new Parser() };
         GeometryFactory geometryFactory = GeometryUtils.getGeometryFactory();
         EarliestArrivalSPTService earliestArrivalSPTService = new EarliestArrivalSPTService();
         earliestArrivalSPTService.setMaxDuration(maxDuration);
@@ -111,7 +111,8 @@ public class StreetfulStopLinker implements GraphBuilder {
             if (spt != null) {
                 for (State state : spt.getAllStates()) {
                     Vertex vertex = state.getVertex();
-                    if (ts == vertex) continue;
+                    if (ts == vertex)
+                        continue;
 
                     if (vertex instanceof TransitStop) {
                         TransitStop other = (TransitStop) vertex;
@@ -142,7 +143,7 @@ public class StreetfulStopLinker implements GraphBuilder {
                             }
                         }
 
-                        if (coordinates.size() < 2) {   // Otherwise the walk step generator breaks.
+                        if (coordinates.size() < 2) { // Otherwise the walk step generator breaks.
                             ArrayList<Coordinate> coordinateList = new ArrayList<Coordinate>(2);
                             coordinateList.add(graphPath.states.get(1).getVertex().getCoordinate());
                             State lastState = graphPath.states.getLast().getBackState();
@@ -150,9 +151,11 @@ public class StreetfulStopLinker implements GraphBuilder {
                             coordinates = new CoordinateArrayListSequence(coordinateList);
                         }
 
-                        LineString geometry = geometryFactory.createLineString(new
-                                PackedCoordinateSequence.Double(coordinates.toCoordinateArray()));
-                        LOG.trace("  to stop: '{}' {} ({}m) [{}]", other.getStop(), other, distance, geometry);
+                        LineString geometry = geometryFactory
+                                .createLineString(new PackedCoordinateSequence.Double(coordinates
+                                        .toCoordinateArray()));
+                        LOG.trace("  to stop: '{}' {} ({}m) [{}]", other.getStop(), other,
+                                distance, geometry);
                         new SimpleTransfer(ts, other, distance, geometry);
                         n++;
                     }
@@ -172,15 +175,17 @@ public class StreetfulStopLinker implements GraphBuilder {
     }
 
     private static class Parser extends PathParser {
-        private static final int OTHER  = 0;
+        private static final int OTHER = 0;
+
         private static final int STREET = 1;
-        private static final int LINK   = 2;
+
+        private static final int LINK = 2;
 
         @Getter
         private final DFA DFA;
 
         Parser() {
-            Nonterminal streets   = star(STREET);
+            Nonterminal streets = star(STREET);
 
             Nonterminal itinerary = seq(LINK, streets, LINK);
 
@@ -191,8 +196,10 @@ public class StreetfulStopLinker implements GraphBuilder {
         public int terminalFor(State state) {
             Edge edge = state.getBackEdge();
 
-            if (edge instanceof PlainStreetEdge)   return STREET;
-            if (edge instanceof StreetTransitLink) return LINK;
+            if (edge instanceof PlainStreetEdge)
+                return STREET;
+            if (edge instanceof StreetTransitLink)
+                return LINK;
 
             return OTHER;
         }

@@ -108,25 +108,31 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 
 public class PlanGeneratorTest {
-    private static final double F_DISTANCE[] = {3, 9996806.8, 3539050.5, 7, 2478638.8, 4, 2, 1, 0};
+    private static final double F_DISTANCE[] = { 3, 9996806.8, 3539050.5, 7, 2478638.8, 4, 2, 1, 0 };
+
     private static final double O_DISTANCE = 7286193.2;
+
     private static final double OCTANT = Math.PI / 4;
+
     private static final double NORTH = OCTANT * 0;
+
     private static final double NORTHEAST = OCTANT * 1;
+
     private static final double EAST = OCTANT * 2;
+
     private static final double NORTHWEST = OCTANT * -1;
+
     private static final double EPSILON = 1e-1;
 
     private static final SimpleTimeZone timeZone = new SimpleTimeZone(2, "CEST");
 
-    private static final String alertsExample =
-            "Mine is the last voice that you will ever hear. Do not be alarmed.";
+    private static final String alertsExample = "Mine is the last voice that you will ever hear. Do not be alarmed.";
 
     private static final PlanGenerator planGenerator = new PlanGenerator(null, null);
 
     /**
-     * Test the generateItinerary() method. This test is intended to be comprehensive but fast.
-     * Any future changes to the generateItinerary() method should be accompanied by changes in this
+     * Test the generateItinerary() method. This test is intended to be comprehensive but fast. Any
+     * future changes to the generateItinerary() method should be accompanied by changes in this
      * test, to ensure continued maximum coverage.
      */
     @Test
@@ -139,8 +145,8 @@ public class PlanGeneratorTest {
     }
 
     /**
-     * Test that a LEG_SWITCH mode at the end of a graph path does not generate an extra leg.
-     * Also test that such a LEG_SWITCH mode does not show up as part of the itinerary.
+     * Test that a LEG_SWITCH mode at the end of a graph path does not generate an extra leg. Also
+     * test that such a LEG_SWITCH mode does not show up as part of the itinerary.
      */
     @Test
     public void testEndWithLegSwitch() {
@@ -155,16 +161,13 @@ public class PlanGeneratorTest {
 
     /**
      * Build three GraphPath objects that can be used for testing for forward, backward and onboard.
-     * This method doesn't rely on any routing code.
-     * Leg 0: Walking towards the train station
-     * Leg 1: First train leg, interlined with leg 2
-     * Leg 2: Second train leg, interlined with leg 1
-     * Leg 3: Simple transfer from the train station to the ferry
-     * Leg 4: Ferry leg
-     * Leg 5: Walking towards the bike rental station
-     * Leg 6: Cycling on a rented bike
-     * Leg 7: Cycling on a rented bike, continued (to demonstrate a {@link LegSwitchingEdge})
-     * Leg 8: Leaving the bike rental station on foot
+     * This method doesn't rely on any routing code. Leg 0: Walking towards the train station Leg 1:
+     * First train leg, interlined with leg 2 Leg 2: Second train leg, interlined with leg 1 Leg 3:
+     * Simple transfer from the train station to the ferry Leg 4: Ferry leg Leg 5: Walking towards
+     * the bike rental station Leg 6: Cycling on a rented bike Leg 7: Cycling on a rented bike,
+     * continued (to demonstrate a {@link LegSwitchingEdge}) Leg 8: Leaving the bike rental station
+     * on foot
+     * 
      * @return An array containing the generated GraphPath objects: forward, then backward, onboard.
      */
     private GraphPath[] buildPaths() {
@@ -174,12 +177,9 @@ public class PlanGeneratorTest {
         Graph graph = new Graph();
 
         // Vertices for leg 0
-        ExitVertex v0 = new ExitVertex(
-                graph, "Vertex 0", 0, 0);
-        IntersectionVertex v2 = new IntersectionVertex(
-                graph, "Vertex 2", 0, 0);
-        IntersectionVertex v4 = new IntersectionVertex(
-                graph, "Vertex 4", 1, 1);
+        ExitVertex v0 = new ExitVertex(graph, "Vertex 0", 0, 0);
+        IntersectionVertex v2 = new IntersectionVertex(graph, "Vertex 2", 0, 0);
+        IntersectionVertex v4 = new IntersectionVertex(graph, "Vertex 4", 1, 1);
 
         // Stops for legs 1, 2 and 4, plus initialization and storage in a list
         Stop trainStopDepart = new Stop();
@@ -362,17 +362,17 @@ public class PlanGeneratorTest {
         thirdStopTimes.add(ferryStopArriveTime);
 
         // Various patterns that are required to construct a full graph path, plus initialization
-        StopPattern firstStopPattern  = new StopPattern(firstStopTimes);
+        StopPattern firstStopPattern = new StopPattern(firstStopTimes);
         StopPattern secondStopPattern = new StopPattern(secondStopTimes);
-        StopPattern thirdStopPattern  = new StopPattern(thirdStopTimes);
+        StopPattern thirdStopPattern = new StopPattern(thirdStopTimes);
 
-        TripPattern firstTripPattern  = new TripPattern(firstRoute, firstStopPattern);
+        TripPattern firstTripPattern = new TripPattern(firstRoute, firstStopPattern);
         TripPattern secondTripPattern = new TripPattern(secondRoute, secondStopPattern);
-        TripPattern thirdTripPattern  = new TripPattern(thirdRoute, thirdStopPattern);
+        TripPattern thirdTripPattern = new TripPattern(thirdRoute, thirdStopPattern);
 
-        TripTimes firstTripTimes  = new TripTimes(firstTrip, firstStopTimes, new Deduplicator());
+        TripTimes firstTripTimes = new TripTimes(firstTrip, firstStopTimes, new Deduplicator());
         TripTimes secondTripTimes = new TripTimes(secondTrip, secondStopTimes, new Deduplicator());
-        TripTimes thirdTripTimes  = new TripTimes(thirdTrip, thirdStopTimes, new Deduplicator());
+        TripTimes thirdTripTimes = new TripTimes(thirdTrip, thirdStopTimes, new Deduplicator());
 
         firstTripPattern.add(firstTripTimes);
         secondTripPattern.add(secondTripTimes);
@@ -381,7 +381,8 @@ public class PlanGeneratorTest {
         // Vertices for legs 1, 2 and 3
         TransitStop v6 = new TransitStop(graph, trainStopDepart);
         TransitStopDepart v8 = new TransitStopDepart(graph, trainStopDepart, v6);
-        // To understand the stop indexes in the vertex constructors, look at firstStopTimes.add() etc. above
+        // To understand the stop indexes in the vertex constructors, look at firstStopTimes.add()
+        // etc. above
         PatternDepartVertex v10 = new PatternDepartVertex(graph, firstTripPattern, 0);
         PatternArriveVertex v12 = new PatternArriveVertex(graph, firstTripPattern, 1);
         PatternDepartVertex v14 = new PatternDepartVertex(graph, firstTripPattern, 1);
@@ -428,28 +429,20 @@ public class PlanGeneratorTest {
         exitDropoffStation.y = 90;
 
         // Vertices for legs 5 and 6
-        BikeRentalStationVertex v44 = new BikeRentalStationVertex(
-                graph, enterPickupStation);
-        BikeRentalStationVertex v46 = new BikeRentalStationVertex(
-                graph, exitPickupStation);
-        IntersectionVertex v48 = new IntersectionVertex(
-                graph, "Vertex 48", 180, 90);
-        IntersectionVertex v50 = new IntersectionVertex(
-                graph, "Vertex 50", 90, 90);
+        BikeRentalStationVertex v44 = new BikeRentalStationVertex(graph, enterPickupStation);
+        BikeRentalStationVertex v46 = new BikeRentalStationVertex(graph, exitPickupStation);
+        IntersectionVertex v48 = new IntersectionVertex(graph, "Vertex 48", 180, 90);
+        IntersectionVertex v50 = new IntersectionVertex(graph, "Vertex 50", 90, 90);
 
         // Vertices for leg 7
-        IntersectionVertex v52 = new IntersectionVertex(
-                graph, "Vertex 52", 90, 90);
-        IntersectionVertex v54 = new IntersectionVertex(
-                graph, "Vertex 54", 0, 90);
+        IntersectionVertex v52 = new IntersectionVertex(graph, "Vertex 52", 90, 90);
+        IntersectionVertex v54 = new IntersectionVertex(graph, "Vertex 54", 0, 90);
 
         // Vertices for legs 7 and 8
-        BikeRentalStationVertex v56 = new BikeRentalStationVertex(
-                graph, enterDropoffStation);
-        BikeRentalStationVertex v58 = new BikeRentalStationVertex(
-                graph, exitDropoffStation);
-        StreetLocation v60 = new StreetLocation(
-                graph, "Vertex 60", new Coordinate(0, 90), "Vertex 60");
+        BikeRentalStationVertex v56 = new BikeRentalStationVertex(graph, enterDropoffStation);
+        BikeRentalStationVertex v58 = new BikeRentalStationVertex(graph, exitDropoffStation);
+        StreetLocation v60 = new StreetLocation(graph, "Vertex 60", new Coordinate(0, 90),
+                "Vertex 60");
 
         // Vertex initialization that can't be done using the constructor
         v0.setExitName("Ausfahrt");
@@ -464,30 +457,30 @@ public class PlanGeneratorTest {
         v54.setFreeFlowing(true);
 
         // Elevation profiles for the street edges that will be created later
-        PackedCoordinateSequence elevation3 = new PackedCoordinateSequence.Double(
-                new double[]{0.0, 0.0, 3.0, 9.9}, 2);
-        PackedCoordinateSequence elevation39 = new PackedCoordinateSequence.Double(
-                new double[]{0.0, 9.9, 2.1, 0.1}, 2);
-        PackedCoordinateSequence elevation41 = new PackedCoordinateSequence.Double(
-                new double[]{0.0, 0.1, 1.9, 2.8}, 2);
-        PackedCoordinateSequence elevation49 = new PackedCoordinateSequence.Double(
-                new double[]{0.0, 2.8, 2.0, 2.6}, 2);
-        PackedCoordinateSequence elevation53 = new PackedCoordinateSequence.Double(
-                new double[]{0.0, 2.6, 1.0, 6.0}, 2);
+        PackedCoordinateSequence elevation3 = new PackedCoordinateSequence.Double(new double[] {
+                0.0, 0.0, 3.0, 9.9 }, 2);
+        PackedCoordinateSequence elevation39 = new PackedCoordinateSequence.Double(new double[] {
+                0.0, 9.9, 2.1, 0.1 }, 2);
+        PackedCoordinateSequence elevation41 = new PackedCoordinateSequence.Double(new double[] {
+                0.0, 0.1, 1.9, 2.8 }, 2);
+        PackedCoordinateSequence elevation49 = new PackedCoordinateSequence.Double(new double[] {
+                0.0, 2.8, 2.0, 2.6 }, 2);
+        PackedCoordinateSequence elevation53 = new PackedCoordinateSequence.Double(new double[] {
+                0.0, 2.6, 1.0, 6.0 }, 2);
 
         // Coordinate sequences and line strings for those same edges
-        PackedCoordinateSequence coordinates3 = new PackedCoordinateSequence.Double(
-                new double[]{0, 0, 1, 1}, 2);
-        PackedCoordinateSequence coordinates25 = new PackedCoordinateSequence.Double(
-                new double[]{133, 67, 135, 67}, 2);
-        PackedCoordinateSequence coordinates39 = new PackedCoordinateSequence.Double(
-                new double[]{179, 89, 180, 89}, 2);
-        PackedCoordinateSequence coordinates41 = new PackedCoordinateSequence.Double(
-                new double[]{180, 89, 180, 90}, 2);
-        PackedCoordinateSequence coordinates49 = new PackedCoordinateSequence.Double(
-                new double[]{180, 90, 90, 90}, 2);
-        PackedCoordinateSequence coordinates53 = new PackedCoordinateSequence.Double(
-                new double[]{90, 90, 0, 90}, 2);
+        PackedCoordinateSequence coordinates3 = new PackedCoordinateSequence.Double(new double[] {
+                0, 0, 1, 1 }, 2);
+        PackedCoordinateSequence coordinates25 = new PackedCoordinateSequence.Double(new double[] {
+                133, 67, 135, 67 }, 2);
+        PackedCoordinateSequence coordinates39 = new PackedCoordinateSequence.Double(new double[] {
+                179, 89, 180, 89 }, 2);
+        PackedCoordinateSequence coordinates41 = new PackedCoordinateSequence.Double(new double[] {
+                180, 89, 180, 90 }, 2);
+        PackedCoordinateSequence coordinates49 = new PackedCoordinateSequence.Double(new double[] {
+                180, 90, 90, 90 }, 2);
+        PackedCoordinateSequence coordinates53 = new PackedCoordinateSequence.Double(new double[] {
+                90, 90, 0, 90 }, 2);
 
         GeometryFactory geometryFactory = new GeometryFactory();
 
@@ -499,76 +492,50 @@ public class PlanGeneratorTest {
         LineString l53 = new LineString(coordinates53, geometryFactory);
 
         // Edges for leg 0
-        FreeEdge e1 = new FreeEdge(
-                v0, v2);
-        PlainStreetEdge e3 = new PlainStreetEdge(
-                v2, v4, l3, "Edge 3", 3.0, StreetTraversalPermission.ALL, false, 0);
+        FreeEdge e1 = new FreeEdge(v0, v2);
+        PlainStreetEdge e3 = new PlainStreetEdge(v2, v4, l3, "Edge 3", 3.0,
+                StreetTraversalPermission.ALL, false, 0);
 
         // Edges for legs 1 and 2
-        StreetTransitLink e5 = new StreetTransitLink(
-                v4, v6, false);
-        PreBoardEdge e7 = new PreBoardEdge(
-                v6, v8);
-        TransitBoardAlight e9 = new TransitBoardAlight(
-                v8, v10, 0, TraverseMode.RAIL);
-        PatternHop e11 = new PatternHop(
-                v10, v12, trainStopDepart, trainStopDwell, 0);
-        PatternDwell e13 = new PatternDwell(
-                v12, v14, 1, firstTripPattern);
-        PatternHop e15 = new PatternHop(
-                v14, v16, trainStopDwell, trainStopInterline, 1);
-        PatternInterlineDwell e17 = new PatternInterlineDwell(
-                v16, v18);
-        PatternHop e19 = new PatternHop(
-                v18, v20, trainStopInterline, trainStopArrive, 0);
-        TransitBoardAlight e21 = new TransitBoardAlight(
-                v20, v22, 1, TraverseMode.RAIL);
-        PreAlightEdge e23 = new PreAlightEdge(
-                v22, v24);
+        StreetTransitLink e5 = new StreetTransitLink(v4, v6, false);
+        PreBoardEdge e7 = new PreBoardEdge(v6, v8);
+        TransitBoardAlight e9 = new TransitBoardAlight(v8, v10, 0, TraverseMode.RAIL);
+        PatternHop e11 = new PatternHop(v10, v12, trainStopDepart, trainStopDwell, 0);
+        PatternDwell e13 = new PatternDwell(v12, v14, 1, firstTripPattern);
+        PatternHop e15 = new PatternHop(v14, v16, trainStopDwell, trainStopInterline, 1);
+        PatternInterlineDwell e17 = new PatternInterlineDwell(v16, v18);
+        PatternHop e19 = new PatternHop(v18, v20, trainStopInterline, trainStopArrive, 0);
+        TransitBoardAlight e21 = new TransitBoardAlight(v20, v22, 1, TraverseMode.RAIL);
+        PreAlightEdge e23 = new PreAlightEdge(v22, v24);
 
         // Edges for legs 3 and 4
-        SimpleTransfer e25 = new SimpleTransfer(
-                v24, v26, 7, l25);
-        PreBoardEdge e27 = new PreBoardEdge(
-                v26, v28);
-        TransitBoardAlight e29 = new TransitBoardAlight(
-                v28, v30, 0, TraverseMode.FERRY);
-        PatternHop e31 = new PatternHop(
-                v30, v32, ferryStopDepart, ferryStopArrive, 0);
-        TransitBoardAlight e33 = new TransitBoardAlight(
-                v32, v34, 1, TraverseMode.FERRY);
-        PreAlightEdge e35 = new PreAlightEdge(
-                v34, v36);
-        StreetTransitLink e37 = new StreetTransitLink(
-                v36, v38, true);
+        SimpleTransfer e25 = new SimpleTransfer(v24, v26, 7, l25);
+        PreBoardEdge e27 = new PreBoardEdge(v26, v28);
+        TransitBoardAlight e29 = new TransitBoardAlight(v28, v30, 0, TraverseMode.FERRY);
+        PatternHop e31 = new PatternHop(v30, v32, ferryStopDepart, ferryStopArrive, 0);
+        TransitBoardAlight e33 = new TransitBoardAlight(v32, v34, 1, TraverseMode.FERRY);
+        PreAlightEdge e35 = new PreAlightEdge(v34, v36);
+        StreetTransitLink e37 = new StreetTransitLink(v36, v38, true);
 
         // Edges for legs 5 and 6, where edges 39 and 41 have the same name to trigger stayOn = true
-        AreaEdge e39 = new AreaEdge(
-                v38, v40, l39, "Edge 39 / 41", 2.1, StreetTraversalPermission.ALL, false, 0,
-                new AreaEdgeList());
-        PlainStreetEdge e41 = new PlainStreetEdge(
-                v40, v42, l41, "Edge 39 / 41", 1.9, StreetTraversalPermission.ALL, false, 0);
-        StreetBikeRentalLink e43 = new StreetBikeRentalLink(
-                v42, v44);
-        RentABikeOnEdge e45 = new RentABikeOnEdge(
-                v44, v46, Collections.singleton(""));
-        StreetBikeRentalLink e47 = new StreetBikeRentalLink(
-                v46, v48);
-        PlainStreetEdge e49 = new PlainStreetEdge(
-                v48, v50, l49, "Edge 49", 2.0, StreetTraversalPermission.ALL, false, 0);
+        AreaEdge e39 = new AreaEdge(v38, v40, l39, "Edge 39 / 41", 2.1,
+                StreetTraversalPermission.ALL, false, 0, new AreaEdgeList());
+        PlainStreetEdge e41 = new PlainStreetEdge(v40, v42, l41, "Edge 39 / 41", 1.9,
+                StreetTraversalPermission.ALL, false, 0);
+        StreetBikeRentalLink e43 = new StreetBikeRentalLink(v42, v44);
+        RentABikeOnEdge e45 = new RentABikeOnEdge(v44, v46, Collections.singleton(""));
+        StreetBikeRentalLink e47 = new StreetBikeRentalLink(v46, v48);
+        PlainStreetEdge e49 = new PlainStreetEdge(v48, v50, l49, "Edge 49", 2.0,
+                StreetTraversalPermission.ALL, false, 0);
 
         // Edges for legs 6, 7 and 8
-        LegSwitchingEdge e51 = new LegSwitchingEdge(
-                v50, v52);
-        PartialPlainStreetEdge e53 = new PartialPlainStreetEdge(new PlainStreetEdge(
-                v52, v54, l53, "Edge 53", 1.0, StreetTraversalPermission.ALL, false, 0),
-                v52, v54, l53, "Edge 53", 1.0, StreetTraversalPermission.ALL, false);
-        StreetBikeRentalLink e55 = new StreetBikeRentalLink(
-                v54, v56);
-        RentABikeOffEdge e57 = new RentABikeOffEdge(
-                v56, v58, Collections.singleton(""));
-        StreetBikeRentalLink e59 = new StreetBikeRentalLink(
-                v58, v60);
+        LegSwitchingEdge e51 = new LegSwitchingEdge(v50, v52);
+        PartialPlainStreetEdge e53 = new PartialPlainStreetEdge(new PlainStreetEdge(v52, v54, l53,
+                "Edge 53", 1.0, StreetTraversalPermission.ALL, false, 0), v52, v54, l53, "Edge 53",
+                1.0, StreetTraversalPermission.ALL, false);
+        StreetBikeRentalLink e55 = new StreetBikeRentalLink(v54, v56);
+        RentABikeOffEdge e57 = new RentABikeOffEdge(v56, v58, Collections.singleton(""));
+        StreetBikeRentalLink e59 = new StreetBikeRentalLink(v58, v60);
 
         // Alert for testing GTFS-RT
         AlertPatch alertPatch = new AlertPatch();
@@ -587,11 +554,10 @@ public class PlanGeneratorTest {
         e53.setNote(Alert.newSimpleAlertSet(alertsExample));
 
         // Add an extra edge to the graph in order to generate stayOn = true for one walk step.
-        new PlainStreetEdge(v40,
-                new IntersectionVertex(graph, "Extra vertex", 180, 88),
+        new PlainStreetEdge(v40, new IntersectionVertex(graph, "Extra vertex", 180, 88),
                 new LineString(new PackedCoordinateSequence.Double(
-                        new double[]{180, 89, 180, 88}, 2), geometryFactory),
-                "Extra edge", 1.9, StreetTraversalPermission.NONE, true, 0);
+                        new double[] { 180, 89, 180, 88 }, 2), geometryFactory), "Extra edge", 1.9,
+                StreetTraversalPermission.NONE, true, 0);
 
         // Various bookkeeping operations
         graph.serviceCodes.put(firstTrip.getId(), 0);
@@ -602,7 +568,8 @@ public class PlanGeneratorTest {
         secondTripTimes.serviceCode = graph.serviceCodes.get(secondTrip.getId());
         thirdTripTimes.serviceCode = graph.serviceCodes.get(thirdTrip.getId());
 
-        CalendarServiceData calendarServiceData = new CalendarServiceDataStub(graph.serviceCodes.keySet());
+        CalendarServiceData calendarServiceData = new CalendarServiceDataStub(
+                graph.serviceCodes.keySet());
         CalendarServiceImpl calendarServiceImpl = new CalendarServiceImpl(calendarServiceData);
 
         calendarServiceData.putTimeZoneForAgencyId("Train", timeZone);
@@ -645,14 +612,14 @@ public class PlanGeneratorTest {
 
         // Create dummy TimetableResolver
         TimetableResolver resolver = new TimetableResolver();
-        
+
         // Mock TimetableSnapshotSource to return dummy TimetableResolver
         TimetableSnapshotSource timetableSnapshotSource = mock(TimetableSnapshotSource.class);
 
         when(timetableSnapshotSource.getTimetableSnapshot()).thenReturn(resolver);
- 
-		timetableSnapshotSource.getTimetableSnapshot().update(
-                thirdTripPattern, tripUpdate, "Ferry", timeZone, serviceDate );
+
+        timetableSnapshotSource.getTimetableSnapshot().update(thirdTripPattern, tripUpdate,
+                "Ferry", timeZone, serviceDate);
 
         // Further graph initialization
         graph.putService(CalendarServiceData.class, calendarServiceData);
@@ -668,7 +635,8 @@ public class PlanGeneratorTest {
         // Temporary graph objects for onboard depart tests
         OnboardDepartVertex onboardDepartVertex = new OnboardDepartVertex("Onboard", 23.0, 12.0);
         OnBoardDepartPatternHop onBoardDepartPatternHop = new OnBoardDepartPatternHop(
-                onboardDepartVertex, v12, firstTripPattern.getScheduledTimetable().getTripTimes(0), serviceDay, 0, 0.5);
+                onboardDepartVertex, v12, firstTripPattern.getScheduledTimetable().getTripTimes(0),
+                serviceDay, 0, 0.5);
 
         // Traverse the path forward first
         RoutingRequest forwardOptions = options.clone();
@@ -805,8 +773,8 @@ public class PlanGeneratorTest {
         State s58Onboard = e57.traverse(s56Onboard);
         State s60Onboard = e59.traverse(s58Onboard);
 
-        return new GraphPath[] {new GraphPath(s60Forward, false),
-                new GraphPath(s0Backward, false), new GraphPath(s60Onboard, false)};
+        return new GraphPath[] { new GraphPath(s60Forward, false),
+                new GraphPath(s0Backward, false), new GraphPath(s60Onboard, false) };
     }
 
     /**
@@ -834,14 +802,16 @@ public class PlanGeneratorTest {
 
         WalkStep[][] steps = new WalkStep[9][0];
         for (int i = 0; i < steps.length; i++) {
-            if (legs[i] == null) continue;
+            if (legs[i] == null)
+                continue;
             steps[i] = legs[i].walkSteps.toArray(steps[i]);
         }
         compareSteps(steps, type);
 
         EncodedPolylineBean[] geometries = new EncodedPolylineBean[9];
         for (int i = 0; i < geometries.length; i++) {
-            if (legs[i] == null) continue;
+            if (legs[i] == null)
+                continue;
             geometries[i] = legs[i].legGeometry;
         }
         compareGeometries(geometries, type);
@@ -849,7 +819,8 @@ public class PlanGeneratorTest {
         // Java's multidimensional arrays are actually arrays of arrays, meaning they can be jagged.
         Place[][] places = new Place[9][2];
         for (int i = 0; i < places.length; i++) {
-            if (legs[i] == null) continue;
+            if (legs[i] == null)
+                continue;
             if (legs[i].stop == null) {
                 places[i][0] = legs[i].from;
                 places[i][1] = legs[i].to;
@@ -869,7 +840,8 @@ public class PlanGeneratorTest {
                 stopIds[i] = new AgencyAndId[places[i].length];
             }
             for (int j = 0; j < stopIds[i].length; j++) {
-                if (places[i][j] == null) continue;
+                if (places[i][j] == null)
+                    continue;
                 stopIds[i][j] = places[i][j].stopId;
             }
         }
@@ -877,20 +849,21 @@ public class PlanGeneratorTest {
 
         /*
          * This four-dimensional array is indexed as follows:
-         *
-         * [X][ ][ ][ ] The leg number
-         * [ ][X][ ][ ] The walk step number
-         * [ ][ ][X][ ] 0 for the start of the walk step, 1 for the end
-         * [ ][ ][ ][X] 0 for the distance traveled, 1 for the actual elevation
-         *
+         * 
+         * [X][ ][ ][ ] The leg number [ ][X][ ][ ] The walk step number [ ][ ][X][ ] 0 for the
+         * start of the walk step, 1 for the end [ ][ ][ ][X] 0 for the distance traveled, 1 for the
+         * actual elevation
+         * 
          * Although technically, this particular array is not jagged, some of its elements are null.
          */
         Double[][][][] elevations = new Double[9][2][2][2];
         for (int i = 0; i < elevations.length; i++) {
             for (int j = 0; j < elevations[i].length; j++) {
-                if (steps[i].length <= j) break;
+                if (steps[i].length <= j)
+                    break;
                 for (int k = 0; k < elevations[i][j].length; k++) {
-                    if (steps[i][j].elevation.size() <= k) break;
+                    if (steps[i][j].elevation.size() <= k)
+                        break;
                     elevations[i][j][k][0] = steps[i][j].elevation.get(k).getFirst();
                     elevations[i][j][k][1] = steps[i][j].elevation.get(k).getSecond();
                 }
@@ -1883,8 +1856,8 @@ public class PlanGeneratorTest {
     }
 
     /**
-     * This class extends the {@link CalendarServiceData} class to allow for easier testing.
-     * It includes methods to return both the set of service ids and the time zone used for testing.
+     * This class extends the {@link CalendarServiceData} class to allow for easier testing. It
+     * includes methods to return both the set of service ids and the time zone used for testing.
      */
     private static final class CalendarServiceDataStub extends CalendarServiceData {
         private static final long serialVersionUID = 1L;
@@ -1912,8 +1885,8 @@ public class PlanGeneratorTest {
     }
 
     /**
-     * This class implements the {@link FareService} interface to allow for testing.
-     * It will return the same fare at every invocation.
+     * This class implements the {@link FareService} interface to allow for testing. It will return
+     * the same fare at every invocation.
      */
     private static final class FareServiceStub implements FareService {
         @Override
@@ -1934,8 +1907,6 @@ public class PlanGeneratorTest {
      * When future values are added, the test should not be assumed to fail upon encountering those.
      */
     private static enum Type {
-        FORWARD,
-        BACKWARD,
-        ONBOARD
+        FORWARD, BACKWARD, ONBOARD
     }
 }

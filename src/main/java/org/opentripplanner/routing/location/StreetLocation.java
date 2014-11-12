@@ -45,13 +45,14 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 
 /**
- * Represents a location on a street, somewhere between the two corners. This is used when computing the first and last segments of a trip, for trips
- * that start or end between two intersections. Also for situating bus stops in the middle of street segments.
+ * Represents a location on a street, somewhere between the two corners. This is used when computing
+ * the first and last segments of a trip, for trips that start or end between two intersections.
+ * Also for situating bus stops in the middle of street segments.
  */
 public class StreetLocation extends StreetVertex {
 
     private static final Logger LOG = LoggerFactory.getLogger(StreetLocation.class);
-    
+
     private static DistanceLibrary distanceLibrary = SphericalDistanceLibrary.getInstance();
 
     private ArrayList<Edge> extra = new ArrayList<Edge>();
@@ -72,8 +73,9 @@ public class StreetLocation extends StreetVertex {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Creates a StreetLocation on the given street (set of PlainStreetEdges). How far along is controlled by the location parameter, which represents
-     * a distance along the edge between 0 (the from vertex) and 1 (the to vertex).
+     * Creates a StreetLocation on the given street (set of PlainStreetEdges). How far along is
+     * controlled by the location parameter, which represents a distance along the edge between 0
+     * (the from vertex) and 1 (the to vertex).
      * 
      * @param graph
      * 
@@ -119,10 +121,11 @@ public class StreetLocation extends StreetVertex {
     }
 
     /**
-     * Creates the StreetLocation along the given edges regardless of how close it is to the endpoints of the edge.
+     * Creates the StreetLocation along the given edges regardless of how close it is to the
+     * endpoints of the edge.
      */
-    public static StreetLocation createStreetLocationOnEdges(Graph graph, String label, String name,
-            Iterable<StreetEdge> edges, Coordinate nearestPoint) {
+    public static StreetLocation createStreetLocationOnEdges(Graph graph, String label,
+            String name, Iterable<StreetEdge> edges, Coordinate nearestPoint) {
 
         boolean wheelchairAccessible = false;
 
@@ -136,13 +139,12 @@ public class StreetLocation extends StreetVertex {
 
             // location is somewhere in the middle of the edge.
             edgeLocation = location;
-            
+
             // creates links from street head -> location -> street tail.
             createHalfLocation(graph, location, label + " to " + tov.getLabel(), name,
                     nearestPoint, street);
-            
-            double distanceToNearestTransitStop = Math.min(
-                    tov.getDistanceToNearestTransitStop(),
+
+            double distanceToNearestTransitStop = Math.min(tov.getDistanceToNearestTransitStop(),
                     fromv.getDistanceToNearestTransitStop());
             edgeLocation.setDistanceToNearestTransitStop(distanceToNearestTransitStop);
         }
@@ -150,7 +152,7 @@ public class StreetLocation extends StreetVertex {
         return location;
 
     }
-    
+
     public static StreetLocation createStreetLocation(Graph graph, String label, String name,
             Iterable<StreetEdge> edges, Coordinate nearestPoint) {
 
@@ -176,11 +178,11 @@ public class StreetLocation extends StreetVertex {
             } else {
                 // location is somewhere in the middle of the edge.
                 edgeLocation = location;
-                
+
                 // creates links from street head -> location -> street tail.
                 createHalfLocation(graph, location, label + " to " + tov.getLabel(), name,
                         nearestPoint, street);
-                
+
                 double distanceToNearestTransitStop = Math.min(
                         tov.getDistanceToNearestTransitStop(),
                         fromv.getDistanceToNearestTransitStop());
@@ -235,7 +237,7 @@ public class StreetLocation extends StreetVertex {
         newRight.setNoThruTraffic(street.isNoThruTraffic());
         newRight.setWheelchairNote(street.getWheelchairNotes());
         newRight.setNote(street.getNotes());
-        
+
         // Copy turn restrictions onto the outgoing half-edge.
         for (TurnRestriction turnRestriction : street.getTurnRestrictions()) {
             newRight.addTurnRestriction(turnRestriction);
@@ -293,20 +295,21 @@ public class StreetLocation extends StreetVertex {
     @Override
     public int removeTemporaryEdges() {
         int nRemoved = 0;
-        for (Edge e : getExtra()) {            
+        for (Edge e : getExtra()) {
             graph.removeTemporaryEdge(e);
             // edges might already be detached
-            if (e.detach() != 0) nRemoved += 1;
+            if (e.detach() != 0)
+                nRemoved += 1;
         }
         return nRemoved;
     }
 
     /**
-     * This finalizer is intended as a failsafe to prevent memory leakage in case someone does
-     * not remove temporary edges. It could even be considered an error if it does any work.
-     * removeTemporaryEdges is called by both this finalizer and the RoutingContext.destroy() 
-     * method, which is in turn called by the RoutingRequest.cleanup() method. You need to call 
-     * one of these after you handle a request and know that you no longer need the context.
+     * This finalizer is intended as a failsafe to prevent memory leakage in case someone does not
+     * remove temporary edges. It could even be considered an error if it does any work.
+     * removeTemporaryEdges is called by both this finalizer and the RoutingContext.destroy()
+     * method, which is in turn called by the RoutingRequest.cleanup() method. You need to call one
+     * of these after you handle a request and know that you no longer need the context.
      */
     @Override
     public void finalize() {
@@ -315,12 +318,13 @@ public class StreetLocation extends StreetVertex {
     }
 
     /**
-     * Temporary edges are traversable to only one routing context. It was too awkward to rework all the edge-splitting
-     * code to pass the routing context down into the temporary edge constructors. Therefore we set the context for
-     * all temporary edges after they are created.
+     * Temporary edges are traversable to only one routing context. It was too awkward to rework all
+     * the edge-splitting code to pass the routing context down into the temporary edge
+     * constructors. Therefore we set the context for all temporary edges after they are created.
      */
     public void setTemporaryEdgeVisibility(RoutingContext rctx) {
-        for (PartialPlainStreetEdge ppse : Iterables.filter(this.extra, PartialPlainStreetEdge.class)) {
+        for (PartialPlainStreetEdge ppse : Iterables.filter(this.extra,
+                PartialPlainStreetEdge.class)) {
             ppse.visibleTo = rctx;
         }
         // There are other temporary edges (FreeEdges) but it's a rabbit hole...

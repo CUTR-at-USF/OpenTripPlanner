@@ -40,70 +40,91 @@ import org.slf4j.LoggerFactory;
 public class BatchProcessor {
 
     private static final Logger LOG = LoggerFactory.getLogger(BatchProcessor.class);
+
     private static final String EXAMPLE_CONTEXT = "batch-context.xml";
-    
+
     private GraphService graphService;
+
     private SPTService sptService;
+
     private SampleFactory sampleFactory;
 
-    @Setter private Population origins;
-    @Setter private Population destinations;
-    @Setter private RoutingRequest prototypeRoutingRequest;
+    @Setter
+    private Population origins;
 
-    @Setter private Aggregator aggregator;
-    @Setter private Accumulator accumulator;
-    @Setter private int logThrottleSeconds = 4;    
-    @Setter private int searchCutoffSeconds = -1;
-    
+    @Setter
+    private Population destinations;
+
+    @Setter
+    private RoutingRequest prototypeRoutingRequest;
+
+    @Setter
+    private Aggregator aggregator;
+
+    @Setter
+    private Accumulator accumulator;
+
+    @Setter
+    private int logThrottleSeconds = 4;
+
+    @Setter
+    private int searchCutoffSeconds = -1;
+
     /**
-     * Empirical results for a 4-core processor (with 8 fake hyperthreading cores):
-     * Throughput increases linearly with nThreads, up to the number of physical cores. 
-     * Diminishing returns beyond 4 threads, but some improvement is seen up to 8 threads.
-     * The default value includes the hyperthreading cores, so you may want to set nThreads 
-     * manually in your IoC XML. 
+     * Empirical results for a 4-core processor (with 8 fake hyperthreading cores): Throughput
+     * increases linearly with nThreads, up to the number of physical cores. Diminishing returns
+     * beyond 4 threads, but some improvement is seen up to 8 threads. The default value includes
+     * the hyperthreading cores, so you may want to set nThreads manually in your IoC XML.
      */
-    @Setter private int nThreads = Runtime.getRuntime().availableProcessors(); 
+    @Setter
+    private int nThreads = Runtime.getRuntime().availableProcessors();
 
-    @Setter private String date = "2011-02-04";
-    @Setter private String time = "08:00 AM";
-    @Setter private TimeZone timeZone = TimeZone.getDefault();
-    @Setter private String outputPath = "/tmp/analystOutput";
-    @Setter private float checkpointIntervalMinutes = -1;
-    
-    enum Mode { BASIC, AGGREGATE, ACCUMULATE };
+    @Setter
+    private String date = "2011-02-04";
+
+    @Setter
+    private String time = "08:00 AM";
+
+    @Setter
+    private TimeZone timeZone = TimeZone.getDefault();
+
+    @Setter
+    private String outputPath = "/tmp/analystOutput";
+
+    @Setter
+    private float checkpointIntervalMinutes = -1;
+
+    enum Mode {
+        BASIC, AGGREGATE, ACCUMULATE
+    };
+
     private Mode mode;
+
     private long startTime = -1;
+
     private long lastLogTime = 0;
+
     private long lastCheckpointTime = 0;
+
     private ResultSet aggregateResultSet = null;
-    
+
     /** Cut off the search instead of building a full path tree. Can greatly improve run times. */
     public void setSearchCutoffMinutes(int minutes) {
         this.searchCutoffSeconds = minutes * 60;
     }
 
     /*
-    public static void main(String[] args) throws IOException {
-        org.springframework.core.io.Resource appContextResource;
-        if( args.length == 0) {
-            LOG.warn("no configuration XML file specified; using example on classpath");
-            appContextResource = new ClassPathResource(EXAMPLE_CONTEXT);
-        } else {
-            String configFile = args[0];
-            appContextResource = new FileSystemResource(configFile);
-        }
-        GenericApplicationContext ctx = new GenericApplicationContext();
-        XmlBeanDefinitionReader xmlReader = new XmlBeanDefinitionReader(ctx);
-        xmlReader.loadBeanDefinitions(appContextResource);
-        ctx.refresh();
-        ctx.registerShutdownHook();
-        BatchProcessor processor = ctx.getBean(BatchProcessor.class);
-        if (processor == null)
-            LOG.error("No BatchProcessor bean was defined.");
-        else
-            processor.run();
-    }
-    */
+     * public static void main(String[] args) throws IOException {
+     * org.springframework.core.io.Resource appContextResource; if( args.length == 0) {
+     * LOG.warn("no configuration XML file specified; using example on classpath");
+     * appContextResource = new ClassPathResource(EXAMPLE_CONTEXT); } else { String configFile =
+     * args[0]; appContextResource = new FileSystemResource(configFile); } GenericApplicationContext
+     * ctx = new GenericApplicationContext(); XmlBeanDefinitionReader xmlReader = new
+     * XmlBeanDefinitionReader(ctx); xmlReader.loadBeanDefinitions(appContextResource);
+     * ctx.refresh(); ctx.registerShutdownHook(); BatchProcessor processor =
+     * ctx.getBean(BatchProcessor.class); if (processor == null)
+     * LOG.error("No BatchProcessor bean was defined."); else processor.run(); }
+     */
 
     private void run() {
         origins.setup();
@@ -118,11 +139,11 @@ public class BatchProcessor {
             /* aggregate over destinations and save one value per origin */
             mode = Mode.AGGREGATE;
             aggregateResultSet = new ResultSet(origins); // results shaped like origins
-        } else if (accumulator != null) { 
+        } else if (accumulator != null) {
             /* accumulate data for each origin into all destinations */
             mode = Mode.ACCUMULATE;
             aggregateResultSet = new ResultSet(destinations); // results shaped like destinations
-        } else { 
+        } else {
             /* neither aggregator nor accumulator, save a bunch of results */
             mode = Mode.BASIC;
             aggregateResultSet = null;
@@ -166,17 +187,18 @@ public class BatchProcessor {
 
     private void projectRunTime(int current, int total) {
         long currentTime = System.currentTimeMillis();
-        // not threadsafe, but the worst thing that will happen is a double log message 
+        // not threadsafe, but the worst thing that will happen is a double log message
         // anyway we are using this in the controller thread now
         if (currentTime > lastLogTime + logThrottleSeconds * 1000) {
             lastLogTime = currentTime;
             double runTimeMin = (currentTime - startTime) / 1000.0 / 60.0;
             double projectedMin = (total - current) * (runTimeMin / current);
             LOG.info("received {} results out of {}", current, total);
-            LOG.info("running {} min, {} min remaining (projected)", (int)runTimeMin, (int)projectedMin);
+            LOG.info("running {} min, {} min remaining (projected)", (int) runTimeMin,
+                    (int) projectedMin);
         }
     }
-    
+
     private boolean checkpoint() {
         if (checkpointIntervalMinutes < 0 || aggregateResultSet == null)
             return false;
@@ -190,12 +212,13 @@ public class BatchProcessor {
         }
         return false;
     }
-    
+
     private RoutingRequest buildRequest(Individual i) {
         RoutingRequest req = prototypeRoutingRequest.clone();
         req.setDateTime(date, time, timeZone);
         if (searchCutoffSeconds > 0) {
-            req.worstTime = req.dateTime + (req.arriveBy ? -searchCutoffSeconds : searchCutoffSeconds);
+            req.worstTime = req.dateTime
+                    + (req.arriveBy ? -searchCutoffSeconds : searchCutoffSeconds);
         }
         GenericLocation latLon = new GenericLocation(i.lat, i.lon);
         req.batch = true;
@@ -211,10 +234,10 @@ public class BatchProcessor {
             return null;
         }
     }
-    
-    /** 
-     * Generate samples for (i.e. non-invasively link into the Graph) only those individuals that 
-     * were not rejected by filters. Other Individuals will have null samples, indicating that they 
+
+    /**
+     * Generate samples for (i.e. non-invasively link into the Graph) only those individuals that
+     * were not rejected by filters. Other Individuals will have null samples, indicating that they
      * should be skipped.
      */
     private void linkIntoGraph(Population p) {
@@ -229,23 +252,23 @@ public class BatchProcessor {
         }
         LOG.info("successfully linked {} individuals out of {}", nonNull, n);
     }
-        
-    /** 
-     * A single computation to perform for a single origin.
-     * Runnable, not Callable. We want accumulation to happen in the worker thread. 
-     * Handling all accumulation in the controller thread risks amassing a queue of large 
-     * result sets. 
+
+    /**
+     * A single computation to perform for a single origin. Runnable, not Callable. We want
+     * accumulation to happen in the worker thread. Handling all accumulation in the controller
+     * thread risks amassing a queue of large result sets.
      */
     private class BatchAnalystTask implements Runnable {
-        
+
         protected final int i;
+
         protected final Individual oi;
-        
+
         public BatchAnalystTask(int i, Individual oi) {
             this.i = i;
             this.oi = oi;
         }
-        
+
         @Override
         public void run() {
             LOG.debug("calling origin : {}", oi);
@@ -268,10 +291,9 @@ public class BatchProcessor {
                     String subName = outputPath.replace("{}", String.format("%d_%s", i, oi.label));
                     results.writeAppropriateFormat(subName);
                 }
-                    
-            }
-        }        
-    }    
-    
-}
 
+            }
+        }
+    }
+
+}

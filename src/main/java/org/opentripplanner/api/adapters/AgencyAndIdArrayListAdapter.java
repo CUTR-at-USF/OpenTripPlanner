@@ -19,7 +19,8 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 
-public class AgencyAndIdArrayListAdapter extends XmlAdapter<ArrayList<AgencyAndIdType>, ArrayList<AgencyAndId>> {
+public class AgencyAndIdArrayListAdapter extends
+        XmlAdapter<ArrayList<AgencyAndIdType>, ArrayList<AgencyAndId>> {
 
     @Override
     public ArrayList<AgencyAndId> unmarshal(ArrayList<AgencyAndIdType> arg) throws Exception {
@@ -38,7 +39,8 @@ public class AgencyAndIdArrayListAdapter extends XmlAdapter<ArrayList<AgencyAndI
             return null;
         }
         ArrayList<AgencyAndIdType> result = new ArrayList<AgencyAndIdType>();
-        for(AgencyAndId a:arg) result.add(new AgencyAndIdType(a.getAgencyId(), a.getId()));
+        for (AgencyAndId a : arg)
+            result.add(new AgencyAndIdType(a.getAgencyId(), a.getId()));
         return result;
     }
 

@@ -24,9 +24,10 @@ import java.util.NoSuchElementException;
 public class JoinedList<E> implements List<E> {
 
     private List<E>[] lists;
+
     private int totalSize;
 
-    public JoinedList(List<E> ... lists) {
+    public JoinedList(List<E>... lists) {
         this.lists = lists;
         totalSize = 0;
         for (List<E> list : lists) {
@@ -117,15 +118,17 @@ public class JoinedList<E> implements List<E> {
     public Iterator<E> iterator() {
         return new JoinedListIterator();
     }
-    
+
     class JoinedListIterator implements ListIterator<E> {
 
         private int listIndex;
+
         private ListIterator<E> iterator;
-        JoinedListIterator(){
+
+        JoinedListIterator() {
             listIndex = 0;
         }
-        
+
         @Override
         public boolean hasNext() {
             if (iterator == null) {
@@ -197,7 +200,7 @@ public class JoinedList<E> implements List<E> {
         public void set(E arg0) {
             throw new UnsupportedOperationException();
         }
-        
+
     }
 
     @Override
@@ -220,7 +223,7 @@ public class JoinedList<E> implements List<E> {
 
     @Override
     public ListIterator<E> listIterator(int arg0) {
-        //fixme: this is slow and stupid
+        // fixme: this is slow and stupid
         JoinedListIterator result = new JoinedListIterator();
         for (int i = 0; i < arg0; ++i) {
             result.next();

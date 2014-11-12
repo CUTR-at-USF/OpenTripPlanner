@@ -26,17 +26,16 @@ public interface RoutingService {
      * In the case of "arrive-by" routing, the origin state is actually the user's end location and
      * the target vertex is the user's start location.
      * 
-     * @param origin
-     *            the start state to begin the route search from
-     * @param target
-     *            the end vertex to route to
+     * @param origin the start state to begin the route search from
+     * @param target the end vertex to route to
      * @return the set of paths routing between the origin and the target
      */
     public List<GraphPath> route(State origin, Vertex target);
 
     /**
      * Here we wish to plan a trip that starts at "fromVertex", travels through the intermediate
-     * vertices in either the optimal order or the specified order, and eventually end up at "toVertex".
+     * vertices in either the optimal order or the specified order, and eventually end up at
+     * "toVertex".
      * 
      * @param fromPlace
      * @param toPlace

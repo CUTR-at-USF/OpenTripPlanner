@@ -27,33 +27,33 @@ import org.opentripplanner.openstreetmap.model.OSMWay;
 
 public interface OpenStreetMapContentHandler {
 
-  /**
-   * Notifes the handler to expect the second stage of parsing (ie. nodes).
-   */
-  public void secondPhase();
+    /**
+     * Notifes the handler to expect the second stage of parsing (ie. nodes).
+     */
+    public void secondPhase();
 
-  /**
-   * Stores a node.
-   */
-  public void addNode(OSMNode node);
+    /**
+     * Stores a node.
+     */
+    public void addNode(OSMNode node);
 
-  /**
-   * Stores a way.
-   */
-  public void addWay(OSMWay way);
+    /**
+     * Stores a way.
+     */
+    public void addWay(OSMWay way);
 
-  /**
-   * Stores a relation.
-   */
-  public void addRelation(OSMRelation relation);
+    /**
+     * Stores a relation.
+     */
+    public void addRelation(OSMRelation relation);
 
-  /**
-   * Called when the relation-processing phase is complete 
-   */
-  public void doneRelations();
+    /**
+     * Called when the relation-processing phase is complete
+     */
+    public void doneRelations();
 
-  /**
-   * Called after the final phase, when all nodes are loaded
-   */
-  public void nodesLoaded();
+    /**
+     * Called after the final phase, when all nodes are loaded
+     */
+    public void nodesLoaded();
 }

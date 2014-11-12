@@ -69,7 +69,7 @@ public class TranslatedString implements Serializable {
         return translations.values().iterator().next();
     }
 
-	public String toString() {
-		return "TranslateString(" + getSomeTranslation() + ")";
-	}
+    public String toString() {
+        return "TranslateString(" + getSomeTranslation() + ")";
+    }
 }

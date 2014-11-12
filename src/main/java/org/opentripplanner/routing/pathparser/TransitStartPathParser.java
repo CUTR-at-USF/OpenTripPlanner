@@ -36,8 +36,8 @@ import static org.opentripplanner.routing.automata.Nonterminal.*;
  * boarding transit without first parking a car. Reject breaking no-through-traffic rules on driving
  * legs.
  * 
- * Despite the name, this actually *ends* at a transit station -- it's used with 
- * TransitStartPathServiceImpl to implement start-at-transit (first/last/next/prev trip) 
+ * Despite the name, this actually *ends* at a transit station -- it's used with
+ * TransitStartPathServiceImpl to implement start-at-transit (first/last/next/prev trip)
  */
 public class TransitStartPathParser extends PathParser {
 
@@ -53,11 +53,10 @@ public class TransitStartPathParser extends PathParser {
                 StreetEdge.CLASS_OTHERPATH));
 
         // (C|O)*(S+O(C|O)*)*(S*(C|O)*) -- the inverse of S+C+S+
-        Nonterminal optionalNontransitLeg = seq(bikeNonStreet,
-                star(plus(StreetEdge.CLASS_STREET),
-                     star(StreetEdge.CLASS_CROSSING),
-                     StreetEdge.CLASS_OTHERPATH,
-                     bikeNonStreet),
+        Nonterminal optionalNontransitLeg = seq(
+                bikeNonStreet,
+                star(plus(StreetEdge.CLASS_STREET), star(StreetEdge.CLASS_CROSSING),
+                        StreetEdge.CLASS_OTHERPATH, bikeNonStreet),
                 seq(star(StreetEdge.CLASS_STREET), bikeNonStreet));
 
         Nonterminal itinerary = seq(star(STATION), optionalNontransitLeg, star(STATION));

@@ -39,7 +39,7 @@ public class CompositeBooleanConverter implements SimpleFeatureConverter<Boolean
     public CompositeBooleanConverter(SimpleFeatureConverter<Boolean>... converters) {
         this.converters = new ArrayList<SimpleFeatureConverter<Boolean>>(Arrays.asList(converters));
     }
-    
+
     /**
      * Is the or combination strategy being used?
      * 
@@ -56,11 +56,9 @@ public class CompositeBooleanConverter implements SimpleFeatureConverter<Boolean
     /**
      * set the list of converters used to the passed in parameter
      * 
-     * @param converters
-     *            list of converters to use
+     * @param converters list of converters to use
      */
-    public void setConverters(
-            Collection<SimpleFeatureConverter<Boolean>> converters) {
+    public void setConverters(Collection<SimpleFeatureConverter<Boolean>> converters) {
         this.converters = converters;
     }
 
@@ -88,6 +86,7 @@ public class CompositeBooleanConverter implements SimpleFeatureConverter<Boolean
 
     /**
      * add a converter to the list to be applied
+     * 
      * @param converter the new converter
      */
     public void add(SimpleFeatureConverter<Boolean> converter) {

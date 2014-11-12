@@ -60,23 +60,22 @@ public class LinkRequest {
     private static Logger LOG = LoggerFactory.getLogger(LinkRequest.class);
 
     NetworkLinkerLibrary linker;
-    
+
     private Boolean result;
 
     private List<Edge> edgesAdded = new ArrayList<Edge>();
 
     private DistanceLibrary distanceLibrary;
-    
+
     public LinkRequest(NetworkLinkerLibrary linker) {
         this.linker = linker;
         this.distanceLibrary = linker.getDistanceLibrary();
     }
-    
+
     /**
      * The entry point for networklinker to link each bike rental station.
      * 
-     * @param v
-     * Sets result to true if the links were successfully added, otherwise false
+     * @param v Sets result to true if the links were successfully added, otherwise false
      */
     public void connectVertexToStreets(BikeRentalStationVertex v) {
         Collection<StreetVertex> nearbyStreetVertices = getNearbyStreetVertices(v, null, null);
@@ -84,8 +83,7 @@ public class LinkRequest {
             result = false;
         } else {
             for (StreetVertex sv : nearbyStreetVertices) {
-                addEdges(new StreetBikeRentalLink(sv, v), 
-                         new StreetBikeRentalLink(v, sv));
+                addEdges(new StreetBikeRentalLink(sv, v), new StreetBikeRentalLink(v, sv));
             }
             result = true;
         }
@@ -93,29 +91,31 @@ public class LinkRequest {
 
     public boolean getResult() {
         if (result == null) {
-            throw new IllegalStateException("Can't get result of LinkRequest; no operation performed");
+            throw new IllegalStateException(
+                    "Can't get result of LinkRequest; no operation performed");
         }
         return result;
     }
 
     /**
-     * For the given vertex, find or create some vertices nearby in the street network.
-     * Once the vertices are found they are remembered, and subsequent calls to this 
-     * method with the same Vertex argument will return the same collection of vertices. 
-     * This method is potentially called multiple times with the same Vertex as an argument, 
-     * via the "determineIncomingEdgesForVertex" and "determineOutgoingEdgesForVertex" methods.
+     * For the given vertex, find or create some vertices nearby in the street network. Once the
+     * vertices are found they are remembered, and subsequent calls to this method with the same
+     * Vertex argument will return the same collection of vertices. This method is potentially
+     * called multiple times with the same Vertex as an argument, via the
+     * "determineIncomingEdgesForVertex" and "determineOutgoingEdgesForVertex" methods.
      * 
-     * Used by both the network linker and for adding temporary "extra" edges at the origin 
-     * and destination of a search.
+     * Used by both the network linker and for adding temporary "extra" edges at the origin and
+     * destination of a search.
      */
-    private Collection<StreetVertex> getNearbyStreetVertices(Vertex v, Collection<Edge> nearbyRouteEdges, RoutingRequest options) {
+    private Collection<StreetVertex> getNearbyStreetVertices(Vertex v,
+            Collection<Edge> nearbyRouteEdges, RoutingRequest options) {
         Collection<StreetVertex> existing = linker.splitVertices.get(v);
         if (existing != null)
             return existing;
 
         String vertexLabel;
         if (v instanceof TransitVertex)
-            vertexLabel = "link for " + ((TransitVertex)v).getStopId();
+            vertexLabel = "link for " + ((TransitVertex) v).getStopId();
         else
             vertexLabel = "link for " + v;
         Coordinate coordinate = v.getCoordinate();
@@ -123,13 +123,15 @@ public class LinkRequest {
         /* is there a bundle of edges nearby to use or split? */
         GenericLocation location = new GenericLocation(coordinate);
         TraversalRequirements reqs = new TraversalRequirements(options);
-        CandidateEdgeBundle edges = linker.index.getClosestEdges(location, reqs, null, nearbyRouteEdges, true);
+        CandidateEdgeBundle edges = linker.index.getClosestEdges(location, reqs, null,
+                nearbyRouteEdges, true);
         if (edges == null || edges.size() < 1) {
-            // no edges were found nearby, or a bidirectional/loop bundle of edges was not identified
+            // no edges were found nearby, or a bidirectional/loop bundle of edges was not
+            // identified
             LOG.debug("found too few edges: {} {}", v.getName(), v.getCoordinate());
             return null;
         }
-        // if the bundle was caught endwise (T intersections and dead ends), 
+        // if the bundle was caught endwise (T intersections and dead ends),
         // get the intersection instead.
         if (edges.endwise()) {
             List<StreetVertex> list = Arrays.asList(edges.endwiseVertex);
@@ -140,22 +142,24 @@ public class LinkRequest {
             StreetVertex atIntersection = linker.index.getIntersectionAt(coordinate);
             if (atIntersection != null) {
                 // if so, the stop can be linked directly to all vertices at the intersection
-                if (edges.getScore() > distanceLibrary.distance(atIntersection.getCoordinate(), coordinate))
+                if (edges.getScore() > distanceLibrary.distance(atIntersection.getCoordinate(),
+                        coordinate))
                     return Arrays.asList(atIntersection);
             }
             return getSplitterVertices(vertexLabel, edges.toEdgeList(), coordinate);
         }
     }
 
-    /** 
-     * Given a bundle of parallel, coincident edges, find a vertex splitting the set of edges as close as
-     * possible to the given coordinate. If necessary, create new edges reflecting the split and update the 
-     * replacement edge lists accordingly. 
+    /**
+     * Given a bundle of parallel, coincident edges, find a vertex splitting the set of edges as
+     * close as possible to the given coordinate. If necessary, create new edges reflecting the
+     * split and update the replacement edge lists accordingly.
      * 
-     * Split edges are not added to the graph immediately, so that they can be re-split later if another stop
-     * is located near the same bundle of original edges.
+     * Split edges are not added to the graph immediately, so that they can be re-split later if
+     * another stop is located near the same bundle of original edges.
      */
-    private Collection<StreetVertex> getSplitterVertices(String label, Collection<StreetEdge> edges, Coordinate coordinate) {
+    private Collection<StreetVertex> getSplitterVertices(String label,
+            Collection<StreetEdge> edges, Coordinate coordinate) {
 
         // It is assumed that we are splitting at least one edge.
         if (edges.size() < 1) {
@@ -172,7 +176,8 @@ public class LinkRequest {
             StreetEdge second = null;
             while (iter.hasNext()) {
                 StreetEdge edge = iter.next();
-                if (edge.getFromVertex() == first.getToVertex() && edge.getToVertex() == first.getFromVertex()) {
+                if (edge.getFromVertex() == first.getToVertex()
+                        && edge.getToVertex() == first.getFromVertex()) {
                     second = edge;
                 }
             }
@@ -182,7 +187,8 @@ public class LinkRequest {
             } else {
                 secondClone = ((PlainStreetEdge) second).clone();
             }
-            P2<PlainStreetEdge> newEdges = new P2<PlainStreetEdge>(((PlainStreetEdge) first).clone(), secondClone); 
+            P2<PlainStreetEdge> newEdges = new P2<PlainStreetEdge>(
+                    ((PlainStreetEdge) first).clone(), secondClone);
             replacement.add(newEdges);
             linker.replacements.put(edgeSet, replacement);
         }
@@ -200,17 +206,18 @@ public class LinkRequest {
                 bestPair = pair;
             }
         }
-        
+
         // split the (sub)segment edge pair as needed, returning vertices at the split point
         return split(replacement, label, bestPair, coordinate);
     }
 
     /**
-     * Split a matched (bidirectional) pair of edges at the given coordinate, unless the coordinate is
-     * very close to one of the existing endpoints. Returns the vertices located at the split point.
+     * Split a matched (bidirectional) pair of edges at the given coordinate, unless the coordinate
+     * is very close to one of the existing endpoints. Returns the vertices located at the split
+     * point.
      */
-    private Collection<StreetVertex> split(LinkedList<P2<PlainStreetEdge>> replacement, String label,
-            P2<PlainStreetEdge> bestPair, Coordinate coordinate) {
+    private Collection<StreetVertex> split(LinkedList<P2<PlainStreetEdge>> replacement,
+            String label, P2<PlainStreetEdge> bestPair, Coordinate coordinate) {
 
         PlainStreetEdge e1 = bestPair.getFirst();
         PlainStreetEdge e2 = bestPair.getSecond();
@@ -219,7 +226,7 @@ public class LinkRequest {
         StreetVertex e1v1 = (StreetVertex) e1.getFromVertex();
         StreetVertex e1v2 = (StreetVertex) e1.getToVertex();
         LineString forwardGeometry = e1.getGeometry();
-        
+
         StreetVertex e2v1 = null;
         StreetVertex e2v2 = null;
         P2<LineString> backGeometryPair = null;
@@ -227,10 +234,9 @@ public class LinkRequest {
             e2v1 = (StreetVertex) e2.getFromVertex();
             e2v2 = (StreetVertex) e2.getToVertex();
             LineString backGeometry = e2.getGeometry();
-            backGeometryPair = GeometryUtils.splitGeometryAtPoint(backGeometry,
-                    coordinate);
+            backGeometryPair = GeometryUtils.splitGeometryAtPoint(backGeometry, coordinate);
         }
-        
+
         P2<LineString> forwardGeometryPair = GeometryUtils.splitGeometryAtPoint(forwardGeometry,
                 coordinate);
 
@@ -241,7 +247,7 @@ public class LinkRequest {
         double totalGeomLength = forwardGeometry.getLength();
         double lengthRatioIn = toMidpoint.getLength() / totalGeomLength;
 
-        // If coordinate is coincident with an endpoint of the edge pair, splitting is unnecessary. 
+        // If coordinate is coincident with an endpoint of the edge pair, splitting is unnecessary.
         // note: the pair potentially being split was generated by the 'replace' method,
         // so the two PlainStreetEdges are known to be pointing in opposite directions.
         if (lengthRatioIn < 0.00001) {
@@ -260,15 +266,16 @@ public class LinkRequest {
             return out;
         }
 
-        double lengthIn  = e1.getLength() * lengthRatioIn;
+        double lengthIn = e1.getLength() * lengthRatioIn;
         double lengthOut = e1.getLength() * (1 - lengthRatioIn);
 
-        // Split each edge independently. If a only one splitter vertex is used, routing may take 
+        // Split each edge independently. If a only one splitter vertex is used, routing may take
         // shortcuts thought the splitter vertex to avoid turn penalties.
-        IntersectionVertex e1midpoint = new IntersectionVertex(linker.graph, "split 1 at " + label, midCoord.x, midCoord.y, name);
+        IntersectionVertex e1midpoint = new IntersectionVertex(linker.graph, "split 1 at " + label,
+                midCoord.x, midCoord.y, name);
         // We are replacing two edges with four edges
-        PlainStreetEdge forward1 = new PlainStreetEdge(e1v1, e1midpoint, toMidpoint, name, lengthIn,
-                e1.getPermission(), false);
+        PlainStreetEdge forward1 = new PlainStreetEdge(e1v1, e1midpoint, toMidpoint, name,
+                lengthIn, e1.getPermission(), false);
         PlainStreetEdge forward2 = new PlainStreetEdge(e1midpoint, e1v2,
                 forwardGeometryPair.getSecond(), name, lengthOut, e1.getPermission(), true);
 
@@ -282,16 +289,18 @@ public class LinkRequest {
         PlainStreetEdge backward2 = null;
         IntersectionVertex e2midpoint = null;
         if (e2 != null) {
-            e2midpoint  = new IntersectionVertex(linker.graph, "split 2 at " + label, midCoord.x, midCoord.y, name);
-            backward1 = new PlainStreetEdge(e2v1, e2midpoint, backGeometryPair.getFirst(),
-                    name, lengthOut, e2.getPermission(), false);
-            backward2 = new PlainStreetEdge(e2midpoint, e2v2, backGeometryPair.getSecond(),
-                    name, lengthIn, e2.getPermission(), true);
+            e2midpoint = new IntersectionVertex(linker.graph, "split 2 at " + label, midCoord.x,
+                    midCoord.y, name);
+            backward1 = new PlainStreetEdge(e2v1, e2midpoint, backGeometryPair.getFirst(), name,
+                    lengthOut, e2.getPermission(), false);
+            backward2 = new PlainStreetEdge(e2midpoint, e2v2, backGeometryPair.getSecond(), name,
+                    lengthIn, e2.getPermission(), true);
             if (e2 instanceof AreaEdge) {
                 ((AreaEdge) e2).getArea().addVertex(e2midpoint, linker.graph);
             }
             double backwardBseLengthIn = e2.getBicycleSafetyEffectiveLength() * lengthRatioIn;
-            double backwardBseLengthOut = e2.getBicycleSafetyEffectiveLength() * (1 - lengthRatioIn);
+            double backwardBseLengthOut = e2.getBicycleSafetyEffectiveLength()
+                    * (1 - lengthRatioIn);
             backward1.setBicycleSafetyEffectiveLength(backwardBseLengthIn);
             backward2.setBicycleSafetyEffectiveLength(backwardBseLengthOut);
             backward1.setElevationProfile(e2.getElevationProfile(0, lengthOut), false);
@@ -317,16 +326,16 @@ public class LinkRequest {
                 break;
             }
         }
-        
+
         // disconnect the two old edges from the graph
         linker.graph.removeTemporaryEdge(e1);
         edgesAdded.remove(e1);
-        //e1.detach();
-        
+        // e1.detach();
+
         if (e2 != null) {
             linker.graph.removeTemporaryEdge(e2);
             edgesAdded.remove(e2);
-            //e2.detach();
+            // e2.detach();
             // return the two new splitter vertices
             return Arrays.asList((StreetVertex) e1midpoint, e2midpoint);
         } else {
@@ -358,7 +367,8 @@ public class LinkRequest {
         TraverseModeSet modes = v.getModes().clone();
         modes.setMode(TraverseMode.WALK, true);
         RoutingRequest request = new RoutingRequest(modes);
-        Collection<StreetVertex> nearbyStreetVertices = getNearbyStreetVertices(v, nearbyEdges, request);
+        Collection<StreetVertex> nearbyStreetVertices = getNearbyStreetVertices(v, nearbyEdges,
+                request);
         if (nearbyStreetVertices == null) {
             result = false;
         } else {

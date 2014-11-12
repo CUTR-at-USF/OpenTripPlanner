@@ -62,7 +62,7 @@ public class StreetBikeRentalLink extends Edge {
 
     public State traverse(State s0) {
         // Do not even consider bike rental vertices unless bike rental is enabled.
-        if ( ! s0.getOptions().allowBikeRental) {
+        if (!s0.getOptions().allowBikeRental) {
             return null;
         }
         // Disallow traversing two StreetBikeRentalLinks in a row.
@@ -73,7 +73,7 @@ public class StreetBikeRentalLink extends Edge {
         }
 
         StateEditor s1 = s0.edit(this);
-        //assume bike rental stations are more-or-less on-street
+        // assume bike rental stations are more-or-less on-street
         s1.incrementTimeInSeconds(1);
         s1.incrementWeight(1);
         s1.setBackMode(s0.getNonTransitMode());

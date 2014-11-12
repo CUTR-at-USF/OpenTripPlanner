@@ -42,7 +42,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-public abstract class GenericXmlBikeRentalDataSource implements BikeRentalDataSource, PreferencesConfigurable {
+public abstract class GenericXmlBikeRentalDataSource implements BikeRentalDataSource,
+        PreferencesConfigurable {
 
     private static final Logger log = LoggerFactory.getLogger(BixiBikeRentalDataSource.class);
 
@@ -120,7 +121,7 @@ public abstract class GenericXmlBikeRentalDataSource implements BikeRentalDataSo
             if (brstation != null)
                 out.add(brstation);
         }
-        synchronized(this) {
+        synchronized (this) {
             stations = out;
         }
     }
@@ -144,7 +145,7 @@ public abstract class GenericXmlBikeRentalDataSource implements BikeRentalDataSo
     public String toString() {
         return getClass().getName() + "(" + url + ")";
     }
-    
+
     @Override
     public void configure(Graph graph, Preferences preferences) {
         String url = preferences.get("url", null);

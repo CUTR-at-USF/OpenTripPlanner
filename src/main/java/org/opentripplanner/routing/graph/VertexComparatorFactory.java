@@ -18,6 +18,6 @@ import java.util.List;
 
 public interface VertexComparatorFactory {
 
-	Comparator<? super Vertex> getComparator(List<Vertex> vertexById);
+    Comparator<? super Vertex> getComparator(List<Vertex> vertexById);
 
 }

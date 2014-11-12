@@ -19,6 +19,7 @@ import com.vividsolutions.jts.geom.LineString;
 
 /**
  * FrequencyHops and PatternHops have start/stop Stops
+ * 
  * @author novalis
  *
  */

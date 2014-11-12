@@ -22,10 +22,8 @@ public class EdgeTest {
     @Test
     public void testConstruct() {
         Graph graph = new Graph();
-        Vertex head = new SimpleConcreteVertex(
-                graph, "head", 47.669457, -122.387577);
-        Vertex tail = new SimpleConcreteVertex(
-                graph, "tail", 47.669462, -122.384739);
+        Vertex head = new SimpleConcreteVertex(graph, "head", 47.669457, -122.387577);
+        Vertex tail = new SimpleConcreteVertex(graph, "tail", 47.669462, -122.384739);
         Edge e = new SimpleConcreteEdge(head, tail);
 
         assertEquals(head, e.getFromVertex());

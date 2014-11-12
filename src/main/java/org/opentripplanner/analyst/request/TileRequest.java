@@ -18,9 +18,11 @@ import org.geotools.geometry.Envelope2D;
 public class TileRequest {
 
     public final Envelope2D bbox; // includes CRS
-    public final int width; 
-    public final int height; 
-    
+
+    public final int width;
+
+    public final int height;
+
     public final String routerId;
 
     public TileRequest(String routerId, Envelope2D bbox, Integer width, Integer height) {
@@ -29,26 +31,25 @@ public class TileRequest {
         this.height = height;
         this.routerId = routerId;
     }
-    
+
     public int hashCode() {
         return bbox.hashCode() * 42677 + width + height * 1307;
     }
-    
+
     public boolean equals(Object other) {
         if (other instanceof TileRequest) {
             TileRequest that = (TileRequest) other;
-            return this.bbox.equals(that.bbox) &&
-                   this.width  == that.width   &&
-                   this.height == that.height;
+            return this.bbox.equals(that.bbox) && this.width == that.width
+                    && this.height == that.height;
         }
         return false;
     }
-    
+
     public String toString() {
-        return String.format("<tile request, routerId=%s bbox=%s width=%d height=%d>", 
-        		routerId, bbox, width, height);
+        return String.format("<tile request, routerId=%s bbox=%s width=%d height=%d>", routerId,
+                bbox, width, height);
     }
-    
+
     // implement iterable to iterate over pixels?
 
 }

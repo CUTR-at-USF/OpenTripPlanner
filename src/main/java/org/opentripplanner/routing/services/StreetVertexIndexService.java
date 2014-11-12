@@ -63,8 +63,7 @@ public interface StreetVertexIndexService {
      * @param prefs
      * @return
      */
-    public CandidateEdgeBundle getClosestEdges(GenericLocation location,
-            TraversalRequirements reqs);
+    public CandidateEdgeBundle getClosestEdges(GenericLocation location, TraversalRequirements reqs);
 
     public List<TransitStop> getNearbyTransitStops(Coordinate coordinate, double radius);
 
@@ -85,8 +84,8 @@ public interface StreetVertexIndexService {
      * 
      * @param place
      * @param options
-     * @param other non-null when another vertex has already been found. Passed in so that any extra edges made when locating the previous vertex may
-     *        be used to locate this one as well.
+     * @param other non-null when another vertex has already been found. Passed in so that any extra
+     *        edges made when locating the previous vertex may be used to locate this one as well.
      * @return
      */
     Vertex getVertexForLocation(GenericLocation place, RoutingRequest options, Vertex other);

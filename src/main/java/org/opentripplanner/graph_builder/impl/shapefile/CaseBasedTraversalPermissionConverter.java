@@ -27,27 +27,38 @@ import org.slf4j.LoggerFactory;
  * Calculates street traversal permissions based upon a fixed set of cases.
  * 
  * For example, given a shapefile that includes a DIRECTION column with data as follows:
+ * 
  * <pre>
  * | DIRECTION | NAME    | 
  * | ONE_WAY_F | Side St | 
  * | TWO_WAY   | Main St |
  * | ONE_WAY_B | Foo St. |
  * </pre>
+ * 
  * You could use a CaseBasedTraversalPermissionConverter to implement the following rules:
  *
- *      <p>By default, all streets should be traversable by pedestrians and bicycles in both directions.</p>
- *      
- *      <p>If a street's DIRECTION attribute is ONE_WAY_F, it should be traversable by cars and bikes in
- *      only the forward direction and traversable by pedestrians in both directions.</p>
+ * <p>
+ * By default, all streets should be traversable by pedestrians and bicycles in both directions.
+ * </p>
  * 
- *      <p>If a street's DIRECTION attribute is ONE_WAY_B, it should be traversable by cars and bikes in
- *      only the backward direction and traversable by pedestrians in both directions.</p>
- *      
- *      <p>If a street's DIRECTION attribute is TWO_WAY, it should be traversable by everyone in both 
- *      directions.</p>
- *      
+ * <p>
+ * If a street's DIRECTION attribute is ONE_WAY_F, it should be traversable by cars and bikes in
+ * only the forward direction and traversable by pedestrians in both directions.
+ * </p>
+ * 
+ * <p>
+ * If a street's DIRECTION attribute is ONE_WAY_B, it should be traversable by cars and bikes in
+ * only the backward direction and traversable by pedestrians in both directions.
+ * </p>
+ * 
+ * <p>
+ * If a street's DIRECTION attribute is TWO_WAY, it should be traversable by everyone in both
+ * directions.
+ * </p>
+ * 
  * 
  * These rules could be implemented by configuring the converter bean as follows:
+ * 
  * <pre>
  * {@code
  * <bean class="org.opentripplanner.graph_builder.impl.shapefile.CaseBasedTraversalPermissionConverter"> 
@@ -62,13 +73,15 @@ import org.slf4j.LoggerFactory;
  *  </property> 
  * </bean>}
  * </pre>
+ * 
  * @see org.opentripplanner.routing.edgetype.StreetTraversalPermission
  * 
  */
 public class CaseBasedTraversalPermissionConverter implements
         SimpleFeatureConverter<P2<StreetTraversalPermission>> {
 
-    private static Logger log = LoggerFactory.getLogger(CaseBasedBicycleSafetyFeatureConverter.class);
+    private static Logger log = LoggerFactory
+            .getLogger(CaseBasedBicycleSafetyFeatureConverter.class);
 
     private String _attributeName;
 
@@ -90,7 +103,7 @@ public class CaseBasedTraversalPermissionConverter implements
         _attributeName = attributeName;
         _defaultPermission = P2.createPair(defaultPermission, defaultPermission);
     }
-    
+
     /**
      * The name of the feature attribute to use when calculating the traversal permissions.
      */

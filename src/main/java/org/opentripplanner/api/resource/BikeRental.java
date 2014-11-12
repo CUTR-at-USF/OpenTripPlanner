@@ -40,26 +40,28 @@ import com.vividsolutions.jts.geom.Envelope;
 @XmlRootElement
 public class BikeRental {
 
-    @Context // FIXME inject Application context
+    @Context
+    // FIXME inject Application context
     @Setter
     private GraphService graphService;
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML + Q, MediaType.TEXT_XML + Q })
-    public BikeRentalStationList getBikeRentalStations(
-            @QueryParam("lowerLeft") String lowerLeft,
-            @QueryParam("upperRight") String upperRight,
-            @PathParam("routerId") String routerId) {
+    public BikeRentalStationList getBikeRentalStations(@QueryParam("lowerLeft") String lowerLeft,
+            @QueryParam("upperRight") String upperRight, @PathParam("routerId") String routerId) {
 
         Graph graph = graphService.getGraph(routerId);
-        if (graph == null) return null;
-        BikeRentalStationService bikeRentalService = graph.getService(BikeRentalStationService.class);
-        if (bikeRentalService == null) return new BikeRentalStationList();
+        if (graph == null)
+            return null;
+        BikeRentalStationService bikeRentalService = graph
+                .getService(BikeRentalStationService.class);
+        if (bikeRentalService == null)
+            return new BikeRentalStationList();
         Envelope envelope;
         if (lowerLeft != null) {
             envelope = getEnvelope(lowerLeft, upperRight);
         } else {
-            envelope = new Envelope(-180,180,-90,90); 
+            envelope = new Envelope(-180, 180, -90, 90);
         }
         Collection<BikeRentalStation> stations = bikeRentalService.getStations();
         List<BikeRentalStation> out = new ArrayList<BikeRentalStation>();

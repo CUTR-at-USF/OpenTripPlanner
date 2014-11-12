@@ -73,10 +73,12 @@ public class LIsochrone extends RoutingResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(LIsochrone.class);
 
-    @Context // FIXME inject Application context
+    @Context
+    // FIXME inject Application context
     private IsoChroneSPTRendererAccSampling accSamplingRenderer;
 
-    @Context // FIXME inject Application context
+    @Context
+    // FIXME inject Application context
     private IsoChroneSPTRendererRecursiveGrid recursiveGridRenderer;
 
     @QueryParam("cutoffSec")
@@ -203,7 +205,8 @@ public class LIsochrone extends RoutingResource {
         tbuilder.setName("contours");
         tbuilder.setCRS(DefaultGeographicCRS.WGS84);
         tbuilder.add("Geometry", MultiPolygon.class);
-        tbuilder.add("Time", Integer.class); // TODO change to something more descriptive and lowercase
+        tbuilder.add("Time", Integer.class); // TODO change to something more descriptive and
+                                             // lowercase
         return tbuilder.buildFeatureType();
     }
 

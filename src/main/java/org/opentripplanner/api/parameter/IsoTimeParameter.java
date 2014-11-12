@@ -28,11 +28,12 @@ public class IsoTimeParameter {
 
     public GregorianCalendar cal;
 
-    public IsoTimeParameter (String param) {
+    public IsoTimeParameter(String param) {
         // WMS spec annex D: time is specified in ISO8601:2000 extended
         // http://stackoverflow.com/questions/2201925/converting-iso8601-compliant-string-to-java-util-date
         try {
-            cal = javax.xml.datatype.DatatypeFactory.newInstance().newXMLGregorianCalendar(param).toGregorianCalendar();
+            cal = javax.xml.datatype.DatatypeFactory.newInstance().newXMLGregorianCalendar(param)
+                    .toGregorianCalendar();
         } catch (Exception e) {
             throw new WebApplicationException(fail(param, e));
         }
@@ -40,8 +41,7 @@ public class IsoTimeParameter {
 
     protected Response fail(String param, Exception e) {
         return Response.status(Status.BAD_REQUEST)
-                       .entity("parsing time " + param + ": " + e.getMessage())
-                       .build();
+                .entity("parsing time " + param + ": " + e.getMessage()).build();
     }
 
 }

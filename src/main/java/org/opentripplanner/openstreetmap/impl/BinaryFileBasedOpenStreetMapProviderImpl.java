@@ -22,8 +22,8 @@ import java.io.FileInputStream;
 import crosby.binary.file.BlockInputStream;
 
 /**
- * Parser for the OpenStreetMap PBF format. Parses files in three passes:
- * First the relations, then the ways, then the nodes are also loaded.
+ * Parser for the OpenStreetMap PBF format. Parses files in three passes: First the relations, then
+ * the ways, then the nodes are also loaded.
  *
  * @see http://wiki.openstreetmap.org/wiki/PBF_Format
  * @see org.opentripplanner.openstreetmap.services.graph_builder.services.osm.OpenStreetMapContentHandler#biPhase
@@ -57,7 +57,8 @@ public class BinaryFileBasedOpenStreetMapProviderImpl implements OpenStreetMapPr
             (new BlockInputStream(input, parser)).process();
             handler.nodesLoaded();
         } catch (Exception ex) {
-            throw new IllegalStateException("error loading OSM from path " + _path, ex);        }
+            throw new IllegalStateException("error loading OSM from path " + _path, ex);
+        }
     }
 
     public void setPath(File path) {

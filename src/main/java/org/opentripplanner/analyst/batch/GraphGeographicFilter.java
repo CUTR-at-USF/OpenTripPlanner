@@ -40,6 +40,7 @@ public class GraphGeographicFilter implements IndividualFilter {
     private static final Logger LOG = LoggerFactory.getLogger(GraphGeographicFilter.class);
 
     private RoutingRequest prototypeRoutingRequest;
+
     private GraphService graphService;
 
     public GraphGeographicFilter(RoutingRequest prototypeRoutingRequest, GraphService graphService) {
@@ -49,19 +50,22 @@ public class GraphGeographicFilter implements IndividualFilter {
     }
 
     private double bufferMeters = 2000;
+
     private boolean useOnlyStops = true;
+
     private static GeometryFactory gf = new GeometryFactory();
+
     private Geometry hull;
-    
+
     public void findHull() {
         LOG.info("finding hull of graph...");
         LOG.debug("using only stops? {}", useOnlyStops);
         if (bufferMeters < prototypeRoutingRequest.maxWalkDistance)
             LOG.warn("geographic filter buffer is smaller than max walk distance, this will probably yield incorrect results.");
-        Graph graph= graphService.getGraph(prototypeRoutingRequest.getRouterId());
+        Graph graph = graphService.getGraph(prototypeRoutingRequest.getRouterId());
         List<Geometry> geometries = new ArrayList<Geometry>();
         for (Vertex v : graph.getVertices()) {
-            if (useOnlyStops && ! (v instanceof TransitStop))
+            if (useOnlyStops && !(v instanceof TransitStop))
                 continue;
             Point pt = gf.createPoint(v.getCoordinate());
             Geometry geom = crudeProjectedBuffer(pt, bufferMeters);
@@ -74,7 +78,7 @@ public class GraphGeographicFilter implements IndividualFilter {
         // may lead to false rejections
         // DouglasPeuckerSimplifier simplifier = new DouglasPeuckerSimplifier();
     }
-    
+
     private Geometry crudeProjectedBuffer(Point pt, double distanceMeters) {
         final double mPerDegreeLat = 111111.111111;
         double lat = pt.getY();
@@ -85,13 +89,13 @@ public class GraphGeographicFilter implements IndividualFilter {
         env.expandBy(lonExpand, latExpand);
         return gf.toGeometry(env);
     }
-    
+
     @Override
     public boolean filter(Individual individual) {
         Coordinate coord = new Coordinate(individual.lon, individual.lat);
         Point pt = gf.createPoint(coord);
         boolean accept = hull.contains(pt);
-        //LOG.debug("label {} accept {}", individual.label, accept);
+        // LOG.debug("label {} accept {}", individual.label, accept);
         return accept;
     }
 

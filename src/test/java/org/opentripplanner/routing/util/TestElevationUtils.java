@@ -21,23 +21,22 @@ import com.vividsolutions.jts.geom.impl.PackedCoordinateSequenceFactory;
 
 public class TestElevationUtils extends TestCase {
 
-	public void testLengthMultiplier() {
+    public void testLengthMultiplier() {
 
-		PackedCoordinateSequenceFactory factory = PackedCoordinateSequenceFactory.DOUBLE_FACTORY;
-		CoordinateSequence seq = factory.create(new Coordinate[] {
-				new Coordinate(0, 1), new Coordinate(10, 1) });
-		
-		assertEquals(1.0, ElevationUtils.getLengthMultiplierFromElevation(seq));
-		
-		seq = factory.create(new Coordinate[] {
-				new Coordinate(0, 1), new Coordinate(10, 2) });
-				
-		assertEquals(1.00498756211208902702, ElevationUtils.getLengthMultiplierFromElevation(seq));
-		
-		seq = factory.create(new Coordinate[] {
-				new Coordinate(0, 1), new Coordinate(10, 2), new Coordinate(15, 1) });
-		
-		assertEquals(1.00992634231424500668, ElevationUtils.getLengthMultiplierFromElevation(seq));
-	}
+        PackedCoordinateSequenceFactory factory = PackedCoordinateSequenceFactory.DOUBLE_FACTORY;
+        CoordinateSequence seq = factory.create(new Coordinate[] { new Coordinate(0, 1),
+                new Coordinate(10, 1) });
+
+        assertEquals(1.0, ElevationUtils.getLengthMultiplierFromElevation(seq));
+
+        seq = factory.create(new Coordinate[] { new Coordinate(0, 1), new Coordinate(10, 2) });
+
+        assertEquals(1.00498756211208902702, ElevationUtils.getLengthMultiplierFromElevation(seq));
+
+        seq = factory.create(new Coordinate[] { new Coordinate(0, 1), new Coordinate(10, 2),
+                new Coordinate(15, 1) });
+
+        assertEquals(1.00992634231424500668, ElevationUtils.getLengthMultiplierFromElevation(seq));
+    }
 
 }

@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FindMaxWalkDistances {
-    
+
     private final static Logger LOG = LoggerFactory.getLogger(FindMaxWalkDistances.class);
 
     public static void find(Graph graph) {
@@ -40,7 +40,7 @@ public class FindMaxWalkDistances {
             gv.setDistanceToNearestTransitStop(Double.MAX_VALUE);
         }
         for (Vertex gv : graph.getVertices()) {
-            if (gv instanceof TransitStop) { 
+            if (gv instanceof TransitStop) {
                 assignStopDistances(graph, (TransitStop) gv);
             }
         }
@@ -51,17 +51,17 @@ public class FindMaxWalkDistances {
             }
         }
     }
-    
+
     /**
-     * TODO - Can this reuse one of the existing search algorithms? 
+     * TODO - Can this reuse one of the existing search algorithms?
      */
     private static void assignStopDistances(Graph graph, TransitStop origin) {
-        
+
         RoutingRequest options = new RoutingRequest(new TraverseModeSet(TraverseMode.WALK));
         options.setMaxWalkDistance(Double.MAX_VALUE);
         options.walkReluctance = 1.0;
         options.setWalkSpeed(1.0);
-        
+
         // Iteration Variables
         State u, v;
         HashSet<Vertex> closed = new HashSet<Vertex>();
@@ -110,7 +110,7 @@ public class FindMaxWalkDistances {
                     }
                     sv.setDistanceToNearestTransitStop(new_w);
                 }
-                
+
                 if (spt.add(v))
                     queue.insert(v, new_w);
             }

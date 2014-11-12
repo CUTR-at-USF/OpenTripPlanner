@@ -17,7 +17,8 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opentripplanner.graph_builder.services.shapefile.SimpleFeatureConverter;
 
 /**
- * A converter which converts null-valued attributes to either true or false (and all others to the other)
+ * A converter which converts null-valued attributes to either true or false (and all others to the
+ * other)
  * 
  * @author novalis
  * 
@@ -25,7 +26,7 @@ import org.opentripplanner.graph_builder.services.shapefile.SimpleFeatureConvert
 public class NullBooleanConverter implements SimpleFeatureConverter<Boolean> {
 
     private String attributeName;
-    
+
     private boolean nullIsTrue = false;
 
     public NullBooleanConverter() {
@@ -35,7 +36,7 @@ public class NullBooleanConverter implements SimpleFeatureConverter<Boolean> {
         this.attributeName = attributeName;
         this.nullIsTrue = nullIsTrue;
     }
-    
+
     @Override
     public Boolean convert(SimpleFeature feature) {
         Object value = feature.getAttribute(attributeName);

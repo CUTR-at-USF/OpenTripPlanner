@@ -144,7 +144,8 @@ public class PortlandCustomNamer implements CustomNamer {
             return null;
         }
         Vertex toVertex = e.getToVertex();
-        for (PlainStreetEdge out : IterableLibrary.filter(toVertex.getOutgoing(), PlainStreetEdge.class)) {
+        for (PlainStreetEdge out : IterableLibrary.filter(toVertex.getOutgoing(),
+                PlainStreetEdge.class)) {
             if (out.hasBogusName()) {
                 String name = nameAccordingToDestination(graph, out, maxDepth - 1);
                 if (name == null) {
@@ -166,7 +167,8 @@ public class PortlandCustomNamer implements CustomNamer {
             return null;
         }
         Vertex fromVertex = e.getFromVertex();
-        for (PlainStreetEdge in : IterableLibrary.filter(fromVertex.getIncoming(), PlainStreetEdge.class)) {
+        for (PlainStreetEdge in : IterableLibrary.filter(fromVertex.getIncoming(),
+                PlainStreetEdge.class)) {
             if (in.hasBogusName()) {
                 String name = nameAccordingToOrigin(graph, in, maxDepth - 1);
                 if (name == null) {

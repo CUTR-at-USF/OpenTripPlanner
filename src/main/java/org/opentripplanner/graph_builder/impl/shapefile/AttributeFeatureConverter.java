@@ -19,25 +19,27 @@ import java.nio.charset.Charset;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opentripplanner.graph_builder.services.shapefile.SimpleFeatureConverter;
 
-/** 
- * Reads a single attribute from a feature and converts it to an object */
+/**
+ * Reads a single attribute from a feature and converts it to an object
+ */
 public class AttributeFeatureConverter<T> implements SimpleFeatureConverter<T> {
 
     private String _attributeName;
+
     private boolean decodeUTF8 = true;
 
     public AttributeFeatureConverter(String attributeName) {
         _attributeName = attributeName;
     }
-    
+
     public AttributeFeatureConverter() {
-        
+
     }
-    
-    public void setAttributeName(String attributeName){
+
+    public void setAttributeName(String attributeName) {
         _attributeName = attributeName;
     }
-    
+
     public String getAttributeName() {
         return _attributeName;
     }
@@ -48,10 +50,10 @@ public class AttributeFeatureConverter<T> implements SimpleFeatureConverter<T> {
         T value = (T) feature.getAttribute(_attributeName);
         if (value instanceof String && decodeUTF8) {
             String str = (String) value;
-            //decode UTF-8, irritatingly
+            // decode UTF-8, irritatingly
             Charset charset = Charset.forName("UTF-8");
             byte[] bytes = new byte[str.length()];
-            //we have to use a deprecated method because it's the only one that works.
+            // we have to use a deprecated method because it's the only one that works.
             str.getBytes(0, str.length(), bytes, 0);
             ByteBuffer bb = ByteBuffer.wrap(bytes);
             value = (T) charset.decode(bb).toString();

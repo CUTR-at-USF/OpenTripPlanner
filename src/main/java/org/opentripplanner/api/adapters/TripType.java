@@ -102,7 +102,7 @@ public class TripType {
     @XmlAttribute
     @JsonSerialize
     Integer tripBikesAllowed;
-    
+
     @XmlAttribute
     @JsonSerialize
     Integer bikesAllowed;

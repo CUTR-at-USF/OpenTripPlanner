@@ -15,7 +15,7 @@ public class AgencyAndIdSerializer extends JsonSerializer<AgencyAndId> {
 
     public static final String SEPARATOR = ":";
 
-    public static SimpleModule makeModule () {
+    public static SimpleModule makeModule() {
         Version moduleVersion = new Version(1, 0, 0, null, null, null);
         SimpleModule module = new SimpleModule("OTP", moduleVersion);
         module.addSerializer(AgencyAndId.class, new AgencyAndIdSerializer());
@@ -28,12 +28,12 @@ public class AgencyAndIdSerializer extends JsonSerializer<AgencyAndId> {
         gen.writeString(a.getAgencyId() + SEPARATOR + a.getId());
     }
 
-    // Gets around type erasure, allowing 
-    // module.addSerializer(new ThingSerializer()) to correctly associate 
+    // Gets around type erasure, allowing
+    // module.addSerializer(new ThingSerializer()) to correctly associate
     // this serializer with the proper type.
     @Override
     public Class<AgencyAndId> handledType() {
-        return AgencyAndId.class; 
+        return AgencyAndId.class;
     }
 
 }

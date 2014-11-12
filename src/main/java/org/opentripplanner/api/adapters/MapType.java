@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class MapType {
     @XmlElement(name = "entry", required = true)
     private final List<Entry> entry = new ArrayList<Entry>();
-    
+
     public List<Entry> getEntry() {
         return this.entry;
     }

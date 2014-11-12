@@ -30,15 +30,16 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
 public class HttpUtils {
-    
+
     private static final int TIMEOUT_CONNECTION = 5000;
+
     private static final int TIMEOUT_SOCKET = 5000;
 
     public static InputStream getData(String url) throws IOException {
         HttpGet httpget = new HttpGet(url);
         HttpClient httpclient = getClient();
         HttpResponse response = httpclient.execute(httpget);
-        if(response.getStatusLine().getStatusCode() != 200)
+        if (response.getStatusLine().getStatusCode() != 200)
             return null;
 
         HttpEntity entity = response.getEntity();
@@ -63,12 +64,12 @@ public class HttpUtils {
                     + status.getReasonPhrase());
         }
     }
-    
+
     private static HttpClient getClient() {
         HttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(httpParams, TIMEOUT_CONNECTION);
         HttpConnectionParams.setSoTimeout(httpParams, TIMEOUT_SOCKET);
-        
+
         DefaultHttpClient httpclient = new DefaultHttpClient();
         httpclient.setParams(httpParams);
         return httpclient;

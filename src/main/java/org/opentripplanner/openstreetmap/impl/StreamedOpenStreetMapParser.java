@@ -36,20 +36,32 @@ import javax.xml.stream.events.XMLEvent;
  */
 public class StreamedOpenStreetMapParser {
 
-    private static final QName qNode     = new QName("node");
-    private static final QName qWay      = new QName("way");
-    private static final QName qRelation = new QName("relation");
-    private static final QName qNd       = new QName("nd");
-    private static final QName qMember   = new QName("member");
-    private static final QName qTag      = new QName("tag");
+    private static final QName qNode = new QName("node");
 
-    private static final QName qId   = new QName("id");
-    private static final QName qLat  = new QName("lat");
-    private static final QName qLon  = new QName("lon");
-    private static final QName qRef  = new QName("ref");
-    private static final QName qKey  = new QName("k");
-    private static final QName qVal  = new QName("v");
+    private static final QName qWay = new QName("way");
+
+    private static final QName qRelation = new QName("relation");
+
+    private static final QName qNd = new QName("nd");
+
+    private static final QName qMember = new QName("member");
+
+    private static final QName qTag = new QName("tag");
+
+    private static final QName qId = new QName("id");
+
+    private static final QName qLat = new QName("lat");
+
+    private static final QName qLon = new QName("lon");
+
+    private static final QName qRef = new QName("ref");
+
+    private static final QName qKey = new QName("k");
+
+    private static final QName qVal = new QName("v");
+
     private static final QName qType = new QName("type");
+
     private static final QName qRole = new QName("role");
 
     public static void parseMap(final File path, OpenStreetMapContentHandler map)
@@ -71,15 +83,15 @@ public class StreamedOpenStreetMapParser {
         map.nodesLoaded();
     }
 
-    public static void parseMap(final InputStream in, OpenStreetMapContentHandler map, int phase) throws IOException,
-            XMLStreamException {
+    public static void parseMap(final InputStream in, OpenStreetMapContentHandler map, int phase)
+            throws IOException, XMLStreamException {
 
         XMLInputFactory inputFactory = XMLInputFactory.newInstance();
         XMLEventReader xmlEventReader = inputFactory.createXMLEventReader(in);
 
         OSMRelation osmRelation = null;
-        OSMNode     osmNode     = null;
-        OSMWay      osmWay      = null;
+        OSMNode osmNode = null;
+        OSMWay osmWay = null;
 
         while (xmlEventReader.hasNext()) {
             XMLEvent xmlEvent = xmlEventReader.nextEvent();
@@ -134,10 +146,10 @@ public class StreamedOpenStreetMapParser {
                 if (osmNode != null && element.getName().equals(qNode)) {
                     map.addNode(osmNode);
                     osmNode = null;
-                }  else if (osmWay != null && element.getName().equals(qWay)) {
+                } else if (osmWay != null && element.getName().equals(qWay)) {
                     map.addWay(osmWay);
                     osmWay = null;
-                }  else if (osmRelation != null && element.getName().equals(qRelation)) {
+                } else if (osmRelation != null && element.getName().equals(qRelation)) {
                     map.addRelation(osmRelation);
                     osmRelation = null;
                 }

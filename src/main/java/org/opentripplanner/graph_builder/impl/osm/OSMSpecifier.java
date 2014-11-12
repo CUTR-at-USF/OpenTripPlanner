@@ -20,12 +20,13 @@ import org.opentripplanner.common.model.P2;
 import org.opentripplanner.openstreetmap.model.OSMWithTags;
 
 /**
- * Specifies a class of OSM tagged entities (e.g. ways) by a list of tags and their values (which may be wildcards).
- * The OSMSpecifier which matches the most tags on an OSM entity will win. In the event that several OSMSpecifiers
- * match the same number of tags, the one that does so using less wildcards will win. For example, if one OSMSpecifier
- * has the tags (highway=residential, cycleway=*) and another has (highway=residential, surface=paved) and a way has the
- * tags (highway=residential, cycleway=lane, surface=paved) the second OSMSpecifier will be applied to that way
- * (2 exact matches beats 1 exact match and a wildcard match).
+ * Specifies a class of OSM tagged entities (e.g. ways) by a list of tags and their values (which
+ * may be wildcards). The OSMSpecifier which matches the most tags on an OSM entity will win. In the
+ * event that several OSMSpecifiers match the same number of tags, the one that does so using less
+ * wildcards will win. For example, if one OSMSpecifier has the tags (highway=residential,
+ * cycleway=*) and another has (highway=residential, surface=paved) and a way has the tags
+ * (highway=residential, cycleway=lane, surface=paved) the second OSMSpecifier will be applied to
+ * that way (2 exact matches beats 1 exact match and a wildcard match).
  */
 public class OSMSpecifier {
 
@@ -51,10 +52,10 @@ public class OSMSpecifier {
     /**
      * Calculates a pair of scores expressing how well an OSM entity's tags match this specifier.
      *
-     * Tags in this specifier are matched against those for the left and right side of the OSM way separately. See:
-     * http://wiki.openstreetmap.org/wiki/Forward_%26_backward,_left_%26_right
-     * TODO: we should probably support forward/backward as well.
-     * TODO: simply count the number of full, partial, and wildcard matches instead of using a scoring system.
+     * Tags in this specifier are matched against those for the left and right side of the OSM way
+     * separately. See: http://wiki.openstreetmap.org/wiki/Forward_%26_backward,_left_%26_right
+     * TODO: we should probably support forward/backward as well. TODO: simply count the number of
+     * full, partial, and wildcard matches instead of using a scoring system.
      *
      * @param match an OSM tagged object to compare to this specifier
      */
@@ -78,12 +79,12 @@ public class OSMSpecifier {
             int leftTagScore = getTagScore(value, leftMatchValue);
             leftScore += leftTagScore;
             if (leftTagScore > 0) {
-                leftMatches ++;
+                leftMatches++;
             }
             int rightTagScore = getTagScore(value, rightMatchValue);
             rightScore += rightTagScore;
             if (rightTagScore > 0) {
-                rightMatches ++;
+                rightMatches++;
             }
         }
         int allMatchLeftBonus = (leftMatches == kvpairs.size()) ? 10 : 0;
@@ -95,8 +96,8 @@ public class OSMSpecifier {
     }
 
     /**
-     * Calculates a score expressing how well an OSM entity's tags match this specifier.
-     * This does exactly the same thing as matchScores but without regard for :left and :right.
+     * Calculates a score expressing how well an OSM entity's tags match this specifier. This does
+     * exactly the same thing as matchScores but without regard for :left and :right.
      */
     public int matchScore(OSMWithTags match) {
         int score = 0;
@@ -116,9 +117,10 @@ public class OSMSpecifier {
     }
 
     /**
-     * Calculates a score indicating how well an OSM tag value matches the given matchValue.
-     * An exact match is worth 100 points, a partial match on the part of the value before a colon is worth 75 points,
-     * and a wildcard match is worth only one point, to serve as a tiebreaker. A score of 0 means they do not match.
+     * Calculates a score indicating how well an OSM tag value matches the given matchValue. An
+     * exact match is worth 100 points, a partial match on the part of the value before a colon is
+     * worth 75 points, and a wildcard match is worth only one point, to serve as a tiebreaker. A
+     * score of 0 means they do not match.
      */
     private int getTagScore(String value, String matchValue) {
         // either this matches on a wildcard, or it matches exactly

@@ -24,12 +24,13 @@ import org.opentripplanner.graph_builder.services.shapefile.FeatureSourceFactory
 public class ShapefileFeatureSourceFactoryImpl implements FeatureSourceFactory {
 
     private File _path;
+
     private ShapefileDataStore dataStore;
 
     public ShapefileFeatureSourceFactoryImpl() {
-        
+
     }
-    
+
     public ShapefileFeatureSourceFactoryImpl(File path) {
         _path = path;
     }
@@ -53,7 +54,7 @@ public class ShapefileFeatureSourceFactoryImpl implements FeatureSourceFactory {
                     + _path, ex);
         }
     }
-    
+
     @Override
     public void cleanup() {
         dataStore.dispose();

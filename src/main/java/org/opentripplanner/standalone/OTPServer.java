@@ -43,25 +43,36 @@ public class OTPServer {
 
     // Core OTP modules
     public GraphService graphService;
+
     public PathService pathService;
-    public RoutingRequest routingRequest; // the prototype routing request which establishes default parameter values
+
+    public RoutingRequest routingRequest; // the prototype routing request which establishes default
+                                          // parameter values
+
     public PlanGenerator planGenerator;
+
     public SPTService sptService;
 
     // Optional Analyst Modules
     public Renderer renderer;
+
     public SPTCache sptCache;
+
     public TileCache tileCache;
+
     public IsoChroneSPTRenderer isoChroneSPTRenderer;
+
     public SampleGridRenderer sampleGridRenderer;
+
     public SurfaceCache surfaceCache;
+
     public PointSetCache pointSetCache;
 
     public Router getRouter(String routerId) {
         return routers.get(routerId);
     }
 
-    public OTPServer (CommandLineParameters params, GraphService gs) {
+    public OTPServer(CommandLineParameters params, GraphService gs) {
         LOG.info("Wiring up and configuring server.");
 
         // Core OTP modules
@@ -71,16 +82,18 @@ public class OTPServer {
 
         // Choose a PathService to wrap the SPTService, depending on expected maximum path lengths
         if (params.longDistance) {
-            LongDistancePathService pathService = new LongDistancePathService(graphService, sptService);
+            LongDistancePathService pathService = new LongDistancePathService(graphService,
+                    sptService);
             pathService.setTimeout(10);
             this.pathService = pathService;
         } else {
-            RetryingPathServiceImpl pathService = new RetryingPathServiceImpl(graphService, sptService);
+            RetryingPathServiceImpl pathService = new RetryingPathServiceImpl(graphService,
+                    sptService);
             pathService.setFirstPathTimeout(10.0);
             pathService.setMultiPathTimeout(1.0);
             this.pathService = pathService;
             // cpf.bind(RemainingWeightHeuristicFactory.class,
-            //        new DefaultRemainingWeightHeuristicFactoryImpl());
+            // new DefaultRemainingWeightHeuristicFactoryImpl());
         }
 
         planGenerator = new PlanGenerator(graphService, pathService);
@@ -91,7 +104,8 @@ public class OTPServer {
             sptCache = new SPTCache(sptService, graphService);
             renderer = new Renderer(tileCache, sptCache);
             sampleGridRenderer = new SampleGridRenderer(graphService, sptService);
-            isoChroneSPTRenderer = new IsoChroneSPTRendererAccSampling(graphService, sptService, sampleGridRenderer);
+            isoChroneSPTRenderer = new IsoChroneSPTRendererAccSampling(graphService, sptService,
+                    sampleGridRenderer);
             surfaceCache = new SurfaceCache(30);
             pointSetCache = new DiskBackedPointSetCache(100, new File(params.pointSetDirectory));
         }
@@ -100,11 +114,11 @@ public class OTPServer {
 
     /**
      * Return an HK2 Binder that injects this specific OTPServer instance into Jersey web resources.
-     * This should be registered in the ResourceConfig (Jersey) or Application (JAX-RS) as a singleton.
-     * More on custom injection in Jersey 2:
+     * This should be registered in the ResourceConfig (Jersey) or Application (JAX-RS) as a
+     * singleton. More on custom injection in Jersey 2:
      * http://jersey.576304.n2.nabble.com/Custom-providers-in-Jersey-2-tp7580699p7580715.html
      */
-     public AbstractBinder makeBinder() {
+    public AbstractBinder makeBinder() {
         return new AbstractBinder() {
             @Override
             protected void configure() {

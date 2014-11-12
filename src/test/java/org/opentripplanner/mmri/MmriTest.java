@@ -50,6 +50,8 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 /** Common base class for all the MMRI tests (see package-info). */
 abstract class MmriTest extends GtfsTest {
 
-    public boolean isLongDistance() { return true; }
+    public boolean isLongDistance() {
+        return true;
+    }
 
 }

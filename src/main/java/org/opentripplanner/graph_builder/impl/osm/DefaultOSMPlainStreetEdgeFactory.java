@@ -26,34 +26,33 @@ import com.vividsolutions.jts.geom.LineString;
 public class DefaultOSMPlainStreetEdgeFactory implements OSMPlainStreetEdgeFactory {
 
     private static final String wayLabelFormat = "osm:way:%d";
-    
+
     private static final String areaLabelFormat = "osm:area:%d";
-    
+
     private String getLabelForWay(OSMWithTags way) {
         return String.format(wayLabelFormat, way.getId());
     }
-    
+
     private String getLabelForArea(OSMWithTags way) {
         return String.format(areaLabelFormat, way.getId());
     }
-    
+
     @Override
     public PlainStreetEdge createEdge(OSMNode fromNode, OSMNode toNode, OSMWithTags way,
             IntersectionVertex startEndpoint, IntersectionVertex endEndpoint, LineString geometry,
             String name, double length, StreetTraversalPermission permissions, boolean back,
             float carSpeed) {
-        PlainStreetEdge pse = new PlainStreetEdge(startEndpoint, endEndpoint, geometry, name, length, permissions,
-                back, carSpeed);
+        PlainStreetEdge pse = new PlainStreetEdge(startEndpoint, endEndpoint, geometry, name,
+                length, permissions, back, carSpeed);
         pse.setLabel(getLabelForWay(way));
         return pse;
     }
 
     @Override
-    public AreaEdge createAreaEdge(OSMNode nodeI, OSMNode nodeJ,
-            OSMWithTags areaEntity, IntersectionVertex startEndpoint,
-            IntersectionVertex endEndpoint, LineString geometry, String name,
-            double length, StreetTraversalPermission permissions,
-            boolean back, float carSpeed, AreaEdgeList area) {
+    public AreaEdge createAreaEdge(OSMNode nodeI, OSMNode nodeJ, OSMWithTags areaEntity,
+            IntersectionVertex startEndpoint, IntersectionVertex endEndpoint, LineString geometry,
+            String name, double length, StreetTraversalPermission permissions, boolean back,
+            float carSpeed, AreaEdgeList area) {
         AreaEdge ae = new AreaEdge(startEndpoint, endEndpoint, geometry, name, length, permissions,
                 back, carSpeed, area);
         ae.setLabel(getLabelForArea(areaEntity));

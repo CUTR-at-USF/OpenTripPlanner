@@ -102,8 +102,8 @@ public class GeometryUtilsTest {
         referenceCoordinates[8][0] = coordinates;
 
         GeometryFactory geometryFactory = GeometryUtils.getGeometryFactory();
-        CoordinateSequenceFactory coordinateSequenceFactory =
-                geometryFactory.getCoordinateSequenceFactory();
+        CoordinateSequenceFactory coordinateSequenceFactory = geometryFactory
+                .getCoordinateSequenceFactory();
         CoordinateSequence sequence = coordinateSequenceFactory.create(coordinates);
         LineString geometry = new LineString(sequence, geometryFactory);
 

@@ -34,7 +34,7 @@ import org.opentripplanner.routing.vertextype.TransitStop;
 import org.opentripplanner.util.TestUtils;
 
 public class TestGraphPath extends TestCase {
-    
+
     private Graph graph;
 
     private GenericAStar aStar = new GenericAStar();
@@ -44,7 +44,8 @@ public class TestGraphPath extends TestCase {
         graph = new Graph();
         GTFSPatternHopFactory hl = new GTFSPatternHopFactory(context);
         hl.run(graph);
-        graph.putService(CalendarServiceData.class, GtfsLibrary.createCalendarServiceData(context.getDao()));
+        graph.putService(CalendarServiceData.class,
+                GtfsLibrary.createCalendarServiceData(context.getDao()));
     }
 
     public void testGraphPathOptimize() throws Exception {

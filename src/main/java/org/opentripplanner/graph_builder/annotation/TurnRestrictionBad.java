@@ -21,9 +21,9 @@ public class TurnRestrictionBad extends GraphBuilderAnnotation {
     private static final long serialVersionUID = 1L;
 
     public static final String FMT = "Bad turn restriction at relation %s";
-    
+
     final long id;
-    
+
     @Override
     public String getMessage() {
         return String.format(FMT, id);

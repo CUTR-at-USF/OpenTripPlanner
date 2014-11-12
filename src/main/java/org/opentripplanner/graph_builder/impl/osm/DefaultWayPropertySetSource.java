@@ -23,23 +23,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This factory class provides a default collection of {@link WayProperties} that determine how OSM streets can be
- * traversed in various modes.
+ * This factory class provides a default collection of {@link WayProperties} that determine how OSM
+ * streets can be traversed in various modes.
  *
- * Circa January 2011, Grant and Mele at TriMet undertook proper testing of bike (and transit) routing, and worked
- * with David Turner on assigning proper weights to different facility types. The weights in this file grew organically
- * from trial and error, and are the result of months of testing and tweaking the routes that OTP returned, as well as
- * actually walking/biking these routes and making changes based on those experiences. This set of weights should be
- * a great starting point for others to use, but they are to some extent tailored to the situation in Portland and
- * people shouldn't hesitate to adjust them to for their own instance.
+ * Circa January 2011, Grant and Mele at TriMet undertook proper testing of bike (and transit)
+ * routing, and worked with David Turner on assigning proper weights to different facility types.
+ * The weights in this file grew organically from trial and error, and are the result of months of
+ * testing and tweaking the routes that OTP returned, as well as actually walking/biking these
+ * routes and making changes based on those experiences. This set of weights should be a great
+ * starting point for others to use, but they are to some extent tailored to the situation in
+ * Portland and people shouldn't hesitate to adjust them to for their own instance.
  *
- * The rules for assigning WayProperties to OSM ways are explained in. The final tie breaker if two Pickers both match
- * is the sequence that the properties are added in this file: if all else is equal the 'setProperties' statement that
- * is closer to the top of the page will prevail over those lower down the page.
+ * The rules for assigning WayProperties to OSM ways are explained in. The final tie breaker if two
+ * Pickers both match is the sequence that the properties are added in this file: if all else is
+ * equal the 'setProperties' statement that is closer to the top of the page will prevail over those
+ * lower down the page.
  *
- * Foot and bicycle permissions are also addressed in OpenStreetMapGraphBuilderImpl.Handler#getPermissionsForEntity().
- * For instance, if a way that normally does not permit walking based on its tag matches (the prevailing 'setProperties'
- * statement) has a 'foot=yes' tag the permissions are overridden and walking is allowed on that way.
+ * Foot and bicycle permissions are also addressed in
+ * OpenStreetMapGraphBuilderImpl.Handler#getPermissionsForEntity(). For instance, if a way that
+ * normally does not permit walking based on its tag matches (the prevailing 'setProperties'
+ * statement) has a 'foot=yes' tag the permissions are overridden and walking is allowed on that
+ * way.
  *
  * TODO clarify why this needs a separate factory interface.
  *
@@ -298,7 +302,8 @@ public class DefaultWayPropertySetSource implements WayPropertySetSource {
                 StreetTraversalPermission.ALL, 2.06, 2.99);
 
         /*
-         * path designed for bicycles (should be treated exactly as a cycleway is), this is a multi-use path (MUP)
+         * path designed for bicycles (should be treated exactly as a cycleway is), this is a
+         * multi-use path (MUP)
          */
         setProperties(props, "highway=path;bicycle=designated",
                 StreetTraversalPermission.PEDESTRIAN_AND_BICYCLE, 0.60, 0.60);
@@ -322,8 +327,9 @@ public class DefaultWayPropertySetSource implements WayPropertySetSource {
                 StreetTraversalPermission.PEDESTRIAN_AND_BICYCLE, 1.1, 1.1);
 
         /*
-         * bicycles on tracks (tracks are defined in OSM as: Roads for agricultural use, gravel roads in the forest etc.; usually unpaved/unsealed but
-         * may occasionally apply to paved tracks as well.)
+         * bicycles on tracks (tracks are defined in OSM as: Roads for agricultural use, gravel
+         * roads in the forest etc.; usually unpaved/unsealed but may occasionally apply to paved
+         * tracks as well.)
          */
         setProperties(props, "highway=track;bicycle=yes",
                 StreetTraversalPermission.PEDESTRIAN_AND_BICYCLE, 1.18, 1.18);
@@ -333,7 +339,10 @@ public class DefaultWayPropertySetSource implements WayPropertySetSource {
                 StreetTraversalPermission.PEDESTRIAN_AND_BICYCLE, 1.18, 1.18);
         setProperties(props, "highway=track;bicycle=designated;surface=*",
                 StreetTraversalPermission.PEDESTRIAN_AND_BICYCLE, 0.99, 0.99);
-        /* this is to avoid double counting since tracks are almost of surface type that is penalized */
+        /*
+         * this is to avoid double counting since tracks are almost of surface type that is
+         * penalized
+         */
         setProperties(props, "highway=track;surface=*",
                 StreetTraversalPermission.PEDESTRIAN_AND_BICYCLE, 1.3, 1.3);
 
@@ -368,7 +377,8 @@ public class DefaultWayPropertySetSource implements WayPropertySetSource {
                 StreetTraversalPermission.BICYCLE_AND_DRIVING, 2, 2);
 
         /*
-         * Automobile speeds in the United States: Based on my (mattwigway) personal experience, primarily in California
+         * Automobile speeds in the United States: Based on my (mattwigway) personal experience,
+         * primarily in California
          */
         setCarSpeed(props, "highway=motorway", 29); // 29 m/s ~= 65 mph
         setCarSpeed(props, "highway=motorway_link", 15); // ~= 35 mph
@@ -401,7 +411,8 @@ public class DefaultWayPropertySetSource implements WayPropertySetSource {
         /*** special situations ****/
 
         /*
-         * cycleway:left/right=lane/track/shared_lane permutations - no longer needed because left/right matching algorithm does this
+         * cycleway:left/right=lane/track/shared_lane permutations - no longer needed because
+         * left/right matching algorithm does this
          */
 
         /* cycleway:left=lane */
@@ -419,9 +430,10 @@ public class DefaultWayPropertySetSource implements WayPropertySetSource {
         /* surface=* mixins */
 
         /*
-         * The following tags have been removed from surface weights because they are no more of an impedence to bicycling than a paved surface
-         * surface=paving_stones surface=fine_gravel (sounds counter-intuitive but see the definition on the OSM Wiki) surface=tartan (this what
-         * running tracks are usually made of)
+         * The following tags have been removed from surface weights because they are no more of an
+         * impedence to bicycling than a paved surface surface=paving_stones surface=fine_gravel
+         * (sounds counter-intuitive but see the definition on the OSM Wiki) surface=tartan (this
+         * what running tracks are usually made of)
          */
 
         setProperties(props, "surface=unpaved", StreetTraversalPermission.ALL, 1.18, 1.18, true);
@@ -451,13 +463,16 @@ public class DefaultWayPropertySetSource implements WayPropertySetSource {
         /* Portland-local mixins */
 
         /*
-         * the RLIS/CCGIS:bicycle=designated mixins are coded out as they are no longer neccessary because of of the bicycle=designated block of code
-         * above. This switch makes our weighting system less reliant on tags that aren't generally used by the OSM community, and prevents the double
-         * counting that was occuring on streets with both bicycle infrastructure and an RLIS:bicycle=designated tag
+         * the RLIS/CCGIS:bicycle=designated mixins are coded out as they are no longer neccessary
+         * because of of the bicycle=designated block of code above. This switch makes our weighting
+         * system less reliant on tags that aren't generally used by the OSM community, and prevents
+         * the double counting that was occuring on streets with both bicycle infrastructure and an
+         * RLIS:bicycle=designated tag
          */
 
         /*
-         * setProperties(props, "RLIS:bicycle=designated", StreetTraversalPermission.ALL, 0.97, 0.97, true);
+         * setProperties(props, "RLIS:bicycle=designated", StreetTraversalPermission.ALL, 0.97,
+         * 0.97, true);
          */
         setProperties(props, "RLIS:bicycle=caution_area", StreetTraversalPermission.ALL, 1.45,
                 1.45, true);
@@ -466,7 +481,8 @@ public class DefaultWayPropertySetSource implements WayPropertySetSource {
         setProperties(props, "RLIS:bicycle:left=caution_area", StreetTraversalPermission.ALL, 1.0,
                 1.45, true);
         /*
-         * setProperties(props, "CCGIS:bicycle=designated", StreetTraversalPermission.ALL, 0.97, 0.97, true);
+         * setProperties(props, "CCGIS:bicycle=designated", StreetTraversalPermission.ALL, 0.97,
+         * 0.97, true);
          */
         setProperties(props, "CCGIS:bicycle=caution_area", StreetTraversalPermission.ALL, 1.45,
                 1.45, true);
@@ -583,7 +599,8 @@ public class DefaultWayPropertySetSource implements WayPropertySetSource {
     }
 
     /**
-     * Note that the safeties here will be adjusted such that the safest street has a safety value of 1, with all others scaled proportionately.
+     * Note that the safeties here will be adjusted such that the safest street has a safety value
+     * of 1, with all others scaled proportionately.
      */
     private void setProperties(WayPropertySet propset, String spec,
             StreetTraversalPermission permission, double safety, double safetyBack) {

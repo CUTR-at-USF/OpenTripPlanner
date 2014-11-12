@@ -148,7 +148,8 @@ public class BikeRentalUpdater extends PollingGraphUpdater {
         List<BikeRentalStation> stations = source.getStations();
 
         // Create graph writer runnable to apply these stations to the graph
-        BikeRentalGraphWriterRunnable graphWriterRunnable = new BikeRentalGraphWriterRunnable(stations);
+        BikeRentalGraphWriterRunnable graphWriterRunnable = new BikeRentalGraphWriterRunnable(
+                stations);
         updaterManager.execute(graphWriterRunnable);
     }
 
@@ -187,7 +188,8 @@ public class BikeRentalUpdater extends PollingGraphUpdater {
             }
             /* remove existing stations that were not present in the update */
             List<BikeRentalStation> toRemove = new ArrayList<BikeRentalStation>();
-            for (Entry<BikeRentalStation, BikeRentalStationVertex> entry : verticesByStation.entrySet()) {
+            for (Entry<BikeRentalStation, BikeRentalStationVertex> entry : verticesByStation
+                    .entrySet()) {
                 BikeRentalStation station = entry.getKey();
                 if (stationSet.contains(station))
                     continue;

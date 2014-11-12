@@ -32,8 +32,8 @@ import org.opentripplanner.routing.vertextype.TransitStop;
 import org.slf4j.LoggerFactory;
 
 /**
- * It prints the stops that satisfy certain criteria.
- * The output is a list of stops, some of the stops attributes (coordinates and etc.) and the criteria it satisfies.
+ * It prints the stops that satisfy certain criteria. The output is a list of stops, some of the
+ * stops attributes (coordinates and etc.) and the criteria it satisfies.
  */
 
 public class StopsAlerts implements GraphBuilder {
@@ -50,21 +50,22 @@ public class StopsAlerts implements GraphBuilder {
     public void buildGraph(Graph graph, HashMap<Class<?>, Object> extra) {
         try {
             PrintWriter pw = new PrintWriter(new File(logFile));
-            pw.printf("%s,%s,%s,%s\n","stopId","lon","lat","types");
+            pw.printf("%s,%s,%s,%s\n", "stopId", "lon", "lat", "types");
             for (TransitStop ts : IterableLibrary.filter(graph.getVertices(), TransitStop.class)) {
                 StringBuilder types = new StringBuilder();
-                for(IStopTester stopTester:stopTesters){
-                    if(stopTester.fulfillDemands(ts,graph)){
-                        if(types.length() > 0) types.append(";");
+                for (IStopTester stopTester : stopTesters) {
+                    if (stopTester.fulfillDemands(ts, graph)) {
+                        if (types.length() > 0)
+                            types.append(";");
                         types.append(stopTester.getType());
                     }
                 }
-                if(types.length() > 0) {
-                    pw.printf("%s,%f,%f,%s\n",ts.getStopId(), ts.getCoordinate().x,
+                if (types.length() > 0) {
+                    pw.printf("%s,%f,%f,%s\n", ts.getStopId(), ts.getCoordinate().x,
                             ts.getCoordinate().y, types.toString());
                 }
             }
-            pw.close();            
+            pw.close();
         } catch (FileNotFoundException e) {
             LOG.error("Failed to write StopsAlerts log file due to {}", e);
             e.printStackTrace();
@@ -78,12 +79,12 @@ public class StopsAlerts implements GraphBuilder {
 
     @Override
     public List<String> getPrerequisites() {
-        return Arrays.asList("transit","streets");
+        return Arrays.asList("transit", "streets");
     }
 
     @Override
     public void checkInputs() {
-        if(logFile.isEmpty())
+        if (logFile.isEmpty())
             throw new RuntimeException("missing log file name");
     }
 }

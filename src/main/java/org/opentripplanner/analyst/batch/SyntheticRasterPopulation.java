@@ -24,13 +24,20 @@ import org.slf4j.LoggerFactory;
 
 public class SyntheticRasterPopulation extends RasterPopulation {
 
-    private static Logger LOG = LoggerFactory.getLogger(SyntheticRasterPopulation.class); 
+    private static Logger LOG = LoggerFactory.getLogger(SyntheticRasterPopulation.class);
 
-    @Setter String name = "synthetic grid coverage";
-    @Setter double resolutionMeters = 250; // deprecated
-    @Setter String crsCode = "EPSG:4326";
-    @Setter boolean boundsFromGraph = false; // use graph envelope, overriding any specified bounds
-    
+    @Setter
+    String name = "synthetic grid coverage";
+
+    @Setter
+    double resolutionMeters = 250; // deprecated
+
+    @Setter
+    String crsCode = "EPSG:4326";
+
+    @Setter
+    boolean boundsFromGraph = false; // use graph envelope, overriding any specified bounds
+
     @Override
     public void createIndividuals() {
         try {

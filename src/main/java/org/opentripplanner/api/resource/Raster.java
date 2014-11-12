@@ -37,40 +37,39 @@ import org.slf4j.LoggerFactory;
 
 @Path("/routers/{routerId}/analyst/raster")
 public class Raster {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(Raster.class);
 
-    @Context // FIXME inject Application context
+    @Context
+    // FIXME inject Application context
     private GeometryIndex index;
 
-    @Context // FIXME inject Application context
+    @Context
+    // FIXME inject Application context
     private Renderer renderer;
-    
-    @GET @Produces("image/*")
-    public Response getRaster(
-           @QueryParam("x") Float x,  
-           @QueryParam("y") Float y,  
-           @QueryParam("width")  Integer width,  
-           @QueryParam("height") Integer height,  
-           @QueryParam("resolution") Double resolution,  
-           @QueryParam("time") IsoTimeParameter time,
-           @QueryParam("format") @DefaultValue("image/geotiff") MIMEImageFormat format,
-           @QueryParam("crs") @DefaultValue("EPSG:4326") CRSParameter crs
-           ) throws Exception {
-        
+
+    @GET
+    @Produces("image/*")
+    public Response getRaster(@QueryParam("x") Float x, @QueryParam("y") Float y,
+            @QueryParam("width") Integer width, @QueryParam("height") Integer height,
+            @QueryParam("resolution") Double resolution, @QueryParam("time") IsoTimeParameter time,
+            @QueryParam("format") @DefaultValue("image/geotiff") MIMEImageFormat format,
+            @QueryParam("crs") @DefaultValue("EPSG:4326") CRSParameter crs) throws Exception {
+
         // BoundingBox is a subclass of Envelope, an Envelope2D constructor parameter
         Envelope2D bbox = new Envelope2D(index.getBoundingBox(crs.crs));
         if (resolution != null) {
-            width  = (int) Math.ceil(bbox.width  / resolution);
+            width = (int) Math.ceil(bbox.width / resolution);
             height = (int) Math.ceil(bbox.height / resolution);
         }
-        
+
         TileRequest tileRequest = new TileRequest("", bbox, width, height);
         SPTRequest sptRequest = new SPTRequest(x, y, time.cal);
-        RenderRequest renderRequest = new RenderRequest(format, Layer.TRAVELTIME, Style.GRAY, false, false);
+        RenderRequest renderRequest = new RenderRequest(format, Layer.TRAVELTIME, Style.GRAY,
+                false, false);
 
-        return null; //renderer.getResponse(tileRequest, sptRequest, null, renderRequest);
-        
+        return null; // renderer.getResponse(tileRequest, sptRequest, null, renderRequest);
+
     }
 
 }

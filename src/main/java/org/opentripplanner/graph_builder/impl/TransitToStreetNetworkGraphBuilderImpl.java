@@ -29,7 +29,8 @@ import org.slf4j.LoggerFactory;
  */
 public class TransitToStreetNetworkGraphBuilderImpl implements GraphBuilder {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TransitToStreetNetworkGraphBuilderImpl.class);
+    private static final Logger LOG = LoggerFactory
+            .getLogger(TransitToStreetNetworkGraphBuilderImpl.class);
 
     public List<String> provides() {
         return Arrays.asList("street to transit", "linking");
@@ -48,6 +49,6 @@ public class TransitToStreetNetworkGraphBuilderImpl implements GraphBuilder {
 
     @Override
     public void checkInputs() {
-        //no inputs
+        // no inputs
     }
 }

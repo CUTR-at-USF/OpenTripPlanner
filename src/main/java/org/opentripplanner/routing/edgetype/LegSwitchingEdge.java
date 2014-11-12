@@ -25,32 +25,32 @@ import com.vividsolutions.jts.geom.LineString;
  */
 public class LegSwitchingEdge extends Edge {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public LegSwitchingEdge(Vertex v1, Vertex v2) {
-		super(v1, v2);
-	}
+    public LegSwitchingEdge(Vertex v1, Vertex v2) {
+        super(v1, v2);
+    }
 
-	@Override
-	public State traverse(State s0) {
-		StateEditor editor = s0.edit(this);
-		editor.setBackMode(TraverseMode.LEG_SWITCH);
-		return editor.makeState();
-	}
+    @Override
+    public State traverse(State s0) {
+        StateEditor editor = s0.edit(this);
+        editor.setBackMode(TraverseMode.LEG_SWITCH);
+        return editor.makeState();
+    }
 
-	@Override
-	public double getDistance() {
-		return 0;
-	}
+    @Override
+    public double getDistance() {
+        return 0;
+    }
 
-	@Override
-	public LineString getGeometry() {
-		return null;
-	}
+    @Override
+    public LineString getGeometry() {
+        return null;
+    }
 
-	@Override
-	public String getName() {
-		return null;
-	}
+    @Override
+    public String getName() {
+        return null;
+    }
 
 }

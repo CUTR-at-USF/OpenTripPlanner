@@ -15,10 +15,14 @@ import crosby.binary.Osmformat;
  */
 public class NodeGeomFilter extends Parser {
 
-    public double minLat =  -90.0;
+    public double minLat = -90.0;
+
     public double minLon = -180.0;
-    public double maxLat =   90.0;
-    public double maxLon =  180.0;
+
+    public double maxLat = 90.0;
+
+    public double maxLon = 180.0;
+
     public final NodeTracker nodesInGeom = new NodeTracker();
 
     public NodeGeomFilter(Envelope env) {
@@ -36,24 +40,26 @@ public class NodeGeomFilter extends Parser {
     }
 
     /** Disable parsing relations in this pass. */
-    @Override 
-    protected void parseRelations(List<Osmformat.Relation> rels) { }
+    @Override
+    protected void parseRelations(List<Osmformat.Relation> rels) {
+    }
 
     /** Disable parsing relations in this pass. */
-    @Override 
-    protected void parseWays(List<Osmformat.Way> ways) { }
+    @Override
+    protected void parseWays(List<Osmformat.Way> ways) {
+    }
 
     /** For each node or dense node, just check whether it is in the bounding geom. */
-    @Override 
+    @Override
     public void handleNode(long id, Node node) {
         if (inGeom(node.lat, node.lon)) {
             nodesInGeom.add(id);
         }
     };
-    
+
     /* We are not using JTS and Geotools Geometry, it's too complicated for this simple task. */
     private boolean inGeom(double lat, double lon) {
         return lon > minLon && lon < maxLon && lat > minLat && lon < maxLat;
     }
-    
+
 }

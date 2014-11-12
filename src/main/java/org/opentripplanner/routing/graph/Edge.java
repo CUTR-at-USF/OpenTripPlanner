@@ -33,7 +33,8 @@ import org.opentripplanner.routing.util.UniqueIdGenerator;
 import com.vividsolutions.jts.geom.LineString;
 
 /**
- * This is the standard implementation of an edge with fixed from and to Vertex instances; all standard OTP edges are subclasses of this.
+ * This is the standard implementation of an edge with fixed from and to Vertex instances; all
+ * standard OTP edges are subclasses of this.
  */
 public abstract class Edge implements Serializable {
 
@@ -81,29 +82,29 @@ public abstract class Edge implements Serializable {
     public Vertex getToVertex() {
         return tov;
     }
-    
+
     /**
      * Returns true if this edge is partial - overriden by subclasses.
      */
     public boolean isPartial() {
         return false;
     }
-    
+
     /**
-     * Checks equivalency to another edge. Default implementation is trivial equality, but subclasses may want to do something more tricky.
+     * Checks equivalency to another edge. Default implementation is trivial equality, but
+     * subclasses may want to do something more tricky.
      */
     public boolean isEquivalentTo(Edge e) {
         return this == e;
     }
-    
+
     /**
      * Returns true if this edge is the reverse of another.
      */
     public boolean isReverseOf(Edge e) {
-        return (this.getFromVertex() == e.getToVertex() &&
-                this.getToVertex() == e.getFromVertex());
+        return (this.getFromVertex() == e.getToVertex() && this.getToVertex() == e.getFromVertex());
     }
-    
+
     public void attachFrom(Vertex fromv) {
         detachFrom();
         if (fromv == null)
@@ -170,7 +171,8 @@ public abstract class Edge implements Serializable {
     }
 
     /**
-     * This should only be called inside State; other methods should call {@link org.opentripplanner.routing.core.State.getBackTrip()}.
+     * This should only be called inside State; other methods should call {@link
+     * org.opentripplanner.routing.core.State.getBackTrip()}.
      * 
      * @author mattwigway
      */

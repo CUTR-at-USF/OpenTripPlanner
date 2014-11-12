@@ -29,7 +29,6 @@ public class EnvelopeParameter {
 
     public Envelope2D env;
 
-
     public EnvelopeParameter(String param) {
 
         String[] tokens = param.split(",");
@@ -39,7 +38,7 @@ public class EnvelopeParameter {
             double maxx = Double.parseDouble(tokens[2]);
             double maxy = Double.parseDouble(tokens[3]);
             // null crs, set later from another parameter
-            env = new Envelope2D(null, minx, miny, maxx-minx, maxy-miny);
+            env = new Envelope2D(null, minx, miny, maxx - minx, maxy - miny);
         } catch (Exception e) {
             throw new WebApplicationException(fail(param, e));
         }

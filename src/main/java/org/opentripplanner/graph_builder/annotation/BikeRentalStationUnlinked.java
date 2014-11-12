@@ -23,9 +23,9 @@ public class BikeRentalStationUnlinked extends GraphBuilderAnnotation {
     private static final long serialVersionUID = 1L;
 
     public static final String FMT = "Bike rental station %s not near any streets; it will not be usable.";
-    
+
     final BikeRentalStationVertex station;
-    
+
     @Override
     public String getMessage() {
         return String.format(FMT, station);
