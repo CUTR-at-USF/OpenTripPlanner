@@ -121,6 +121,23 @@ public class TimetableResolverTest {
         assertNotSame(scheduled, forNow);
         assertEquals(scheduled, resolver.resolve(pattern, tomorrow));
         assertEquals(scheduled, resolver.resolve(pattern, null));
+        
+        // test for frequencyBased trips 
+        tripDescriptorBuilder.setTripId("15.1");
+        tripDescriptorBuilder.setScheduleRelationship(ScheduleRelationship.UNSCHEDULED);
+        
+        pattern = patternIndex.get(new AgencyAndId("agency", "15.1"));
+        scheduled = resolver.resolve(pattern, today);
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder);
+        tripUpdate = tripUpdateBuilder.build();
+        
+        // add a new timzetable for today
+        resolver.update(pattern, tripUpdate, "agency", timeZone, today);
+        forNow = resolver.resolve(pattern, today);
+        assertEquals(scheduled, resolver.resolve(pattern, yesterday));
+        assertNotSame(scheduled, forNow);
+        assertEquals(scheduled, resolver.resolve(pattern, tomorrow));
+        assertEquals(scheduled, resolver.resolve(pattern, null));
     }
 
     @Test(expected = ConcurrentModificationException.class)

@@ -16,17 +16,9 @@ package org.opentripplanner.updater.stoptime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.opentripplanner.util.TestUtils.AUGUST;
-import java.util.SortedSet;
 import java.io.File;
-import java.sql.Date;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Set;
 import java.util.SimpleTimeZone;
 import java.util.TimeZone;
@@ -65,9 +57,9 @@ public class TimetableSnapshotSourceTest {
 
     private static byte cancellation[];
 
-    private static byte frequencyBasedUpdate1[];
+    private static byte freqBasedUpdate1[];
 
-    private static byte frequencyBasedUpdate2[];
+    private static byte freqBasedUpdate2[];
 
     private static Graph graph = new Graph();
 
@@ -77,7 +69,6 @@ public class TimetableSnapshotSourceTest {
 
     private TimetableSnapshotSource updater;
 
-    private TimetableSnapshotSource updater2;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -113,13 +104,13 @@ public class TimetableSnapshotSourceTest {
         VehicleDescriptor.Builder vehicleDescriptor = VehicleDescriptor.newBuilder();
         vehicleDescriptor.setId("a");
         tripUpdateBuilder.setVehicle(vehicleDescriptor);
-        frequencyBasedUpdate1 = tripUpdateBuilder.build().toByteArray();
+        freqBasedUpdate1 = tripUpdateBuilder.build().toByteArray();
 
         vehicleDescriptor.setId("b");
         stopTimeEventBuilder = stopTimeUpdateBuilder.getArrivalBuilder();
         stopTimeUpdateBuilder.setStopSequence(1);
         tripUpdateBuilder.setVehicle(vehicleDescriptor);
-        frequencyBasedUpdate2 = tripUpdateBuilder.build().toByteArray();
+        freqBasedUpdate2 = tripUpdateBuilder.build().toByteArray();
     }
 
     @Before
@@ -146,7 +137,7 @@ public class TimetableSnapshotSourceTest {
         assertNotNull(newResolver);
         assertNotSame(resolver, newResolver);
 
-        updater.applyTripUpdates(Arrays.asList(TripUpdate.parseFrom(frequencyBasedUpdate1)),
+        updater.applyTripUpdates(Arrays.asList(TripUpdate.parseFrom(freqBasedUpdate1)),
                 "agency");
         resolver = updater.getTimetableSnapshot();
         assertSame(resolver, updater.getTimetableSnapshot());
@@ -181,8 +172,8 @@ public class TimetableSnapshotSourceTest {
             e.printStackTrace();
         }
 
-        // make sure the reset precedure has removed the previous tripUpdate
-        updater.applyTripUpdates(Arrays.asList(TripUpdate.parseFrom(frequencyBasedUpdate2)),
+        // make sure the reset procedure has removed the previous tripUpdate
+        updater.applyTripUpdates(Arrays.asList(TripUpdate.parseFrom(freqBasedUpdate2)),
                 "agency");
         resolver = updater.getTimetableSnapshot();
         assertSame(resolver, updater.getTimetableSnapshot());
@@ -192,7 +183,6 @@ public class TimetableSnapshotSourceTest {
 
         timeTable = pattern.getUpdatedTimetable(options, serviceDay);
         assertEquals(timeTable.getTripTimes(0).getVehicleID(), "b");
-
     }
 
     @Test
