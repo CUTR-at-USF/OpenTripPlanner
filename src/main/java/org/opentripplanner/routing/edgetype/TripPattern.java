@@ -352,8 +352,8 @@ public class TripPattern implements Serializable {
     public void add(FrequencyEntry freq) {
         trips.add(freq.tripTimes.trip);
         scheduledTimetable.addFrequencyEntry(freq);
-        System.out.println("Try to fix the realtime update for " + this.getRoute().getId() + " , "
-                + freq.tripTimes.trip.getId());
+//        System.out.println("Try to fix the realtime update for " + this.getRoute().getId() + " , "
+//                + freq.tripTimes.trip.getId());
         scheduledTimetable.addTripTimes(freq.tripTimes);
         // increase the number of tripTimes in this tripPattern
         noTrips = scheduledTimetable.getTripTimes().size();

@@ -123,8 +123,10 @@ public class TimetableSnapshotSource {
             return;
         }
 
-        // this remove the tripTimes of the previous time interval update (applies only on
-        // frequencyBased trip)
+        // After every real-time update, the trip times are deleted and reset.
+        // TODO: Handle ScheduleRelationship = NO_DATA values so that GTFS-rt producers
+        //        can communicate that there is a bus running, but they don't have any realtime info about it
+        //       see https://github.com/opentripplanner/OpenTripPlanner/issues/1347#issuecomment-45012120.
         for (TripPattern pattern : graphIndex.patternForTrip.values()) {
 
             // check if the pattern belongs to frequencyBased trips

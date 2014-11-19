@@ -343,7 +343,6 @@ public class TimetableTest {
 
         int trip_1_index = timetable.getTripIndex(new AgencyAndId("agency", "1"));
 
-        // test written by Mona
         // update arrival time of second stop along the trip
         tripDescriptorBuilder = TripDescriptor.newBuilder();
         tripDescriptorBuilder.setTripId("1");
@@ -409,6 +408,10 @@ public class TimetableTest {
         assertNotNull(path);
         endTime = startTime + 23 * 60;
         assertEquals(endTime, path.getEndTime());
+        
+        stopTimeEventBuilder.setDelay(180);
+        tripUpdate = tripUpdateBuilder.build();
+        assertFalse(timetable.updateFreqTrip(tripUpdate, "agency", timeZone, serviceDate));
     }
 
 }

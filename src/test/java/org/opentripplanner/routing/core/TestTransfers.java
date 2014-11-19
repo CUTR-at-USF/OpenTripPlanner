@@ -253,7 +253,7 @@ public class TestTransfers extends TestCase {
         trips = extractTrips(path);
         // Check whether a later second trip was taken
         assertEquals("8.1", trips.get(0).getId().getId());
-        assertEquals("4.3", trips.get(1).getId().getId());
+        assertEquals("4.2", trips.get(1).getId().getId());
 
         // Revert the graph, thus using the original transfer table again
         reset(graph);
