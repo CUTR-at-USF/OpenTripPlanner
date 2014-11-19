@@ -142,81 +142,31 @@ public class TimetableSnapshotSource {
             LOG.warn("updates is null");
             return;
         }
-        //Trip trip= graphIndex.tripForId.get(1);
-        
- 
-   	 // this should be executed for only frequency-based trip
-//        for (TripPattern pattern: graphIndex.patternForTrip.values()){   
-//        	System.out.println(pattern.getRoute().getId());
-//         	//check if the pattern belongs to frequencyBased trips
-//        	if (pattern.getScheduledTimetable().getFrequencyEntries().size() != 0 ){
-//	        	SortedSet<Timetable> sortedTimetables = buffer.timetables.get(pattern);
-//	        	if (sortedTimetables != null){
-//		            
-//		            for(Timetable timetable : sortedTimetables) {
-//		            	int currentSize = timetable.getTripTimes().size();
-//		            	System.out.println(timetable.getFrequencyEntries().size());
-//		            	System.out.println(pattern.route.getId().getId()+ ", timetable.getTripTimes size = "+ currentSize);
-//		            	for (int i = 0; i< pattern.noTrips; i++){
-//		            		timetable.getTripTimes(i).vehicleID = null;
-//		            	}
-//		            	for (int i= currentSize - 1;   pattern.noTrips <= i; i--){
-//			        		//pattern.getScheduledTimetable().getTripTimes().remove(i);
-//			        		timetable.getTripTimes().remove(i);
-//			        		 
-//			        	}
-//		            	System.out.println("after: "+ timetable.getTripTimes().size()); 
-//		           }
-//	        	}
-//        	}
-//        }
-      	
-     // this should be executed for only frequency-based trip
-      for (TripPattern pattern: graphIndex.patternForTrip.values()){   
-      	System.out.println(pattern.getRoute().getId());
-       	//check if the pattern belongs to frequencyBased trips
-      	if (pattern.getScheduledTimetable().getFrequencyEntries().size() != 0 ){
-//      		int noTripTimes = pattern.getScheduledTimetable().getTripTimes().size();
-//      		for (int i= noTripTimes - 1;   pattern.noTrips <= i; i--){
-//      			pattern.getScheduledTimetable().getTripTimes().remove(i);
-//      		}
-        	SortedSet<Timetable> sortedTimetables = buffer.timetables.get(pattern);
-        	if (sortedTimetables != null){
-	            
-	            for(Timetable timetable : sortedTimetables) {
-	            	int currentSize = timetable.getTripTimes().size();
-	            	System.out.println(timetable.getFrequencyEntries().size());
-	            	System.out.println(pattern.route.getId().getId()+ ", timetable.getTripTimes size = "+ currentSize);
-	            	for (int i = 0; i< pattern.noTrips; i++){
-	            		timetable.getTripTimes(i).vehicleID = null;
-	            	}
-	            	for (int i= currentSize - 1;   pattern.noTrips <= i; i--){
-		        		//pattern.getScheduledTimetable().getTripTimes().remove(i);
-		        		timetable.getTripTimes().remove(i);
-		        		 
-		        	}
-	            	System.out.println("after: "+ timetable.getTripTimes().size()); 
-	           }
-        	}
-      	}
-      }
-        
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();
-        FileWriter logFile;
-		try {
-			logFile = new FileWriter("tripUpdatesLogs.txt", true);
-			logFile.write("\n====================================================================\n");
-			logFile.write("                New set of TripUpdates     "+ dateFormat.format(date) + "            \n");
-			logFile.write("====================================================================\n");
-			logFile.close();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-        
-	       
-        
+
+        // After every real-time update, the trip times are deleted and reset.
+        // TODO: Handle ScheduleRelationship = NO_DATA values so that GTFS-rt producers
+        //        can communicate that there is a bus running, but they don't have any realtime info about it
+        //       see https://github.com/opentripplanner/OpenTripPlanner/issues/1347#issuecomment-45012120.
+        for (TripPattern pattern : graphIndex.patternForTrip.values()) {
+
+            // check if the pattern belongs to frequencyBased trips
+            if (pattern.getScheduledTimetable().getFrequencyEntries().size() != 0) {
+                SortedSet<Timetable> sortedTimetables = buffer.timetables.get(pattern);
+                if (sortedTimetables != null) {
+
+                    for (Timetable timetable : sortedTimetables) {
+                        int currentSize = timetable.getTripTimes().size();
+                        for (int i = 0; i < pattern.noTrips; i++) {
+                            timetable.getTripTimes(i).vehicleID = null;
+                        }
+                        for (int i = currentSize - 1; pattern.noTrips <= i; i--) {
+                            timetable.getTripTimes().remove(i);
+                        }
+                    }
+                }
+            }
+        }
+
         LOG.debug("message contains {} trip updates", updates.size());
         int uIndex = 0;
         for (TripUpdate tripUpdate : updates) {
