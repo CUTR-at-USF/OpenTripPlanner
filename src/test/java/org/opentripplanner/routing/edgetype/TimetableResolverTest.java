@@ -47,8 +47,11 @@ import com.google.transit.realtime.GtfsRealtime.TripDescriptor.ScheduleRelations
 
 public class TimetableResolverTest {
     private static Graph graph;
+
     private static GtfsContext context;
+
     private static Map<AgencyAndId, TripPattern> patternIndex;
+
     private static TimeZone timeZone = TimeZone.getTimeZone("GMT");
 
     @BeforeClass
@@ -102,7 +105,7 @@ public class TimetableResolverTest {
         tripUpdateBuilder.setTrip(tripDescriptorBuilder);
 
         TripUpdate tripUpdate = tripUpdateBuilder.build();
-    
+
         // add a new timetable for today
         resolver.update(pattern, tripUpdate, "agency", timeZone, today);
         Timetable forNow = resolver.resolve(pattern, today);
@@ -120,7 +123,7 @@ public class TimetableResolverTest {
         assertEquals(scheduled, resolver.resolve(pattern, null));
     }
 
-    @Test(expected=ConcurrentModificationException.class)
+    @Test(expected = ConcurrentModificationException.class)
     public void testUpdate() {
         ServiceDate today = new ServiceDate();
         ServiceDate yesterday = today.previous();
@@ -139,15 +142,14 @@ public class TimetableResolverTest {
         tripUpdateBuilder.setTrip(tripDescriptorBuilder);
 
         TripUpdate tripUpdate = tripUpdateBuilder.build();
- 
-		// new timetable for today
+
+        // new timetable for today
         resolver.update(pattern, tripUpdate, "agency", timeZone, today);
         Timetable updatedNow = resolver.resolve(pattern, today);
         assertNotSame(origNow, updatedNow);
 
-         
-		// reuse timetable for today
-        resolver.update(pattern, tripUpdate, "agency", timeZone, today );
+        // reuse timetable for today
+        resolver.update(pattern, tripUpdate, "agency", timeZone, today);
         assertEquals(updatedNow, resolver.resolve(pattern, today));
 
         // create new timetable for tomorrow
@@ -160,7 +162,7 @@ public class TimetableResolverTest {
         snapshot.update(pattern, tripUpdate, "agency", timeZone, yesterday);
     }
 
-    @Test(expected=ConcurrentModificationException.class)
+    @Test(expected = ConcurrentModificationException.class)
     public void testCommit() {
         ServiceDate today = new ServiceDate();
         ServiceDate yesterday = today.previous();
@@ -182,7 +184,7 @@ public class TimetableResolverTest {
         tripUpdateBuilder.setTrip(tripDescriptorBuilder);
 
         TripUpdate tripUpdate = tripUpdateBuilder.build();
-         
+
         // add a new timetable for today, commit, and everything should match
         assertTrue(resolver.update(pattern, tripUpdate, "agency", timeZone, today));
         snapshot = resolver.commit();
@@ -225,8 +227,8 @@ public class TimetableResolverTest {
         TripUpdate tripUpdate = tripUpdateBuilder.build();
 
         TimetableResolver resolver = new TimetableResolver();
- 
-		resolver.update(pattern, tripUpdate, "agency", timeZone, today );
+
+        resolver.update(pattern, tripUpdate, "agency", timeZone, today);
         resolver.update(pattern, tripUpdate, "agency", timeZone, yesterday);
 
         assertNotSame(resolver.resolve(pattern, yesterday), resolver.resolve(pattern, null));
