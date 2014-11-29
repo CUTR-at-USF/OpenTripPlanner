@@ -13,16 +13,8 @@
 
 package org.opentripplanner.routing.edgetype;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -39,13 +31,11 @@ import org.opentripplanner.routing.core.ServiceDay;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.StopTransfer;
 import org.opentripplanner.routing.core.TransferTable;
-import org.opentripplanner.routing.core.TraverseMode;
 import org.opentripplanner.routing.trippattern.FrequencyEntry;
 import org.opentripplanner.routing.trippattern.TripTimes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import lombok.Getter;
 
 import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
@@ -184,12 +174,11 @@ public class Timetable implements Serializable {
                     bestTrip = tt;
                     bestTime = arvTime;
                 }
-
+            }
         }
         // ACK all logic is identical to above.
         // A sign that FrequencyEntries and TripTimes need a common interface.
         FrequencyEntry bestFreq = null;
-        //System.out.println("when realtime updates are available frequencyEntries is "+ frequencyEntries);
         for (FrequencyEntry freq : frequencyEntries) {
             TripTimes tt = freq.tripTimes;
             if ( ! serviceDay.serviceRunning(tt.serviceCode)) continue; // TODO merge into call on next line
@@ -305,8 +294,7 @@ public class Timetable implements Serializable {
 
     /** @return the index of TripTimes for this trip ID in this particular Timetable */
     public int getTripIndex(AgencyAndId tripId) {
-        int ret = 0;
-        System.out.println("previous tripTimes.size = "+ tripTimes.size());
+        int ret = 0;      
         for (TripTimes tt : tripTimes) {
             // could replace linear search with indexing in stoptime updater, but not necessary
             // at this point since the updater thread is far from pegged.
@@ -368,7 +356,7 @@ public class Timetable implements Serializable {
                 LOG.error("TripDescriptor object has no TripId field");
                 return false;
             }
-            AgencyAndId tripId = new AgencyAndId(agencyId, tripDescriptor.getTripId());
+            String tripId = tripDescriptor.getTripId();
             int tripIndex = getTripIndex(tripId);
             if (tripIndex == -1) {
                 LOG.info("tripId {} not found in pattern.", tripId);
@@ -439,11 +427,9 @@ public class Timetable implements Serializable {
                                     return false;
                                 }
                             } else {
-                                if (delay == null) {
-                                    newTimes.updateArrivalTime(i, TripTimes.UNAVAILABLE);
-                                } else {
+                                
                                     newTimes.updateArrivalDelay(i, delay);
-                                }
+                                
                             }
 
                             if (update.hasDeparture()) {
@@ -505,9 +491,10 @@ public class Timetable implements Serializable {
             return false;
         }
 
-        LOG.trace("A valid TripUpdate object was applied using the Timetable class update method.");
-        return true;
-    }
+    LOG.trace("A valid TripUpdate object was applied using the Timetable class update method.");
+    return true;
+}
+
 
 
     /**
@@ -517,225 +504,192 @@ public class Timetable implements Serializable {
      * @return
      */
     public boolean updateFreqTrip(TripUpdate tripUpdate, TimeZone timeZone,
-            ServiceDate updateServiceDate) {
-        System.out.println("........................................... ");
-        int previous = 0;
-        int firstNzIndex = -1;
+            ServiceDate updateServiceDate) {  
+      int previous = 0;
+      int firstNzIndex = -1;
 
-        if (tripUpdate == null) {
-            LOG.error("A null TripUpdate pointer was passed to the Timetable class update method.");
-            return false;
-        } else try {
-             // Though all timetables have the same trip ordering, some may have extra trips due to
-             // the dynamic addition of unscheduled trips.
-             // However, we want to apply trip updates on top of *scheduled* times
-            if (!tripUpdate.hasTrip()) {
-                LOG.error("TripUpdate object has no TripDescriptor field.");
-                return false;
-            }
-            
-            FileWriter logFile = new FileWriter("tripUpdatesLogs.txt", true);
-            logFile.write("\n.....................................................\n");
-      
-            TripDescriptor tripDescriptor = tripUpdate.getTrip();
-            if (!tripDescriptor.hasTripId()) {
-                LOG.error("TripDescriptor object has no TripId field");
-                return false;
-            }
-            String tripId = tripDescriptor.getTripId();
-            int tripIndex = getTripIndex(tripId);
-            if (tripIndex == -1) {
-                LOG.info("tripId {} not found in pattern.", tripId);
-                return false;
-            } else {
-                LOG.trace("tripId {} found at index {} in scheduled timetable.", tripId, tripIndex);
-            }
+      if (tripUpdate == null) {
+          LOG.error("A null TripUpdate pointer was passed to the Timetable class update method.");
+          return false;
+      } else
+          try {
+              // Though all timetables have the same trip ordering, some may have extra trips due
+              // to
+              // the dynamic addition of unscheduled trips.
+              // However, we want to apply trip updates on top of *scheduled* times
+              if (!tripUpdate.hasTrip()) {
+                  LOG.error("TripUpdate object has no TripDescriptor field.");
+                  return false;
+              }
 
-            TripTimes newTimes = new TripTimes(getTripTimes(tripIndex));
-            newTimes.setVehicleID(tripUpdate.getVehicle().getId());
-            
-            if (tripDescriptor.hasScheduleRelationship() && tripDescriptor.getScheduleRelationship()
-                    == TripDescriptor.ScheduleRelationship.CANCELED) {
-                newTimes.cancel();
-            } else {
-            	 
-                // The GTFS-RT reference specifies that StopTimeUpdates are sorted by stop_sequence.
-                Iterator<StopTimeUpdate> updates = tripUpdate.getStopTimeUpdateList().iterator();
-                if (!updates.hasNext()) {
-                    LOG.warn("Won't apply zero-length trip update to trip {}.", tripId);
-                    return false;
-                }
+              TripDescriptor tripDescriptor = tripUpdate.getTrip();
 
-                TripTimes newTimes = new TripTimes(getTripTimes(tripIndex));
-                newTimes.setVehicleID(tripUpdate.getVehicle().getId());
+              if (!tripDescriptor.hasTripId()) {
+                  LOG.error("TripDescriptor object has no TripId field");
+                  return false;
+              }
+              
+              String tripId = tripDescriptor.getTripId(); 
+              int tripIndex = getTripIndex(tripId);
+              if (tripIndex == -1) {
+                  LOG.info("tripId {} not found in pattern.", tripId);
+                  return false;
+              } else {
+                  LOG.trace("tripId {} found at index {} in scheduled timetable.", tripId,
+                          tripIndex);
+              }
 
-                if (tripDescriptor.hasScheduleRelationship()
-                        && tripDescriptor.getScheduleRelationship() == TripDescriptor.ScheduleRelationship.CANCELED) {
-                    newTimes.cancel();
-                } else {
+              TripTimes newTimes = new TripTimes(getTripTimes(tripIndex));
+              newTimes.setVehicleID(tripUpdate.getVehicle().getId());
 
-                    // The GTFS-RT reference specifies that StopTimeUpdates are sorted by
-                    // stop_sequence.
-                    Iterator<StopTimeUpdate> updates = tripUpdate.getStopTimeUpdateList()
-                            .iterator();
-                    if (!updates.hasNext()) {
-                        LOG.warn("Won't apply zero-length trip update to trip {}.", tripId);
-                        return false;
-                    }
+              if (tripDescriptor.hasScheduleRelationship()
+                      && tripDescriptor.getScheduleRelationship() == TripDescriptor.ScheduleRelationship.CANCELED) {
+                  newTimes.cancel();
+              } else {
 
-                    StopTimeUpdate update = updates.next();
+                  // The GTFS-RT reference specifies that StopTimeUpdates are sorted by
+                  // stop_sequence.
+                  Iterator<StopTimeUpdate> updates = tripUpdate.getStopTimeUpdateList()
+                          .iterator();
+                  if (!updates.hasNext()) {
+                      LOG.warn("Won't apply zero-length trip update to trip {}.", tripId);
+                      return false;
+                  }
 
-                    int numStops = newTimes.getNumStops();
-                    
-                    int[] status = new int[numStops];
+                  StopTimeUpdate update = updates.next();
 
-                    boolean foundMatch = false;
-                    for (int i = 0; i < numStops; i++) {
-
-                        boolean match = false;
-                        if (update != null) {
-                            if (update.hasStopSequence()) {
-                                match = update.getStopSequence() == newTimes.getStopSequence(i);
-                            } else if (update.hasStopId()) {
-                                match = pattern.getStop(i).getId().getId()
-                                        .equals(update.getStopId());
-                            }
-                        }
-                        if (match) {
-                            int arrivalTime = 0;
-                            if (foundMatch == false) {
-                                firstNzIndex = i;
-                                foundMatch = true;
-                            }
-                            StopTimeUpdate.ScheduleRelationship scheduleRelationship = update
-                                    .hasScheduleRelationship() ? update.getScheduleRelationship()
-                                    : StopTimeUpdate.ScheduleRelationship.SCHEDULED;
-                            if (scheduleRelationship == StopTimeUpdate.ScheduleRelationship.SKIPPED) {
-                                // TODO: Handle partial trip cancellations
-                                LOG.warn("Partially canceled trips are currently unsupported."
-                                        + " Skipping TripUpdate.");
-                                return false;
-                            } else if (scheduleRelationship == StopTimeUpdate.ScheduleRelationship.NO_DATA) {
-                                newTimes.updateArrivalDelay(i, 0);
-                                newTimes.updateDepartureDelay(i, 0);
-                                                            } else {
-                                long today = updateServiceDate.getAsDate(timeZone).getTime() / 1000;
-
-                                if (update.hasArrival()) {
-                                    
-                                    StopTimeEvent arrival = update.getArrival();
-                                    if (arrival.hasDelay()) {
-                                        LOG.error("Part of a TripUpdate object could not be applied successfully.");
-                                        return false;
-                                        
-                                    } else if (arrival.hasTime()) {
-                                        newTimes.updateArrivalTime(i,
-                                                (int) (arrival.getTime() - today));
-                                        arrivalTime = (int) (arrival.getTime() - today);
-                                        status[update.getStopSequence() - 1] = 1;
-                                        int minutes = (arrivalTime % 3600) / 60;
-                                        int seconds = minutes % 60;
-                                        DecimalFormat df = new DecimalFormat();
-                                        df.setMinimumIntegerDigits(2);
-                                         System.out.println(this.getPattern().getRoute().getId().getId()
-                                         +", veh: "+ tripUpdate.getVehicle().getId() +
-                                         ", StopID: "+
-                                         this.getPattern().getStop(i).getId().getId()+
-                                         ", Stop.seq:"+ (int)(i+1) + ", "+", arrival = " +
-                                         (int)(arrivalTime/3600) + ":"+ df.format(minutes) + ":"+
-                                         df.format(seconds));
-
-                                        if (arrivalTime < previous) {
-                                            System.out.println("      ---- Decreasing----     ");
-                                        }
-                                        previous = arrivalTime;
-                                        
-                                    } else {
-                                        LOG.error("Arrival time at index {} is erroneous.", i);
-                                        return false;
-                                    }
-                                } else {
-                                  
-                                        newTimes.updateArrivalTime(i, TripTimes.UNAVAILABLE);
-                                     
-                                }
-                            }
-
-                                if (update.hasDeparture()) {
-                                    StopTimeEvent departure = update.getDeparture();
-                                    if (departure.hasDelay()) {
-                                        
-                                        LOG.error("Part of a TripUpdate object could not be applied successfully.");
-                                        return false;
-                                        
-                                    } else if (departure.hasTime()) {
-                                        newTimes.updateDepartureTime(i,
-                                                (int) (departure.getTime() - today));
-                                        
-                                    } else {
-                                        newTimes.updateDepartureDelay(i, delay);
-                                    }
-                                } else if (departure.hasTime()) {
-                                    newTimes.updateDepartureTime(i,
-                                            (int) (departure.getTime() - today));
-                                    delay = newTimes.getDepartureDelay(i);
-                                } else {
-                                    LOG.error("Departure time at index {} is erroneous.", i);
-                                    return false;
-                                }
-                            } else {
-                            	 newTimes.updateDepartureTime(i, arrivalTime);
-                            }
-                        }
-                        if (updates.hasNext()) {
-                            update = updates.next();
-                        } else {
-                            update = null;
-                        }
-                    } else {
-                        tripIndex = numTrips;
-                        newTimes.setVehicleID(currentVehicle);
-                        tripTimes.add(tripIndex, newTimes); 
-                    }
-
-                }
-                //estimate arrival time for head of queue, eg: [0, 0, t3, t4]--> [t1, t2, t3, t4]
-                if (0 < firstNzIndex && firstNzIndex != 0){
-                	for(int i = firstNzIndex ; 0 <= i; i--){
-                    	newTimes.backPropagateDelay(i);
-                    }	
-                }
-                int numTrips = tripTimes.size();
-                String currentVehicle = tripUpdate.getVehicle().getId();
-                // Update succeeded, save the new TripTimes back into this Timetable.
-                if (tripTimes.get(tripIndex).vehicleID == null){
-                	tripTimes.set(tripIndex, newTimes);
-                	tripTimes.get(tripIndex).setVehicleID(currentVehicle);
-                } else { 
-                	tripIndex = numTrips;
-                	newTimes.setVehicleID(currentVehicle);        	 
-                	tripTimes.add(tripIndex, newTimes);
-                }
+                  int numStops = newTimes.getNumStops();
                   
-            // Update succeeded, save the new TripTimes back into this Timetable.
-            if (tripTimes.get(tripIndex).vehicleID == null)
-            	tripTimes.set(tripIndex, newTimes);
-            else{
-            	int noTrips = tripTimes.size();
-            	tripIndex = noTrips;
-            	newTimes.setVehicleID(tripUpdate.getVehicle().getId());
-            	this.tripTimes.add(tripIndex, newTimes);
-            }
-           
-           
-        } catch (Exception e) { // prevent server from dying while debugging
-            e.printStackTrace();
-            return false;
-        }
+                  int[] status = new int[numStops];
 
-        LOG.debug("A valid TripUpdate object was applied using the Timetable class update method.");
-        return true;
-    }
+                  boolean foundMatch = false;
+                  for (int i = 0; i < numStops; i++) {
+
+                      boolean match = false;
+                      if (update != null) {
+                          if (update.hasStopSequence()) {
+                              match = update.getStopSequence() == newTimes.getStopSequence(i);
+                          } else if (update.hasStopId()) {
+                              match = pattern.getStop(i).getId().getId()
+                                      .equals(update.getStopId());
+                          }
+                      }
+                      if (match) {
+                          int arrivalTime = 0;
+                          if (foundMatch == false) {
+                              firstNzIndex = i;
+                              foundMatch = true;
+                          }
+                          StopTimeUpdate.ScheduleRelationship scheduleRelationship = update
+                                  .hasScheduleRelationship() ? update.getScheduleRelationship()
+                                  : StopTimeUpdate.ScheduleRelationship.SCHEDULED;
+                          if (scheduleRelationship == StopTimeUpdate.ScheduleRelationship.SKIPPED) {
+                              // TODO: Handle partial trip cancellations
+                              LOG.warn("Partially canceled trips are currently unsupported."
+                                      + " Skipping TripUpdate.");
+                              return false;
+                          } else if (scheduleRelationship == StopTimeUpdate.ScheduleRelationship.NO_DATA) {
+                              newTimes.updateArrivalDelay(i, 0);
+                              newTimes.updateDepartureDelay(i, 0);
+                                                          } else {
+                              long today = updateServiceDate.getAsDate(timeZone).getTime() / 1000;
+
+                              if (update.hasArrival()) {
+                                  
+                                  StopTimeEvent arrival = update.getArrival();
+                                  if (arrival.hasDelay()) {
+                                      LOG.error("Part of a TripUpdate object could not be applied successfully.");
+                                      return false;
+                                      
+                                  } else if (arrival.hasTime()) {
+                                      newTimes.updateArrivalTime(i,
+                                              (int) (arrival.getTime() - today));
+                                      arrivalTime = (int) (arrival.getTime() - today);
+                                      status[update.getStopSequence() - 1] = 1;
+                                                                      
+                                      previous = arrivalTime;
+                                      
+                                  } else {
+                                      LOG.error("Arrival time at index {} is erroneous.", i);
+                                      return false;
+                                  }
+                              } else {
+                                
+                                      newTimes.updateArrivalTime(i, TripTimes.UNAVAILABLE);
+                                   
+                              }
+
+                              if (update.hasDeparture()) {
+                                  StopTimeEvent departure = update.getDeparture();
+                                  if (departure.hasDelay()) {
+                                      
+                                      LOG.error("Part of a TripUpdate object could not be applied successfully.");
+                                      return false;
+                                      
+                                  } else if (departure.hasTime()) {
+                                      newTimes.updateDepartureTime(i,
+                                              (int) (departure.getTime() - today));
+                                      
+                                  } else {
+                                      LOG.error("Departure time at index {} is erroneous.", i);
+                                      return false;
+                                  }
+                              } else {
+                                  newTimes.updateDepartureTime(i, arrivalTime);
+                              }
+                          }
+                          if (updates.hasNext()) {
+                              update = updates.next();
+                          } else {
+                              update = null;
+                          }
+                      } else {
+
+                          if (firstNzIndex != -1) {
+                              newTimes.estimateArrivaltime(i);
+                          }
+                      }
+                  }
+
+                  if (update != null) {
+
+                      LOG.error("Part of a TripUpdate object could not be applied successfully.");
+
+                      return false;
+                  }
+
+                  // estimate arrival time for head of queue, eg: [0, 0, t3, t4]--> [t1, t2, t3,
+                  // t4]
+                  if (0 < firstNzIndex && firstNzIndex != 0) {
+                      for (int i = firstNzIndex; 0 < i; i--) {
+                          // for(int i = firstNzIndex ; 0 <= i; i--){
+                          newTimes.backPropagateDelay(i - 1);
+                      }
+                  }
+
+                  int numTrips = tripTimes.size();
+                  String currentVehicle = tripUpdate.getVehicle().getId();
+
+                  // Update succeeded, save the new TripTimes back into this Timetable.
+                  if (tripTimes.get(tripIndex).vehicleID == null) {
+                      tripTimes.set(tripIndex, newTimes);
+                      tripTimes.get(tripIndex).setVehicleID(currentVehicle);
+                  } else {
+                      tripIndex = numTrips;
+                      newTimes.setVehicleID(currentVehicle);
+                      tripTimes.add(tripIndex, newTimes); 
+                  }
+              }
+
+          } catch (Exception e) { // prevent server from dying while debugging
+              e.printStackTrace();
+              return false;
+          }
+
+      LOG.trace("A valid TripUpdate object was applied using the Timetable class update method.");
+      return true;
+  }
+
 
     /**
      * Add a trip to this Timetable. The Timetable must be analyzed, compacted, and indexed

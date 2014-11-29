@@ -320,9 +320,9 @@ public class TimetableTest {
                 GtfsLibrary.createCalendarServiceData(context2.getDao()));
 
         patternIndex = new HashMap<AgencyAndId, TripPattern>();
-        for (TransitStopDepart tsd : filter(graph2.getVertices(), TransitStopDepart.class)) {
-            for (TransitBoardAlight tba : filter(tsd.getOutgoing(), TransitBoardAlight.class)) {
-                if (!tba.isBoarding())
+        for (TransitStopDepart tsd : Iterables.filter(graph2.getVertices(), TransitStopDepart.class)) {
+            for (TransitBoardAlight tba : Iterables.filter(tsd.getOutgoing(), TransitBoardAlight.class)) {
+                if (!tba.boarding)
                     continue;
                 TripPattern pattern = tba.getPattern();
                 for (Trip trip : pattern.getTrips()) {
@@ -360,7 +360,7 @@ public class TimetableTest {
         tripUpdateBuilder.setVehicle(vehicleDescriptor);
         tripUpdate = tripUpdateBuilder.build();
 
-        assertTrue(timetable.updateFreqTrip(tripUpdate, "agency", timeZone, serviceDate));
+        assertTrue(timetable.updateFreqTrip(tripUpdate, timeZone, serviceDate));
         assertEquals(7 * 3600 + 13 * 60, timetable.getTripTimes(trip_1_index).getArrivalTime(1));
         // check the back-propagation of delay
         assertEquals(7 * 3600 + 3 * 60, timetable.getTripTimes(trip_1_index).getArrivalTime(0));
@@ -382,8 +382,8 @@ public class TimetableTest {
         vehicleDescriptor.setId("b");
         tripUpdateBuilder.setVehicle(vehicleDescriptor);
         tripUpdate2 = tripUpdateBuilder.build();
-        assertTrue(timetable.updateFreqTrip(tripUpdate2, "agency", timeZone, serviceDate));
-        assertEquals(2, timetable.getTripTimes().size());
+        assertTrue(timetable.updateFreqTrip(tripUpdate2, timeZone, serviceDate));
+        assertEquals(2, timetable.tripTimes.size());
 
         assertEquals(7 * 3600 + 45 * 60, timetable.getTripTimes(1).getArrivalTime(1));
         // check the back-propagation of delay
@@ -410,7 +410,7 @@ public class TimetableTest {
         
         stopTimeEventBuilder.setDelay(180);
         tripUpdate = tripUpdateBuilder.build();
-        assertFalse(timetable.updateFreqTrip(tripUpdate, "agency", timeZone, serviceDate));
+        assertFalse(timetable.updateFreqTrip(tripUpdate, timeZone, serviceDate));
     }
 
 }

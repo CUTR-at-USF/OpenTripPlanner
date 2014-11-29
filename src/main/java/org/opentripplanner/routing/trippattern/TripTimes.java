@@ -242,19 +242,12 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
     	int currentStop;
     	if (stop != 0){
     		currentStop = stop;
-//    		dt = this.scheduledDepartureTimes[stop] - this.scheduledDepartureTimes[stop-1];
-//	    	System.out.println("   "+ getArrivalTime(stop-1)/3600 + ":"+ (getArrivalTime(stop-1)%3600)/60 + " , "+ dt/60+ ":" + (dt%60) );
-//    		arrivalTimes[stop] = getArrivalTime(stop-1) + dt;
     	}else{
     		currentStop = this.getNumStops()-1;
-//    		dt = this.scheduledDepartureTimes[this.getNumStops()-1];
-//    		arrivalTimes[stop] = getArrivalTime(this.getNumStops()-2) + dt;
-//    		System.out.println(" ** "+ getArrivalTime(this.getNumStops()-2)/3600+ ":"+ (getArrivalTime(this.getNumStops()-2)%3600)/60+ " , " + " , "+ dt/60+ ":" + (dt%60));
     	}
     	 
     	dt = this.scheduledDepartureTimes[currentStop] - this.scheduledDepartureTimes[currentStop-1];
-    	//System.out.println("   "+ getArrivalTime(currentStop-1)/3600 + ":"+ (getArrivalTime(currentStop-1)%3600)/60 + " , "+ dt/60+ ":" + (dt%60) );
-		arrivalTimes[stop] = getArrivalTime(currentStop-1) + dt;
+    	arrivalTimes[stop] = getArrivalTime(currentStop-1) + dt;
 		
     	}
     /** @return the amount of time in seconds that the vehicle waits at the stop. */
@@ -277,16 +270,14 @@ public class TripTimes implements Serializable, Comparable<TripTimes>, Cloneable
     }
     /** @return the amount of time in seconds that the vehicle takes to reach the following stop. */
     public int getRunningTime(int stop) {
-    	if (stop != this.getNumStops()-2){
-	    	System.out.println("---TripTimes + get running time: "+ this.trip.getId()+" , vehicle = "+ this.vehicleID +", stop = "+ stop +" , ari2 = " + getArrivalTime(stop + 1) + " , ari1 = "+ getDepartureTime(stop) +", nStops = "+ this.getNumStops());	      
+    	if (stop != this.getNumStops()-2){	    	       
 	        return getArrivalTime(stop + 1) - getDepartureTime(stop);
     	}else{
     		
 	        int dt = getArrivalTime(0) - getDepartureTime(stop);
 	        if (dt < 0)
 	        	dt = this.scheduledDepartureTimes[stop+1] - this.scheduledDepartureTimes[stop];
-	        System.out.println("---TripTimes + get running time to the first stp: "+ this.trip.getId()+" , vehicle = "+ this.vehicleID +", stop = "+ stop +" , ari2 = " + getArrivalTime(0) + " , dt = "+ dt);
-    		return dt;
+	        	return dt;
     	}
     		
     }
