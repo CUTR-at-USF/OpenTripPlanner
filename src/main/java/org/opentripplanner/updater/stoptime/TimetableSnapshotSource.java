@@ -25,6 +25,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.TimeZone;
  
 
@@ -33,6 +34,7 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 
 import com.google.common.collect.Maps;
+
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.opentripplanner.routing.core.ServiceDay;
@@ -150,17 +152,17 @@ public class TimetableSnapshotSource {
         for (TripPattern pattern : graphIndex.patternForTrip.values()) {
 
             // check if the pattern belongs to frequencyBased trips
-            if (pattern.getScheduledTimetable().getFrequencyEntries().size() != 0) {
+        	if (pattern.scheduledTimetable.frequencyEntries.size() != 0) {
                 SortedSet<Timetable> sortedTimetables = buffer.timetables.get(pattern);
                 if (sortedTimetables != null) {
 
                     for (Timetable timetable : sortedTimetables) {
-                        int currentSize = timetable.getTripTimes().size();
+                        int currentSize = timetable.tripTimes.size();
                         for (int i = 0; i < pattern.noTrips; i++) {
                             timetable.getTripTimes(i).vehicleID = null;
                         }
                         for (int i = currentSize - 1; pattern.noTrips <= i; i--) {
-                            timetable.getTripTimes().remove(i);
+                        	timetable.tripTimes.remove(i);
                         }
                     }
                 }

@@ -152,7 +152,7 @@ public class TimetableSnapshotSourceTest {
         Vertex stop_a = graph.getVertex("agency_A");
         Vertex stop_b = graph.getVertex("agency_B");
         // A to B
-        graph.setTimetableSnapshotSource(updater);
+        graph.timetableSnapshotSource = updater;
         options.setRoutingContext(graph, stop_a, stop_b);
 
         CalendarServiceData calendarServiceData = new CalendarServiceDataStub(
@@ -177,8 +177,8 @@ public class TimetableSnapshotSourceTest {
                 "agency");
         resolver = updater.getTimetableSnapshot();
         assertSame(resolver, updater.getTimetableSnapshot());
-
-        graph.setTimetableSnapshotSource(updater);
+       
+        graph.timetableSnapshotSource = updater;
         options.setRoutingContext(graph, stop_a, stop_b);
 
         timeTable = pattern.getUpdatedTimetable(options, serviceDay);
