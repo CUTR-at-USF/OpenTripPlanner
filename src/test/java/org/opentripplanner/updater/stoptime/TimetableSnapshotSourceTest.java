@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.Set;
@@ -27,7 +28,6 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
@@ -35,14 +35,11 @@ import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.opentripplanner.ConstantsForTests;
 import org.opentripplanner.gtfs.GtfsContext;
 import org.opentripplanner.gtfs.GtfsLibrary;
-import org.opentripplanner.routing.core.RoutingRequest;
-import org.opentripplanner.routing.core.ServiceDay;
 import org.opentripplanner.routing.edgetype.TripPattern;
 import org.opentripplanner.routing.edgetype.Timetable;
 import org.opentripplanner.routing.edgetype.TimetableResolver;
 import org.opentripplanner.routing.edgetype.factory.GTFSPatternHopFactory;
 import org.opentripplanner.routing.graph.Graph;
-import org.opentripplanner.routing.graph.Vertex;
 import org.opentripplanner.routing.impl.DefaultStreetVertexIndexFactory;
 import org.opentripplanner.routing.trippattern.TripTimes;
 
@@ -105,7 +102,7 @@ public class TimetableSnapshotSourceTest {
         vehicleDescriptor.setId("a");
         tripUpdateBuilder.setVehicle(vehicleDescriptor);
         freqBasedUpdate1 = tripUpdateBuilder.build().toByteArray();
-
+     
         vehicleDescriptor.setId("b");
         stopTimeEventBuilder = stopTimeUpdateBuilder.getArrivalBuilder();
         stopTimeUpdateBuilder.setStopSequence(1);
@@ -145,23 +142,8 @@ public class TimetableSnapshotSourceTest {
         AgencyAndId tripId = new AgencyAndId("agency", "15.1");
         Trip trip = graph.index.tripForId.get(tripId);
         TripPattern pattern = graph.index.patternForTrip.get(trip);
-
-        RoutingRequest options = new RoutingRequest();
-        long startTime = (long) (new java.util.Date().getTime()) / 1000;
-        options.dateTime = startTime;
-        Vertex stop_a = graph.getVertex("agency_A");
-        Vertex stop_b = graph.getVertex("agency_B");
-        // A to B
-        graph.timetableSnapshotSource = updater;
-        options.setRoutingContext(graph, stop_a, stop_b);
-
-        CalendarServiceData calendarServiceData = new CalendarServiceDataStub(
-                graph.serviceCodes.keySet());
-        CalendarServiceImpl calendarServiceImpl = new CalendarServiceImpl(calendarServiceData);
-        long time = (new java.util.Date().getTime()) / 1000 - 100;
-        ServiceDay serviceDay = new ServiceDay(graph, time, calendarServiceImpl, "agency");
-
-        Timetable timeTable = pattern.getUpdatedTimetable(options, serviceDay);
+ 
+        Timetable timeTable = resolver.resolve(pattern, serviceDate);
         assertEquals(timeTable.getTripTimes(0).getVehicleID(), "a");
 
         // wait one second and send new trip update
@@ -177,11 +159,8 @@ public class TimetableSnapshotSourceTest {
                 "agency");
         resolver = updater.getTimetableSnapshot();
         assertSame(resolver, updater.getTimetableSnapshot());
-       
-        graph.timetableSnapshotSource = updater;
-        options.setRoutingContext(graph, stop_a, stop_b);
-
-        timeTable = pattern.getUpdatedTimetable(options, serviceDay);
+ 
+        timeTable = resolver.resolve(pattern, serviceDate);
         assertEquals(timeTable.getTripTimes(0).getVehicleID(), "b");
     }
 

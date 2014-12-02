@@ -957,6 +957,7 @@ public class GTFSPatternHopFactory {
                             "trip goes backwards for some reason");
                 }
                 for (j = i; j < i + numInterpStops; ++j) {
+                	//System.out.println("interpolating " + j + " between " + prevDepartureTime + " and " + arrivalTime);
                 	departureTime = prevDepartureTime + interpStep * (j - i + 1);
                     st = stopTimes.get(j);
                     if (st.isArrivalTimeSet()) {

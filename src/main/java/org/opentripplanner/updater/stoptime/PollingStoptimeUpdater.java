@@ -13,8 +13,6 @@
 
 package org.opentripplanner.updater.stoptime;
 
-import java.io.FileNotFoundException;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.prefs.Preferences;

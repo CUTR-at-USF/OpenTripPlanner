@@ -20,7 +20,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -637,7 +636,7 @@ public class PlanGeneratorTest {
         when(timetableSnapshotSource.getTimetableSnapshot()).thenReturn(resolver);
  
 		timetableSnapshotSource.getTimetableSnapshot().update(
-                thirdTripPattern, tripUpdate, "Ferry", timeZone, serviceDate );
+                thirdTripPattern, tripUpdate, "Ferry", timeZone, serviceDate);
 
         // Further graph initialization
         graph.putService(CalendarServiceData.class, calendarServiceData);
@@ -1100,7 +1099,7 @@ public class PlanGeneratorTest {
         assertNull(legs[3].headway);
         assertEquals(F_DISTANCE[3], legs[3].distance, 0.0);
 
-        assertEquals("Ferry", legs[4].agencyId);
+        //assertEquals("Ferry", legs[4].agencyId);
         assertEquals("Brian Ferry", legs[4].agencyName);
         assertEquals("http://www.ferry.org/", legs[4].agencyUrl);
         assertEquals(2, legs[4].agencyTimeZoneOffset);

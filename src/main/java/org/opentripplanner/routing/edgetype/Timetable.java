@@ -138,6 +138,8 @@ public class Timetable implements Serializable {
     public TripTimes getNextTrip(State s0, ServiceDay serviceDay, int stopIndex, boolean boarding) {
         /* Search at the state's time, but relative to midnight on the given service day. */
         int time = serviceDay.secondsSinceMidnight(s0.getTimeSeconds());
+        //indicate wether realtime update for frequencyBased trips is available
+        boolean rtUpdatesAvailable = false;
         // NOTE the time is sometimes negative here. That is fine, we search for the first trip of the day.
         TripTimes bestTrip = null;
         Stop currentStop = pattern.getStop(stopIndex);
@@ -156,6 +158,8 @@ public class Timetable implements Serializable {
                 continue; // TODO merge into call on next line
             if (!tt.tripAcceptable(s0, stopIndex))
                 continue;
+            if (tt.vehicleID != null)
+            	rtUpdatesAvailable = true;
             int adjustedTime = adjustTimeForTransfer(s0, currentStop, tt.trip, boarding,
                     serviceDay, time);
             if (adjustedTime == -1)
@@ -176,36 +180,41 @@ public class Timetable implements Serializable {
                 }
             }
         }
+        
         // ACK all logic is identical to above.
         // A sign that FrequencyEntries and TripTimes need a common interface.
-        FrequencyEntry bestFreq = null;
-        for (FrequencyEntry freq : frequencyEntries) {
-            TripTimes tt = freq.tripTimes;
-            if ( ! serviceDay.serviceRunning(tt.serviceCode)) continue; // TODO merge into call on next line
-            if ( ! tt.tripAcceptable(s0, stopIndex)) continue;
-            int adjustedTime = adjustTimeForTransfer(s0, currentStop, tt.trip, boarding, serviceDay, time);
-            if (adjustedTime == -1) continue;
-            LOG.debug("  running freq {}", freq);
-            if (boarding) {
-                int depTime = freq.nextDepartureTime(stopIndex, adjustedTime); // min transfer time included in search
-                if (depTime < 0) continue;
-                if (depTime >= adjustedTime && depTime < bestTime) {
-                    bestFreq = freq;
-                    bestTime = depTime;
-                }
-            } else {
-                int arvTime = freq.prevArrivalTime(stopIndex, adjustedTime); // min transfer time included in search
-                if (arvTime < 0) continue;
-                if (arvTime <= adjustedTime && arvTime > bestTime) {
-                    bestFreq = freq;
-                    bestTime = arvTime;
-                }
-            }
-        }
-        if (bestFreq != null) {
-            // A FrequencyEntry beat all the TripTimes.
-            // Materialize that FrequencyEntry entry at the given time.
-            bestTrip = bestFreq.tripTimes.timeShift(stopIndex, bestTime, boarding);
+        if(! rtUpdatesAvailable){
+        
+	        bestTime = boarding ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+	        FrequencyEntry bestFreq = null;
+	        for (FrequencyEntry freq : frequencyEntries) {
+	            TripTimes tt = freq.tripTimes;
+	            if ( ! serviceDay.serviceRunning(tt.serviceCode)) continue; // TODO merge into call on next line
+	            if ( ! tt.tripAcceptable(s0, stopIndex)) continue;
+	            int adjustedTime = adjustTimeForTransfer(s0, currentStop, tt.trip, boarding, serviceDay, time);
+	            if (adjustedTime == -1) continue;
+	            LOG.debug("  running freq {}", freq);
+	            if (boarding) {
+	                int depTime = freq.nextDepartureTime(stopIndex, adjustedTime); // min transfer time included in search
+	                if (depTime < 0) continue;
+	                if (depTime >= adjustedTime && depTime < bestTime) {
+	                    bestFreq = freq;
+	                    bestTime = depTime;
+	                }
+	            } else {
+	                int arvTime = freq.prevArrivalTime(stopIndex, adjustedTime); // min transfer time included in search
+	                if (arvTime < 0) continue;
+	                if (arvTime <= adjustedTime && arvTime > bestTime) {
+	                    bestFreq = freq;
+	                    bestTime = arvTime;
+	                }
+	            }
+	        }
+	        if (bestFreq != null) {
+	            // A FrequencyEntry beat all the TripTimes.
+	            // Materialize that FrequencyEntry entry at the given time.
+	            bestTrip = bestFreq.tripTimes.timeShift(stopIndex, bestTime, boarding);
+	        }
         }
         return bestTrip;
     }
@@ -294,6 +303,7 @@ public class Timetable implements Serializable {
 
     /** @return the index of TripTimes for this trip ID in this particular Timetable */
     public int getTripIndex(AgencyAndId tripId) {
+    	
         int ret = 0;      
         for (TripTimes tt : tripTimes) {
             // could replace linear search with indexing in stoptime updater, but not necessary
@@ -427,9 +437,11 @@ public class Timetable implements Serializable {
                                     return false;
                                 }
                             } else {
-                                
+                            	if (delay == null) {
+                                    newTimes.updateArrivalTime(i, TripTimes.UNAVAILABLE);
+                                } else {
                                     newTimes.updateArrivalDelay(i, delay);
-                                
+                                }
                             }
 
                             if (update.hasDeparture()) {
@@ -505,7 +517,7 @@ public class Timetable implements Serializable {
      */
     public boolean updateFreqTrip(TripUpdate tripUpdate, TimeZone timeZone,
             ServiceDate updateServiceDate) {  
-      int previous = 0;
+
       int firstNzIndex = -1;
 
       if (tripUpdate == null) {
@@ -606,8 +618,6 @@ public class Timetable implements Serializable {
                                               (int) (arrival.getTime() - today));
                                       arrivalTime = (int) (arrival.getTime() - today);
                                       status[update.getStopSequence() - 1] = 1;
-                                                                      
-                                      previous = arrivalTime;
                                       
                                   } else {
                                       LOG.error("Arrival time at index {} is erroneous.", i);
@@ -658,11 +668,10 @@ public class Timetable implements Serializable {
                       return false;
                   }
 
-                  // estimate arrival time for head of queue, eg: [0, 0, t3, t4]--> [t1, t2, t3,
+                  // estimate arrival time for head of queue, eg:[0, 0, t3, t4]--> [t1, t2, t3,
                   // t4]
                   if (0 < firstNzIndex && firstNzIndex != 0) {
                       for (int i = firstNzIndex; 0 < i; i--) {
-                          // for(int i = firstNzIndex ; 0 <= i; i--){
                           newTimes.backPropagateDelay(i - 1);
                       }
                   }

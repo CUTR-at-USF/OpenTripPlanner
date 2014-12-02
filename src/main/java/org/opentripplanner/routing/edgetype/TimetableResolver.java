@@ -13,9 +13,6 @@
 
 package org.opentripplanner.routing.edgetype;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -30,7 +27,6 @@ import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
 import com.google.transit.realtime.GtfsRealtime.TripDescriptor.ScheduleRelationship;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 
@@ -49,7 +45,7 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate;
  */
 public class TimetableResolver {
 
-    public static class SortedTimetableComparator implements Comparator<Timetable> {
+	protected static class SortedTimetableComparator implements Comparator<Timetable> {
         @Override
         public int compare(Timetable t1, Timetable t2) {
             return t1.serviceDate.compareTo(t2.serviceDate);
@@ -91,7 +87,7 @@ public class TimetableResolver {
      * @return whether or not the update was actually applied
      */
     public boolean update(TripPattern pattern, TripUpdate tripUpdate, String agencyId,
-            TimeZone timeZone, ServiceDate serviceDate)  {
+            TimeZone timeZone, ServiceDate serviceDate) {
         // synchronization prevents commits/snapshots while update is in progress
         synchronized(this) {
             if (dirty == null)
