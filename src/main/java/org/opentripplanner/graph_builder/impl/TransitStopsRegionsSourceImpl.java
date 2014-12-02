@@ -31,37 +31,38 @@ import com.vividsolutions.jts.geom.Envelope;
  *
  */
 public class TransitStopsRegionsSourceImpl implements RegionsSource {
-    private static Logger LOG = LoggerFactory.getLogger(TransitStopsRegionsSourceImpl.class);
+	private static Logger LOG = LoggerFactory
+			.getLogger(TransitStopsRegionsSourceImpl.class);
 
-    private static final double METERS_PER_DEGREE_LAT = 111111;
-    private double distance = 2000;
+	private static final double METERS_PER_DEGREE_LAT = 111111;
+	private double distance = 2000;
 
-    // FIXME replace autowiring
-    GraphBuilderTask task;
-    
-    public void setDistance(double distance) {
-        this.distance = distance;
-    }
+	// FIXME replace autowiring
+	GraphBuilderTask task;
 
-    @Override
-    public Iterable<Envelope> getRegions() {
+	public void setDistance(double distance) {
+		this.distance = distance;
+	}
 
-    	List<Envelope> regions = new ArrayList<Envelope>();
+	@Override
+	public Iterable<Envelope> getRegions() {
 
-        for (Vertex gv : task.getGraph().getVertices()) {
-            if (gv instanceof TransitStop) {
-                Coordinate c = gv.getCoordinate();
-                Envelope env = new Envelope(c);
-                double meters_per_degree_lon_here =  
-                    METERS_PER_DEGREE_LAT * Math.cos(Math.toRadians(c.y));
-                env.expandBy(distance / meters_per_degree_lon_here,  
-                        distance / METERS_PER_DEGREE_LAT);
-                regions.add(env);
-            }
-        }
+		List<Envelope> regions = new ArrayList<Envelope>();
 
-        LOG.debug("Total regions: " + regions.size());
-        
-        return regions;
-    }
+		for (Vertex gv : task.getGraph().getVertices()) {
+			if (gv instanceof TransitStop) {
+				Coordinate c = gv.getCoordinate();
+				Envelope env = new Envelope(c);
+				double meters_per_degree_lon_here = METERS_PER_DEGREE_LAT
+						* Math.cos(Math.toRadians(c.y));
+				env.expandBy(distance / meters_per_degree_lon_here, distance
+						/ METERS_PER_DEGREE_LAT);
+				regions.add(env);
+			}
+		}
+
+		LOG.debug("Total regions: " + regions.size());
+
+		return regions;
+	}
 }

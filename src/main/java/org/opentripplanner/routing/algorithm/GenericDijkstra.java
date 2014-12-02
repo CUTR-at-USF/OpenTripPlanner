@@ -31,101 +31,117 @@ import org.opentripplanner.routing.spt.ShortestPathTree;
  */
 public class GenericDijkstra {
 
-    private RoutingRequest options;
+	private RoutingRequest options;
 
-    public SearchTerminationStrategy searchTerminationStrategy;
+	public SearchTerminationStrategy searchTerminationStrategy;
 
-    public SkipEdgeStrategy skipEdgeStrategy;
+	public SkipEdgeStrategy skipEdgeStrategy;
 
-    public SkipTraverseResultStrategy skipTraverseResultStrategy;
+	public SkipTraverseResultStrategy skipTraverseResultStrategy;
 
-    public TraverseVisitor traverseVisitor;
+	public TraverseVisitor traverseVisitor;
 
-    private boolean verbose = false;
+	private boolean verbose = false;
 
-    private RemainingWeightHeuristic heuristic = new TrivialRemainingWeightHeuristic();
+	private RemainingWeightHeuristic heuristic = new TrivialRemainingWeightHeuristic();
 
-    public GenericDijkstra(RoutingRequest options) {
-        this.options = options;
-    }
+	public GenericDijkstra(RoutingRequest options) {
+		this.options = options;
+	}
 
-    public void setSearchTerminationStrategy(SearchTerminationStrategy searchTerminationStrategy) {
-        this.searchTerminationStrategy = searchTerminationStrategy;
-    }
+	public void setSearchTerminationStrategy(
+			SearchTerminationStrategy searchTerminationStrategy) {
+		this.searchTerminationStrategy = searchTerminationStrategy;
+	}
 
-    public void setSkipEdgeStrategy(SkipEdgeStrategy skipEdgeStrategy) {
-        this.skipEdgeStrategy = skipEdgeStrategy;
-    }
+	public void setSkipEdgeStrategy(SkipEdgeStrategy skipEdgeStrategy) {
+		this.skipEdgeStrategy = skipEdgeStrategy;
+	}
 
-    public void setSkipTraverseResultStrategy(SkipTraverseResultStrategy skipTraverseResultStrategy) {
-        this.skipTraverseResultStrategy = skipTraverseResultStrategy;
-    }
+	public void setSkipTraverseResultStrategy(
+			SkipTraverseResultStrategy skipTraverseResultStrategy) {
+		this.skipTraverseResultStrategy = skipTraverseResultStrategy;
+	}
 
-    public ShortestPathTree getShortestPathTree(State initialState) {
-        Vertex target = null;
-        if (options.rctx != null) {
-            target = initialState.getOptions().rctx.target;
-        }
-        ShortestPathTree spt = new BasicShortestPathTree(options);
-        BinHeap<State> queue = new BinHeap<State>(1000);
+	public ShortestPathTree getShortestPathTree(State initialState) {
+		Vertex target = null;
+		if (options.rctx != null) {
+			target = initialState.getOptions().rctx.target;
+		}
+		ShortestPathTree spt = new BasicShortestPathTree(options);
+		BinHeap<State> queue = new BinHeap<State>(1000);
 
-        spt.add(initialState);
-        queue.insert(initialState, initialState.getWeight());
+		spt.add(initialState);
+		queue.insert(initialState, initialState.getWeight());
 
-        while (!queue.empty()) { // Until the priority queue is empty:
-            State u = queue.extract_min();
-            Vertex u_vertex = u.getVertex();
+		while (!queue.empty()) { // Until the priority queue is empty:
+			State u = queue.extract_min();
+			Vertex u_vertex = u.getVertex();
 
-            if (traverseVisitor != null) {
-                traverseVisitor.visitVertex(u);
-            }
+			if (traverseVisitor != null) {
+				traverseVisitor.visitVertex(u);
+			}
 
-            if (!spt.getStates(u_vertex).contains(u)) {
-                continue;
-            }
+			if (!spt.getStates(u_vertex).contains(u)) {
+				continue;
+			}
 
-            if (verbose) {
-                System.out.println("min," + u.getWeight());
-                System.out.println(u_vertex);
-            }
+			if (verbose) {
+				System.out.println("min," + u.getWeight());
+				System.out.println(u_vertex);
+			}
 
-            if (searchTerminationStrategy != null &&
-                searchTerminationStrategy.shouldSearchTerminate(initialState.getVertex(), null, u, spt, options)) {
-                break;
-            }
+			if (searchTerminationStrategy != null
+					&& searchTerminationStrategy.shouldSearchTerminate(
+							initialState.getVertex(), null, u, spt, options)) {
+				break;
+			}
 
-            for (Edge edge : options.arriveBy ? u_vertex.getIncoming() : u_vertex.getOutgoing()) {
-                if (skipEdgeStrategy != null &&
-                    skipEdgeStrategy.shouldSkipEdge(initialState.getVertex(), null, u, edge, spt, options)) {
-                    continue;
-                }
-                // Iterate over traversal results. When an edge leads nowhere (as indicated by
-                // returning NULL), the iteration is over.
-                for (State v = edge.traverse(u); v != null; v = v.getNextResult()) {
-                    if (skipTraverseResultStrategy != null &&
-                        skipTraverseResultStrategy.shouldSkipTraversalResult(initialState.getVertex(), null, u, v, spt, options)) {
-                        continue;
-                    }
-                    if (traverseVisitor != null) {
-                        traverseVisitor.visitEdge(edge, v);
-                    }
-                    if (verbose) {
-                        System.out.printf("  w = %f + %f = %f %s", u.getWeight(), v.getWeightDelta(), v.getWeight(), v.getVertex());
-                    }
-                    if (v.exceedsWeightLimit(options.maxWeight)) continue;
-                    if (spt.add(v)) {
-                        double estimate = heuristic.computeForwardWeight(v, target);
-                        queue.insert(v, v.getWeight() + estimate);
-                        if (traverseVisitor != null) traverseVisitor.visitEnqueue(v);
-                    }
-                }
-            }
-            spt.postVisit(u);
-        }
-        return spt;
-    }
+			for (Edge edge : options.arriveBy ? u_vertex.getIncoming()
+					: u_vertex.getOutgoing()) {
+				if (skipEdgeStrategy != null
+						&& skipEdgeStrategy.shouldSkipEdge(
+								initialState.getVertex(), null, u, edge, spt,
+								options)) {
+					continue;
+				}
+				// Iterate over traversal results. When an edge leads nowhere
+				// (as indicated by
+				// returning NULL), the iteration is over.
+				for (State v = edge.traverse(u); v != null; v = v
+						.getNextResult()) {
+					if (skipTraverseResultStrategy != null
+							&& skipTraverseResultStrategy
+									.shouldSkipTraversalResult(
+											initialState.getVertex(), null, u,
+											v, spt, options)) {
+						continue;
+					}
+					if (traverseVisitor != null) {
+						traverseVisitor.visitEdge(edge, v);
+					}
+					if (verbose) {
+						System.out.printf("  w = %f + %f = %f %s",
+								u.getWeight(), v.getWeightDelta(),
+								v.getWeight(), v.getVertex());
+					}
+					if (v.exceedsWeightLimit(options.maxWeight))
+						continue;
+					if (spt.add(v)) {
+						double estimate = heuristic.computeForwardWeight(v,
+								target);
+						queue.insert(v, v.getWeight() + estimate);
+						if (traverseVisitor != null)
+							traverseVisitor.visitEnqueue(v);
+					}
+				}
+			}
+			spt.postVisit(u);
+		}
+		return spt;
+	}
 
-    public void setHeuristic(RemainingWeightHeuristic heuristic) {
-        this.heuristic = heuristic;
-    }
+	public void setHeuristic(RemainingWeightHeuristic heuristic) {
+		this.heuristic = heuristic;
+	}
 }

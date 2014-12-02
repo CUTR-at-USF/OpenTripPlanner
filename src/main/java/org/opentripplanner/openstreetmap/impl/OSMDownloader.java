@@ -27,167 +27,175 @@ import org.slf4j.LoggerFactory;
 import com.vividsolutions.jts.geom.Envelope;
 
 public class OSMDownloader {
-    private static final Logger LOG = LoggerFactory.getLogger(OSMDownloader.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(OSMDownloader.class);
 
-    private double _latYStep = 0.04;
+	private double _latYStep = 0.04;
 
-    private double _lonXStep = 0.04;
+	private double _lonXStep = 0.04;
 
-    private double _overlap = 0.001;
+	private double _overlap = 0.001;
 
-    private File _cacheDirectory;
+	private File _cacheDirectory;
 
-    private int _updateIfOlderThanDuration = 0;
+	private int _updateIfOlderThanDuration = 0;
 
-    private String _apiBaseUrl = "http://open.mapquestapi.com/xapi/api/0.6/";
+	private String _apiBaseUrl = "http://open.mapquestapi.com/xapi/api/0.6/";
 
-    public void setLatStep(double latStep) {
-        _latYStep = latStep;
-    }
+	public void setLatStep(double latStep) {
+		_latYStep = latStep;
+	}
 
-    public void setLonStep(double lonStep) {
-        _lonXStep = lonStep;
-    }
+	public void setLonStep(double lonStep) {
+		_lonXStep = lonStep;
+	}
 
-    public void setOverlap(double overlap) {
-        _overlap = overlap;
-    }
+	public void setOverlap(double overlap) {
+		_overlap = overlap;
+	}
 
-    public void setCacheDirectory(File cacheDirectory) {
-        _cacheDirectory = cacheDirectory;
-    }
+	public void setCacheDirectory(File cacheDirectory) {
+		_cacheDirectory = cacheDirectory;
+	}
 
-    public void setUpdateIfOlderThanDuration(int durationInMilliseconds) {
-        _updateIfOlderThanDuration = durationInMilliseconds;
-    }
+	public void setUpdateIfOlderThanDuration(int durationInMilliseconds) {
+		_updateIfOlderThanDuration = durationInMilliseconds;
+	}
 
-    public void visitRegion(Envelope rectangle, OSMDownloaderListener listener) throws IOException {
+	public void visitRegion(Envelope rectangle, OSMDownloaderListener listener)
+			throws IOException {
 
-        double minY = floor(rectangle.getMinY(), _latYStep);
-        double maxY = ceil(rectangle.getMaxY(), _latYStep);
-        double minX = floor(rectangle.getMinX(), _lonXStep);
-        double maxX = ceil(rectangle.getMaxX(), _lonXStep);
+		double minY = floor(rectangle.getMinY(), _latYStep);
+		double maxY = ceil(rectangle.getMaxY(), _latYStep);
+		double minX = floor(rectangle.getMinX(), _lonXStep);
+		double maxX = ceil(rectangle.getMaxX(), _lonXStep);
 
-        for (double y = minY; y < maxY; y += _latYStep) {
-            for (double x = minX; x < maxX; x += _lonXStep) {
-                String key = getKey(x, y);
-                File path = getPathToUpToDateMapTile(y, x, key);
-                try {
-                    listener.handleMapTile(key, y, x, path);
-                } catch (IllegalStateException e) {
-                    LOG.debug("trying to re-download");
-                    path.delete();
-                    path = getPathToUpToDateMapTile(y, x, key);
-                    listener.handleMapTile(key, y, x, path);
-                }
-            }
-        }
-    }
+		for (double y = minY; y < maxY; y += _latYStep) {
+			for (double x = minX; x < maxX; x += _lonXStep) {
+				String key = getKey(x, y);
+				File path = getPathToUpToDateMapTile(y, x, key);
+				try {
+					listener.handleMapTile(key, y, x, path);
+				} catch (IllegalStateException e) {
+					LOG.debug("trying to re-download");
+					path.delete();
+					path = getPathToUpToDateMapTile(y, x, key);
+					listener.handleMapTile(key, y, x, path);
+				}
+			}
+		}
+	}
 
-    public static double floor(double value, double step) {
-        return step * Math.floor(value / step);
-    }
+	public static double floor(double value, double step) {
+		return step * Math.floor(value / step);
+	}
 
-    public static double ceil(double value, double step) {
-        return step * Math.ceil(value / step);
-    }
+	public static double ceil(double value, double step) {
+		return step * Math.ceil(value / step);
+	}
 
-    private String formatNumberWithoutLocale(double number) {
-	return String.format((Locale) null, "%.4f", number);
-    }
+	private String formatNumberWithoutLocale(double number) {
+		return String.format((Locale) null, "%.4f", number);
+	}
 
-    private String getKey(double x, double y) {
-        return formatNumberWithoutLocale(y) + "_" + formatNumberWithoutLocale(x) + "_" + formatNumberWithoutLocale(_latYStep)
-                + "_" + formatNumberWithoutLocale(_lonXStep) + "_" + formatNumberWithoutLocale(_overlap);
-    }
+	private String getKey(double x, double y) {
+		return formatNumberWithoutLocale(y) + "_"
+				+ formatNumberWithoutLocale(x) + "_"
+				+ formatNumberWithoutLocale(_latYStep) + "_"
+				+ formatNumberWithoutLocale(_lonXStep) + "_"
+				+ formatNumberWithoutLocale(_overlap);
+	}
 
-    private File getPathToUpToDateMapTile(double lat, double lon, String key) throws IOException {
+	private File getPathToUpToDateMapTile(double lat, double lon, String key)
+			throws IOException {
 
-        File path = getPathToMapTile(key);
+		File path = getPathToMapTile(key);
 
-        if (needsUpdate(path)) {
-            Envelope r = new Envelope(lon - _overlap, lon + _lonXStep + _overlap, lat - _overlap,
-                    lat + _latYStep + _overlap);
+		if (needsUpdate(path)) {
+			Envelope r = new Envelope(lon - _overlap, lon + _lonXStep
+					+ _overlap, lat - _overlap, lat + _latYStep + _overlap);
 
-            LOG.debug("downloading osm tile: " + key + " from path " + path + " e " + path.exists());
-            
+			LOG.debug("downloading osm tile: " + key + " from path " + path
+					+ " e " + path.exists());
 
-            URL url = constructUrl(r);
-            LOG.warn("downloading from " + url.toString());
+			URL url = constructUrl(r);
+			LOG.warn("downloading from " + url.toString());
 
-            InputStream in = url.openStream();
-            FileOutputStream out = new FileOutputStream(path);
-            try {
-                byte[] data = new byte[4096];
-                while (true) {
-                    int numBytes = in.read(data);
-                    if (numBytes == -1) {
-                        break;
-                    }
-                    out.write(data, 0, numBytes);
-                }
-                in.close();
-                out.close();
-            } catch (RuntimeException e) {
-                out.close();
-                LOG.info("Removing half-written file " + path);
-                path.delete(); //clean up any half-written files
-                throw e;
-            }
-        }
+			InputStream in = url.openStream();
+			FileOutputStream out = new FileOutputStream(path);
+			try {
+				byte[] data = new byte[4096];
+				while (true) {
+					int numBytes = in.read(data);
+					if (numBytes == -1) {
+						break;
+					}
+					out.write(data, 0, numBytes);
+				}
+				in.close();
+				out.close();
+			} catch (RuntimeException e) {
+				out.close();
+				LOG.info("Removing half-written file " + path);
+				path.delete(); // clean up any half-written files
+				throw e;
+			}
+		}
 
-        return path;
-    }
+		return path;
+	}
 
-    private File getPathToMapTile(String key) throws IOException {
-        if( _cacheDirectory == null) {
-            File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-            _cacheDirectory = new File(tmpDir,"osm-tiles");
-        }
+	private File getPathToMapTile(String key) throws IOException {
+		if (_cacheDirectory == null) {
+			File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+			_cacheDirectory = new File(tmpDir, "osm-tiles");
+		}
 
-        if (!_cacheDirectory.exists()) {
-            if (!_cacheDirectory.mkdirs()) {
-                throw new RuntimeException("Failed to create directory " + _cacheDirectory);
-            }
-        }
+		if (!_cacheDirectory.exists()) {
+			if (!_cacheDirectory.mkdirs()) {
+				throw new RuntimeException("Failed to create directory "
+						+ _cacheDirectory);
+			}
+		}
 
-        File path = new File(_cacheDirectory, "map-" + key + ".osm");
-        return path;
-    }
+		File path = new File(_cacheDirectory, "map-" + key + ".osm");
+		return path;
+	}
 
-    private boolean needsUpdate(File path) {
-        if (!path.exists())
-            return true;
-        if (_updateIfOlderThanDuration > 0) {
-            if (System.currentTimeMillis() - path.lastModified() > _updateIfOlderThanDuration)
-                return true;
-        }
-        return false;
-    }
+	private boolean needsUpdate(File path) {
+		if (!path.exists())
+			return true;
+		if (_updateIfOlderThanDuration > 0) {
+			if (System.currentTimeMillis() - path.lastModified() > _updateIfOlderThanDuration)
+				return true;
+		}
+		return false;
+	}
 
-    private URL constructUrl(Envelope r) {
-        double left = r.getMinX();
-        double right = r.getMaxX();
-        double bottom = r.getMinY();
-        double top = r.getMaxY();
-        try {
-            return new URL(getApiBaseUrl() + "map?bbox=" + left + "," + bottom
-                    + "," + right + "," + top);
-        } catch (MalformedURLException e) {
-            throw new IllegalStateException(e);
-        }
-    }
+	private URL constructUrl(Envelope r) {
+		double left = r.getMinX();
+		double right = r.getMaxX();
+		double bottom = r.getMinY();
+		double top = r.getMaxY();
+		try {
+			return new URL(getApiBaseUrl() + "map?bbox=" + left + "," + bottom
+					+ "," + right + "," + top);
+		} catch (MalformedURLException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 
-    /** 
-     * Set the base OSM API URL from which OSM tiles will be downloaded.
-     */
-    public void setApiBaseUrl(String apiBaseUrl) {
-        this._apiBaseUrl = apiBaseUrl;
-    }
+	/**
+	 * Set the base OSM API URL from which OSM tiles will be downloaded.
+	 */
+	public void setApiBaseUrl(String apiBaseUrl) {
+		this._apiBaseUrl = apiBaseUrl;
+	}
 
-    public String getApiBaseUrl() {
-        if (_apiBaseUrl == null)
-            throw new IllegalStateException("Map API base URL must be set before building a URL.");
-        return _apiBaseUrl;
-    }
+	public String getApiBaseUrl() {
+		if (_apiBaseUrl == null)
+			throw new IllegalStateException(
+					"Map API base URL must be set before building a URL.");
+		return _apiBaseUrl;
+	}
 }

@@ -28,42 +28,43 @@ import org.opentripplanner.routing.vertextype.ParkAndRideVertex;
 
 public class TestUnconnectedAreas extends TestCase {
 
-    /**
-     * The P+R.osm.gz file contains 2 park and ride, one a single way area and the other a
-     * multipolygon with a hole. Both are not linked to any street, apart from three roads that
-     * crosses the P+R with w/o common nodes.
-     * 
-     * This test just make sure we correctly link those P+R with the street network by creating
-     * virtual nodes at the place where the street intersects the P+R areas. See ticket #1562.
-     */
-    @Test
-    public void testUnconnectedParkAndRide() throws Exception {
+	/**
+	 * The P+R.osm.gz file contains 2 park and ride, one a single way area and
+	 * the other a multipolygon with a hole. Both are not linked to any street,
+	 * apart from three roads that crosses the P+R with w/o common nodes.
+	 * 
+	 * This test just make sure we correctly link those P+R with the street
+	 * network by creating virtual nodes at the place where the street
+	 * intersects the P+R areas. See ticket #1562.
+	 */
+	@Test
+	public void testUnconnectedParkAndRide() throws Exception {
 
-        Graph gg = new Graph();
+		Graph gg = new Graph();
 
-        OpenStreetMapGraphBuilderImpl loader = new OpenStreetMapGraphBuilderImpl();
-        loader.setDefaultWayPropertySetSource(new DefaultWayPropertySetSource());
-        FileBasedOpenStreetMapProviderImpl provider = new FileBasedOpenStreetMapProviderImpl();
-        File file = new File(getClass().getResource("P+R.osm.gz").getFile());
-        provider.setPath(file);
-        loader.setProvider(provider);
-        loader.buildGraph(gg, new HashMap<Class<?>, Object>());
+		OpenStreetMapGraphBuilderImpl loader = new OpenStreetMapGraphBuilderImpl();
+		loader.setDefaultWayPropertySetSource(new DefaultWayPropertySetSource());
+		FileBasedOpenStreetMapProviderImpl provider = new FileBasedOpenStreetMapProviderImpl();
+		File file = new File(getClass().getResource("P+R.osm.gz").getFile());
+		provider.setPath(file);
+		loader.setProvider(provider);
+		loader.buildGraph(gg, new HashMap<Class<?>, Object>());
 
-        assertEquals(1, gg.getBuilderAnnotations().size());
+		assertEquals(1, gg.getBuilderAnnotations().size());
 
-        int nParkAndRide = 0;
-        int nParkAndRideLink = 0;
-        for (Vertex v : gg.getVertices()) {
-            if (v instanceof ParkAndRideVertex) {
-                nParkAndRide++;
-            }
-        }
-        for (Edge e : gg.getEdges()) {
-            if (e instanceof ParkAndRideLinkEdge) {
-                nParkAndRideLink++;
-            }
-        }
-        assertEquals(2, nParkAndRide);
-        assertEquals(10, nParkAndRideLink);
-    }
+		int nParkAndRide = 0;
+		int nParkAndRideLink = 0;
+		for (Vertex v : gg.getVertices()) {
+			if (v instanceof ParkAndRideVertex) {
+				nParkAndRide++;
+			}
+		}
+		for (Edge e : gg.getEdges()) {
+			if (e instanceof ParkAndRideLinkEdge) {
+				nParkAndRideLink++;
+			}
+		}
+		assertEquals(2, nParkAndRide);
+		assertEquals(10, nParkAndRideLink);
+	}
 }

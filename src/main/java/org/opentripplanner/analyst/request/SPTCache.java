@@ -29,40 +29,41 @@ import com.google.common.cache.LoadingCache;
 
 public class SPTCache extends CacheLoader<RoutingRequest, ShortestPathTree> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SPTCache.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SPTCache.class);
 
-    private SPTServiceFactory sptServiceFactory;
-    
-    private GraphService graphService;
+	private SPTServiceFactory sptServiceFactory;
 
-    public SPTCache(SPTServiceFactory sptServiceFactory, GraphService graphService) {
-        this.sptServiceFactory = sptServiceFactory;
-        this.graphService = graphService;
-        this.sptCache = CacheBuilder.newBuilder()
-                .concurrencyLevel(concurrency)
-                .maximumSize(size)
-                .build(this);
-    }
+	private GraphService graphService;
 
-    private LoadingCache<RoutingRequest, ShortestPathTree> sptCache;
+	public SPTCache(SPTServiceFactory sptServiceFactory,
+			GraphService graphService) {
+		this.sptServiceFactory = sptServiceFactory;
+		this.graphService = graphService;
+		this.sptCache = CacheBuilder.newBuilder().concurrencyLevel(concurrency)
+				.maximumSize(size).build(this);
+	}
 
-    public int size = 200;
-    public int concurrency = 16;
+	private LoadingCache<RoutingRequest, ShortestPathTree> sptCache;
 
-    @Override /** completes the abstract CacheLoader superclass */
-    public ShortestPathTree load(RoutingRequest req) throws Exception {
-        LOG.debug("spt cache miss : {}", req);
-        req.setRoutingContext(graphService.getGraph());
-        long t0 = System.currentTimeMillis();
-        ShortestPathTree spt = sptServiceFactory.instantiate().getShortestPathTree(req);
-        long t1 = System.currentTimeMillis();
-        LOG.debug("calculated spt in {}msec", (int) (t1 - t0));
-        req.cleanup();
-        return spt;
-    }
+	public int size = 200;
+	public int concurrency = 16;
 
-    public ShortestPathTree get(RoutingRequest req) throws Exception {
-        return req == null ? null : sptCache.get(req);
-    }
-    
+	@Override
+	/** completes the abstract CacheLoader superclass */
+	public ShortestPathTree load(RoutingRequest req) throws Exception {
+		LOG.debug("spt cache miss : {}", req);
+		req.setRoutingContext(graphService.getGraph());
+		long t0 = System.currentTimeMillis();
+		ShortestPathTree spt = sptServiceFactory.instantiate()
+				.getShortestPathTree(req);
+		long t1 = System.currentTimeMillis();
+		LOG.debug("calculated spt in {}msec", (int) (t1 - t0));
+		req.cleanup();
+		return spt;
+	}
+
+	public ShortestPathTree get(RoutingRequest req) throws Exception {
+		return req == null ? null : sptCache.get(req);
+	}
+
 }

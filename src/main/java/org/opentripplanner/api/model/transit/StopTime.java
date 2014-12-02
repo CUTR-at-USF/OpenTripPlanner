@@ -23,38 +23,38 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class StopTime {
-    @JsonSerialize
-    @XmlAttribute
-    public boolean realTime;
+	@JsonSerialize
+	@XmlAttribute
+	public boolean realTime;
 
-    @JsonSerialize
-    @XmlAttribute
-    public long delay;
+	@JsonSerialize
+	@XmlAttribute
+	public long delay;
 
-    @JsonSerialize
-    @XmlAttribute
-    public long time;
+	@JsonSerialize
+	@XmlAttribute
+	public long time;
 
-    @JsonSerialize
-    @XmlAttribute
-    public String serviceDate;
+	@JsonSerialize
+	@XmlAttribute
+	public String serviceDate;
 
-    @JsonSerialize
-    @XmlAttribute
-    public String phase;
+	@JsonSerialize
+	@XmlAttribute
+	public String phase;
 
-    @JsonSerialize
-    @XmlAttribute
-    public String direction;
-    
-    @JsonSerialize
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @XmlElement
-    public TripType trip;
+	@JsonSerialize
+	@XmlAttribute
+	public String direction;
 
-    @JsonSerialize
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @XmlElement
-    public StopType stop;
+	@JsonSerialize
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	@XmlElement
+	public TripType trip;
+
+	@JsonSerialize
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	@XmlElement
+	public StopType stop;
 
 }

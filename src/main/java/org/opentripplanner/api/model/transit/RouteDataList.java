@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "RouteDataList")
 public class RouteDataList {
 
-    @XmlElement(name = "RouteData")
-    public Collection<RouteData> routeData = new ArrayList<RouteData>();
+	@XmlElement(name = "RouteData")
+	public Collection<RouteData> routeData = new ArrayList<RouteData>();
 
 }

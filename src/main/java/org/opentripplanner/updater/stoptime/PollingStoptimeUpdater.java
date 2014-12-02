@@ -43,132 +43,139 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate;
  *
  */
 public class PollingStoptimeUpdater extends PollingGraphUpdater {
-    private static final Logger LOG = LoggerFactory.getLogger(PollingStoptimeUpdater.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(PollingStoptimeUpdater.class);
 
-    /**
-     * Parent update manager. Is used to execute graph writer runnables.
-     */
-    private GraphUpdaterManager updaterManager;
+	/**
+	 * Parent update manager. Is used to execute graph writer runnables.
+	 */
+	private GraphUpdaterManager updaterManager;
 
-    /**
-     * Update streamer
-     */
-    private TripUpdateSource updateSource;
+	/**
+	 * Update streamer
+	 */
+	private TripUpdateSource updateSource;
 
-    /**
-     * Property to set on the RealtimeDataSnapshotSource
-     */
-    private Integer logFrequency;
+	/**
+	 * Property to set on the RealtimeDataSnapshotSource
+	 */
+	private Integer logFrequency;
 
-    /**
-     * Property to set on the RealtimeDataSnapshotSource
-     */
-    private Integer maxSnapshotFrequency;
+	/**
+	 * Property to set on the RealtimeDataSnapshotSource
+	 */
+	private Integer maxSnapshotFrequency;
 
-    /**
-     * Property to set on the RealtimeDataSnapshotSource
-     */
-    private Boolean purgeExpiredData;
+	/**
+	 * Property to set on the RealtimeDataSnapshotSource
+	 */
+	private Boolean purgeExpiredData;
 
-    /**
-     * Default agency id that is used for the trip ids in the TripUpdates
-     */
-    private String agencyId;
+	/**
+	 * Default agency id that is used for the trip ids in the TripUpdates
+	 */
+	private String agencyId;
 
-    @Override
-    public void setGraphUpdaterManager(GraphUpdaterManager updaterManager) {
-        this.updaterManager = updaterManager;
-    }
+	@Override
+	public void setGraphUpdaterManager(GraphUpdaterManager updaterManager) {
+		this.updaterManager = updaterManager;
+	}
 
-    @Override
-    public void configurePolling(Graph graph, Preferences preferences) throws Exception {
-        // Create update streamer from preferences
-        agencyId = preferences.get("defaultAgencyId", "");
-        String sourceType = preferences.get("sourceType", null);
-        if (sourceType != null) {
-            if (sourceType.equals("gtfs-http")) {
-                updateSource = new GtfsRealtimeHttpTripUpdateSource();
-            } else if (sourceType.equals("gtfs-file")) {
-                updateSource = new GtfsRealtimeFileTripUpdateSource();
-            }
-        }
+	@Override
+	public void configurePolling(Graph graph, Preferences preferences)
+			throws Exception {
+		// Create update streamer from preferences
+		agencyId = preferences.get("defaultAgencyId", "");
+		String sourceType = preferences.get("sourceType", null);
+		if (sourceType != null) {
+			if (sourceType.equals("gtfs-http")) {
+				updateSource = new GtfsRealtimeHttpTripUpdateSource();
+			} else if (sourceType.equals("gtfs-file")) {
+				updateSource = new GtfsRealtimeFileTripUpdateSource();
+			}
+		}
 
-        // Configure update source
-        if (updateSource == null) {
-            throw new IllegalArgumentException(
-                    "Unknown update streamer source type: " + sourceType);
-        } else if (updateSource instanceof PreferencesConfigurable) {
-            ((PreferencesConfigurable) updateSource).configure(graph, preferences);
-        }
+		// Configure update source
+		if (updateSource == null) {
+			throw new IllegalArgumentException(
+					"Unknown update streamer source type: " + sourceType);
+		} else if (updateSource instanceof PreferencesConfigurable) {
+			((PreferencesConfigurable) updateSource).configure(graph,
+					preferences);
+		}
 
-        // Configure updater
-        int logFrequency = preferences.getInt("logFrequency", -1);
-        if (logFrequency >= 0) {
-            this.logFrequency = logFrequency;
-        }
-        int maxSnapshotFrequency = preferences.getInt("maxSnapshotFrequencyMs", -1);
-        if (maxSnapshotFrequency >= 0)
-            this.maxSnapshotFrequency = maxSnapshotFrequency;
-        String purgeExpiredData = preferences.get("purgeExpiredData", "");
-        if (!purgeExpiredData.isEmpty()) {
-            this.purgeExpiredData = preferences.getBoolean("purgeExpiredData", true);
-        }
+		// Configure updater
+		int logFrequency = preferences.getInt("logFrequency", -1);
+		if (logFrequency >= 0) {
+			this.logFrequency = logFrequency;
+		}
+		int maxSnapshotFrequency = preferences.getInt("maxSnapshotFrequencyMs",
+				-1);
+		if (maxSnapshotFrequency >= 0)
+			this.maxSnapshotFrequency = maxSnapshotFrequency;
+		String purgeExpiredData = preferences.get("purgeExpiredData", "");
+		if (!purgeExpiredData.isEmpty()) {
+			this.purgeExpiredData = preferences.getBoolean("purgeExpiredData",
+					true);
+		}
 
-        LOG.info("Creating stop time updater running every {} seconds : {}",
-                frequencySec, updateSource);
-    }
+		LOG.info("Creating stop time updater running every {} seconds : {}",
+				frequencySec, updateSource);
+	}
 
-    @Override
-    public void setup() throws InterruptedException, ExecutionException {
-        // Create a realtime data snapshot source and wait for runnable to be executed
-        updaterManager.executeBlocking(new GraphWriterRunnable() {
-            @Override
-            public void run(Graph graph) {
-                // Only create a realtime data snapshot source if none exists already
-                TimetableSnapshotSource snapshotSource = graph.timetableSnapshotSource;
-                if (snapshotSource == null) {
-                    snapshotSource = new TimetableSnapshotSource(graph);
-                    // Add snapshot source to graph
-                    graph.timetableSnapshotSource = (snapshotSource);
-                }
+	@Override
+	public void setup() throws InterruptedException, ExecutionException {
+		// Create a realtime data snapshot source and wait for runnable to be
+		// executed
+		updaterManager.executeBlocking(new GraphWriterRunnable() {
+			@Override
+			public void run(Graph graph) {
+				// Only create a realtime data snapshot source if none exists
+				// already
+				TimetableSnapshotSource snapshotSource = graph.timetableSnapshotSource;
+				if (snapshotSource == null) {
+					snapshotSource = new TimetableSnapshotSource(graph);
+					// Add snapshot source to graph
+					graph.timetableSnapshotSource = (snapshotSource);
+				}
 
-                // Set properties of realtime data snapshot source
-                if (logFrequency != null) {
-                    snapshotSource.logFrequency = (logFrequency);
-                }
-                if (maxSnapshotFrequency != null) {
-                    snapshotSource.maxSnapshotFrequency = (maxSnapshotFrequency);
-                }
-                if (purgeExpiredData != null) {
-                    snapshotSource.purgeExpiredData = (purgeExpiredData);
-                }
-            }
-        });
-    }
+				// Set properties of realtime data snapshot source
+				if (logFrequency != null) {
+					snapshotSource.logFrequency = (logFrequency);
+				}
+				if (maxSnapshotFrequency != null) {
+					snapshotSource.maxSnapshotFrequency = (maxSnapshotFrequency);
+				}
+				if (purgeExpiredData != null) {
+					snapshotSource.purgeExpiredData = (purgeExpiredData);
+				}
+			}
+		});
+	}
 
-    /**
-     * Repeatedly makes blocking calls to an UpdateStreamer to retrieve new stop time updates, and
-     * applies those updates to the graph.
-     */
-    @Override
-    public void runPolling() {
-        // Get update lists from update source
-        List<TripUpdate> updates = updateSource.getUpdates();
+	/**
+	 * Repeatedly makes blocking calls to an UpdateStreamer to retrieve new stop
+	 * time updates, and applies those updates to the graph.
+	 */
+	@Override
+	public void runPolling() {
+		// Get update lists from update source
+		List<TripUpdate> updates = updateSource.getUpdates();
 
-        if (updates != null && updates.size() > 0) {
-            // Handle trip updates via graph writer runnable
-            TripUpdateGraphWriterRunnable runnable =
-                    new TripUpdateGraphWriterRunnable(updates, agencyId);
-            updaterManager.execute(runnable);
-        }
-    }
+		if (updates != null && updates.size() > 0) {
+			// Handle trip updates via graph writer runnable
+			TripUpdateGraphWriterRunnable runnable = new TripUpdateGraphWriterRunnable(
+					updates, agencyId);
+			updaterManager.execute(runnable);
+		}
+	}
 
-    @Override
-    public void teardown() {
-    }
+	@Override
+	public void teardown() {
+	}
 
-    public String toString() {
-        String s = (updateSource == null) ? "NONE" : updateSource.toString();
-        return "Streaming stoptime updater with update source = " + s;
-    }
+	public String toString() {
+		String s = (updateSource == null) ? "NONE" : updateSource.toString();
+		return "Streaming stoptime updater with update source = " + s;
+	}
 }

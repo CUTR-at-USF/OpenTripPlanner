@@ -34,69 +34,76 @@ import com.vividsolutions.jts.geom.Polygon;
 
 public class ShapefilePopulation extends BasicPopulation {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ShapefilePopulation.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(ShapefilePopulation.class);
 
-    public String labelAttribute;
+	public String labelAttribute;
 
-    public String inputAttribute;
-    
-    @Override
-    public void createIndividuals() {
-        String filename = this.sourceFilename;
-        LOG.debug("Loading population from shapefile {}", filename);
-        LOG.debug("Feature attributes: input data in {}, labeled with {}", inputAttribute, labelAttribute);
-        try {
-            File file = new File(filename);
-            if ( ! file.exists())
-                throw new RuntimeException("Shapefile does not exist.");
-            FileDataStore store = FileDataStoreFinder.getDataStore(file);
-            SimpleFeatureSource featureSource = store.getFeatureSource();
+	public String inputAttribute;
 
-            CoordinateReferenceSystem sourceCRS = featureSource.getInfo().getCRS();
-            CoordinateReferenceSystem WGS84 = CRS.decode("EPSG:4326", true);
+	@Override
+	public void createIndividuals() {
+		String filename = this.sourceFilename;
+		LOG.debug("Loading population from shapefile {}", filename);
+		LOG.debug("Feature attributes: input data in {}, labeled with {}",
+				inputAttribute, labelAttribute);
+		try {
+			File file = new File(filename);
+			if (!file.exists())
+				throw new RuntimeException("Shapefile does not exist.");
+			FileDataStore store = FileDataStoreFinder.getDataStore(file);
+			SimpleFeatureSource featureSource = store.getFeatureSource();
 
-            Query query = new Query();
-            query.setCoordinateSystem(sourceCRS);
-            query.setCoordinateSystemReproject(WGS84);
-            SimpleFeatureCollection featureCollection = featureSource.getFeatures(query);
+			CoordinateReferenceSystem sourceCRS = featureSource.getInfo()
+					.getCRS();
+			CoordinateReferenceSystem WGS84 = CRS.decode("EPSG:4326", true);
 
-            SimpleFeatureIterator it = featureCollection.features();
-            int i = 0;
-            while (it.hasNext()) {
-                SimpleFeature feature = it.next();
-                Geometry geom = (Geometry) feature.getDefaultGeometry();
-                Point point = null;
-                if (geom instanceof Point) {
-                    point = (Point) geom;
-                } else if (geom instanceof Polygon) {
-                    point = ((Polygon) geom).getCentroid();
-                } else if (geom instanceof MultiPolygon) {
-                    point = ((MultiPolygon) geom).getCentroid();
-                } else {
-                    throw new RuntimeException("Shapefile must contain either points or polygons.");
-                }
-                String label;
-                if (labelAttribute == null) {
-                    label = Integer.toString(i);
-                } else {
-                    label = feature.getAttribute(labelAttribute).toString();
-                }
-                double input = 0.0;
-                if (inputAttribute != null) {
-                    Number n = (Number) feature.getAttribute(inputAttribute);
-                    input = n.doubleValue(); 
-                }
-                Individual individual = new Individual(label, point.getX(), point.getY(), input);
-                this.addIndividual(individual);
-                i += 1;
-            }
-            LOG.debug("loaded {} features", i);
-            it.close();
-        } catch (Exception ex) {
-            LOG.error("Error loading population from shapefile: {}", ex.getMessage());
-            throw new RuntimeException(ex);
-        }
-        LOG.debug("Done loading shapefile.");
-    }
+			Query query = new Query();
+			query.setCoordinateSystem(sourceCRS);
+			query.setCoordinateSystemReproject(WGS84);
+			SimpleFeatureCollection featureCollection = featureSource
+					.getFeatures(query);
+
+			SimpleFeatureIterator it = featureCollection.features();
+			int i = 0;
+			while (it.hasNext()) {
+				SimpleFeature feature = it.next();
+				Geometry geom = (Geometry) feature.getDefaultGeometry();
+				Point point = null;
+				if (geom instanceof Point) {
+					point = (Point) geom;
+				} else if (geom instanceof Polygon) {
+					point = ((Polygon) geom).getCentroid();
+				} else if (geom instanceof MultiPolygon) {
+					point = ((MultiPolygon) geom).getCentroid();
+				} else {
+					throw new RuntimeException(
+							"Shapefile must contain either points or polygons.");
+				}
+				String label;
+				if (labelAttribute == null) {
+					label = Integer.toString(i);
+				} else {
+					label = feature.getAttribute(labelAttribute).toString();
+				}
+				double input = 0.0;
+				if (inputAttribute != null) {
+					Number n = (Number) feature.getAttribute(inputAttribute);
+					input = n.doubleValue();
+				}
+				Individual individual = new Individual(label, point.getX(),
+						point.getY(), input);
+				this.addIndividual(individual);
+				i += 1;
+			}
+			LOG.debug("loaded {} features", i);
+			it.close();
+		} catch (Exception ex) {
+			LOG.error("Error loading population from shapefile: {}",
+					ex.getMessage());
+			throw new RuntimeException(ex);
+		}
+		LOG.debug("Done loading shapefile.");
+	}
 
 }

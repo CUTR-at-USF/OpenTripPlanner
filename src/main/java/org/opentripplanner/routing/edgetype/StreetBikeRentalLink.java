@@ -25,75 +25,79 @@ import org.opentripplanner.routing.vertextype.StreetVertex;
 import com.vividsolutions.jts.geom.LineString;
 
 /**
- * This represents the connection between a street vertex and a bike rental station vertex.
+ * This represents the connection between a street vertex and a bike rental
+ * station vertex.
  * 
  */
 public class StreetBikeRentalLink extends Edge {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private BikeRentalStationVertex bikeRentalStationVertex;
+	private BikeRentalStationVertex bikeRentalStationVertex;
 
-    public StreetBikeRentalLink(StreetVertex fromv, BikeRentalStationVertex tov) {
-        super(fromv, tov);
-        bikeRentalStationVertex = tov;
-    }
+	public StreetBikeRentalLink(StreetVertex fromv, BikeRentalStationVertex tov) {
+		super(fromv, tov);
+		bikeRentalStationVertex = tov;
+	}
 
-    public StreetBikeRentalLink(BikeRentalStationVertex fromv, StreetVertex tov) {
-        super(fromv, tov);
-        bikeRentalStationVertex = fromv;
-    }
+	public StreetBikeRentalLink(BikeRentalStationVertex fromv, StreetVertex tov) {
+		super(fromv, tov);
+		bikeRentalStationVertex = fromv;
+	}
 
-    public String getDirection() {
-        return null;
-    }
+	public String getDirection() {
+		return null;
+	}
 
-    public double getDistance() {
-        return 0;
-    }
+	public double getDistance() {
+		return 0;
+	}
 
-    public LineString getGeometry() {
-        return null;
-    }
+	public LineString getGeometry() {
+		return null;
+	}
 
-    public String getName() {
-        return bikeRentalStationVertex.getName();
-    }
+	public String getName() {
+		return bikeRentalStationVertex.getName();
+	}
 
-    public State traverse(State s0) {
-        // Do not even consider bike rental vertices unless bike rental is enabled.
-        if ( ! s0.getOptions().allowBikeRental) {
-            return null;
-        }
-        // Disallow traversing two StreetBikeRentalLinks in a row.
-        // This prevents the router from using bike rental stations as shortcuts to get around
-        // turn restrictions.
-        if (s0.getBackEdge() instanceof StreetBikeRentalLink) {
-            return null;
-        }
+	public State traverse(State s0) {
+		// Do not even consider bike rental vertices unless bike rental is
+		// enabled.
+		if (!s0.getOptions().allowBikeRental) {
+			return null;
+		}
+		// Disallow traversing two StreetBikeRentalLinks in a row.
+		// This prevents the router from using bike rental stations as shortcuts
+		// to get around
+		// turn restrictions.
+		if (s0.getBackEdge() instanceof StreetBikeRentalLink) {
+			return null;
+		}
 
-        StateEditor s1 = s0.edit(this);
-        //assume bike rental stations are more-or-less on-street
-        s1.incrementTimeInSeconds(1);
-        s1.incrementWeight(1);
-        s1.setBackMode(s0.getNonTransitMode());
-        return s1.makeState();
-    }
+		StateEditor s1 = s0.edit(this);
+		// assume bike rental stations are more-or-less on-street
+		s1.incrementTimeInSeconds(1);
+		s1.incrementWeight(1);
+		s1.setBackMode(s0.getNonTransitMode());
+		return s1.makeState();
+	}
 
-    @Override
-    public double weightLowerBound(RoutingRequest options) {
-        return options.modes.contains(TraverseMode.BICYCLE) ? 0 : Double.POSITIVE_INFINITY;
-    }
+	@Override
+	public double weightLowerBound(RoutingRequest options) {
+		return options.modes.contains(TraverseMode.BICYCLE) ? 0
+				: Double.POSITIVE_INFINITY;
+	}
 
-    public Vertex getFromVertex() {
-        return fromv;
-    }
+	public Vertex getFromVertex() {
+		return fromv;
+	}
 
-    public Vertex getToVertex() {
-        return tov;
-    }
+	public Vertex getToVertex() {
+		return tov;
+	}
 
-    public String toString() {
-        return "StreetBikeRentalLink(" + fromv + " -> " + tov + ")";
-    }
+	public String toString() {
+		return "StreetBikeRentalLink(" + fromv + " -> " + tov + ")";
+	}
 }

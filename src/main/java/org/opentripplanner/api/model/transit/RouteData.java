@@ -30,20 +30,20 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @XmlRootElement(name = "RouteData")
 public class RouteData {
-    @XmlElement
-    @XmlJavaTypeAdapter(AgencyAndIdAdapter.class)
-    @JsonSerialize
-    public AgencyAndId id;
+	@XmlElement
+	@XmlJavaTypeAdapter(AgencyAndIdAdapter.class)
+	@JsonSerialize
+	public AgencyAndId id;
 
-    @XmlElementWrapper
-    public List<StopType> stops;
+	@XmlElementWrapper
+	public List<StopType> stops;
 
-    @XmlElementWrapper
-    public List<RouteVariant> variants;
+	@XmlElementWrapper
+	public List<RouteVariant> variants;
 
-    @XmlElementWrapper
-    public List<String> directions;
-    
-    @XmlElement(name = "route")
-    public RouteType route;
+	@XmlElementWrapper
+	public List<String> directions;
+
+	@XmlElement(name = "route")
+	public RouteType route;
 }

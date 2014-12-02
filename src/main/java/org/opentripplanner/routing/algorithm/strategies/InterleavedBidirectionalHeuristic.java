@@ -40,299 +40,353 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-public class InterleavedBidirectionalHeuristic implements RemainingWeightHeuristic {
+public class InterleavedBidirectionalHeuristic implements
+		RemainingWeightHeuristic {
 
-    private static final long serialVersionUID = 20130813L;
+	private static final long serialVersionUID = 20130813L;
 
-    private static final int HEURISTIC_STEPS_PER_MAIN_STEP = 4; // TODO determine a good value empirically
-    private static Logger LOG = LoggerFactory.getLogger(InterleavedBidirectionalHeuristic.class);
+	private static final int HEURISTIC_STEPS_PER_MAIN_STEP = 4; // TODO
+																// determine a
+																// good value
+																// empirically
+	private static Logger LOG = LoggerFactory
+			.getLogger(InterleavedBidirectionalHeuristic.class);
 
-    private DistanceLibrary distanceLibrary = SphericalDistanceLibrary.getInstance();
+	private DistanceLibrary distanceLibrary = SphericalDistanceLibrary
+			.getInstance();
 
-    /* 
-     * http://en.wikipedia.org/wiki/Train_routes_in_the_Netherlands
-     * http://en.wikipedia.org/wiki/File:Baanvaksnelheden.png 
-     */
-    private final static double MAX_TRANSIT_SPEED = 45.0; // in meters/second
-    
-    /** The vertex that the main search is working towards. */
-    Vertex target;
+	/*
+	 * http://en.wikipedia.org/wiki/Train_routes_in_the_Netherlands
+	 * http://en.wikipedia.org/wiki/File:Baanvaksnelheden.png
+	 */
+	private final static double MAX_TRANSIT_SPEED = 45.0; // in meters/second
 
-    double maxFound = 0;
-    
-    double minEgressWalk = 0;
+	/** The vertex that the main search is working towards. */
+	Vertex target;
 
-    TObjectDoubleHashMap<Vertex> weights;
+	double maxFound = 0;
 
-    Graph graph;
-    
-    Vertex origin;
-    
-    RoutingRequest options;
-    
-    BinHeap<Vertex> q;
+	double minEgressWalk = 0;
 
-    boolean finished = false;
-    
-    public InterleavedBidirectionalHeuristic(Graph graph) {
-        this.graph = graph;
-    }
+	TObjectDoubleHashMap<Vertex> weights;
 
-    
-    /* Implementation observations:
-     * 1. filling weights array with inf is expensive (~70 msec in PDX)
-     * 2. keeping a separate closed bitset is ugly (and was not threadsafe)
-     * 3. street movement is "almost Euclidean" in cost
-     * 4. precomputing 20km origin/destination circles takes ~30 msec each
-     *    1 or 2km takes only about 5msec each.
-     *    20km using hashmap weights takes ~150 msec each AND search gets really slow due to unlimited walking
-     *    
-     * 5. we could get the and calculate origin circle on the fly using distance
-     * 6. we could use a HashMap for weights
-     * 0. Raising walk distance severely affects bidi heuristic performance
-     * TODO: verify that everything works both arriveBy and departAfter
-     * 
-     * We could even create shortcut edges from the destination stops to the destination.
-     */
-    
-    @Override
-    public void initialize(RoutingRequest options, Vertex origin, Vertex target, long abortTime) {
-        if (target == this.target) {
-            LOG.debug("reusing existing heuristic");
-            return;
-        }
-        long start = System.currentTimeMillis();
-        this.target = target;
-        // int nVertices = AbstractVertex.getMaxIndex(); // will be ever increasing?
-        int nVertices = graph.countVertices();
-        weights = new TObjectDoubleHashMap((int)(Math.log(nVertices)) + 1, 0.5f, Double.POSITIVE_INFINITY);
-        this.options = options;
-        this.origin = origin;
-        // do not use soft limiting in long-distance mode
-        options.softWalkLimiting = false;
-        options.softPreTransitLimiting = false;
-        // make sure distance table is initialized before starting thread
-        LOG.debug("initializing heuristic computation thread");
-        // forward street search first, sets values around origin to 0
-        List<State> search = streetSearch(options, false, abortTime); // ~30 msec
-        if (search == null) return; // Search timed out
-        LOG.debug("end foreward street search {} ms", System.currentTimeMillis() - start);
-        // create a new priority queue
-        q = new BinHeap<Vertex>();
-        // enqueue states for each stop within walking distance of the destination
-        search = streetSearch(options, true, abortTime);
-        if (search == null) return; // Search timed out
-        for (State stopState : search) { // backward street search
-            q.insert(stopState.getVertex(), stopState.getWeight());
-        }
-        LOG.debug("end backward street search {} ms", System.currentTimeMillis() - start);
-        // once street searches are done, raise the limits to max
-        // because hard walk limiting is incorrect and is observed to cause problems 
-        // for trips near the cutoff
-        options.setMaxWalkDistance(Double.POSITIVE_INFINITY);
-        options.setMaxPreTransitTime(Integer.MAX_VALUE);
-        LOG.debug("initialized SSSP");
-        options.rctx.debugOutput.finishedPrecalculating();
-    }
+	Graph graph;
 
-    /** Do up to N iterations as long as the queue is not empty */
-    @Override
-    public void doSomeWork() {
-        if (finished) return;
-        for (int i = 0; i < HEURISTIC_STEPS_PER_MAIN_STEP; ++i) {
-            if (q.empty()) {
-                LOG.debug("Emptied SSSP queue.");
-                finished = true;
-                break;
-            }
-            double uw = q.peek_min_key();
-            Vertex u = q.extract_min();
-            //LOG.info("dequeued weight {} at {}", uw, u);
-//            // Ignore vertices that could be rekeyed (but are not rekeyed in this implementation).
-//            if (uw > weights.get(u)) continue;
-            // The weight of the queue head is uniformly increasing. This is the highest ever seen.
-            maxFound = uw;
-            
-//            System.out.printf("H, %3.5f, %3.5f, %2.1f\n", u.getY(), u.getX(), 
-//                    Double.isInfinite(uw) ? -1.0 : uw);
+	Vertex origin;
 
-            // OUTgoing for heuristic search when main search is arriveBy 
-            for (Edge e : options.arriveBy ? u.getOutgoing() : u.getIncoming()) {
-                // Do not enter streets in this phase.
-                if (e instanceof StreetTransitLink) continue;
-                Vertex v = options.arriveBy ? e.getToVertex() : e.getFromVertex();
-                double ew = e.weightLowerBound(options);
-                // INF heuristic value indicates unreachable (e.g. non-running transit service)
-                // this saves time by not reverse-exploring those routes and avoids maxFound of INF.
-                if (Double.isInfinite(ew)) {
-                    continue;  
-                }
-                double vw = uw + ew;
-                double old_vw = weights.get(v);
-                if (vw < old_vw) {
-                    // including when old_vw is infinite because it is not yet touched
-                    weights.put(v, vw);
-                    q.insert(v, vw); 
-                }
-            }
-        }
-    }
-    
-    @Override
-    public double computeForwardWeight(State s, Vertex target) {
-        return computeReverseWeight(s, target);
-    }
+	RoutingRequest options;
 
-    /**
-     * We must return an underestimate of the cost to reach the destination no matter how much 
-     * progress has been made on the heuristic search.
-     * 
-     * All on-street vertices must be explored by the heuristic before the main search starts.
-     * This allows us to completely skip walking outside a certain radius of the origin/destination.
-     */
-    @Override
-    public double computeReverseWeight(State s, Vertex target) {
-        final Vertex v = s.getVertex();
-        // Temporary vertices (StreetLocations) might not be found in walk search.
-        if (v instanceof StreetLocation) return 0;
-        double weight = weights.get(v);
-        // All valid street vertices should be explored before the main search starts,
-        // but many transit vertices may not yet be explored when the search starts.
-        // TODO: verify that StreetVertex includes all vertices of interest.
-        if (v instanceof StreetVertex) {
-            // If we are near the origin but have not boarded transit return zero.
-            // If we are near the origin but not near the destination, do not alight from transit.
-            // If we are near the origin and the destination always return zero.
-            if (weight == -1 && s.isEverBoarded()) return Double.POSITIVE_INFINITY;
-            else if (weight < 0) return 0;
-            else return weight; // defaults to +INF when the vertex was not touched in walk searches.
-        } else if (weight == Double.POSITIVE_INFINITY) {
-            // A non-street vertex that was not yet touched by the reverse heuristic search.
-            // Return the maximum of the Euclidean heuristic or the highest weight yet found by the heuristic search.
-            double dist = distanceLibrary.fastDistance(v.getY(), v.getX(), target.getY(), target.getX());
-            double time = dist / MAX_TRANSIT_SPEED;
-            return Math.max(maxFound, time);
-        }
-        else return weight;
-    }
+	BinHeap<Vertex> q;
 
-    @Override
-    public void reset() {
-    }
-        
+	boolean finished = false;
 
-    /*
-    
-    Main search always proceeds from the origin to the target (arriveBy or departAfter)
-    heuristic search always proceeds outward from the target (arriveBy or departAfter)
-    
-    when main search is departAfter:
-    it gets outgoing edges and traverses them with arriveBy=false
-    heuristic search gets incoming edges and traverses them with arriveBy=true
-    heuristic destination street search also gets incoming edges and traverses them with arriveBy=true
-    heuristic origin street search gets outgoing edges and traverses them with arriveBy=false
-    
-    when main search is arriveBy:
-    it gets incoming edges and traverses them with arriveBy=true
-    heuristic search gets outgoing edges and traverses them with arriveBy=false
-    heuristic destination street search also gets outgoing edges and traverses them with arriveBy=false
-    heuristic origin street search gets incoming edges and traverses them with arriveBy=true
-    
-    We traverse using the real traverse method rather than the lower bound traverse method because
-    this allows us to keep track of the distance walked.
-    
-    We are not boarding transit in the street search. Though walking is only allowed at the very 
-    beginning and end of the trip, we have to worry about storing overestimated weights because 
-    places around the origin may be walked through pre-transit.
-    
-    Perhaps rather than tracking walk distance, we should just check the straight-line radius and 
-    only walk within that distance. This would avoid needing to call the main traversal functions.
+	public InterleavedBidirectionalHeuristic(Graph graph) {
+		this.graph = graph;
+	}
 
-    Really, as soon as you hit any transit stop during the destination search, you can't set any 
-    weights higher than that amount unless you flood-fill with 0s from the origin.
+	/*
+	 * Implementation observations: 1. filling weights array with inf is
+	 * expensive (~70 msec in PDX) 2. keeping a separate closed bitset is ugly
+	 * (and was not threadsafe) 3. street movement is "almost Euclidean" in cost
+	 * 4. precomputing 20km origin/destination circles takes ~30 msec each 1 or
+	 * 2km takes only about 5msec each. 20km using hashmap weights takes ~150
+	 * msec each AND search gets really slow due to unlimited walking
+	 * 
+	 * 5. we could get the and calculate origin circle on the fly using distance
+	 * 6. we could use a HashMap for weights 0. Raising walk distance severely
+	 * affects bidi heuristic performance TODO: verify that everything works
+	 * both arriveBy and departAfter
+	 * 
+	 * We could even create shortcut edges from the destination stops to the
+	 * destination.
+	 */
 
-    The other ultra-simple option is to just set the heuristic value to 0 for all on-street locations
-    within walking distance of the origin and destination.
-    
-    Another way of achieving this is to search from the origin first, saving 0s, then search from
-    the destination without overwriting any 0s.
+	@Override
+	public void initialize(RoutingRequest options, Vertex origin,
+			Vertex target, long abortTime) {
+		if (target == this.target) {
+			LOG.debug("reusing existing heuristic");
+			return;
+		}
+		long start = System.currentTimeMillis();
+		this.target = target;
+		// int nVertices = AbstractVertex.getMaxIndex(); // will be ever
+		// increasing?
+		int nVertices = graph.countVertices();
+		weights = new TObjectDoubleHashMap((int) (Math.log(nVertices)) + 1,
+				0.5f, Double.POSITIVE_INFINITY);
+		this.options = options;
+		this.origin = origin;
+		// do not use soft limiting in long-distance mode
+		options.softWalkLimiting = false;
+		options.softPreTransitLimiting = false;
+		// make sure distance table is initialized before starting thread
+		LOG.debug("initializing heuristic computation thread");
+		// forward street search first, sets values around origin to 0
+		List<State> search = streetSearch(options, false, abortTime); // ~30
+																		// msec
+		if (search == null)
+			return; // Search timed out
+		LOG.debug("end foreward street search {} ms",
+				System.currentTimeMillis() - start);
+		// create a new priority queue
+		q = new BinHeap<Vertex>();
+		// enqueue states for each stop within walking distance of the
+		// destination
+		search = streetSearch(options, true, abortTime);
+		if (search == null)
+			return; // Search timed out
+		for (State stopState : search) { // backward street search
+			q.insert(stopState.getVertex(), stopState.getWeight());
+		}
+		LOG.debug("end backward street search {} ms",
+				System.currentTimeMillis() - start);
+		// once street searches are done, raise the limits to max
+		// because hard walk limiting is incorrect and is observed to cause
+		// problems
+		// for trips near the cutoff
+		options.setMaxWalkDistance(Double.POSITIVE_INFINITY);
+		options.setMaxPreTransitTime(Integer.MAX_VALUE);
+		LOG.debug("initialized SSSP");
+		options.rctx.debugOutput.finishedPrecalculating();
+	}
 
-    TODO perhaps reimplement using the generic dijkstra class
-    */
+	/** Do up to N iterations as long as the queue is not empty */
+	@Override
+	public void doSomeWork() {
+		if (finished)
+			return;
+		for (int i = 0; i < HEURISTIC_STEPS_PER_MAIN_STEP; ++i) {
+			if (q.empty()) {
+				LOG.debug("Emptied SSSP queue.");
+				finished = true;
+				break;
+			}
+			double uw = q.peek_min_key();
+			Vertex u = q.extract_min();
+			// LOG.info("dequeued weight {} at {}", uw, u);
+			// // Ignore vertices that could be rekeyed (but are not rekeyed in
+			// this implementation).
+			// if (uw > weights.get(u)) continue;
+			// The weight of the queue head is uniformly increasing. This is the
+			// highest ever seen.
+			maxFound = uw;
 
-    private List<State> streetSearch (RoutingRequest rr, boolean fromTarget, long abortTime) {
-        rr = rr.clone();
-        if (fromTarget)
-            rr.setArriveBy( ! rr.arriveBy);
-        List<State> stopStates = Lists.newArrayList();
-        ShortestPathTree spt = new BasicShortestPathTree(rr);
-        BinHeap<State> pq = new BinHeap<State>();
-        Vertex initVertex = fromTarget ? rr.rctx.target : rr.rctx.origin;
-        State initState = new State(initVertex, rr);
-        pq.insert(initState, 0);
-        while ( ! pq.empty()) {
-            /**
-             * Terminate the search prematurely if we've hit our computation wall.
-             */
-            if (abortTime < Long.MAX_VALUE  && System.currentTimeMillis() > abortTime) {
-                return null;
-            }
+			// System.out.printf("H, %3.5f, %3.5f, %2.1f\n", u.getY(), u.getX(),
+			// Double.isInfinite(uw) ? -1.0 : uw);
 
-            State s = pq.extract_min();
-            double w = s.getWeight();
-            Vertex v = s.getVertex();
-            if (v instanceof TransitVertex) {
-                if (v instanceof TransitStationStop) {
-                    stopStates.add(s);
-                    // Prune street search upon reaching TransitStationStops.
-                }
-                // Do not save weights at transit stops (or any other Transit Vertices). Since stops may be reached
-                // by SimpleTransfer their weights will be recorded during the main heuristic search.
-                continue;
-            }
-            // at this point the vertex is closed (pulled off heap).
-            // on reverse search save measured weights.
-            // on forward search set heuristic to 0 -- we have no idea how far to the destination, 
-            // the optimal path may use transit.
-            if (!fromTarget) {
-                weights.put(v, -1); // Mark vertex as being near origin.
-            } else {
-                double old_weight = weights.get(v);
-                if (old_weight == -1) {
-                    weights.put(v, -2); // Mark vertex as near both origin and destination.
-                } else if (w < old_weight) {
-                    // When new weight is better than old, or old weight is +INF because vertex is as yet unreached.
-                    // This will not touch -1 values around the origin, their values are unknown until we use transit.
-                    weights.put(v, w);
-                }
-            }
-            // FIXME should only traverse when state is better than old_weight
-            for (Edge e : rr.arriveBy ? v.getIncoming() : v.getOutgoing()) {
-                // arriveBy has been set to match actual directional behavior in this subsearch
-                State s1 = e.traverse(s);
-                if (s1 == null)
-                    continue;
-                if (spt.add(s1)) {
-                    pq.insert(s1,  s1.getWeight());
-                }
-            }
-        }
-        // return a list of all stops hit
-        LOG.debug("hit stops: {}", stopStates);
-        return stopStates;
-    }
- 
-    public static class Factory implements RemainingWeightHeuristicFactory {
-        @Override
-        public RemainingWeightHeuristic getInstanceForSearch(RoutingRequest opt) {
-            if (opt.modes.isTransit()) {
-                LOG.debug("Transit itinerary requested.");
-                return new InterleavedBidirectionalHeuristic (opt.rctx.graph);
-            } else {
-                LOG.debug("Non-transit itinerary requested.");
-                return new DefaultRemainingWeightHeuristic();
-            }
-        }
-    }
+			// OUTgoing for heuristic search when main search is arriveBy
+			for (Edge e : options.arriveBy ? u.getOutgoing() : u.getIncoming()) {
+				// Do not enter streets in this phase.
+				if (e instanceof StreetTransitLink)
+					continue;
+				Vertex v = options.arriveBy ? e.getToVertex() : e
+						.getFromVertex();
+				double ew = e.weightLowerBound(options);
+				// INF heuristic value indicates unreachable (e.g. non-running
+				// transit service)
+				// this saves time by not reverse-exploring those routes and
+				// avoids maxFound of INF.
+				if (Double.isInfinite(ew)) {
+					continue;
+				}
+				double vw = uw + ew;
+				double old_vw = weights.get(v);
+				if (vw < old_vw) {
+					// including when old_vw is infinite because it is not yet
+					// touched
+					weights.put(v, vw);
+					q.insert(v, vw);
+				}
+			}
+		}
+	}
+
+	@Override
+	public double computeForwardWeight(State s, Vertex target) {
+		return computeReverseWeight(s, target);
+	}
+
+	/**
+	 * We must return an underestimate of the cost to reach the destination no
+	 * matter how much progress has been made on the heuristic search.
+	 * 
+	 * All on-street vertices must be explored by the heuristic before the main
+	 * search starts. This allows us to completely skip walking outside a
+	 * certain radius of the origin/destination.
+	 */
+	@Override
+	public double computeReverseWeight(State s, Vertex target) {
+		final Vertex v = s.getVertex();
+		// Temporary vertices (StreetLocations) might not be found in walk
+		// search.
+		if (v instanceof StreetLocation)
+			return 0;
+		double weight = weights.get(v);
+		// All valid street vertices should be explored before the main search
+		// starts,
+		// but many transit vertices may not yet be explored when the search
+		// starts.
+		// TODO: verify that StreetVertex includes all vertices of interest.
+		if (v instanceof StreetVertex) {
+			// If we are near the origin but have not boarded transit return
+			// zero.
+			// If we are near the origin but not near the destination, do not
+			// alight from transit.
+			// If we are near the origin and the destination always return zero.
+			if (weight == -1 && s.isEverBoarded())
+				return Double.POSITIVE_INFINITY;
+			else if (weight < 0)
+				return 0;
+			else
+				return weight; // defaults to +INF when the vertex was not
+								// touched in walk searches.
+		} else if (weight == Double.POSITIVE_INFINITY) {
+			// A non-street vertex that was not yet touched by the reverse
+			// heuristic search.
+			// Return the maximum of the Euclidean heuristic or the highest
+			// weight yet found by the heuristic search.
+			double dist = distanceLibrary.fastDistance(v.getY(), v.getX(),
+					target.getY(), target.getX());
+			double time = dist / MAX_TRANSIT_SPEED;
+			return Math.max(maxFound, time);
+		} else
+			return weight;
+	}
+
+	@Override
+	public void reset() {
+	}
+
+	/*
+	 * 
+	 * Main search always proceeds from the origin to the target (arriveBy or
+	 * departAfter) heuristic search always proceeds outward from the target
+	 * (arriveBy or departAfter)
+	 * 
+	 * when main search is departAfter: it gets outgoing edges and traverses
+	 * them with arriveBy=false heuristic search gets incoming edges and
+	 * traverses them with arriveBy=true heuristic destination street search
+	 * also gets incoming edges and traverses them with arriveBy=true heuristic
+	 * origin street search gets outgoing edges and traverses them with
+	 * arriveBy=false
+	 * 
+	 * when main search is arriveBy: it gets incoming edges and traverses them
+	 * with arriveBy=true heuristic search gets outgoing edges and traverses
+	 * them with arriveBy=false heuristic destination street search also gets
+	 * outgoing edges and traverses them with arriveBy=false heuristic origin
+	 * street search gets incoming edges and traverses them with arriveBy=true
+	 * 
+	 * We traverse using the real traverse method rather than the lower bound
+	 * traverse method because this allows us to keep track of the distance
+	 * walked.
+	 * 
+	 * We are not boarding transit in the street search. Though walking is only
+	 * allowed at the very beginning and end of the trip, we have to worry about
+	 * storing overestimated weights because places around the origin may be
+	 * walked through pre-transit.
+	 * 
+	 * Perhaps rather than tracking walk distance, we should just check the
+	 * straight-line radius and only walk within that distance. This would avoid
+	 * needing to call the main traversal functions.
+	 * 
+	 * Really, as soon as you hit any transit stop during the destination
+	 * search, you can't set any weights higher than that amount unless you
+	 * flood-fill with 0s from the origin.
+	 * 
+	 * The other ultra-simple option is to just set the heuristic value to 0 for
+	 * all on-street locations within walking distance of the origin and
+	 * destination.
+	 * 
+	 * Another way of achieving this is to search from the origin first, saving
+	 * 0s, then search from the destination without overwriting any 0s.
+	 * 
+	 * TODO perhaps reimplement using the generic dijkstra class
+	 */
+
+	private List<State> streetSearch(RoutingRequest rr, boolean fromTarget,
+			long abortTime) {
+		rr = rr.clone();
+		if (fromTarget)
+			rr.setArriveBy(!rr.arriveBy);
+		List<State> stopStates = Lists.newArrayList();
+		ShortestPathTree spt = new BasicShortestPathTree(rr);
+		BinHeap<State> pq = new BinHeap<State>();
+		Vertex initVertex = fromTarget ? rr.rctx.target : rr.rctx.origin;
+		State initState = new State(initVertex, rr);
+		pq.insert(initState, 0);
+		while (!pq.empty()) {
+			/**
+			 * Terminate the search prematurely if we've hit our computation
+			 * wall.
+			 */
+			if (abortTime < Long.MAX_VALUE
+					&& System.currentTimeMillis() > abortTime) {
+				return null;
+			}
+
+			State s = pq.extract_min();
+			double w = s.getWeight();
+			Vertex v = s.getVertex();
+			if (v instanceof TransitVertex) {
+				if (v instanceof TransitStationStop) {
+					stopStates.add(s);
+					// Prune street search upon reaching TransitStationStops.
+				}
+				// Do not save weights at transit stops (or any other Transit
+				// Vertices). Since stops may be reached
+				// by SimpleTransfer their weights will be recorded during the
+				// main heuristic search.
+				continue;
+			}
+			// at this point the vertex is closed (pulled off heap).
+			// on reverse search save measured weights.
+			// on forward search set heuristic to 0 -- we have no idea how far
+			// to the destination,
+			// the optimal path may use transit.
+			if (!fromTarget) {
+				weights.put(v, -1); // Mark vertex as being near origin.
+			} else {
+				double old_weight = weights.get(v);
+				if (old_weight == -1) {
+					weights.put(v, -2); // Mark vertex as near both origin and
+										// destination.
+				} else if (w < old_weight) {
+					// When new weight is better than old, or old weight is +INF
+					// because vertex is as yet unreached.
+					// This will not touch -1 values around the origin, their
+					// values are unknown until we use transit.
+					weights.put(v, w);
+				}
+			}
+			// FIXME should only traverse when state is better than old_weight
+			for (Edge e : rr.arriveBy ? v.getIncoming() : v.getOutgoing()) {
+				// arriveBy has been set to match actual directional behavior in
+				// this subsearch
+				State s1 = e.traverse(s);
+				if (s1 == null)
+					continue;
+				if (spt.add(s1)) {
+					pq.insert(s1, s1.getWeight());
+				}
+			}
+		}
+		// return a list of all stops hit
+		LOG.debug("hit stops: {}", stopStates);
+		return stopStates;
+	}
+
+	public static class Factory implements RemainingWeightHeuristicFactory {
+		@Override
+		public RemainingWeightHeuristic getInstanceForSearch(RoutingRequest opt) {
+			if (opt.modes.isTransit()) {
+				LOG.debug("Transit itinerary requested.");
+				return new InterleavedBidirectionalHeuristic(opt.rctx.graph);
+			} else {
+				LOG.debug("Non-transit itinerary requested.");
+				return new DefaultRemainingWeightHeuristic();
+			}
+		}
+	}
 
 }

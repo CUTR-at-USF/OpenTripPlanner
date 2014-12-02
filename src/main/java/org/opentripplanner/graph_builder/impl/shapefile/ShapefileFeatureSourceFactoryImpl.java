@@ -23,46 +23,47 @@ import org.opentripplanner.graph_builder.services.shapefile.FeatureSourceFactory
 
 public class ShapefileFeatureSourceFactoryImpl implements FeatureSourceFactory {
 
-    private File _path;
-    private ShapefileDataStore dataStore;
+	private File _path;
+	private ShapefileDataStore dataStore;
 
-    public ShapefileFeatureSourceFactoryImpl() {
-        
-    }
-    
-    public ShapefileFeatureSourceFactoryImpl(File path) {
-        _path = path;
-    }
+	public ShapefileFeatureSourceFactoryImpl() {
 
-    public void setPath(File path) {
-        _path = path;
-    }
+	}
 
-    @Override
-    public FeatureSource<SimpleFeatureType, SimpleFeature> getFeatureSource() {
+	public ShapefileFeatureSourceFactoryImpl(File path) {
+		_path = path;
+	}
 
-        try {
-            dataStore = new ShapefileDataStore(_path.toURI().toURL());
+	public void setPath(File path) {
+		_path = path;
+	}
 
-            String typeNames[] = dataStore.getTypeNames();
-            String typeName = typeNames[0];
+	@Override
+	public FeatureSource<SimpleFeatureType, SimpleFeature> getFeatureSource() {
 
-            return dataStore.getFeatureSource(typeName);
-        } catch (Exception ex) {
-            throw new IllegalStateException("error creating feature source from shapefile: path="
-                    + _path, ex);
-        }
-    }
-    
-    @Override
-    public void cleanup() {
-        dataStore.dispose();
-    }
+		try {
+			dataStore = new ShapefileDataStore(_path.toURI().toURL());
 
-    @Override
-    public void checkInputs() {
-        if (!_path.canRead()) {
-            throw new RuntimeException("Can't read Shapefile path: " + _path);
-        }
-    }
+			String typeNames[] = dataStore.getTypeNames();
+			String typeName = typeNames[0];
+
+			return dataStore.getFeatureSource(typeName);
+		} catch (Exception ex) {
+			throw new IllegalStateException(
+					"error creating feature source from shapefile: path="
+							+ _path, ex);
+		}
+	}
+
+	@Override
+	public void cleanup() {
+		dataStore.dispose();
+	}
+
+	@Override
+	public void checkInputs() {
+		if (!_path.canRead()) {
+			throw new RuntimeException("Can't read Shapefile path: " + _path);
+		}
+	}
 }

@@ -24,13 +24,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class shows an example of how to implement a graph updater. Besides implementing the methods
- * of the interface GraphUpdater, the updater also needs to be registered in the function
+ * This class shows an example of how to implement a graph updater. Besides
+ * implementing the methods of the interface GraphUpdater, the updater also
+ * needs to be registered in the function
  * GraphUpdaterConfigurator.applyConfigurationToGraph.
  * 
- * This example is suited for streaming updaters. For polling updaters it is better to use the
- * abstract base class PollingGraphUpdater. The class ExamplePollingGraphUpdater shows an example of
- * this.
+ * This example is suited for streaming updaters. For polling updaters it is
+ * better to use the abstract base class PollingGraphUpdater. The class
+ * ExamplePollingGraphUpdater shows an example of this.
  * 
  * Usage example ('example' name is an example) in the file 'Graph.properties':
  * 
@@ -45,62 +46,71 @@ import org.slf4j.LoggerFactory;
  */
 public class ExampleGraphUpdater implements GraphUpdater {
 
-    private static Logger LOG = LoggerFactory.getLogger(ExampleGraphUpdater.class);
+	private static Logger LOG = LoggerFactory
+			.getLogger(ExampleGraphUpdater.class);
 
-    private GraphUpdaterManager updaterManager;
+	private GraphUpdaterManager updaterManager;
 
-    private Integer frequencySec;
+	private Integer frequencySec;
 
-    private String url;
+	private String url;
 
-    // Here the updater can be configured using the properties in the file 'Graph.properties'.
-    @Override
-    public void configure(Graph graph, Preferences preferences) throws Exception {
-        frequencySec = preferences.getInt("frequencySec", 5);
-        url = preferences.get("url", null);
-        LOG.info("Configured example updater: frequencySec={} and url={}", frequencySec, url);
-    }
+	// Here the updater can be configured using the properties in the file
+	// 'Graph.properties'.
+	@Override
+	public void configure(Graph graph, Preferences preferences)
+			throws Exception {
+		frequencySec = preferences.getInt("frequencySec", 5);
+		url = preferences.get("url", null);
+		LOG.info("Configured example updater: frequencySec={} and url={}",
+				frequencySec, url);
+	}
 
-    // Here the updater gets to know its parent manager to execute GraphWriterRunnables.
-    @Override
-    public void setGraphUpdaterManager(GraphUpdaterManager updaterManager) {
-        LOG.info("Example updater: updater manager is set");
-        this.updaterManager = updaterManager;
-    }
+	// Here the updater gets to know its parent manager to execute
+	// GraphWriterRunnables.
+	@Override
+	public void setGraphUpdaterManager(GraphUpdaterManager updaterManager) {
+		LOG.info("Example updater: updater manager is set");
+		this.updaterManager = updaterManager;
+	}
 
-    // Here the updater can be initialized.
-    @Override
-    public void setup() {
-        LOG.info("Setup example updater");
-        
-        // Execute anonymous graph writer runnable and wait for its termination
-        try {
-            updaterManager.executeBlocking(new GraphWriterRunnable() {
-                @Override
-                public void run(Graph graph) {
-                    LOG.info("Anonymous graph writer {} runnable is run on the "
-                            + "graph writer scheduler.", this.hashCode());
-                    // Do some writing to the graph here
-                }
-            });
-        } catch (InterruptedException e) {
-        } catch (ExecutionException e) {
-        }
-    }
+	// Here the updater can be initialized.
+	@Override
+	public void setup() {
+		LOG.info("Setup example updater");
 
-    // This is where the updater thread receives updates and applies them to the graph.
-    // This method only runs once.
-    @Override
-    public void run() {
-        LOG.info("Run example updater with hashcode: {}", this.hashCode());
-        // Here the updater can connect to a server and register a callback function
-        // to handle updates to the graph
-    }
+		// Execute anonymous graph writer runnable and wait for its termination
+		try {
+			updaterManager.executeBlocking(new GraphWriterRunnable() {
+				@Override
+				public void run(Graph graph) {
+					LOG.info(
+							"Anonymous graph writer {} runnable is run on the "
+									+ "graph writer scheduler.",
+							this.hashCode());
+					// Do some writing to the graph here
+				}
+			});
+		} catch (InterruptedException e) {
+		} catch (ExecutionException e) {
+		}
+	}
 
-    // Here the updater can cleanup after itself.
-    @Override
-    public void teardown() {
-        LOG.info("Teardown example updater");
-    }
+	// This is where the updater thread receives updates and applies them to the
+	// graph.
+	// This method only runs once.
+	@Override
+	public void run() {
+		LOG.info("Run example updater with hashcode: {}", this.hashCode());
+		// Here the updater can connect to a server and register a callback
+		// function
+		// to handle updates to the graph
+	}
+
+	// Here the updater can cleanup after itself.
+	@Override
+	public void teardown() {
+		LOG.info("Teardown example updater");
+	}
 
 }

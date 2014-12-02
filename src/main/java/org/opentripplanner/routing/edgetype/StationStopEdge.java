@@ -23,55 +23,58 @@ import org.opentripplanner.routing.vertextype.TransitStop;
 import com.vividsolutions.jts.geom.LineString;
 
 /**
- * An edge that connects a parent station to a constituent stop. This is not intended to provide
- * implicit transfers (i.e. child stop to parent station to another child stop) but instead to allow
- * beginning or ending a path (itinerary) at a parent station.
+ * An edge that connects a parent station to a constituent stop. This is not
+ * intended to provide implicit transfers (i.e. child stop to parent station to
+ * another child stop) but instead to allow beginning or ending a path
+ * (itinerary) at a parent station.
  * 
- * Currently this edge is only intended for use in the long distance path service. The path parsers
- * should ensure that it is effectively ignored in other path services, and even in the long distance
- * path service anywhere but the beginning or end of a path.
+ * Currently this edge is only intended for use in the long distance path
+ * service. The path parsers should ensure that it is effectively ignored in
+ * other path services, and even in the long distance path service anywhere but
+ * the beginning or end of a path.
  * 
- * Note that when most users specify that they want to depart from a parent stop at 8AM, they 
- * actually want to leave from any constituent stop at or after exactly 8AM and are accounting for
- * the initial walk access leg themselves. No edge should have zero cost (this can potentially
- * create endless search loops) but the edges can have zero time while having positive cost.
+ * Note that when most users specify that they want to depart from a parent stop
+ * at 8AM, they actually want to leave from any constituent stop at or after
+ * exactly 8AM and are accounting for the initial walk access leg themselves. No
+ * edge should have zero cost (this can potentially create endless search loops)
+ * but the edges can have zero time while having positive cost.
  */
 public class StationStopEdge extends Edge {
-    private static final long serialVersionUID = 20130918L;
+	private static final long serialVersionUID = 20130918L;
 
-    public StationStopEdge(TransitStation from, TransitStop to) {
-        super(from, to);
-    }
+	public StationStopEdge(TransitStation from, TransitStop to) {
+		super(from, to);
+	}
 
-    public StationStopEdge(TransitStop from, TransitStation to) {
-        super(from, to);
-    }
+	public StationStopEdge(TransitStop from, TransitStation to) {
+		super(from, to);
+	}
 
-    @Override
-    public State traverse(State s0) {
-        StateEditor s1 = s0.edit(this);
-        s1.setBackMode(TraverseMode.LEG_SWITCH);
-        s1.incrementWeight(1);
-        // Increment weight, but not time. See Javadoc on this class.
-        return s1.makeState();
-    }
+	@Override
+	public State traverse(State s0) {
+		StateEditor s1 = s0.edit(this);
+		s1.setBackMode(TraverseMode.LEG_SWITCH);
+		s1.incrementWeight(1);
+		// Increment weight, but not time. See Javadoc on this class.
+		return s1.makeState();
+	}
 
-    @Override
-    public double getDistance() {
-        return 0;
-    }
+	@Override
+	public double getDistance() {
+		return 0;
+	}
 
-    @Override
-    public LineString getGeometry() {
-        return null;
-    }
+	@Override
+	public LineString getGeometry() {
+		return null;
+	}
 
-    @Override
-    public String getName() {
-        return null;
-    }
+	@Override
+	public String getName() {
+		return null;
+	}
 
-    public String toString() {
-        return "StationStopEdge(" + fromv + " -> " + tov + ")";
-    }
+	public String toString() {
+		return "StationStopEdge(" + fromv + " -> " + tov + ")";
+	}
 }

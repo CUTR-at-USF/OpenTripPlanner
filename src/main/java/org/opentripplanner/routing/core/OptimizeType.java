@@ -14,10 +14,11 @@
 package org.opentripplanner.routing.core;
 
 public enum OptimizeType {
-    QUICK, /* the fastest trip */
-    SAFE,
-    FLAT, /* needs a rewrite */
-    GREENWAYS,
-    TRIANGLE, /* not yet supported */
-    TRANSFERS /* obsolete, replaced by the transferPenalty option in Traverse options */
+	QUICK, /* the fastest trip */
+	SAFE, FLAT, /* needs a rewrite */
+	GREENWAYS, TRIANGLE, /* not yet supported */
+	TRANSFERS /*
+			 * obsolete, replaced by the transferPenalty option in Traverse
+			 * options
+			 */
 }

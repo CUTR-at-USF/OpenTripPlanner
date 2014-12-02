@@ -27,49 +27,54 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Embed inside the graph a default configuration used when decorating the graph during load.
+ * Embed inside the graph a default configuration used when decorating the graph
+ * during load.
  * 
  */
 public class EmbeddedConfigGraphBuilderImpl implements GraphBuilder {
 
-    public File propertiesFile;
+	public File propertiesFile;
 
-    private static final Logger LOG = LoggerFactory.getLogger(EmbeddedConfigGraphBuilderImpl.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(EmbeddedConfigGraphBuilderImpl.class);
 
-    public void setPropertiesPath(String propertiesPath) {
-        propertiesFile = new File(propertiesPath);
-    }
+	public void setPropertiesPath(String propertiesPath) {
+		propertiesFile = new File(propertiesPath);
+	}
 
-    /**
-     * An set of ids which identifies what stages this graph builder provides (i.e. streets,
-     * elevation, transit)
-     */
-    public List<String> provides() {
-        return Collections.emptyList();
-    }
+	/**
+	 * An set of ids which identifies what stages this graph builder provides
+	 * (i.e. streets, elevation, transit)
+	 */
+	public List<String> provides() {
+		return Collections.emptyList();
+	}
 
-    /** A list of ids of stages which must be provided before this stage */
-    public List<String> getPrerequisites() {
-        return Collections.emptyList();
-    }
+	/** A list of ids of stages which must be provided before this stage */
+	public List<String> getPrerequisites() {
+		return Collections.emptyList();
+	}
 
-    @Override
-    public void buildGraph(Graph graph, HashMap<Class<?>, Object> extra) {
-        try {
-            LOG.info("Bundling config '" + propertiesFile.getPath() + "' into graph.");
-            Properties props = new Properties();
-            props.load(new FileInputStream(propertiesFile));
-            graph.embeddedPreferences = props;
-        } catch (IOException e) {
-            LOG.error("Can't load properties from '" + propertiesFile.getAbsolutePath() + "'", e);
-        }
-    }
+	@Override
+	public void buildGraph(Graph graph, HashMap<Class<?>, Object> extra) {
+		try {
+			LOG.info("Bundling config '" + propertiesFile.getPath()
+					+ "' into graph.");
+			Properties props = new Properties();
+			props.load(new FileInputStream(propertiesFile));
+			graph.embeddedPreferences = props;
+		} catch (IOException e) {
+			LOG.error(
+					"Can't load properties from '"
+							+ propertiesFile.getAbsolutePath() + "'", e);
+		}
+	}
 
-    @Override
-    public void checkInputs() {
-        if (!propertiesFile.canRead()) {
-            throw new IllegalArgumentException("Configuration '" + propertiesFile.getAbsolutePath()
-                    + "' can't be read.");
-        }
-    }
+	@Override
+	public void checkInputs() {
+		if (!propertiesFile.canRead()) {
+			throw new IllegalArgumentException("Configuration '"
+					+ propertiesFile.getAbsolutePath() + "' can't be read.");
+		}
+	}
 }

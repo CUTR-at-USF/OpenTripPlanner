@@ -14,29 +14,31 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * OTP simple built-in geocoder.
- * Client geocoder modules usually read XML, but GeocoderBuiltin reads JSON.
+ * OTP simple built-in geocoder. Client geocoder modules usually read XML, but
+ * GeocoderBuiltin reads JSON.
  */
 @Path("/routers/{routerId}/geocode")
 @Produces(MediaType.APPLICATION_JSON)
 public class GeocoderResource {
 
-    private final LuceneIndex index;
+	private final LuceneIndex index;
 
-    public GeocoderResource (@Context OTPServer otpServer, @PathParam("routerId") String routerId) {
-        GraphIndex graphIndex = otpServer.graphService.getGraph(routerId).index;
-        synchronized (graphIndex) {
-            if (graphIndex.luceneIndex == null) {
-                // Synchronously lazy-initialize the Lucene index
-                graphIndex.luceneIndex = new LuceneIndex(graphIndex, false);
-            }
-            index = graphIndex.luceneIndex;
-        }
-    }
+	public GeocoderResource(@Context OTPServer otpServer,
+			@PathParam("routerId") String routerId) {
+		GraphIndex graphIndex = otpServer.graphService.getGraph(routerId).index;
+		synchronized (graphIndex) {
+			if (graphIndex.luceneIndex == null) {
+				// Synchronously lazy-initialize the Lucene index
+				graphIndex.luceneIndex = new LuceneIndex(graphIndex, false);
+			}
+			index = graphIndex.luceneIndex;
+		}
+	}
 
-    @GET
-    public Response textSearch (@QueryParam("query") String query) {
-        return Response.status(Response.Status.OK).entity(index.query(query)).build();
-    }
+	@GET
+	public Response textSearch(@QueryParam("query") String query) {
+		return Response.status(Response.Status.OK).entity(index.query(query))
+				.build();
+	}
 
 }

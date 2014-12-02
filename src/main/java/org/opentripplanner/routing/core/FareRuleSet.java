@@ -22,61 +22,62 @@ import org.opentripplanner.common.model.P2;
 
 public class FareRuleSet implements Serializable {
 
-    private static final long serialVersionUID = 7218355718876553028L;
+	private static final long serialVersionUID = 7218355718876553028L;
 
-    private Set<AgencyAndId> routes;
-    private Set<P2<String>> originDestinations;
-    private Set<String> contains;
-    
-    public FareRuleSet() {
-        routes = new HashSet<AgencyAndId>();
-        originDestinations= new HashSet<P2<String>>();
-        contains = new HashSet<String>();
-    }
+	private Set<AgencyAndId> routes;
+	private Set<P2<String>> originDestinations;
+	private Set<String> contains;
 
-    public void addOriginDestination(String origin, String destination) {
-        originDestinations.add(new P2<String>(origin, destination));        
-    }
+	public FareRuleSet() {
+		routes = new HashSet<AgencyAndId>();
+		originDestinations = new HashSet<P2<String>>();
+		contains = new HashSet<String>();
+	}
 
-    public void addContains(String containsId) {
-        contains.add(containsId);
-    }
-    
-    public void addRoute(AgencyAndId route) {
-        routes.add(route);
-    }
+	public void addOriginDestination(String origin, String destination) {
+		originDestinations.add(new P2<String>(origin, destination));
+	}
 
-    public boolean matches(String startZone, String endZone, Set<String> zonesVisited,
-            Set<AgencyAndId> routesVisited) {
-        //check for matching origin/destination, if this ruleset has any origin/destination restrictions
-        if (originDestinations.size() > 0) {
-            P2<String> od = new P2<String>(startZone, endZone);
-            if (!originDestinations.contains(od)) {
-                P2<String> od2 = new P2<String>(od.first, null);
-                if (!originDestinations.contains(od2)) {
-                    od2 = new P2<String>(null, od.first);
-                    if (!originDestinations.contains(od2)) {
-                        return false;
-                    }
-                }
-            }
-        }
+	public void addContains(String containsId) {
+		contains.add(containsId);
+	}
 
-        //check for matching contains, if this ruleset has any containment restrictions
-        if (contains.size() > 0) {
-            if (!zonesVisited.equals(contains)) {
-                return false;
-            }
-        }
+	public void addRoute(AgencyAndId route) {
+		routes.add(route);
+	}
 
-        //check for matching routes
-        if (routes.size() != 0) {
-            if (!routes.containsAll(routesVisited)) {
-                return false;
-            }
-        }
+	public boolean matches(String startZone, String endZone,
+			Set<String> zonesVisited, Set<AgencyAndId> routesVisited) {
+		// check for matching origin/destination, if this ruleset has any
+		// origin/destination restrictions
+		if (originDestinations.size() > 0) {
+			P2<String> od = new P2<String>(startZone, endZone);
+			if (!originDestinations.contains(od)) {
+				P2<String> od2 = new P2<String>(od.first, null);
+				if (!originDestinations.contains(od2)) {
+					od2 = new P2<String>(null, od.first);
+					if (!originDestinations.contains(od2)) {
+						return false;
+					}
+				}
+			}
+		}
 
-        return true;
-    }
+		// check for matching contains, if this ruleset has any containment
+		// restrictions
+		if (contains.size() > 0) {
+			if (!zonesVisited.equals(contains)) {
+				return false;
+			}
+		}
+
+		// check for matching routes
+		if (routes.size() != 0) {
+			if (!routes.containsAll(routesVisited)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 }
-

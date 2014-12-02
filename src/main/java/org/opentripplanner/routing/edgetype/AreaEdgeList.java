@@ -37,173 +37,190 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 /**
- * This is a representation of a set of contiguous OSM areas, used for various tasks related to edge splitting, such as start/endpoint snapping and
- * adding new edges during transit linking.
+ * This is a representation of a set of contiguous OSM areas, used for various
+ * tasks related to edge splitting, such as start/endpoint snapping and adding
+ * new edges during transit linking.
  * 
  * @author novalis
  */
 public class AreaEdgeList implements Serializable {
-    private static final long serialVersionUID = 969137349467214074L;
+	private static final long serialVersionUID = 969137349467214074L;
 
-    private ArrayList<AreaEdge> edges = new ArrayList<AreaEdge>();
+	private ArrayList<AreaEdge> edges = new ArrayList<AreaEdge>();
 
-    private HashSet<IntersectionVertex> vertices = new HashSet<IntersectionVertex>();
+	private HashSet<IntersectionVertex> vertices = new HashSet<IntersectionVertex>();
 
-    // these are all of the original edges of the area, whether
-    // or not there are corresponding OSM edges. It is used as part of a hack
-    // to fix up areas after network linking.
-    private Polygon originalEdges;
+	// these are all of the original edges of the area, whether
+	// or not there are corresponding OSM edges. It is used as part of a hack
+	// to fix up areas after network linking.
+	private Polygon originalEdges;
 
-    private List<NamedArea> areas = new ArrayList<NamedArea>();
+	private List<NamedArea> areas = new ArrayList<NamedArea>();
 
-    private static DistanceLibrary distanceLibrary = SphericalDistanceLibrary.getInstance();
+	private static DistanceLibrary distanceLibrary = SphericalDistanceLibrary
+			.getInstance();
 
-    public List<AreaEdge> getEdges() {
-        return edges;
-    }
+	public List<AreaEdge> getEdges() {
+		return edges;
+	}
 
-    public void setEdges(ArrayList<AreaEdge> edges) {
-        this.edges = edges;
-        for (AreaEdge edge : edges) {
-            vertices.add((IntersectionVertex) edge.getFromVertex());
-        }
-    }
+	public void setEdges(ArrayList<AreaEdge> edges) {
+		this.edges = edges;
+		for (AreaEdge edge : edges) {
+			vertices.add((IntersectionVertex) edge.getFromVertex());
+		}
+	}
 
-    public void addEdge(AreaEdge edge) {
-        edges.add(edge);
-        vertices.add((IntersectionVertex) edge.getFromVertex());
-    }
+	public void addEdge(AreaEdge edge) {
+		edges.add(edge);
+		vertices.add((IntersectionVertex) edge.getFromVertex());
+	}
 
-    public void removeEdge(AreaEdge edge) {
-        edges.remove(edge);
-        // reconstruct vertices
-        vertices.clear();
-        for (Edge e : edges) {
-            vertices.add((IntersectionVertex) e.getFromVertex());
-        }
-    }
+	public void removeEdge(AreaEdge edge) {
+		edges.remove(edge);
+		// reconstruct vertices
+		vertices.clear();
+		for (Edge e : edges) {
+			vertices.add((IntersectionVertex) e.getFromVertex());
+		}
+	}
 
-    /**
-     * Safely add a vertex to this area. This creates edges to all other vertices unless those edges would cross one of the original edges.
-     * 
-     * @param v
-     */
-    public void addVertex(IntersectionVertex newVertex, Graph graph) {
-        GeometryFactory geometryFactory = GeometryUtils.getGeometryFactory();
-        if (edges.size() == 0) {
-            throw new RuntimeException("Can't add a vertex to an empty area");
-        }
+	/**
+	 * Safely add a vertex to this area. This creates edges to all other
+	 * vertices unless those edges would cross one of the original edges.
+	 * 
+	 * @param v
+	 */
+	public void addVertex(IntersectionVertex newVertex, Graph graph) {
+		GeometryFactory geometryFactory = GeometryUtils.getGeometryFactory();
+		if (edges.size() == 0) {
+			throw new RuntimeException("Can't add a vertex to an empty area");
+		}
 
-        @SuppressWarnings("unchecked")
-        HashSet<IntersectionVertex> verticesCopy = (HashSet<IntersectionVertex>) vertices.clone();
-        VERTEX: for (IntersectionVertex v : verticesCopy) {
-            LineString newGeometry = geometryFactory.createLineString(new Coordinate[] {
-                    newVertex.getCoordinate(), v.getCoordinate() });
+		@SuppressWarnings("unchecked")
+		HashSet<IntersectionVertex> verticesCopy = (HashSet<IntersectionVertex>) vertices
+				.clone();
+		VERTEX: for (IntersectionVertex v : verticesCopy) {
+			LineString newGeometry = geometryFactory
+					.createLineString(new Coordinate[] {
+							newVertex.getCoordinate(), v.getCoordinate() });
 
-            // ensure that new edge does not leave the bounds of the original area, or
-            // fall into any holes
-            if (!originalEdges.union(originalEdges.getBoundary()).contains(newGeometry)) {
-                continue VERTEX;
-            }
+			// ensure that new edge does not leave the bounds of the original
+			// area, or
+			// fall into any holes
+			if (!originalEdges.union(originalEdges.getBoundary()).contains(
+					newGeometry)) {
+				continue VERTEX;
+			}
 
-            // check to see if this splits multiple NamedAreas. This code is rather similar to
-            // code in OSMGBI, but the data structures are different
+			// check to see if this splits multiple NamedAreas. This code is
+			// rather similar to
+			// code in OSMGBI, but the data structures are different
 
-            createSegments(newVertex, v, areas, graph);
-        }
+			createSegments(newVertex, v, areas, graph);
+		}
 
-        vertices.add(newVertex);
-    }
+		vertices.add(newVertex);
+	}
 
-    private void createSegments(IntersectionVertex from, IntersectionVertex to,
-            List<NamedArea> areas, Graph graph) {
+	private void createSegments(IntersectionVertex from, IntersectionVertex to,
+			List<NamedArea> areas, Graph graph) {
 
-        GeometryFactory geometryFactory = GeometryUtils.getGeometryFactory();
+		GeometryFactory geometryFactory = GeometryUtils.getGeometryFactory();
 
-        LineString line = geometryFactory.createLineString(new Coordinate[] { from.getCoordinate(),
-                to.getCoordinate() });
+		LineString line = geometryFactory.createLineString(new Coordinate[] {
+				from.getCoordinate(), to.getCoordinate() });
 
-        List<NamedArea> intersects = new ArrayList<NamedArea>();
-        for (NamedArea area : areas) {
-            Geometry polygon = area.getPolygon();
-            Geometry intersection = polygon.intersection(line);
-            if (intersection.getLength() > 0.000001) {
-                intersects.add(area);
-            }
-        }
-        if (intersects.size() == 1) {
-            NamedArea area = intersects.get(0);
+		List<NamedArea> intersects = new ArrayList<NamedArea>();
+		for (NamedArea area : areas) {
+			Geometry polygon = area.getPolygon();
+			Geometry intersection = polygon.intersection(line);
+			if (intersection.getLength() > 0.000001) {
+				intersects.add(area);
+			}
+		}
+		if (intersects.size() == 1) {
+			NamedArea area = intersects.get(0);
 
-            double length = distanceLibrary.distance(to.getCoordinate(), from.getCoordinate());
+			double length = distanceLibrary.distance(to.getCoordinate(),
+					from.getCoordinate());
 
-            AreaEdge forward = new AreaEdge(from, to, line, area.getName(), length,
-                    area.getPermission(), false, this);
-            forward.setStreetClass(area.getStreetClass());
-            AreaEdge backward = new AreaEdge(to, from, (LineString) line.reverse(), area.getName(),
-                    length, area.getPermission(), true, this);
-            backward.setStreetClass(area.getStreetClass());
-            edges.add(forward);
-            edges.add(backward);
+			AreaEdge forward = new AreaEdge(from, to, line, area.getName(),
+					length, area.getPermission(), false, this);
+			forward.setStreetClass(area.getStreetClass());
+			AreaEdge backward = new AreaEdge(to, from,
+					(LineString) line.reverse(), area.getName(), length,
+					area.getPermission(), true, this);
+			backward.setStreetClass(area.getStreetClass());
+			edges.add(forward);
+			edges.add(backward);
 
-        } else {
-            Coordinate startCoordinate = from.getCoordinate();
-            Point startPoint = geometryFactory.createPoint(startCoordinate);
-            for (NamedArea area : intersects) {
-                Geometry polygon = area.getPolygon();
-                if (!polygon.intersects(startPoint))
-                    continue;
-                Geometry lineParts = line.intersection(polygon);
-                if (lineParts.getLength() > 0.000001) {
-                    Coordinate edgeCoordinate = null;
-                    // this is either a LineString or a MultiLineString (we hope)
-                    if (lineParts instanceof MultiLineString) {
-                        MultiLineString mls = (MultiLineString) lineParts;
-                        for (int i = 0; i < mls.getNumGeometries(); ++i) {
-                            LineString segment = (LineString) mls.getGeometryN(i);
-                            if (segment.contains(startPoint)
-                                    || segment.getBoundary().contains(startPoint)) {
-                                edgeCoordinate = segment.getEndPoint().getCoordinate();
-                            }
-                        }
-                    } else if (lineParts instanceof LineString) {
-                        edgeCoordinate = ((LineString) lineParts).getEndPoint().getCoordinate();
-                    } else {
-                        continue;
-                    }
+		} else {
+			Coordinate startCoordinate = from.getCoordinate();
+			Point startPoint = geometryFactory.createPoint(startCoordinate);
+			for (NamedArea area : intersects) {
+				Geometry polygon = area.getPolygon();
+				if (!polygon.intersects(startPoint))
+					continue;
+				Geometry lineParts = line.intersection(polygon);
+				if (lineParts.getLength() > 0.000001) {
+					Coordinate edgeCoordinate = null;
+					// this is either a LineString or a MultiLineString (we
+					// hope)
+					if (lineParts instanceof MultiLineString) {
+						MultiLineString mls = (MultiLineString) lineParts;
+						for (int i = 0; i < mls.getNumGeometries(); ++i) {
+							LineString segment = (LineString) mls
+									.getGeometryN(i);
+							if (segment.contains(startPoint)
+									|| segment.getBoundary().contains(
+											startPoint)) {
+								edgeCoordinate = segment.getEndPoint()
+										.getCoordinate();
+							}
+						}
+					} else if (lineParts instanceof LineString) {
+						edgeCoordinate = ((LineString) lineParts).getEndPoint()
+								.getCoordinate();
+					} else {
+						continue;
+					}
 
-                    String label = "area splitter at " + edgeCoordinate;
-                    IntersectionVertex newEndpoint = (IntersectionVertex) graph.getVertex(label);
-                    if (newEndpoint == null) {
-                        newEndpoint = new IntersectionVertex(graph, label, edgeCoordinate.x,
-                                edgeCoordinate.y);
-                    }
+					String label = "area splitter at " + edgeCoordinate;
+					IntersectionVertex newEndpoint = (IntersectionVertex) graph
+							.getVertex(label);
+					if (newEndpoint == null) {
+						newEndpoint = new IntersectionVertex(graph, label,
+								edgeCoordinate.x, edgeCoordinate.y);
+					}
 
-                    createSegments(from, newEndpoint, Arrays.asList(area), graph);
-                    createSegments(newEndpoint, to, intersects, graph);
-                    break;
-                }
-            }
-        }
-    }
+					createSegments(from, newEndpoint, Arrays.asList(area),
+							graph);
+					createSegments(newEndpoint, to, intersects, graph);
+					break;
+				}
+			}
+		}
+	}
 
-    public Polygon getOriginalEdges() {
-        return originalEdges;
-    }
+	public Polygon getOriginalEdges() {
+		return originalEdges;
+	}
 
-    public void setOriginalEdges(Polygon polygon) {
-        this.originalEdges = polygon;
-    }
+	public void setOriginalEdges(Polygon polygon) {
+		this.originalEdges = polygon;
+	}
 
-    public void addArea(NamedArea namedArea) {
-        areas.add(namedArea);
-    }
+	public void addArea(NamedArea namedArea) {
+		areas.add(namedArea);
+	}
 
-    public List<NamedArea> getAreas() {
-        return areas;
-    }
+	public List<NamedArea> getAreas() {
+		return areas;
+	}
 
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        edges.trimToSize();
-        out.defaultWriteObject();
-    }
+	private void writeObject(ObjectOutputStream out) throws IOException {
+		edges.trimToSize();
+		out.defaultWriteObject();
+	}
 }

@@ -29,129 +29,137 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GraphBuilderTask implements Runnable {
-    
-    private static Logger LOG = LoggerFactory.getLogger(GraphBuilderTask.class); 
 
-    private List<GraphBuilder> _graphBuilders = new ArrayList<GraphBuilder>();
+	private static Logger LOG = LoggerFactory.getLogger(GraphBuilderTask.class);
 
-    private File graphFile;
-    
-    private boolean _alwaysRebuild = true;
+	private List<GraphBuilder> _graphBuilders = new ArrayList<GraphBuilder>();
 
-    private List<RoutingRequest> _modeList;
-    
-    private String _baseGraph = null;
-    
-    private Graph graph = new Graph();
+	private File graphFile;
 
-    /** Should the graph be serialized to disk after being created or not? */
-    public boolean serializeGraph = true;
+	private boolean _alwaysRebuild = true;
 
-    public void addGraphBuilder(GraphBuilder loader) {
-        _graphBuilders.add(loader);
-    }
+	private List<RoutingRequest> _modeList;
 
-    public void setGraphBuilders(List<GraphBuilder> graphLoaders) {
-        _graphBuilders = graphLoaders;
-    }
+	private String _baseGraph = null;
 
-    public void setAlwaysRebuild(boolean alwaysRebuild) {
-        _alwaysRebuild = alwaysRebuild;
-    }
-    
-    public void setBaseGraph(String baseGraph) {
-        this._baseGraph = baseGraph;
-        try {
-            graph = Graph.load(new File(baseGraph), LoadLevel.FULL);
-        } catch (Exception e) {
-            throw new RuntimeException("error loading base graph");
-        }
-    }
+	private Graph graph = new Graph();
 
-    public void addMode(RoutingRequest mo) {
-        _modeList.add(mo);
-    }
+	/** Should the graph be serialized to disk after being created or not? */
+	public boolean serializeGraph = true;
 
-    public void setModes(List<RoutingRequest> modeList) {
-        _modeList = modeList;
-    }
-    
-    public void setPath (String path) {
-        graphFile = new File(path.concat("/Graph.obj"));
-    }
-    
-    public void setPath (File path) {
-        graphFile = new File(path, "Graph.obj");
-    }
+	public void addGraphBuilder(GraphBuilder loader) {
+		_graphBuilders.add(loader);
+	}
 
-    public Graph getGraph() {
-        return this.graph;
-    }
+	public void setGraphBuilders(List<GraphBuilder> graphLoaders) {
+		_graphBuilders = graphLoaders;
+	}
 
-    public void run() {
+	public void setAlwaysRebuild(boolean alwaysRebuild) {
+		_alwaysRebuild = alwaysRebuild;
+	}
 
-        /* Record how long it takes to build the graph, purely for informational purposes. */
-        long startTime = System.currentTimeMillis();
+	public void setBaseGraph(String baseGraph) {
+		this._baseGraph = baseGraph;
+		try {
+			graph = Graph.load(new File(baseGraph), LoadLevel.FULL);
+		} catch (Exception e) {
+			throw new RuntimeException("error loading base graph");
+		}
+	}
 
-        if (graphFile == null) {
-            throw new RuntimeException("graphBuilderTask has no attribute graphFile.");
-        }
+	public void addMode(RoutingRequest mo) {
+		_modeList.add(mo);
+	}
 
-        if( graphFile.exists() && ! _alwaysRebuild) {
-            LOG.info("graph already exists and alwaysRebuild=false => skipping graph build");
-            return;
-        }
+	public void setModes(List<RoutingRequest> modeList) {
+		_modeList = modeList;
+	}
 
-        if (serializeGraph) {
-            try {
-                if (!graphFile.getParentFile().exists())
-                    if (!graphFile.getParentFile().mkdirs())
-                        LOG.error("Failed to create directories for graph bundle at " + graphFile);
-                graphFile.createNewFile();
-            } catch (IOException e) {
-                throw new RuntimeException("Cannot create or overwrite graph at path " + graphFile);
-            }
-        }
+	public void setPath(String path) {
+		graphFile = new File(path.concat("/Graph.obj"));
+	}
 
-        //check prerequisites
-        ArrayList<String> provided = new ArrayList<String>();
-        boolean bad = false;
-        for (GraphBuilder builder : _graphBuilders) {
-            List<String> prerequisites = builder.getPrerequisites();
-            for (String prereq : prerequisites) {
-                if (!provided.contains(prereq)) {
-                    LOG.error("Graph builder " + builder + " requires " + prereq + " but no previous stages provide it");
-                    bad = true;
-                }
-            }
-            provided.addAll(builder.provides());
-        }
-        if (_baseGraph != null)
-            LOG.warn("base graph loaded, not enforcing prerequisites");
-        else if (bad)
-            throw new RuntimeException("Prerequisites unsatisfied");
+	public void setPath(File path) {
+		graphFile = new File(path, "Graph.obj");
+	}
 
-        //check inputs
-        for (GraphBuilder builder : _graphBuilders) {
-            builder.checkInputs();
-        }
-        
-        HashMap<Class<?>, Object> extra = new HashMap<Class<?>, Object>();
-        for (GraphBuilder load : _graphBuilders)
-            load.buildGraph(graph, extra);
+	public Graph getGraph() {
+		return this.graph;
+	}
 
-        graph.summarizeBuilderAnnotations();
-        if (serializeGraph) {
-            try {
-                graph.save(graphFile);
-            } catch (Exception ex) {
-                throw new IllegalStateException(ex);
-            }
-        } else {
-            LOG.info("Not saving graph to disk, as requested.");
-        }
+	public void run() {
 
-        long endTime = System.currentTimeMillis();
-        LOG.info(String.format("Graph building took %.1f minutes.", (endTime - startTime) / 1000 / 60.0));
-    }
+		/*
+		 * Record how long it takes to build the graph, purely for informational
+		 * purposes.
+		 */
+		long startTime = System.currentTimeMillis();
+
+		if (graphFile == null) {
+			throw new RuntimeException(
+					"graphBuilderTask has no attribute graphFile.");
+		}
+
+		if (graphFile.exists() && !_alwaysRebuild) {
+			LOG.info("graph already exists and alwaysRebuild=false => skipping graph build");
+			return;
+		}
+
+		if (serializeGraph) {
+			try {
+				if (!graphFile.getParentFile().exists())
+					if (!graphFile.getParentFile().mkdirs())
+						LOG.error("Failed to create directories for graph bundle at "
+								+ graphFile);
+				graphFile.createNewFile();
+			} catch (IOException e) {
+				throw new RuntimeException(
+						"Cannot create or overwrite graph at path " + graphFile);
+			}
+		}
+
+		// check prerequisites
+		ArrayList<String> provided = new ArrayList<String>();
+		boolean bad = false;
+		for (GraphBuilder builder : _graphBuilders) {
+			List<String> prerequisites = builder.getPrerequisites();
+			for (String prereq : prerequisites) {
+				if (!provided.contains(prereq)) {
+					LOG.error("Graph builder " + builder + " requires "
+							+ prereq + " but no previous stages provide it");
+					bad = true;
+				}
+			}
+			provided.addAll(builder.provides());
+		}
+		if (_baseGraph != null)
+			LOG.warn("base graph loaded, not enforcing prerequisites");
+		else if (bad)
+			throw new RuntimeException("Prerequisites unsatisfied");
+
+		// check inputs
+		for (GraphBuilder builder : _graphBuilders) {
+			builder.checkInputs();
+		}
+
+		HashMap<Class<?>, Object> extra = new HashMap<Class<?>, Object>();
+		for (GraphBuilder load : _graphBuilders)
+			load.buildGraph(graph, extra);
+
+		graph.summarizeBuilderAnnotations();
+		if (serializeGraph) {
+			try {
+				graph.save(graphFile);
+			} catch (Exception ex) {
+				throw new IllegalStateException(ex);
+			}
+		} else {
+			LOG.info("Not saving graph to disk, as requested.");
+		}
+
+		long endTime = System.currentTimeMillis();
+		LOG.info(String.format("Graph building took %.1f minutes.",
+				(endTime - startTime) / 1000 / 60.0));
+	}
 }

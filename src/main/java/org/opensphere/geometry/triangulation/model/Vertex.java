@@ -40,8 +40,10 @@ public class Vertex {
 	/** Coordinate of the vertex */
 	private Coordinate coordinate;
 
-	/** Indicator to know if the vertex is a border vertex
-	 * of the triangulation framework */
+	/**
+	 * Indicator to know if the vertex is a border vertex of the triangulation
+	 * framework
+	 */
 	private boolean border;
 
 	/**
@@ -50,12 +52,12 @@ public class Vertex {
 	public Vertex() {
 		//
 	}
-	
+
 	/**
 	 * Constructor.
 	 * 
 	 * @param id
-	 * 		ID of the vertex
+	 *            ID of the vertex
 	 */
 	public Vertex(int id) {
 		this.id = id;
@@ -65,9 +67,9 @@ public class Vertex {
 	 * Constructor.
 	 * 
 	 * @param id
-	 * 		ID of the vertex
+	 *            ID of the vertex
 	 * @param coordinate
-	 * 		coordinate of the vertex
+	 *            coordinate of the vertex
 	 */
 	public Vertex(int id, Coordinate coordinate) {
 		this.id = id;
@@ -78,10 +80,10 @@ public class Vertex {
 	 * Constructor.
 	 * 
 	 * @param id
-	 * 		ID of the vertex
+	 *            ID of the vertex
 	 * @param border
-	 * 		defines if the vertex is a border vertex
-	 * 		or not in the triangulation framework
+	 *            defines if the vertex is a border vertex or not in the
+	 *            triangulation framework
 	 */
 	public Vertex(int id, boolean border) {
 		this.id = id;
@@ -92,12 +94,12 @@ public class Vertex {
 	 * Constructor.
 	 * 
 	 * @param id
-	 * 		ID of the vertex
+	 *            ID of the vertex
 	 * @param coordinate
-	 * 		coordinate of the vertex
+	 *            coordinate of the vertex
 	 * @param border
-	 * 		defines if the vertex is a border vertex
-	 * 		or not in the triangulation framework
+	 *            defines if the vertex is a border vertex or not in the
+	 *            triangulation framework
 	 */
 	public Vertex(int id, Coordinate coordinate, boolean border) {
 		this.id = id;
@@ -108,9 +110,8 @@ public class Vertex {
 	/**
 	 * Returns the ID of the vertex.
 	 * 
-	 * @return
-	 * 		the ID of the vertex
-	 */	
+	 * @return the ID of the vertex
+	 */
 	public int getId() {
 		return this.id;
 	}
@@ -119,7 +120,7 @@ public class Vertex {
 	 * Defines the ID of the vertex.
 	 * 
 	 * @param id
-	 * 		the ID of the vertex
+	 *            the ID of the vertex
 	 */
 	public void setId(int id) {
 		this.id = id;
@@ -128,8 +129,7 @@ public class Vertex {
 	/**
 	 * Returns the coordinate of the vertex.
 	 * 
-	 * @return
-	 * 		the coordinate of the vertex
+	 * @return the coordinate of the vertex
 	 */
 	public Coordinate getCoordinate() {
 		return this.coordinate;
@@ -139,31 +139,28 @@ public class Vertex {
 	 * Defines the coordinate of the vertex.
 	 * 
 	 * @param c
-	 * 		the coordinate of the vertex
+	 *            the coordinate of the vertex
 	 */
 	public void setCoordinate(Coordinate c) {
 		this.coordinate = c;
 	}
 
 	/**
-	 * Returns true if the vertex is a border vertex
-	 * of the triangulation framework, false otherwise.
+	 * Returns true if the vertex is a border vertex of the triangulation
+	 * framework, false otherwise.
 	 * 
-	 * @return
-	 * 		true if the vertex is a border vertex,
-	 * 		false otherwise
+	 * @return true if the vertex is a border vertex, false otherwise
 	 */
 	public boolean isBorder() {
 		return this.border;
 	}
 
 	/**
-	 * Defines the indicator to know if the edge
-	 * is a border edge of the triangulation framework.
+	 * Defines the indicator to know if the edge is a border edge of the
+	 * triangulation framework.
 	 * 
 	 * @param border
-	 * 		true if the edge is a border edge,
-	 * 		false otherwise
+	 *            true if the edge is a border edge, false otherwise
 	 */
 	public void setBorder(boolean border) {
 		this.border = border;

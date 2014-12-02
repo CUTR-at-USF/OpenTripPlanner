@@ -22,45 +22,45 @@ import java.util.HashMap;
  */
 public class Fare {
 
-    public static enum FareType {
-        regular, student, senior, tram, special
-    }
+	public static enum FareType {
+		regular, student, senior, tram, special
+	}
 
-    /**
-     * A mapping from {@link FareType} to {@link Money}.
-     */
-    public HashMap<FareType, Money> fare;
+	/**
+	 * A mapping from {@link FareType} to {@link Money}.
+	 */
+	public HashMap<FareType, Money> fare;
 
-    public Fare() {
-        fare = new HashMap<FareType, Money>();
-    }
+	public Fare() {
+		fare = new HashMap<FareType, Money>();
+	}
 
-    public void addFare(FareType fareType, WrappedCurrency currency, int cents) {
-        fare.put(fareType, new Money(currency, cents));
-    }
+	public void addFare(FareType fareType, WrappedCurrency currency, int cents) {
+		fare.put(fareType, new Money(currency, cents));
+	}
 
-    public Money getFare(FareType type) {
-        return fare.get(type);
-    }
+	public Money getFare(FareType type) {
+		return fare.get(type);
+	}
 
-    public void addCost(int surcharge) {
-        for (Money cost : fare.values()) {
-            int cents = cost.getCents();
-            cost.setCents(cents + surcharge);
-        }
-    }
+	public void addCost(int surcharge) {
+		for (Money cost : fare.values()) {
+			int cents = cost.getCents();
+			cost.setCents(cents + surcharge);
+		}
+	}
 
-    public String toString() {
-        StringBuffer buffer = new StringBuffer("Fare(");
-        for (FareType type : fare.keySet()) {
-            Money cost = fare.get(type);
-            buffer.append("[");
-            buffer.append(type.toString());
-            buffer.append(":");
-            buffer.append(cost.toString());
-            buffer.append("], ");
-        }
-        buffer.append(")");
-        return buffer.toString();
-    }
+	public String toString() {
+		StringBuffer buffer = new StringBuffer("Fare(");
+		for (FareType type : fare.keySet()) {
+			Money cost = fare.get(type);
+			buffer.append("[");
+			buffer.append(type.toString());
+			buffer.append(":");
+			buffer.append(cost.toString());
+			buffer.append("], ");
+		}
+		buffer.append(")");
+		return buffer.toString();
+	}
 }

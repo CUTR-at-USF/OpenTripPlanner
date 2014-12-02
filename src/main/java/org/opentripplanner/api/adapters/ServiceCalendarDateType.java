@@ -25,55 +25,56 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @XmlRootElement(name = "CalendarDate")
 public class ServiceCalendarDateType {
 
-    public ServiceCalendarDateType(AgencyAndId serviceId, long date, int exceptionType) {
-        this.serviceId = serviceId;
-        this.date = date;
-        this.exceptionType = exceptionType;
-        switch (this.exceptionType) {
-        case 1:
-            this.exception = "Remove";
-            break;
-        case 2:
-            this.exception = "Add";
-            break;
-        default:
-            this.exception = "";
-        }
-    }
+	public ServiceCalendarDateType(AgencyAndId serviceId, long date,
+			int exceptionType) {
+		this.serviceId = serviceId;
+		this.date = date;
+		this.exceptionType = exceptionType;
+		switch (this.exceptionType) {
+		case 1:
+			this.exception = "Remove";
+			break;
+		case 2:
+			this.exception = "Add";
+			break;
+		default:
+			this.exception = "";
+		}
+	}
 
-    public ServiceCalendarDateType(ServiceCalendarDate arg) {
-        this.serviceId = arg.getServiceId();
-        this.date = arg.getDate().getAsDate().getTime();
-        this.exceptionType = arg.getExceptionType();
-        switch (this.exceptionType) {
-        case 1:
-            this.exception = "Remove";
-            break;
-        case 2:
-            this.exception = "Add";
-            break;
-        default:
-            this.exception = "";
-        }
-    }
+	public ServiceCalendarDateType(ServiceCalendarDate arg) {
+		this.serviceId = arg.getServiceId();
+		this.date = arg.getDate().getAsDate().getTime();
+		this.exceptionType = arg.getExceptionType();
+		switch (this.exceptionType) {
+		case 1:
+			this.exception = "Remove";
+			break;
+		case 2:
+			this.exception = "Add";
+			break;
+		default:
+			this.exception = "";
+		}
+	}
 
-    public ServiceCalendarDateType() {
-    }
+	public ServiceCalendarDateType() {
+	}
 
-    @XmlJavaTypeAdapter(AgencyAndIdAdapter.class)
-    @JsonSerialize
-    AgencyAndId serviceId;
+	@XmlJavaTypeAdapter(AgencyAndIdAdapter.class)
+	@JsonSerialize
+	AgencyAndId serviceId;
 
-    @XmlAttribute
-    @JsonSerialize
-    Long date;
+	@XmlAttribute
+	@JsonSerialize
+	Long date;
 
-    @XmlAttribute
-    @JsonSerialize
-    Integer exceptionType;
+	@XmlAttribute
+	@JsonSerialize
+	Integer exceptionType;
 
-    @XmlAttribute
-    @JsonSerialize
-    String exception;
+	@XmlAttribute
+	@JsonSerialize
+	String exception;
 
 }

@@ -23,84 +23,84 @@ import org.onebusaway.gtfs.model.Route;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
-   Holds data about a GTFS route from routes.txt.  Data includes id,
-   short name, long name, color, etc.
-*/
+ * Holds data about a GTFS route from routes.txt. Data includes id, short name,
+ * long name, color, etc.
+ */
 
 @XmlRootElement(name = "route")
 public class RouteType {
 
-    public RouteType() {
-    }
+	public RouteType() {
+	}
 
-    public RouteType(Route route) {
-        this.id = route.getId();
-        this.routeShortName = route.getShortName();
-        this.routeLongName = route.getLongName();
-        this.routeDesc = route.getDesc();
-        this.routeType = route.getType();
-        this.routeUrl = route.getUrl();
-        this.routeColor = route.getColor();
-        this.routeTextColor = route.getTextColor();
-        this.routeBikesAllowed = route.getBikesAllowed();
-    }
+	public RouteType(Route route) {
+		this.id = route.getId();
+		this.routeShortName = route.getShortName();
+		this.routeLongName = route.getLongName();
+		this.routeDesc = route.getDesc();
+		this.routeType = route.getType();
+		this.routeUrl = route.getUrl();
+		this.routeColor = route.getColor();
+		this.routeTextColor = route.getTextColor();
+		this.routeBikesAllowed = route.getBikesAllowed();
+	}
 
-    public RouteType(Route route, Boolean extended) {
-        this.id = route.getId();
-        this.routeShortName = route.getShortName();
-        this.routeType = route.getType();
-        this.routeLongName = route.getLongName();
-        if (extended != null && extended.equals(true)) {
-            this.routeDesc = route.getDesc();
-            this.routeType = route.getType();
-            this.routeUrl = route.getUrl();
-            this.routeColor = route.getColor();
-            this.routeTextColor = route.getTextColor();
-        }
-    }
-    
-    public AgencyAndId getId(){
-        return this.id;
-    }
+	public RouteType(Route route, Boolean extended) {
+		this.id = route.getId();
+		this.routeShortName = route.getShortName();
+		this.routeType = route.getType();
+		this.routeLongName = route.getLongName();
+		if (extended != null && extended.equals(true)) {
+			this.routeDesc = route.getDesc();
+			this.routeType = route.getType();
+			this.routeUrl = route.getUrl();
+			this.routeColor = route.getColor();
+			this.routeTextColor = route.getTextColor();
+		}
+	}
 
-    @XmlJavaTypeAdapter(AgencyAndIdAdapter.class)
-    @JsonSerialize
-    AgencyAndId id;
+	public AgencyAndId getId() {
+		return this.id;
+	}
 
-    @XmlJavaTypeAdapter(AgencyAndIdAdapter.class)
-    @JsonSerialize
-    AgencyAndId serviceId;
+	@XmlJavaTypeAdapter(AgencyAndIdAdapter.class)
+	@JsonSerialize
+	AgencyAndId id;
 
-    @XmlAttribute
-    @JsonSerialize
-    String routeShortName;
+	@XmlJavaTypeAdapter(AgencyAndIdAdapter.class)
+	@JsonSerialize
+	AgencyAndId serviceId;
 
-    @XmlAttribute
-    @JsonSerialize
-    String routeLongName;
+	@XmlAttribute
+	@JsonSerialize
+	String routeShortName;
 
-    @XmlAttribute
-    @JsonSerialize
-    String routeDesc;
+	@XmlAttribute
+	@JsonSerialize
+	String routeLongName;
 
-    @XmlAttribute
-    @JsonSerialize
-    String routeUrl;
+	@XmlAttribute
+	@JsonSerialize
+	String routeDesc;
 
-    @XmlAttribute
-    @JsonSerialize
-    String routeColor;
+	@XmlAttribute
+	@JsonSerialize
+	String routeUrl;
 
-    @XmlAttribute
-    @JsonSerialize
-    Integer routeType;
+	@XmlAttribute
+	@JsonSerialize
+	String routeColor;
 
-    @XmlAttribute
-    @JsonSerialize
-    String routeTextColor;
+	@XmlAttribute
+	@JsonSerialize
+	Integer routeType;
 
-    @XmlAttribute
-    @JsonSerialize
-    Integer routeBikesAllowed;
+	@XmlAttribute
+	@JsonSerialize
+	String routeTextColor;
+
+	@XmlAttribute
+	@JsonSerialize
+	Integer routeBikesAllowed;
 
 }

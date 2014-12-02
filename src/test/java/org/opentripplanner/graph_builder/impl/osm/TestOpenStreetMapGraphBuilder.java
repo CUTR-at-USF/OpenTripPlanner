@@ -38,247 +38,274 @@ import org.opentripplanner.routing.vertextype.IntersectionVertex;
 
 public class TestOpenStreetMapGraphBuilder extends TestCase {
 
-    private HashMap<Class<?>, Object> extra;
-    
-    @Before
-    public void setUp() {
-        extra = new HashMap<Class<?>, Object>();
-    }
+	private HashMap<Class<?>, Object> extra;
 
-    @Test
-    public void testGraphBuilder() throws Exception {
+	@Before
+	public void setUp() {
+		extra = new HashMap<Class<?>, Object>();
+	}
 
-        Graph gg = new Graph();
+	@Test
+	public void testGraphBuilder() throws Exception {
 
-        OpenStreetMapGraphBuilderImpl loader = new OpenStreetMapGraphBuilderImpl();
-        loader.setDefaultWayPropertySetSource(new DefaultWayPropertySetSource());
-        FileBasedOpenStreetMapProviderImpl provider = new FileBasedOpenStreetMapProviderImpl();
+		Graph gg = new Graph();
 
-        File file = new File(URLDecoder.decode(getClass().getResource("map.osm.gz").getFile(), "UTF-8"));
+		OpenStreetMapGraphBuilderImpl loader = new OpenStreetMapGraphBuilderImpl();
+		loader.setDefaultWayPropertySetSource(new DefaultWayPropertySetSource());
+		FileBasedOpenStreetMapProviderImpl provider = new FileBasedOpenStreetMapProviderImpl();
 
-        provider.setPath(file);
-        loader.setProvider(provider);
+		File file = new File(URLDecoder.decode(
+				getClass().getResource("map.osm.gz").getFile(), "UTF-8"));
 
-        loader.buildGraph(gg, extra);
+		provider.setPath(file);
+		loader.setProvider(provider);
 
-        // Kamiennogorska at south end of segment
-        Vertex v1 = gg.getVertex("osm:node:280592578");
+		loader.buildGraph(gg, extra);
 
-        // Kamiennogorska at Mariana Smoluchowskiego
-        Vertex v2 = gg.getVertex("osm:node:288969929");
+		// Kamiennogorska at south end of segment
+		Vertex v1 = gg.getVertex("osm:node:280592578");
 
-        // Mariana Smoluchowskiego, north end
-        Vertex v3 = gg.getVertex("osm:node:280107802");
+		// Kamiennogorska at Mariana Smoluchowskiego
+		Vertex v2 = gg.getVertex("osm:node:288969929");
 
-        // Mariana Smoluchowskiego, south end (of segment connected to v2)
-        Vertex v4 = gg.getVertex("osm:node:288970952");
+		// Mariana Smoluchowskiego, north end
+		Vertex v3 = gg.getVertex("osm:node:280107802");
 
-        assertNotNull(v1);
-        assertNotNull(v2);
-        assertNotNull(v3);
-        assertNotNull(v4);
+		// Mariana Smoluchowskiego, south end (of segment connected to v2)
+		Vertex v4 = gg.getVertex("osm:node:288970952");
 
-        Edge e1 = null, e2 = null, e3 = null;
-        for (Edge e: v2.getOutgoing()) {
-            if (e.getToVertex() == v1) {
-                e1 = e;
-            } else if (e.getToVertex() == v3) {
-                e2 = e;
-            } else if (e.getToVertex() == v4) {
-                e3 = e;
-            }
-        }
+		assertNotNull(v1);
+		assertNotNull(v2);
+		assertNotNull(v3);
+		assertNotNull(v4);
 
-        assertNotNull(e1);
-        assertNotNull(e2);
-        assertNotNull(e3);
+		Edge e1 = null, e2 = null, e3 = null;
+		for (Edge e : v2.getOutgoing()) {
+			if (e.getToVertex() == v1) {
+				e1 = e;
+			} else if (e.getToVertex() == v3) {
+				e2 = e;
+			} else if (e.getToVertex() == v4) {
+				e3 = e;
+			}
+		}
 
-        assertTrue("name of e1 must be like \"Kamiennog\u00F3rska\"; was " + e1.getName(), e1
-                .getName().contains("Kamiennog\u00F3rska"));
-        assertTrue("name of e2 must be like \"Mariana Smoluchowskiego\"; was " + e2.getName(), e2
-                .getName().contains("Mariana Smoluchowskiego"));
-    }
+		assertNotNull(e1);
+		assertNotNull(e2);
+		assertNotNull(e3);
 
-    /**
-     * Detailed testing of OSM graph building using a very small chunk of NYC (SOHO-ish).
-     * @throws Exception
-     */
-    @Test
-    public void testBuildGraphDetailed() throws Exception {
+		assertTrue(
+				"name of e1 must be like \"Kamiennog\u00F3rska\"; was "
+						+ e1.getName(),
+				e1.getName().contains("Kamiennog\u00F3rska"));
+		assertTrue("name of e2 must be like \"Mariana Smoluchowskiego\"; was "
+				+ e2.getName(), e2.getName()
+				.contains("Mariana Smoluchowskiego"));
+	}
 
-        Graph gg = new Graph();
+	/**
+	 * Detailed testing of OSM graph building using a very small chunk of NYC
+	 * (SOHO-ish).
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testBuildGraphDetailed() throws Exception {
 
-        OpenStreetMapGraphBuilderImpl loader = new OpenStreetMapGraphBuilderImpl();
-        loader.setDefaultWayPropertySetSource(new DefaultWayPropertySetSource());
-        FileBasedOpenStreetMapProviderImpl provider = new FileBasedOpenStreetMapProviderImpl();
+		Graph gg = new Graph();
 
-        File file = new File(URLDecoder.decode(getClass().getResource("NYC_small.osm.gz").getFile(), "UTF-8"));
+		OpenStreetMapGraphBuilderImpl loader = new OpenStreetMapGraphBuilderImpl();
+		loader.setDefaultWayPropertySetSource(new DefaultWayPropertySetSource());
+		FileBasedOpenStreetMapProviderImpl provider = new FileBasedOpenStreetMapProviderImpl();
 
-        provider.setPath(file);
-        loader.setProvider(provider);
+		File file = new File(URLDecoder.decode(
+				getClass().getResource("NYC_small.osm.gz").getFile(), "UTF-8"));
 
-        loader.buildGraph(gg, extra);
-        
-        // These vertices are labeled in the OSM file as having traffic lights.
-        IntersectionVertex iv1 = (IntersectionVertex) gg.getVertex("osm:node:1919595918");
-        IntersectionVertex iv2 = (IntersectionVertex) gg.getVertex("osm:node:42442273");
-        IntersectionVertex iv3 = (IntersectionVertex) gg.getVertex("osm:node:1919595927");
-        IntersectionVertex iv4 = (IntersectionVertex) gg.getVertex("osm:node:42452026");
-        assertTrue(iv1.trafficLight);
-        assertTrue(iv2.trafficLight);
-        assertTrue(iv3.trafficLight);
-        assertTrue(iv4.trafficLight);
-        
-        // These are not.
-        IntersectionVertex iv5 = (IntersectionVertex) gg.getVertex("osm:node:42435485");
-        IntersectionVertex iv6 = (IntersectionVertex) gg.getVertex("osm:node:42439335");
-        IntersectionVertex iv7 = (IntersectionVertex) gg.getVertex("osm:node:42436761");
-        IntersectionVertex iv8 = (IntersectionVertex) gg.getVertex("osm:node:42442291");
-        assertFalse(iv5.trafficLight);
-        assertFalse(iv6.trafficLight);
-        assertFalse(iv7.trafficLight);
-        assertFalse(iv8.trafficLight);
-        
-        Set<P2<Integer>> edgeEndpoints = new HashSet<P2<Integer>>();
-        for (StreetEdge se : gg.getStreetEdges()) {
-            P2<Integer> endpoints = new P2<Integer>(se.getFromVertex().getIndex(),
-                    se.getToVertex().getIndex());
-            
-            // Check that we don't get any duplicate edges on this small graph.
-            if (edgeEndpoints.contains(endpoints)) {
-                assertFalse(true);
-            }
-            edgeEndpoints.add(endpoints);
-            
-            StreetTraversalPermission perm = se.getPermission();
-            
-            // CAR and CUSTOM_MOTOR_VEHICLE should always have the same permissions.
-            assertEquals(perm.allows(StreetTraversalPermission.CAR),
-                    perm.allows(StreetTraversalPermission.CUSTOM_MOTOR_VEHICLE));
+		provider.setPath(file);
+		loader.setProvider(provider);
 
-            // Check turn restriction consistency.
-            // NOTE(flamholz): currently there don't appear to be any turn restrictions
-            // in the OSM file we are loading.
-            for (TurnRestriction tr : gg.getTurnRestrictions(se)) {
-                // All turn restrictions should apply equally to
-                // CAR and CUSTOM_MOTOR_VEHICLE.
-                TraverseModeSet modes = tr.modes;
-                assertEquals(modes.getCar(), modes.getCustomMotorVehicle());
-            }
-        }
-    }
+		loader.buildGraph(gg, extra);
 
-    @Test
-    public void testWayDataSet() {
-        OSMWithTags way = new OSMWay();
-        way.addTag("highway", "footway");
-        way.addTag("cycleway", "lane");
-        way.addTag("access", "no");
-        way.addTag("surface", "gravel");
+		// These vertices are labeled in the OSM file as having traffic lights.
+		IntersectionVertex iv1 = (IntersectionVertex) gg
+				.getVertex("osm:node:1919595918");
+		IntersectionVertex iv2 = (IntersectionVertex) gg
+				.getVertex("osm:node:42442273");
+		IntersectionVertex iv3 = (IntersectionVertex) gg
+				.getVertex("osm:node:1919595927");
+		IntersectionVertex iv4 = (IntersectionVertex) gg
+				.getVertex("osm:node:42452026");
+		assertTrue(iv1.trafficLight);
+		assertTrue(iv2.trafficLight);
+		assertTrue(iv3.trafficLight);
+		assertTrue(iv4.trafficLight);
 
-        WayPropertySet wayPropertySet = new WayPropertySet();
+		// These are not.
+		IntersectionVertex iv5 = (IntersectionVertex) gg
+				.getVertex("osm:node:42435485");
+		IntersectionVertex iv6 = (IntersectionVertex) gg
+				.getVertex("osm:node:42439335");
+		IntersectionVertex iv7 = (IntersectionVertex) gg
+				.getVertex("osm:node:42436761");
+		IntersectionVertex iv8 = (IntersectionVertex) gg
+				.getVertex("osm:node:42442291");
+		assertFalse(iv5.trafficLight);
+		assertFalse(iv6.trafficLight);
+		assertFalse(iv7.trafficLight);
+		assertFalse(iv8.trafficLight);
 
-        // where there are no way specifiers, the default is used
-        assertEquals(wayPropertySet.getDataForWay(way), wayPropertySet.defaultProperties);
+		Set<P2<Integer>> edgeEndpoints = new HashSet<P2<Integer>>();
+		for (StreetEdge se : gg.getStreetEdges()) {
+			P2<Integer> endpoints = new P2<Integer>(se.getFromVertex()
+					.getIndex(), se.getToVertex().getIndex());
 
-        // add two equal matches: lane only...
-        OSMSpecifier lane_only = new OSMSpecifier();
-        lane_only.addTag("cycleway", "lane");
+			// Check that we don't get any duplicate edges on this small graph.
+			if (edgeEndpoints.contains(endpoints)) {
+				assertFalse(true);
+			}
+			edgeEndpoints.add(endpoints);
 
-        WayProperties lane_is_safer = new WayProperties();
-        lane_is_safer.setSafetyFeatures(new P2<Double>(1.5, 1.5));
+			StreetTraversalPermission perm = se.getPermission();
 
-        wayPropertySet.addProperties(lane_only, lane_is_safer);
+			// CAR and CUSTOM_MOTOR_VEHICLE should always have the same
+			// permissions.
+			assertEquals(perm.allows(StreetTraversalPermission.CAR),
+					perm.allows(StreetTraversalPermission.CUSTOM_MOTOR_VEHICLE));
 
-        // and footway only
-        OSMSpecifier footway_only = new OSMSpecifier();
-        footway_only.addTag("highway", "footway");
+			// Check turn restriction consistency.
+			// NOTE(flamholz): currently there don't appear to be any turn
+			// restrictions
+			// in the OSM file we are loading.
+			for (TurnRestriction tr : gg.getTurnRestrictions(se)) {
+				// All turn restrictions should apply equally to
+				// CAR and CUSTOM_MOTOR_VEHICLE.
+				TraverseModeSet modes = tr.modes;
+				assertEquals(modes.getCar(), modes.getCustomMotorVehicle());
+			}
+		}
+	}
 
-        WayProperties footways_allow_peds = new WayProperties();
-        footways_allow_peds.setPermission(StreetTraversalPermission.PEDESTRIAN);
+	@Test
+	public void testWayDataSet() {
+		OSMWithTags way = new OSMWay();
+		way.addTag("highway", "footway");
+		way.addTag("cycleway", "lane");
+		way.addTag("access", "no");
+		way.addTag("surface", "gravel");
 
-        wayPropertySet.addProperties(footway_only, footways_allow_peds);
+		WayPropertySet wayPropertySet = new WayPropertySet();
 
-        WayProperties dataForWay = wayPropertySet.getDataForWay(way);
-        // the first one is found
-        assertEquals(dataForWay, lane_is_safer);
+		// where there are no way specifiers, the default is used
+		assertEquals(wayPropertySet.getDataForWay(way),
+				wayPropertySet.defaultProperties);
 
-        // add a better match
-        OSMSpecifier lane_and_footway = new OSMSpecifier();
-        lane_and_footway.addTag("cycleway", "lane");
-        lane_and_footway.addTag("highway", "footway");
+		// add two equal matches: lane only...
+		OSMSpecifier lane_only = new OSMSpecifier();
+		lane_only.addTag("cycleway", "lane");
 
-        WayProperties safer_and_peds = new WayProperties();
-        safer_and_peds.setSafetyFeatures(new P2<Double>(0.75, 0.75));
-        safer_and_peds.setPermission(StreetTraversalPermission.PEDESTRIAN);
+		WayProperties lane_is_safer = new WayProperties();
+		lane_is_safer.setSafetyFeatures(new P2<Double>(1.5, 1.5));
 
-        wayPropertySet.addProperties(lane_and_footway, safer_and_peds);
-        dataForWay = wayPropertySet.getDataForWay(way);
-        assertEquals(dataForWay, safer_and_peds);
+		wayPropertySet.addProperties(lane_only, lane_is_safer);
 
-        // add a mixin
-        OSMSpecifier gravel = new OSMSpecifier("surface=gravel");
-        WayProperties gravel_is_dangerous = new WayProperties();
-        gravel_is_dangerous.setSafetyFeatures(new P2<Double>(2.0, 2.0));
-        wayPropertySet.addProperties(gravel, gravel_is_dangerous, true);
+		// and footway only
+		OSMSpecifier footway_only = new OSMSpecifier();
+		footway_only.addTag("highway", "footway");
 
-        dataForWay = wayPropertySet.getDataForWay(way);
-        assertEquals(dataForWay.getSafetyFeatures().first, 1.5);
+		WayProperties footways_allow_peds = new WayProperties();
+		footways_allow_peds.setPermission(StreetTraversalPermission.PEDESTRIAN);
 
-        // test a left-right distinction
-        way = new OSMWay();
-        way.addTag("highway", "footway");
-        way.addTag("cycleway", "lane");
-        way.addTag("cycleway:right", "track");
+		wayPropertySet.addProperties(footway_only, footways_allow_peds);
 
-        OSMSpecifier track_only = new OSMSpecifier("highway=footway;cycleway=track");
-        WayProperties track_is_safest = new WayProperties();
-        track_is_safest.setSafetyFeatures(new P2<Double>(0.25, 0.25));
+		WayProperties dataForWay = wayPropertySet.getDataForWay(way);
+		// the first one is found
+		assertEquals(dataForWay, lane_is_safer);
 
-        wayPropertySet.addProperties(track_only, track_is_safest);
-        dataForWay = wayPropertySet.getDataForWay(way);
-        assertEquals(0.25, dataForWay.getSafetyFeatures().first); // right (with traffic) comes
-                                                                       // from track
-        assertEquals(0.75, dataForWay.getSafetyFeatures().second); // left comes from lane
+		// add a better match
+		OSMSpecifier lane_and_footway = new OSMSpecifier();
+		lane_and_footway.addTag("cycleway", "lane");
+		lane_and_footway.addTag("highway", "footway");
 
-        way = new OSMWay();
-        way.addTag("highway", "footway");
-        way.addTag("footway", "sidewalk");
-        way.addTag("RLIS:reviewed", "no");
-        WayPropertySet propset = new WayPropertySet();
-        CreativeNamer namer = new CreativeNamer("platform");
-        propset.addCreativeNamer(new OSMSpecifier(
-                "railway=platform;highway=footway;footway=sidewalk"), namer);
-        namer = new CreativeNamer("sidewalk");
-        propset.addCreativeNamer(new OSMSpecifier("highway=footway;footway=sidewalk"), namer);
-        assertEquals("sidewalk", propset.getCreativeNameForWay(way));
-    }
+		WayProperties safer_and_peds = new WayProperties();
+		safer_and_peds.setSafetyFeatures(new P2<Double>(0.75, 0.75));
+		safer_and_peds.setPermission(StreetTraversalPermission.PEDESTRIAN);
 
-    @Test
-    public void testCreativeNaming() {
-        OSMWithTags way = new OSMWay();
-        way.addTag("highway", "footway");
-        way.addTag("cycleway", "lane");
-        way.addTag("access", "no");
+		wayPropertySet.addProperties(lane_and_footway, safer_and_peds);
+		dataForWay = wayPropertySet.getDataForWay(way);
+		assertEquals(dataForWay, safer_and_peds);
 
-        CreativeNamer namer = new CreativeNamer();
-        namer.setCreativeNamePattern("Highway with cycleway {cycleway} and access {access} and morx {morx}");
-        assertEquals("Highway with cycleway lane and access no and morx ",
-                namer.generateCreativeName(way));
-    }
+		// add a mixin
+		OSMSpecifier gravel = new OSMSpecifier("surface=gravel");
+		WayProperties gravel_is_dangerous = new WayProperties();
+		gravel_is_dangerous.setSafetyFeatures(new P2<Double>(2.0, 2.0));
+		wayPropertySet.addProperties(gravel, gravel_is_dangerous, true);
 
-    // disabled pending discussion with author (AMB)
-    // @Test
-    // public void testMultipolygon() throws Exception {
-    // Graph gg = new Graph();
-    // OpenStreetMapGraphBuilderImpl loader = new OpenStreetMapGraphBuilderImpl();
-    //
-    // FileBasedOpenStreetMapProviderImpl pr = new FileBasedOpenStreetMapProviderImpl();
-    // pr.setPath(new File(getClass().getResource("otp-multipolygon-test.osm").getPath()));
-    // loader.setProvider(pr);
-    //
-    // loader.buildGraph(gg, extra);
-    //
-    // assertNotNull(gg.getVertex("way -3535 from 4"));
-    // }
+		dataForWay = wayPropertySet.getDataForWay(way);
+		assertEquals(dataForWay.getSafetyFeatures().first, 1.5);
+
+		// test a left-right distinction
+		way = new OSMWay();
+		way.addTag("highway", "footway");
+		way.addTag("cycleway", "lane");
+		way.addTag("cycleway:right", "track");
+
+		OSMSpecifier track_only = new OSMSpecifier(
+				"highway=footway;cycleway=track");
+		WayProperties track_is_safest = new WayProperties();
+		track_is_safest.setSafetyFeatures(new P2<Double>(0.25, 0.25));
+
+		wayPropertySet.addProperties(track_only, track_is_safest);
+		dataForWay = wayPropertySet.getDataForWay(way);
+		assertEquals(0.25, dataForWay.getSafetyFeatures().first); // right (with
+																	// traffic)
+																	// comes
+																	// from
+																	// track
+		assertEquals(0.75, dataForWay.getSafetyFeatures().second); // left comes
+																	// from lane
+
+		way = new OSMWay();
+		way.addTag("highway", "footway");
+		way.addTag("footway", "sidewalk");
+		way.addTag("RLIS:reviewed", "no");
+		WayPropertySet propset = new WayPropertySet();
+		CreativeNamer namer = new CreativeNamer("platform");
+		propset.addCreativeNamer(new OSMSpecifier(
+				"railway=platform;highway=footway;footway=sidewalk"), namer);
+		namer = new CreativeNamer("sidewalk");
+		propset.addCreativeNamer(new OSMSpecifier(
+				"highway=footway;footway=sidewalk"), namer);
+		assertEquals("sidewalk", propset.getCreativeNameForWay(way));
+	}
+
+	@Test
+	public void testCreativeNaming() {
+		OSMWithTags way = new OSMWay();
+		way.addTag("highway", "footway");
+		way.addTag("cycleway", "lane");
+		way.addTag("access", "no");
+
+		CreativeNamer namer = new CreativeNamer();
+		namer.setCreativeNamePattern("Highway with cycleway {cycleway} and access {access} and morx {morx}");
+		assertEquals("Highway with cycleway lane and access no and morx ",
+				namer.generateCreativeName(way));
+	}
+
+	// disabled pending discussion with author (AMB)
+	// @Test
+	// public void testMultipolygon() throws Exception {
+	// Graph gg = new Graph();
+	// OpenStreetMapGraphBuilderImpl loader = new
+	// OpenStreetMapGraphBuilderImpl();
+	//
+	// FileBasedOpenStreetMapProviderImpl pr = new
+	// FileBasedOpenStreetMapProviderImpl();
+	// pr.setPath(new
+	// File(getClass().getResource("otp-multipolygon-test.osm").getPath()));
+	// loader.setProvider(pr);
+	//
+	// loader.buildGraph(gg, extra);
+	//
+	// assertNotNull(gg.getVertex("way -3535 from 4"));
+	// }
 }

@@ -27,39 +27,40 @@ import org.opentripplanner.updater.PropertiesPreferences;
  */
 public class MemoryGraphSource implements GraphSource {
 
-    private Graph graph;
+	private Graph graph;
 
-    private GraphUpdaterConfigurator decorator = new GraphUpdaterConfigurator();
+	private GraphUpdaterConfigurator decorator = new GraphUpdaterConfigurator();
 
-    public MemoryGraphSource(String routerId, Graph graph) {
-        this(routerId, graph, new PropertiesPreferences(new Properties()));
-    }
+	public MemoryGraphSource(String routerId, Graph graph) {
+		this(routerId, graph, new PropertiesPreferences(new Properties()));
+	}
 
-    public MemoryGraphSource(String routerId, Graph graph, Preferences config) {
-        this.graph = graph;
-        this.graph.routerId = routerId;
-        decorator.setupGraph(graph, config);
-    }
+	public MemoryGraphSource(String routerId, Graph graph, Preferences config) {
+		this.graph = graph;
+		this.graph.routerId = routerId;
+		decorator.setupGraph(graph, config);
+	}
 
-    @Override
-    public Graph getGraph() {
-        return graph;
-    }
+	@Override
+	public Graph getGraph() {
+		return graph;
+	}
 
-    @Override
-    public boolean reload(boolean force, boolean preEvict) {
-        /*
-         * The method does not make sense for memory-graph, but we want to be able to support it if
-         * we want to mix in-memory graph with file-based graphs.
-         */
-        return true;
-    }
+	@Override
+	public boolean reload(boolean force, boolean preEvict) {
+		/*
+		 * The method does not make sense for memory-graph, but we want to be
+		 * able to support it if we want to mix in-memory graph with file-based
+		 * graphs.
+		 */
+		return true;
+	}
 
-    @Override
-    public void evict() {
-        if (graph != null) {
-            decorator.shutdownGraph(graph);
-        }
-        graph = null;
-    }
+	@Override
+	public void evict() {
+		if (graph != null) {
+			decorator.shutdownGraph(graph);
+		}
+		graph = null;
+	}
 }

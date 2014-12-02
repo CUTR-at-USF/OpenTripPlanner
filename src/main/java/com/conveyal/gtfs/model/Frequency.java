@@ -19,30 +19,31 @@ import java.io.IOException;
 
 public class Frequency extends Entity {
 
-    public Trip trip;
-    public int start_time;
-    public int end_time;
-    public int headway_secs;
-    public int exact_times;
+	public Trip trip;
+	public int start_time;
+	public int end_time;
+	public int headway_secs;
+	public int exact_times;
 
-    public static class Loader extends Entity.Loader<Frequency> {
+	public static class Loader extends Entity.Loader<Frequency> {
 
-        public Loader(GTFSFeed feed) {
-            super(feed, "frequencies");
-        }
+		public Loader(GTFSFeed feed) {
+			super(feed, "frequencies");
+		}
 
-        @Override
-        public void loadOneRow() throws IOException {
-            Frequency f = new Frequency();
-            f.trip = getRefField("trip_id", true, feed.trips);
-            f.start_time = getTimeField("start_time");
-            f.end_time = getTimeField("end_time");
-            f.headway_secs = getIntField("headway_secs", true, 1, 24 * 60 * 60);
-            f.exact_times = getIntField("exact_times", false, 0, 1);
-            f.feed = feed;
-            feed.frequencies.put(f.trip.trip_id, f); // TODO this should be a multimap
-        }
+		@Override
+		public void loadOneRow() throws IOException {
+			Frequency f = new Frequency();
+			f.trip = getRefField("trip_id", true, feed.trips);
+			f.start_time = getTimeField("start_time");
+			f.end_time = getTimeField("end_time");
+			f.headway_secs = getIntField("headway_secs", true, 1, 24 * 60 * 60);
+			f.exact_times = getIntField("exact_times", false, 0, 1);
+			f.feed = feed;
+			feed.frequencies.put(f.trip.trip_id, f); // TODO this should be a
+														// multimap
+		}
 
-    }
+	}
 
 }

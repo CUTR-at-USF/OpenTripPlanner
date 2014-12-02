@@ -31,46 +31,51 @@ import org.opentripplanner.geocoder.GeocoderResults;
 import com.vividsolutions.jts.geom.Envelope;
 
 public class GoogleGeocoder implements Geocoder {
-	
+
 	private GoogleJsonDeserializer googleJsonDeserializer = new GoogleJsonDeserializer();
 
 	@Override
 	public GeocoderResults geocode(String address, Envelope bbox) {
 		String content = null;
-		
+
 		try {
 			// make json request
 			URL googleGeocoderUrl = getGoogleGeocoderUrl(address);
-            URLConnection conn = googleGeocoderUrl.openConnection();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
-            
-            StringBuilder sb = new StringBuilder(128);
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-                sb.append("\n");
-            }
-            reader.close();
-            content = sb.toString();
+			URLConnection conn = googleGeocoderUrl.openConnection();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					conn.getInputStream(), "utf-8"));
+
+			StringBuilder sb = new StringBuilder(128);
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				sb.append(line);
+				sb.append("\n");
+			}
+			reader.close();
+			content = sb.toString();
 
 		} catch (IOException e) {
 			e.printStackTrace();
 			return noGeocoderResult("Error parsing geocoder response");
 		}
-		
-        GoogleGeocoderResults googleGeocoderResults = googleJsonDeserializer.parseResults(content);
-        
-        List<GoogleGeocoderResult> googleResults = googleGeocoderResults.getResults();
-        List<GeocoderResult> geocoderResults = new ArrayList<GeocoderResult>();
-        for (GoogleGeocoderResult googleGeocoderResult : googleResults) {
+
+		GoogleGeocoderResults googleGeocoderResults = googleJsonDeserializer
+				.parseResults(content);
+
+		List<GoogleGeocoderResult> googleResults = googleGeocoderResults
+				.getResults();
+		List<GeocoderResult> geocoderResults = new ArrayList<GeocoderResult>();
+		for (GoogleGeocoderResult googleGeocoderResult : googleResults) {
 			Geometry geometry = googleGeocoderResult.getGeometry();
 			Location location = geometry.getLocation();
 			Double lat = location.getLat();
 			Double lng = location.getLng();
-			
-			String formattedAddress = googleGeocoderResult.getFormatted_address();
-			
-			GeocoderResult geocoderResult = new GeocoderResult(lat, lng, formattedAddress);
+
+			String formattedAddress = googleGeocoderResult
+					.getFormatted_address();
+
+			GeocoderResult geocoderResult = new GeocoderResult(lat, lng,
+					formattedAddress);
 			geocoderResults.add(geocoderResult);
 		}
 
@@ -82,7 +87,8 @@ public class GoogleGeocoder implements Geocoder {
 	}
 
 	private URL getGoogleGeocoderUrl(String address) throws IOException {
-		UriBuilder uriBuilder = UriBuilder.fromUri("http://maps.google.com/maps/api/geocode/json");
+		UriBuilder uriBuilder = UriBuilder
+				.fromUri("http://maps.google.com/maps/api/geocode/json");
 		uriBuilder.queryParam("sensor", false);
 		uriBuilder.queryParam("address", address);
 		URI uri = uriBuilder.build();

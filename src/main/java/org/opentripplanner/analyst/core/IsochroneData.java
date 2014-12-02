@@ -22,18 +22,18 @@ import com.vividsolutions.jts.geom.Geometry;
  */
 public class IsochroneData {
 
-    public int cutoffSec;
+	public int cutoffSec;
 
-    public Geometry geometry;
+	public Geometry geometry;
 
-    public Geometry debugGeometry;
+	public Geometry debugGeometry;
 
-    public IsochroneData(int cutoffSec, Geometry geometry) {
-        this.cutoffSec = cutoffSec;
-        this.geometry = geometry;
-    }
+	public IsochroneData(int cutoffSec, Geometry geometry) {
+		this.cutoffSec = cutoffSec;
+		this.geometry = geometry;
+	}
 
-    public String toString() {
-        return String.format("<isochrone %s sec>", cutoffSec);
-    }
+	public String toString() {
+		return String.format("<isochrone %s sec>", cutoffSec);
+	}
 }

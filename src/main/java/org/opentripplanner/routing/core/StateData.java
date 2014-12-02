@@ -23,97 +23,99 @@ import org.opentripplanner.routing.edgetype.TripPattern;
 import org.opentripplanner.routing.trippattern.TripTimes;
 
 /**
- * StateData contains the components of search state that are unlikely to be changed as often as
- * time or weight. This avoids frequent duplication, which should have a positive impact on both
- * time and space use during searches.
+ * StateData contains the components of search state that are unlikely to be
+ * changed as often as time or weight. This avoids frequent duplication, which
+ * should have a positive impact on both time and space use during searches.
  */
 public class StateData implements Cloneable {
 
-    // the time at which the search started
-    protected long startTime;
+	// the time at which the search started
+	protected long startTime;
 
-    // which trip index inside a pattern
-    protected TripTimes tripTimes;
+	// which trip index inside a pattern
+	protected TripTimes tripTimes;
 
-    protected AgencyAndId tripId;
-    
-    protected Trip previousTrip;
+	protected AgencyAndId tripId;
 
-    protected double lastTransitWalk = 0;
+	protected Trip previousTrip;
 
-    protected String zone;
+	protected double lastTransitWalk = 0;
 
-    protected AgencyAndId route;
+	protected String zone;
 
-    protected int numBoardings;
+	protected AgencyAndId route;
 
-    protected boolean everBoarded;
+	protected int numBoardings;
 
-    protected boolean usingRentedBike;
+	protected boolean everBoarded;
 
-    protected boolean carParked;
+	protected boolean usingRentedBike;
 
-    protected boolean bikeParked;
-    
-    protected Stop previousStop;
+	protected boolean carParked;
 
-    protected long lastAlightedTime;
+	protected boolean bikeParked;
 
-    protected AgencyAndId[] routeSequence;
+	protected Stop previousStop;
 
-    protected HashMap<Object, Object> extensions;
+	protected long lastAlightedTime;
 
-    protected RoutingRequest opt;
+	protected AgencyAndId[] routeSequence;
 
-    protected TripPattern lastPattern;
+	protected HashMap<Object, Object> extensions;
 
-    protected ServiceDay serviceDay;
+	protected RoutingRequest opt;
 
-    protected TraverseMode nonTransitMode;
+	protected TripPattern lastPattern;
 
-    /** 
-     * This is the wait time at the beginning of the trip (or at the end of the trip for
-     * reverse searches). In Analyst anyhow, this is is subtracted from total trip length of each
-     * final State in lieu of reverse optimization. It is initially set to zero so that it will be
-     * ineffectual on a search that does not ever board a transit vehicle.
-     */
-    protected long initialWaitTime = 0;
+	protected ServiceDay serviceDay;
 
-    /**
-     * This is the time between the trip that was taken at the previous stop and the next trip
-     * that could have been taken. It is used to determine if a path needs reverse-optimization.
-     */
-    protected int lastNextArrivalDelta;
+	protected TraverseMode nonTransitMode;
 
-    /**
-     * The mode that was used to traverse the backEdge
-     */
-    protected TraverseMode backMode;
+	/**
+	 * This is the wait time at the beginning of the trip (or at the end of the
+	 * trip for reverse searches). In Analyst anyhow, this is is subtracted from
+	 * total trip length of each final State in lieu of reverse optimization. It
+	 * is initially set to zero so that it will be ineffectual on a search that
+	 * does not ever board a transit vehicle.
+	 */
+	protected long initialWaitTime = 0;
 
-    protected boolean backWalkingBike;
+	/**
+	 * This is the time between the trip that was taken at the previous stop and
+	 * the next trip that could have been taken. It is used to determine if a
+	 * path needs reverse-optimization.
+	 */
+	protected int lastNextArrivalDelta;
 
-    public Set<String> bikeRentalNetworks;
+	/**
+	 * The mode that was used to traverse the backEdge
+	 */
+	protected TraverseMode backMode;
 
-    public StateData(RoutingRequest options) {
-        TraverseModeSet modes = options.modes;
-        if (modes.getCar())
-            nonTransitMode = TraverseMode.CAR;
-        else if (modes.getCustomMotorVehicle())
-            nonTransitMode = TraverseMode.CUSTOM_MOTOR_VEHICLE;
-        else if (modes.getWalk())
-            nonTransitMode = TraverseMode.WALK;
-        else if (modes.getBicycle())
-            nonTransitMode = TraverseMode.BICYCLE;
-        else
-            nonTransitMode = null;
-    }
+	protected boolean backWalkingBike;
 
-    protected StateData clone() {
-        try {
-            return (StateData) super.clone();
-        } catch (CloneNotSupportedException e1) {
-            throw new IllegalStateException("This is not happening");
-        }
-    }
+	public Set<String> bikeRentalNetworks;
+
+	public StateData(RoutingRequest options) {
+		TraverseModeSet modes = options.modes;
+		if (modes.getCar())
+			nonTransitMode = TraverseMode.CAR;
+		else if (modes.getCustomMotorVehicle())
+			nonTransitMode = TraverseMode.CUSTOM_MOTOR_VEHICLE;
+		else if (modes.getWalk())
+			nonTransitMode = TraverseMode.WALK;
+		else if (modes.getBicycle())
+			nonTransitMode = TraverseMode.BICYCLE;
+		else
+			nonTransitMode = null;
+	}
+
+	protected StateData clone() {
+		try {
+			return (StateData) super.clone();
+		} catch (CloneNotSupportedException e1) {
+			throw new IllegalStateException("This is not happening");
+		}
+	}
 
 }

@@ -60,275 +60,312 @@ import com.vividsolutions.jts.geom.MultiLineString;
  *
  */
 public class ShapefileStreetGraphBuilderImpl implements GraphBuilder {
-    private static Logger log = LoggerFactory.getLogger(ShapefileStreetGraphBuilderImpl.class);
+	private static Logger log = LoggerFactory
+			.getLogger(ShapefileStreetGraphBuilderImpl.class);
 
-    private FeatureSourceFactory _featureSourceFactory;
+	private FeatureSourceFactory _featureSourceFactory;
 
-    private ShapefileStreetSchema _schema;
+	private ShapefileStreetSchema _schema;
 
-    public StreetEdgeFactory edgeFactory = new DefaultStreetEdgeFactory();
+	public StreetEdgeFactory edgeFactory = new DefaultStreetEdgeFactory();
 
-    public List<String> provides() {
-        return Arrays.asList("streets");
-    }
+	public List<String> provides() {
+		return Arrays.asList("streets");
+	}
 
-    public List<String> getPrerequisites() {
-        return Collections.emptyList();
-    }
-    
-    public void setFeatureSourceFactory(FeatureSourceFactory factory) {
-        _featureSourceFactory = factory;
-    }
+	public List<String> getPrerequisites() {
+		return Collections.emptyList();
+	}
 
-    public void setSchema(ShapefileStreetSchema schema) {
-        _schema = schema;
-    }
+	public void setFeatureSourceFactory(FeatureSourceFactory factory) {
+		_featureSourceFactory = factory;
+	}
 
-    @Override
-    public void buildGraph(Graph graph, HashMap<Class<?>, Object> extra) {
+	public void setSchema(ShapefileStreetSchema schema) {
+		_schema = schema;
+	}
 
-        try {
+	@Override
+	public void buildGraph(Graph graph, HashMap<Class<?>, Object> extra) {
 
-            FeatureSource<SimpleFeatureType, SimpleFeature> featureSource = _featureSourceFactory
-                    .getFeatureSource();
-            CoordinateReferenceSystem sourceCRS = featureSource.getInfo().getCRS();
+		try {
 
-            Hints hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE);
-            CRSAuthorityFactory factory = ReferencingFactoryFinder.getCRSAuthorityFactory("EPSG",
-                    hints);
-            CoordinateReferenceSystem worldCRS = factory
-                    .createCoordinateReferenceSystem("EPSG:4326");
+			FeatureSource<SimpleFeatureType, SimpleFeature> featureSource = _featureSourceFactory
+					.getFeatureSource();
+			CoordinateReferenceSystem sourceCRS = featureSource.getInfo()
+					.getCRS();
 
-            Query query = new Query();
-            query.setCoordinateSystem(sourceCRS);
-            query.setCoordinateSystemReproject(worldCRS);
+			Hints hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER,
+					Boolean.TRUE);
+			CRSAuthorityFactory factory = ReferencingFactoryFinder
+					.getCRSAuthorityFactory("EPSG", hints);
+			CoordinateReferenceSystem worldCRS = factory
+					.createCoordinateReferenceSystem("EPSG:4326");
 
-            FeatureCollection<SimpleFeatureType, SimpleFeature> features = featureSource
-                    .getFeatures(query);
+			Query query = new Query();
+			query.setCoordinateSystem(sourceCRS);
+			query.setCoordinateSystemReproject(worldCRS);
 
-            features = featureSource.getFeatures(query);
+			FeatureCollection<SimpleFeatureType, SimpleFeature> features = featureSource
+					.getFeatures(query);
 
-            HashMap<String, HashMap<Coordinate, Integer>> intersectionNameToId = new HashMap<String, HashMap<Coordinate, Integer>>();
+			features = featureSource.getFeatures(query);
 
-            SimpleFeatureConverter<String> streetIdConverter = _schema.getIdConverter();
-            SimpleFeatureConverter<String> streetNameConverter = _schema.getNameConverter();
-            SimpleFeatureConverter<P2<StreetTraversalPermission>> permissionConverter = _schema
-                    .getPermissionConverter();
-            SimpleFeatureConverter<String> noteConverter = _schema.getNoteConverter();
+			HashMap<String, HashMap<Coordinate, Integer>> intersectionNameToId = new HashMap<String, HashMap<Coordinate, Integer>>();
 
-            HashMap<Coordinate, IntersectionVertex> intersectionsByLocation = 
-                    new HashMap<Coordinate, IntersectionVertex>();
+			SimpleFeatureConverter<String> streetIdConverter = _schema
+					.getIdConverter();
+			SimpleFeatureConverter<String> streetNameConverter = _schema
+					.getNameConverter();
+			SimpleFeatureConverter<P2<StreetTraversalPermission>> permissionConverter = _schema
+					.getPermissionConverter();
+			SimpleFeatureConverter<String> noteConverter = _schema
+					.getNoteConverter();
 
-            SimpleFeatureConverter<P2<Double>> safetyConverter = _schema.getBicycleSafetyConverter();
+			HashMap<Coordinate, IntersectionVertex> intersectionsByLocation = new HashMap<Coordinate, IntersectionVertex>();
 
-            SimpleFeatureConverter<Boolean> slopeOverrideCoverter = _schema.getSlopeOverrideConverter();
+			SimpleFeatureConverter<P2<Double>> safetyConverter = _schema
+					.getBicycleSafetyConverter();
 
-            SimpleFeatureConverter<Boolean> featureSelector = _schema.getFeatureSelector();
-            
-            // Keep track of features that are duplicated so we don't have duplicate streets
-            Set<Object> seen = new HashSet<Object>();
+			SimpleFeatureConverter<Boolean> slopeOverrideCoverter = _schema
+					.getSlopeOverrideConverter();
 
-            List<SimpleFeature> featureList = new ArrayList<SimpleFeature>();
-            FeatureIterator<SimpleFeature> it2 = features.features();
-            while (it2.hasNext()) {
-                SimpleFeature feature = it2.next();
-                if (featureSelector != null && ! featureSelector.convert(feature)) {
-                    continue;
-                }
-                featureList.add(feature);
-            }
-            it2.close();
-            it2 = null;
+			SimpleFeatureConverter<Boolean> featureSelector = _schema
+					.getFeatureSelector();
 
-            HashMap<Coordinate, TreeSet<String>> coordinateToStreetNames = getCoordinatesToStreetNames(featureList);
-            
-            for (SimpleFeature feature : featureList) {
-                if (feature.getDefaultGeometry() == null) {
-                    log.warn("feature has no geometry: " + feature.getIdentifier());
-                    continue;
-                }
-                LineString geom = toLineString((Geometry) feature.getDefaultGeometry());
+			// Keep track of features that are duplicated so we don't have
+			// duplicate streets
+			Set<Object> seen = new HashSet<Object>();
 
-                Object o = streetIdConverter.convert(feature);
-                String label = "" + o;
-                if (o != null && seen.contains(label)) {
-                    continue;
-                }
-                seen.add(label);
-                String name = streetNameConverter.convert(feature);
-                Coordinate[] coordinates = geom.getCoordinates();
+			List<SimpleFeature> featureList = new ArrayList<SimpleFeature>();
+			FeatureIterator<SimpleFeature> it2 = features.features();
+			while (it2.hasNext()) {
+				SimpleFeature feature = it2.next();
+				if (featureSelector != null
+						&& !featureSelector.convert(feature)) {
+					continue;
+				}
+				featureList.add(feature);
+			}
+			it2.close();
+			it2 = null;
 
-                if (coordinates.length < 2) {
-                    //not a real linestring
-                    log.warn("Bad geometry for street with label " + label + " name " + name);
-                    continue;
-                }
-                
-                // this rounding is a total hack, to work around
-                // http://jira.codehaus.org/browse/GEOT-2811
-                Coordinate startCoordinate = new Coordinate(
-                        Math.round(coordinates[0].x * 1048576) / 1048576.0, Math
-                                .round(coordinates[0].y * 1048576) / 1048576.0);
-                Coordinate endCoordinate = new Coordinate(Math
-                        .round(coordinates[coordinates.length - 1].x * 1048576) / 1048576.0, Math
-                        .round(coordinates[coordinates.length - 1].y * 1048576) / 1048576.0);
+			HashMap<Coordinate, TreeSet<String>> coordinateToStreetNames = getCoordinatesToStreetNames(featureList);
 
-                String startIntersectionName = getIntersectionName(coordinateToStreetNames,
-                        intersectionNameToId, startCoordinate);
+			for (SimpleFeature feature : featureList) {
+				if (feature.getDefaultGeometry() == null) {
+					log.warn("feature has no geometry: "
+							+ feature.getIdentifier());
+					continue;
+				}
+				LineString geom = toLineString((Geometry) feature
+						.getDefaultGeometry());
 
-                if (startIntersectionName == "null") {
-                    log.warn("No intersection name for " + name);
-                }
+				Object o = streetIdConverter.convert(feature);
+				String label = "" + o;
+				if (o != null && seen.contains(label)) {
+					continue;
+				}
+				seen.add(label);
+				String name = streetNameConverter.convert(feature);
+				Coordinate[] coordinates = geom.getCoordinates();
 
-                String endIntersectionName = getIntersectionName(coordinateToStreetNames,
-                        intersectionNameToId, endCoordinate);
+				if (coordinates.length < 2) {
+					// not a real linestring
+					log.warn("Bad geometry for street with label " + label
+							+ " name " + name);
+					continue;
+				}
 
-                IntersectionVertex startIntersection = intersectionsByLocation.get(startCoordinate);
-                if (startIntersection == null) {
-                    startIntersection = new IntersectionVertex(graph, startIntersectionName, startCoordinate.x,
-                            startCoordinate.y, startIntersectionName);
-                    intersectionsByLocation.put(startCoordinate, startIntersection);
-                }
+				// this rounding is a total hack, to work around
+				// http://jira.codehaus.org/browse/GEOT-2811
+				Coordinate startCoordinate = new Coordinate(
+						Math.round(coordinates[0].x * 1048576) / 1048576.0,
+						Math.round(coordinates[0].y * 1048576) / 1048576.0);
+				Coordinate endCoordinate = new Coordinate(
+						Math.round(coordinates[coordinates.length - 1].x * 1048576) / 1048576.0,
+						Math.round(coordinates[coordinates.length - 1].y * 1048576) / 1048576.0);
 
-                IntersectionVertex endIntersection = intersectionsByLocation.get(endCoordinate);
-                if (endIntersection == null) {
-                    endIntersection = new IntersectionVertex(graph, endIntersectionName, endCoordinate.x,
-                            endCoordinate.y, endIntersectionName);
-                    intersectionsByLocation.put(endCoordinate, endIntersection);
-                }
+				String startIntersectionName = getIntersectionName(
+						coordinateToStreetNames, intersectionNameToId,
+						startCoordinate);
 
-                double length = 0;
-                for (int i = 0; i < coordinates.length - 1; ++i) {
-                    length += JTS.orthodromicDistance(coordinates[i],
-                            coordinates[i + 1], worldCRS);
-                }
-                P2<StreetTraversalPermission> permissions = permissionConverter.convert(feature);
+				if (startIntersectionName == "null") {
+					log.warn("No intersection name for " + name);
+				}
 
-                // TODO Set appropriate car speed from shapefile source.
-                StreetEdge street = edgeFactory.createEdge(startIntersection, endIntersection,
-                        geom, name, length, permissions.first, false);
-                LineString reversed = (LineString) geom.reverse();
-                StreetEdge backStreet = edgeFactory.createEdge(endIntersection, startIntersection,
-                        reversed, name, length, permissions.second, true);
-                backStreet.shareData(street);
+				String endIntersectionName = getIntersectionName(
+						coordinateToStreetNames, intersectionNameToId,
+						endCoordinate);
 
-                if (noteConverter != null) {
-                	String note = noteConverter.convert(feature);
-                	if (note != null && note.length() > 0) {
-				Alert noteAlert = Alert.createSimpleAlerts(note);
-				graph.streetNotesService.addStaticNote(street, noteAlert, StreetNotesService.ALWAYS_MATCHER);
-				graph.streetNotesService.addStaticNote(backStreet, noteAlert, StreetNotesService.ALWAYS_MATCHER);
-                	}
-                }
+				IntersectionVertex startIntersection = intersectionsByLocation
+						.get(startCoordinate);
+				if (startIntersection == null) {
+					startIntersection = new IntersectionVertex(graph,
+							startIntersectionName, startCoordinate.x,
+							startCoordinate.y, startIntersectionName);
+					intersectionsByLocation.put(startCoordinate,
+							startIntersection);
+				}
 
-                boolean slopeOverride = slopeOverrideCoverter.convert(feature);
-                street.setSlopeOverride(slopeOverride);
-                backStreet.setSlopeOverride(slopeOverride);
+				IntersectionVertex endIntersection = intersectionsByLocation
+						.get(endCoordinate);
+				if (endIntersection == null) {
+					endIntersection = new IntersectionVertex(graph,
+							endIntersectionName, endCoordinate.x,
+							endCoordinate.y, endIntersectionName);
+					intersectionsByLocation.put(endCoordinate, endIntersection);
+				}
 
-                if (safetyConverter != null) {
-                    P2<Double> safetyFactors = safetyConverter.convert(feature);
-                    if (safetyFactors != null) {
-                        street.setBicycleSafetyFactor(safetyFactors.first.floatValue());
-                        backStreet.setBicycleSafetyFactor(safetyFactors.second.floatValue());
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            throw new IllegalStateException("error loading shapefile street data", ex);
-        } finally {
-            _featureSourceFactory.cleanup();
-        }       
-    }
+				double length = 0;
+				for (int i = 0; i < coordinates.length - 1; ++i) {
+					length += JTS.orthodromicDistance(coordinates[i],
+							coordinates[i + 1], worldCRS);
+				}
+				P2<StreetTraversalPermission> permissions = permissionConverter
+						.convert(feature);
 
-    private HashMap<Coordinate, TreeSet<String>> getCoordinatesToStreetNames(
-            List<SimpleFeature> features) {
-        HashMap<Coordinate, TreeSet<String>> coordinateToStreets = new HashMap<Coordinate, TreeSet<String>>();
-        SimpleFeatureConverter<String> streetNameConverter = _schema.getNameConverter();
+				// TODO Set appropriate car speed from shapefile source.
+				StreetEdge street = edgeFactory.createEdge(startIntersection,
+						endIntersection, geom, name, length, permissions.first,
+						false);
+				LineString reversed = (LineString) geom.reverse();
+				StreetEdge backStreet = edgeFactory.createEdge(endIntersection,
+						startIntersection, reversed, name, length,
+						permissions.second, true);
+				backStreet.shareData(street);
 
-        SimpleFeatureConverter<Boolean> featureSelector = _schema.getFeatureSelector();
-        Iterator<SimpleFeature> it = features.iterator();
-        while (it.hasNext()) {
-            SimpleFeature feature = it.next();
-            if (featureSelector != null && !featureSelector.convert(feature)) {
-                continue;
-            }
-            if (feature.getDefaultGeometry() == null) {
-                log.warn("feature has no geometry: " + feature.getIdentifier());
-                continue;
-            }
-            LineString geom = toLineString((Geometry) feature.getDefaultGeometry());
+				if (noteConverter != null) {
+					String note = noteConverter.convert(feature);
+					if (note != null && note.length() > 0) {
+						Alert noteAlert = Alert.createSimpleAlerts(note);
+						graph.streetNotesService.addStaticNote(street,
+								noteAlert, StreetNotesService.ALWAYS_MATCHER);
+						graph.streetNotesService.addStaticNote(backStreet,
+								noteAlert, StreetNotesService.ALWAYS_MATCHER);
+					}
+				}
 
-            for (Coordinate coord : geom.getCoordinates()) {
-                // this rounding is a total hack, to work around
-                // http://jira.codehaus.org/browse/GEOT-2811
-                Coordinate rounded = new Coordinate(Math.round(coord.x * 1048576) / 1048576.0, Math
-                        .round(coord.y * 1048576) / 1048576.0);
+				boolean slopeOverride = slopeOverrideCoverter.convert(feature);
+				street.setSlopeOverride(slopeOverride);
+				backStreet.setSlopeOverride(slopeOverride);
 
-                TreeSet<String> streets = coordinateToStreets.get(rounded);
-                if (streets == null) {
-                    streets = new TreeSet<String>();
-                    coordinateToStreets.put(rounded, streets);
-                }
-                String streetName = streetNameConverter.convert(feature);
-                if (streetName == null) {
-                	throw new IllegalStateException("Unexpectedly got null for a street name for feature at " + coord);
-                }
-                streets.add(streetName);
-            }
-        }
+				if (safetyConverter != null) {
+					P2<Double> safetyFactors = safetyConverter.convert(feature);
+					if (safetyFactors != null) {
+						street.setBicycleSafetyFactor(safetyFactors.first
+								.floatValue());
+						backStreet.setBicycleSafetyFactor(safetyFactors.second
+								.floatValue());
+					}
+				}
+			}
+		} catch (Exception ex) {
+			throw new IllegalStateException(
+					"error loading shapefile street data", ex);
+		} finally {
+			_featureSourceFactory.cleanup();
+		}
+	}
 
-        return coordinateToStreets;
-    }
+	private HashMap<Coordinate, TreeSet<String>> getCoordinatesToStreetNames(
+			List<SimpleFeature> features) {
+		HashMap<Coordinate, TreeSet<String>> coordinateToStreets = new HashMap<Coordinate, TreeSet<String>>();
+		SimpleFeatureConverter<String> streetNameConverter = _schema
+				.getNameConverter();
 
-    private String getIntersectionName(HashMap<Coordinate, TreeSet<String>> coordinateToStreets,
-            HashMap<String, HashMap<Coordinate, Integer>> intersectionNameToId,
-            Coordinate coordinate) {
+		SimpleFeatureConverter<Boolean> featureSelector = _schema
+				.getFeatureSelector();
+		Iterator<SimpleFeature> it = features.iterator();
+		while (it.hasNext()) {
+			SimpleFeature feature = it.next();
+			if (featureSelector != null && !featureSelector.convert(feature)) {
+				continue;
+			}
+			if (feature.getDefaultGeometry() == null) {
+				log.warn("feature has no geometry: " + feature.getIdentifier());
+				continue;
+			}
+			LineString geom = toLineString((Geometry) feature
+					.getDefaultGeometry());
 
-        TreeSet<String> streets = coordinateToStreets.get(coordinate);
-        if (streets == null) {
-            return "null";
-        }
+			for (Coordinate coord : geom.getCoordinates()) {
+				// this rounding is a total hack, to work around
+				// http://jira.codehaus.org/browse/GEOT-2811
+				Coordinate rounded = new Coordinate(
+						Math.round(coord.x * 1048576) / 1048576.0,
+						Math.round(coord.y * 1048576) / 1048576.0);
 
-        String intersection = streets.first() + " at " + streets.last();
+				TreeSet<String> streets = coordinateToStreets.get(rounded);
+				if (streets == null) {
+					streets = new TreeSet<String>();
+					coordinateToStreets.put(rounded, streets);
+				}
+				String streetName = streetNameConverter.convert(feature);
+				if (streetName == null) {
+					throw new IllegalStateException(
+							"Unexpectedly got null for a street name for feature at "
+									+ coord);
+				}
+				streets.add(streetName);
+			}
+		}
 
-        HashMap<Coordinate, Integer> possibleIntersections = intersectionNameToId.get(intersection);
-        if (possibleIntersections == null) {
-            possibleIntersections = new HashMap<Coordinate, Integer>();
-            possibleIntersections.put(coordinate, 1);
-            intersectionNameToId.put(intersection, possibleIntersections);
-            return intersection;
-        }
-        Integer index = possibleIntersections.get(coordinate);
-        if (index == null) {
-            int max = 0;
-            for (Integer value : possibleIntersections.values()) {
-                if (value > max)
-                    max = value;
-            }
-            possibleIntersections.put(coordinate, max + 1);
-            index = max + 1;
-        }
-        if (index > 1) {
-            intersection += " #" + possibleIntersections.get(coordinate);
-        }
-        return intersection;
-    }
+		return coordinateToStreets;
+	}
 
-    private LineString toLineString(Geometry g) {
-        if (g instanceof LineString) {
-            return (LineString) g;
-        } else if (g instanceof MultiLineString) {
-            MultiLineString ml = (MultiLineString) g;
+	private String getIntersectionName(
+			HashMap<Coordinate, TreeSet<String>> coordinateToStreets,
+			HashMap<String, HashMap<Coordinate, Integer>> intersectionNameToId,
+			Coordinate coordinate) {
 
-            Coordinate[] coords = ml.getCoordinates();
-            return GeometryUtils.getGeometryFactory().createLineString(coords);
-        } else {
-            throw new RuntimeException("found a geometry feature that's not a linestring: " + g);
-        }
-    }
+		TreeSet<String> streets = coordinateToStreets.get(coordinate);
+		if (streets == null) {
+			return "null";
+		}
 
-    @Override
-    public void checkInputs() {
-        _featureSourceFactory.checkInputs();
-    }
+		String intersection = streets.first() + " at " + streets.last();
+
+		HashMap<Coordinate, Integer> possibleIntersections = intersectionNameToId
+				.get(intersection);
+		if (possibleIntersections == null) {
+			possibleIntersections = new HashMap<Coordinate, Integer>();
+			possibleIntersections.put(coordinate, 1);
+			intersectionNameToId.put(intersection, possibleIntersections);
+			return intersection;
+		}
+		Integer index = possibleIntersections.get(coordinate);
+		if (index == null) {
+			int max = 0;
+			for (Integer value : possibleIntersections.values()) {
+				if (value > max)
+					max = value;
+			}
+			possibleIntersections.put(coordinate, max + 1);
+			index = max + 1;
+		}
+		if (index > 1) {
+			intersection += " #" + possibleIntersections.get(coordinate);
+		}
+		return intersection;
+	}
+
+	private LineString toLineString(Geometry g) {
+		if (g instanceof LineString) {
+			return (LineString) g;
+		} else if (g instanceof MultiLineString) {
+			MultiLineString ml = (MultiLineString) g;
+
+			Coordinate[] coords = ml.getCoordinates();
+			return GeometryUtils.getGeometryFactory().createLineString(coords);
+		} else {
+			throw new RuntimeException(
+					"found a geometry feature that's not a linestring: " + g);
+		}
+	}
+
+	@Override
+	public void checkInputs() {
+		_featureSourceFactory.checkInputs();
+	}
 }

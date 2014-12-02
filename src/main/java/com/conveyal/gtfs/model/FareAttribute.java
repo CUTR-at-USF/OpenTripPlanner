@@ -20,41 +20,66 @@ import java.io.IOException;
 
 public class FareAttribute extends Entity {
 
-    public String fare_id;
-    public double price;
-    public String currency_type;
-    public int payment_method;
-    public int transfers;
-    public int transfer_duration;
+	public String fare_id;
+	public double price;
+	public String currency_type;
+	public int payment_method;
+	public int transfers;
+	public int transfer_duration;
 
-    public static class Loader extends Entity.Loader<FareAttribute> {
+	public static class Loader extends Entity.Loader<FareAttribute> {
 
-        public Loader(GTFSFeed feed) {
-            super(feed, "fare_attributes");
-        }
+		public Loader(GTFSFeed feed) {
+			super(feed, "fare_attributes");
+		}
 
-        @Override
-        public void loadOneRow() throws IOException {
+		@Override
+		public void loadOneRow() throws IOException {
 
-            /* Calendars and Fares are special: they are stored as joined tables rather than simple maps. */
-            String fareId = getStringField("fare_id", true);
-            Fare fare = feed.getOrCreateFare(fareId);
-            if (fare.fare_attribute != null) {
-                feed.errors.add(new DuplicateKeyError(tableName, row, "fare_id"));
-            } else {
-                FareAttribute fa = new FareAttribute();
-                fa.fare_id = fareId;
-                fa.price = getDoubleField("price", true, 0, Integer.MAX_VALUE);
-                fa.currency_type = getStringField("currency_type", true);
-                fa.payment_method = getIntField("payment_method", true, 0, 1);
-                fa.transfers = getIntField("transfers", false, 0, 10); // TODO missing means "unlimited" in this case (rather than 0), supply default value or just use the NULL to mean unlimited
-                fa.transfer_duration = getIntField("transfer_duration", false, 0, 24 * 60 * 60);
-                fa.feed = feed;
-                fare.fare_attribute = fa;
-            }
+			/*
+			 * Calendars and Fares are special: they are stored as joined tables
+			 * rather than simple maps.
+			 */
+			String fareId = getStringField("fare_id", true);
+			Fare fare = feed.getOrCreateFare(fareId);
+			if (fare.fare_attribute != null) {
+				feed.errors
+						.add(new DuplicateKeyError(tableName, row, "fare_id"));
+			} else {
+				FareAttribute fa = new FareAttribute();
+				fa.fare_id = fareId;
+				fa.price = getDoubleField("price", true, 0, Integer.MAX_VALUE);
+				fa.currency_type = getStringField("currency_type", true);
+				fa.payment_method = getIntField("payment_method", true, 0, 1);
+				fa.transfers = getIntField("transfers", false, 0, 10); // TODO
+																		// missing
+																		// means
+																		// "unlimited"
+																		// in
+																		// this
+																		// case
+																		// (rather
+																		// than
+																		// 0),
+																		// supply
+																		// default
+																		// value
+																		// or
+																		// just
+																		// use
+																		// the
+																		// NULL
+																		// to
+																		// mean
+																		// unlimited
+				fa.transfer_duration = getIntField("transfer_duration", false,
+						0, 24 * 60 * 60);
+				fa.feed = feed;
+				fare.fare_attribute = fa;
+			}
 
-        }
+		}
 
-    }
+	}
 
 }

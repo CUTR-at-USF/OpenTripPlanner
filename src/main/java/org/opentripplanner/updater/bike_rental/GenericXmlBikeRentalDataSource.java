@@ -25,64 +25,71 @@ import org.opentripplanner.util.xml.XmlDataListDownloader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class GenericXmlBikeRentalDataSource implements BikeRentalDataSource, PreferencesConfigurable {
+public abstract class GenericXmlBikeRentalDataSource implements
+		BikeRentalDataSource, PreferencesConfigurable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GenericXmlBikeRentalDataSource.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(GenericXmlBikeRentalDataSource.class);
 
-    private String url;
+	private String url;
 
-    List<BikeRentalStation> stations = new ArrayList<BikeRentalStation>();
+	List<BikeRentalStation> stations = new ArrayList<BikeRentalStation>();
 
-    private XmlDataListDownloader<BikeRentalStation> xmlDownloader;
+	private XmlDataListDownloader<BikeRentalStation> xmlDownloader;
 
-    public GenericXmlBikeRentalDataSource(String path) {
-        xmlDownloader = new XmlDataListDownloader<BikeRentalStation>();
-        xmlDownloader.setPath(path);
-        xmlDownloader.setDataFactory(new XmlDataListDownloader.XmlDataFactory<BikeRentalStation>() {
-            @Override
-            public BikeRentalStation build(Map<String, String> attributes) {
-                /* TODO Do not make this class abstract, but instead make the client
-                 * provide itself the factory?
-                 */
-                return makeStation(attributes);
-            }
-        });
-    }
+	public GenericXmlBikeRentalDataSource(String path) {
+		xmlDownloader = new XmlDataListDownloader<BikeRentalStation>();
+		xmlDownloader.setPath(path);
+		xmlDownloader
+				.setDataFactory(new XmlDataListDownloader.XmlDataFactory<BikeRentalStation>() {
+					@Override
+					public BikeRentalStation build(
+							Map<String, String> attributes) {
+						/*
+						 * TODO Do not make this class abstract, but instead
+						 * make the client provide itself the factory?
+						 */
+						return makeStation(attributes);
+					}
+				});
+	}
 
-    @Override
-    public boolean update() {
-        List<BikeRentalStation> newStations = xmlDownloader.download(url);
-        if (newStations != null) {
-            synchronized(this) {
-                stations = newStations;
-            }
-            return true;
-        }
-        LOG.info("Can't update bike rental station list from: " + url + ", keeping current list.");
-        return false;
-    }
+	@Override
+	public boolean update() {
+		List<BikeRentalStation> newStations = xmlDownloader.download(url);
+		if (newStations != null) {
+			synchronized (this) {
+				stations = newStations;
+			}
+			return true;
+		}
+		LOG.info("Can't update bike rental station list from: " + url
+				+ ", keeping current list.");
+		return false;
+	}
 
-    @Override
-    public synchronized List<BikeRentalStation> getStations() {
-        return stations;
-    }
+	@Override
+	public synchronized List<BikeRentalStation> getStations() {
+		return stations;
+	}
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
+	public void setUrl(String url) {
+		this.url = url;
+	}
 
-    public abstract BikeRentalStation makeStation(Map<String, String> attributes);
+	public abstract BikeRentalStation makeStation(Map<String, String> attributes);
 
-    @Override
-    public String toString() {
-        return getClass().getName() + "(" + url + ")";
-    }
-    
-    @Override
-    public void configure(Graph graph, Preferences preferences) {
-        String url = preferences.get("url", null);
-        if (url == null)
-            throw new IllegalArgumentException("Missing mandatory 'url' configuration.");
-        setUrl(url);
-    }
+	@Override
+	public String toString() {
+		return getClass().getName() + "(" + url + ")";
+	}
+
+	@Override
+	public void configure(Graph graph, Preferences preferences) {
+		String url = preferences.get("url", null);
+		if (url == null)
+			throw new IllegalArgumentException(
+					"Missing mandatory 'url' configuration.");
+		setUrl(url);
+	}
 }

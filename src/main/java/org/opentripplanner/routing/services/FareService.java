@@ -18,6 +18,7 @@ import org.opentripplanner.routing.spt.GraphPath;
 
 /**
  * Computes a fare for a given GraphPath.
+ * 
  * @author novalis
  *
  */

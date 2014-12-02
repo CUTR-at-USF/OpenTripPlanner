@@ -27,41 +27,42 @@ import com.vividsolutions.jts.geom.util.AffineTransformation;
  */
 public interface TileRenderer {
 
-    /**
-     * Context used for rendering a tile.
-     * 
-     */
-    public abstract class TileRenderContext {
+	/**
+	 * Context used for rendering a tile.
+	 * 
+	 */
+	public abstract class TileRenderContext {
 
-        /** Graphics where to paint tile to, in pixel CRS (no transform set) */
-        public Graphics2D graphics;
+		/** Graphics where to paint tile to, in pixel CRS (no transform set) */
+		public Graphics2D graphics;
 
-        /** The JTS transform that convert from WGS84 CRS to pixel CRS */
-        public AffineTransformation transform;
+		/** The JTS transform that convert from WGS84 CRS to pixel CRS */
+		public AffineTransformation transform;
 
-        /** The graph being processed */
-        public Graph graph;
+		/** The graph being processed */
+		public Graph graph;
 
-        /** Bounding box of the rendered tile in WGS84 CRS, w/o margins */
-        public Envelope bbox;
+		/** Bounding box of the rendered tile in WGS84 CRS, w/o margins */
+		public Envelope bbox;
 
-        /** Ground pixel density inverse */
-        public double metersPerPixel;
+		/** Ground pixel density inverse */
+		public double metersPerPixel;
 
-        /** Tile size in pixels */
-        public int tileWidth, tileHeight;
+		/** Tile size in pixels */
+		public int tileWidth, tileHeight;
 
-        /** Expand the bounding box to add some margins, in pixel size. */
-        public abstract Envelope expandPixels(double marginXPixels, double marginYPixels);
-    }
+		/** Expand the bounding box to add some margins, in pixel size. */
+		public abstract Envelope expandPixels(double marginXPixels,
+				double marginYPixels);
+	}
 
-    /** Return the BufferedImage color model the renderer would like to use */
-    public abstract int getColorModel();
+	/** Return the BufferedImage color model the renderer would like to use */
+	public abstract int getColorModel();
 
-    /** Implementation of the tile rendering */
-    public abstract void renderTile(TileRenderContext context);
+	/** Implementation of the tile rendering */
+	public abstract void renderTile(TileRenderContext context);
 
-    /** Gets descriptive name of this Tile Render */
-    public abstract String getName();
+	/** Gets descriptive name of this Tile Render */
+	public abstract String getName();
 
 }

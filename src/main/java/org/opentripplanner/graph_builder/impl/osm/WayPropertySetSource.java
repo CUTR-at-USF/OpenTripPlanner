@@ -14,8 +14,8 @@
 package org.opentripplanner.graph_builder.impl.osm;
 
 /**
- * Factory interface for providing a {@link WayPropertySet} that determine how OSM
- * streets can be traversed in various modes and named.
+ * Factory interface for providing a {@link WayPropertySet} that determine how
+ * OSM streets can be traversed in various modes and named.
  *
  * TODO clarify why we need a factory interface for this.
  *
@@ -24,5 +24,5 @@ package org.opentripplanner.graph_builder.impl.osm;
  * @see OpenStreetMapGraphBuilderImpl#setWayPropertySetSource(WayPropertySetSource)
  */
 public interface WayPropertySetSource {
-    public WayPropertySet getWayPropertySet();
+	public WayPropertySet getWayPropertySet();
 }

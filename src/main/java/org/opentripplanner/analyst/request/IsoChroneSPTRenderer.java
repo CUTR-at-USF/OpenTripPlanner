@@ -25,10 +25,15 @@ import org.opentripplanner.routing.core.RoutingRequest;
  */
 public interface IsoChroneSPTRenderer {
 
-    /**
-     * @param isoChroneRequest Contains a list of cutoff times, etc...
-     * @param sptRequest Contains path computation parameters (origin, modes, max walk...)
-     * @return A list of IsochroneData, one for each cutoff time in the request (same order).
-     */
-    List<IsochroneData> getIsochrones(IsoChroneRequest isoChroneRequest, RoutingRequest sptRequest);
+	/**
+	 * @param isoChroneRequest
+	 *            Contains a list of cutoff times, etc...
+	 * @param sptRequest
+	 *            Contains path computation parameters (origin, modes, max
+	 *            walk...)
+	 * @return A list of IsochroneData, one for each cutoff time in the request
+	 *         (same order).
+	 */
+	List<IsochroneData> getIsochrones(IsoChroneRequest isoChroneRequest,
+			RoutingRequest sptRequest);
 }

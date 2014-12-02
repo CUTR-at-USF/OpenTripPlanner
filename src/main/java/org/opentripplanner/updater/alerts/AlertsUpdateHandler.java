@@ -35,149 +35,166 @@ import com.google.transit.realtime.GtfsRealtime.TimeRange;
 
 /**
  * This updater only includes GTFS-Realtime Service Alert feeds.
+ * 
  * @author novalis
  *
  */
 public class AlertsUpdateHandler {
-    private static final Logger log = LoggerFactory.getLogger(AlertsUpdateHandler.class);
+	private static final Logger log = LoggerFactory
+			.getLogger(AlertsUpdateHandler.class);
 
-    private String defaultAgencyId;
+	private String defaultAgencyId;
 
-    private Set<String> patchIds = new HashSet<String>();
+	private Set<String> patchIds = new HashSet<String>();
 
-    private AlertPatchService alertPatchService;
+	private AlertPatchService alertPatchService;
 
-    /** How long before the posted start of an event it should be displayed to users */
-    private long earlyStart;
+	/**
+	 * How long before the posted start of an event it should be displayed to
+	 * users
+	 */
+	private long earlyStart;
 
-    public void update(FeedMessage message) {
-        alertPatchService.expire(patchIds);
-        patchIds.clear();
+	public void update(FeedMessage message) {
+		alertPatchService.expire(patchIds);
+		patchIds.clear();
 
-        for (FeedEntity entity : message.getEntityList()) {
-            if (!entity.hasAlert()) {
-                continue;
-            }
-            GtfsRealtime.Alert alert = entity.getAlert();
-            String id = entity.getId();
-            handleAlert(id, alert);
-        }
-    }
+		for (FeedEntity entity : message.getEntityList()) {
+			if (!entity.hasAlert()) {
+				continue;
+			}
+			GtfsRealtime.Alert alert = entity.getAlert();
+			String id = entity.getId();
+			handleAlert(id, alert);
+		}
+	}
 
-    private void handleAlert(String id, GtfsRealtime.Alert alert) {
-        Alert alertText = new Alert();
-        alertText.alertDescriptionText = deBuffer(alert.getDescriptionText());
-        alertText.alertHeaderText = deBuffer(alert.getHeaderText());
-        alertText.alertUrl = deBuffer(alert.getUrl());
-        ArrayList<TimePeriod> periods = new ArrayList<TimePeriod>();
-        if(alert.getActivePeriodCount() > 0) {
-            long bestStartTime = Long.MAX_VALUE;
-            for (TimeRange activePeriod : alert.getActivePeriodList()) {
-                final long realStart = activePeriod.hasStart() ? activePeriod.getStart() : 0;
-                final long start = activePeriod.hasStart() ? realStart - earlyStart : 0;
-                if (realStart > 0 && realStart < bestStartTime) {
-                    bestStartTime = realStart;
-                }
-                final long end = activePeriod.hasEnd() ? activePeriod.getEnd() : Long.MAX_VALUE;
-                periods.add(new TimePeriod(start, end));
-            }
-            if (bestStartTime != Long.MAX_VALUE) {
-                alertText.effectiveStartDate = new Date(bestStartTime * 1000);
-            }
-        } else {
-            // Per the GTFS-rt spec, if an alert has no TimeRanges, than it should always be shown.
-            periods.add(new TimePeriod(0, Long.MAX_VALUE));
-        }
-        for (EntitySelector informed : alert.getInformedEntityList()) {
-            String patchId = createId(id, informed);
+	private void handleAlert(String id, GtfsRealtime.Alert alert) {
+		Alert alertText = new Alert();
+		alertText.alertDescriptionText = deBuffer(alert.getDescriptionText());
+		alertText.alertHeaderText = deBuffer(alert.getHeaderText());
+		alertText.alertUrl = deBuffer(alert.getUrl());
+		ArrayList<TimePeriod> periods = new ArrayList<TimePeriod>();
+		if (alert.getActivePeriodCount() > 0) {
+			long bestStartTime = Long.MAX_VALUE;
+			for (TimeRange activePeriod : alert.getActivePeriodList()) {
+				final long realStart = activePeriod.hasStart() ? activePeriod
+						.getStart() : 0;
+				final long start = activePeriod.hasStart() ? realStart
+						- earlyStart : 0;
+				if (realStart > 0 && realStart < bestStartTime) {
+					bestStartTime = realStart;
+				}
+				final long end = activePeriod.hasEnd() ? activePeriod.getEnd()
+						: Long.MAX_VALUE;
+				periods.add(new TimePeriod(start, end));
+			}
+			if (bestStartTime != Long.MAX_VALUE) {
+				alertText.effectiveStartDate = new Date(bestStartTime * 1000);
+			}
+		} else {
+			// Per the GTFS-rt spec, if an alert has no TimeRanges, than it
+			// should always be shown.
+			periods.add(new TimePeriod(0, Long.MAX_VALUE));
+		}
+		for (EntitySelector informed : alert.getInformedEntityList()) {
+			String patchId = createId(id, informed);
 
-            String routeId = null;
-            if (informed.hasRouteId()) {
-                routeId = informed.getRouteId();
-            }
-            // TODO: The other elements of a TripDescriptor are ignored...
-            String tripId = null;
-            if (informed.hasTrip() && informed.getTrip().hasTripId()) {
-                tripId = informed.getTrip().getTripId();
-            }
-            String stopId = null;
-            if (informed.hasStopId()) {
-                stopId = informed.getStopId();
-            }
+			String routeId = null;
+			if (informed.hasRouteId()) {
+				routeId = informed.getRouteId();
+			}
+			// TODO: The other elements of a TripDescriptor are ignored...
+			String tripId = null;
+			if (informed.hasTrip() && informed.getTrip().hasTripId()) {
+				tripId = informed.getTrip().getTripId();
+			}
+			String stopId = null;
+			if (informed.hasStopId()) {
+				stopId = informed.getStopId();
+			}
 
-            String agencyId = informed.getAgencyId();
-            if (informed.hasAgencyId()) {
-                agencyId = informed.getAgencyId().intern();
-            } else {
-                agencyId = defaultAgencyId;
-            }
-            if (agencyId == null) {
-                log.error("Empty agency id (and no default set) in feed; other ids are route "
-                        + routeId + " and stop " + stopId);
-                continue;
-            }
+			String agencyId = informed.getAgencyId();
+			if (informed.hasAgencyId()) {
+				agencyId = informed.getAgencyId().intern();
+			} else {
+				agencyId = defaultAgencyId;
+			}
+			if (agencyId == null) {
+				log.error("Empty agency id (and no default set) in feed; other ids are route "
+						+ routeId + " and stop " + stopId);
+				continue;
+			}
 
-            AlertPatch patch = new AlertPatch();
-            if (routeId != null) {
-                patch.setRoute(new AgencyAndId(agencyId, routeId));
-            }
-            if (tripId != null) {
-                patch.setTrip(new AgencyAndId(agencyId, tripId));
-            }
-            if (stopId != null) {
-                patch.setStop(new AgencyAndId(agencyId, stopId));
-            }
-            if(agencyId != null && routeId == null && tripId == null && stopId == null) {
-                patch.setAgencyId(agencyId);
-            }
-            patch.setTimePeriods(periods);
-            patch.setAlert(alertText);
+			AlertPatch patch = new AlertPatch();
+			if (routeId != null) {
+				patch.setRoute(new AgencyAndId(agencyId, routeId));
+			}
+			if (tripId != null) {
+				patch.setTrip(new AgencyAndId(agencyId, tripId));
+			}
+			if (stopId != null) {
+				patch.setStop(new AgencyAndId(agencyId, stopId));
+			}
+			if (agencyId != null && routeId == null && tripId == null
+					&& stopId == null) {
+				patch.setAgencyId(agencyId);
+			}
+			patch.setTimePeriods(periods);
+			patch.setAlert(alertText);
 
-            patch.setId(patchId);
-            patchIds.add(patchId);
+			patch.setId(patchId);
+			patchIds.add(patchId);
 
-            alertPatchService.apply(patch);
-        }
-    }
+			alertPatchService.apply(patch);
+		}
+	}
 
-    private String createId(String id, EntitySelector informed) {
-        return id + " "
-            + (informed.hasAgencyId  () ? informed.getAgencyId  () : " null ") + " "
-            + (informed.hasRouteId   () ? informed.getRouteId   () : " null ") + " "
-            + (informed.hasRouteType () ? informed.getRouteType () : " null ") + " "
-            + (informed.hasStopId    () ? informed.getStopId    () : " null ") + " "
-            + (informed.hasTrip() ? informed.getTrip().getTripId() : " null ");
-    }
+	private String createId(String id, EntitySelector informed) {
+		return id
+				+ " "
+				+ (informed.hasAgencyId() ? informed.getAgencyId() : " null ")
+				+ " "
+				+ (informed.hasRouteId() ? informed.getRouteId() : " null ")
+				+ " "
+				+ (informed.hasRouteType() ? informed.getRouteType() : " null ")
+				+ " "
+				+ (informed.hasStopId() ? informed.getStopId() : " null ")
+				+ " "
+				+ (informed.hasTrip() ? informed.getTrip().getTripId()
+						: " null ");
+	}
 
-    /**
-     * convert a protobuf TranslatedString to a OTP TranslatedString
-     *
-     * @return A TranslatedString containing the same information as the input
-     */
-    private TranslatedString deBuffer(GtfsRealtime.TranslatedString input) {
-        TranslatedString result = new TranslatedString();
-        for (GtfsRealtime.TranslatedString.Translation translation : input.getTranslationList()) {
-            String language = translation.getLanguage();
-            String string = translation.getText();
-            result.addTranslation(language, string);
-        }
-        return result;
-    }
+	/**
+	 * convert a protobuf TranslatedString to a OTP TranslatedString
+	 *
+	 * @return A TranslatedString containing the same information as the input
+	 */
+	private TranslatedString deBuffer(GtfsRealtime.TranslatedString input) {
+		TranslatedString result = new TranslatedString();
+		for (GtfsRealtime.TranslatedString.Translation translation : input
+				.getTranslationList()) {
+			String language = translation.getLanguage();
+			String string = translation.getText();
+			result.addTranslation(language, string);
+		}
+		return result;
+	}
 
-    public void setDefaultAgencyId(String defaultAgencyId) {
-        if(defaultAgencyId != null)
-            this.defaultAgencyId = defaultAgencyId.intern();
-    }
+	public void setDefaultAgencyId(String defaultAgencyId) {
+		if (defaultAgencyId != null)
+			this.defaultAgencyId = defaultAgencyId.intern();
+	}
 
-    public void setAlertPatchService(AlertPatchService alertPatchService) {
-        this.alertPatchService = alertPatchService;
-    }
+	public void setAlertPatchService(AlertPatchService alertPatchService) {
+		this.alertPatchService = alertPatchService;
+	}
 
-    public long getEarlyStart() {
-        return earlyStart;
-    }
+	public long getEarlyStart() {
+		return earlyStart;
+	}
 
-    public void setEarlyStart(long earlyStart) {
-        this.earlyStart = earlyStart;
-    }
+	public void setEarlyStart(long earlyStart) {
+		this.earlyStart = earlyStart;
+	}
 }

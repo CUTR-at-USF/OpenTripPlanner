@@ -31,66 +31,75 @@ import org.opentripplanner.routing.spt.ShortestPathTree;
 import org.opentripplanner.util.TestUtils;
 
 public class TestAStar extends TestCase {
-    
-    GenericAStar aStar = new GenericAStar();
 
-    public void testBasic() throws Exception {
+	GenericAStar aStar = new GenericAStar();
 
-        GtfsContext context = GtfsLibrary.readGtfs(new File(ConstantsForTests.CALTRAIN_GTFS));
+	public void testBasic() throws Exception {
 
-        Graph gg = new Graph();
-        GTFSPatternHopFactory factory = new GTFSPatternHopFactory(context);
-        factory.run(gg);
-        gg.putService(CalendarServiceData.class, GtfsLibrary.createCalendarServiceData(context.getDao()));
-        RoutingRequest options = new RoutingRequest();
-        
-        ShortestPathTree spt;
-        GraphPath path = null;
+		GtfsContext context = GtfsLibrary.readGtfs(new File(
+				ConstantsForTests.CALTRAIN_GTFS));
 
-        options.dateTime = TestUtils.dateInSeconds("America/Los_Angeles", 2009, 8, 7, 12, 0, 0);
-        options.setRoutingContext(gg, "Caltrain:Millbrae Caltrain", "Caltrain:Mountain View Caltrain");
-        spt = aStar.getShortestPathTree(options);
-        path = spt.getPath(gg.getVertex("Caltrain:Mountain View Caltrain"), true);
+		Graph gg = new Graph();
+		GTFSPatternHopFactory factory = new GTFSPatternHopFactory(context);
+		factory.run(gg);
+		gg.putService(CalendarServiceData.class,
+				GtfsLibrary.createCalendarServiceData(context.getDao()));
+		RoutingRequest options = new RoutingRequest();
 
-        long endTime = TestUtils.dateInSeconds("America/Los_Angeles", 2009, 8, 7, 13, 29, 0);
+		ShortestPathTree spt;
+		GraphPath path = null;
 
-        assertEquals(path.getEndTime(), endTime);
+		options.dateTime = TestUtils.dateInSeconds("America/Los_Angeles", 2009,
+				8, 7, 12, 0, 0);
+		options.setRoutingContext(gg, "Caltrain:Millbrae Caltrain",
+				"Caltrain:Mountain View Caltrain");
+		spt = aStar.getShortestPathTree(options);
+		path = spt.getPath(gg.getVertex("Caltrain:Mountain View Caltrain"),
+				true);
 
-        /* test backwards traversal */
-        options.setArriveBy(true);
-        options.dateTime = endTime;
-        options.setRoutingContext(gg, "Caltrain:Millbrae Caltrain", "Caltrain:Mountain View Caltrain");
-        spt = aStar.getShortestPathTree(options);
-        path = spt.getPath(gg.getVertex("Caltrain:Millbrae Caltrain"), true);
+		long endTime = TestUtils.dateInSeconds("America/Los_Angeles", 2009, 8,
+				7, 13, 29, 0);
 
-        long expectedStartTime = TestUtils.dateInSeconds("America/Los_Angeles", 2009, 8, 7, 12, 39, 0);
+		assertEquals(path.getEndTime(), endTime);
 
-        assertTrue(path.getStartTime() - expectedStartTime <= 1);
+		/* test backwards traversal */
+		options.setArriveBy(true);
+		options.dateTime = endTime;
+		options.setRoutingContext(gg, "Caltrain:Millbrae Caltrain",
+				"Caltrain:Mountain View Caltrain");
+		spt = aStar.getShortestPathTree(options);
+		path = spt.getPath(gg.getVertex("Caltrain:Millbrae Caltrain"), true);
 
-    }
+		long expectedStartTime = TestUtils.dateInSeconds("America/Los_Angeles",
+				2009, 8, 7, 12, 39, 0);
 
-    public void testMaxTime() {
+		assertTrue(path.getStartTime() - expectedStartTime <= 1);
 
-        Graph graph = ConstantsForTests.getInstance().getPortlandGraph();
-        Vertex start = graph.getVertex("TriMet:8371");
-        Vertex end = graph.getVertex("TriMet:8374");
+	}
 
-        RoutingRequest options = new RoutingRequest();
-        long startTime = TestUtils.dateInSeconds("America/Los_Angeles", 2009, 11, 1, 12, 34, 25);
-        options.dateTime = startTime;
-        // one hour is more than enough time
-        options.worstTime = startTime + 60 * 60; 
-        options.setRoutingContext(graph, start, end);
+	public void testMaxTime() {
 
-        ShortestPathTree spt = aStar.getShortestPathTree(options);
-        GraphPath path = spt.getPath(end, true);
-        assertNotNull(path);
-        
-        // but one minute is not enough
-        options.worstTime = startTime + 60; 
-        spt = aStar.getShortestPathTree(options);
-        path = spt.getPath(end, true);
-        assertNull(path);        
-    }
+		Graph graph = ConstantsForTests.getInstance().getPortlandGraph();
+		Vertex start = graph.getVertex("TriMet:8371");
+		Vertex end = graph.getVertex("TriMet:8374");
+
+		RoutingRequest options = new RoutingRequest();
+		long startTime = TestUtils.dateInSeconds("America/Los_Angeles", 2009,
+				11, 1, 12, 34, 25);
+		options.dateTime = startTime;
+		// one hour is more than enough time
+		options.worstTime = startTime + 60 * 60;
+		options.setRoutingContext(graph, start, end);
+
+		ShortestPathTree spt = aStar.getShortestPathTree(options);
+		GraphPath path = spt.getPath(end, true);
+		assertNotNull(path);
+
+		// but one minute is not enough
+		options.worstTime = startTime + 60;
+		spt = aStar.getShortestPathTree(options);
+		path = spt.getPath(end, true);
+		assertNull(path);
+	}
 
 }

@@ -25,51 +25,58 @@ import org.opentripplanner.openstreetmap.model.OSMWithTags;
  */
 public class TestTemplateLibrary extends TestCase {
 
-    public void testTemplate() {
-        OSMWithTags osmTags = new OSMWithTags();
-        osmTags.addTag("note", "Note EN");
-        osmTags.addTag("description:fr", "Description FR");
-        osmTags.addTag("wheelchair:description", "Wheelchair description EN");
-        osmTags.addTag("wheelchair:description:fr", "Wheelchair description FR");
+	public void testTemplate() {
+		OSMWithTags osmTags = new OSMWithTags();
+		osmTags.addTag("note", "Note EN");
+		osmTags.addTag("description:fr", "Description FR");
+		osmTags.addTag("wheelchair:description", "Wheelchair description EN");
+		osmTags.addTag("wheelchair:description:fr", "Wheelchair description FR");
 
-        assertEquals(null, TemplateLibrary.generate(null, osmTags));
-        assertEquals("", TemplateLibrary.generate("", osmTags));
-        assertEquals("Static text", TemplateLibrary.generate("Static text", osmTags));
-        assertEquals("Note: Note EN", TemplateLibrary.generate("Note: {note}", osmTags));
-        assertEquals("Inexistant: ",
-                TemplateLibrary.generate("Inexistant: {foobar:description}", osmTags));
-        assertEquals("Wheelchair note: Wheelchair description EN",
-                TemplateLibrary.generate("Wheelchair note: {wheelchair:description}", osmTags));
+		assertEquals(null, TemplateLibrary.generate(null, osmTags));
+		assertEquals("", TemplateLibrary.generate("", osmTags));
+		assertEquals("Static text",
+				TemplateLibrary.generate("Static text", osmTags));
+		assertEquals("Note: Note EN",
+				TemplateLibrary.generate("Note: {note}", osmTags));
+		assertEquals("Inexistant: ", TemplateLibrary.generate(
+				"Inexistant: {foobar:description}", osmTags));
+		assertEquals("Wheelchair note: Wheelchair description EN",
+				TemplateLibrary.generate(
+						"Wheelchair note: {wheelchair:description}", osmTags));
 
-        assertEquals(null, TemplateLibrary.generateI18N(null, osmTags, "en"));
-        Map<String, String> expected = new HashMap<>();
+		assertEquals(null, TemplateLibrary.generateI18N(null, osmTags, "en"));
+		Map<String, String> expected = new HashMap<>();
 
-        expected.put("en", "");
-        assertEquals(expected, TemplateLibrary.generateI18N("", osmTags, "en"));
+		expected.put("en", "");
+		assertEquals(expected, TemplateLibrary.generateI18N("", osmTags, "en"));
 
-        expected.clear();
-        expected.put("en", "Note: Note EN");
-        assertEquals(expected, TemplateLibrary.generateI18N("Note: {note}", osmTags, "en"));
+		expected.clear();
+		expected.put("en", "Note: Note EN");
+		assertEquals(expected,
+				TemplateLibrary.generateI18N("Note: {note}", osmTags, "en"));
 
-        expected.clear();
-        expected.put("fr", "Note: Note EN");
-        assertEquals(expected, TemplateLibrary.generateI18N("Note: {note}", osmTags, "fr"));
+		expected.clear();
+		expected.put("fr", "Note: Note EN");
+		assertEquals(expected,
+				TemplateLibrary.generateI18N("Note: {note}", osmTags, "fr"));
 
-        expected.clear();
-        expected.put("fr", "Desc: Description FR");
-        assertEquals(expected, TemplateLibrary.generateI18N("Desc: {description}", osmTags, "fr"));
+		expected.clear();
+		expected.put("fr", "Desc: Description FR");
+		assertEquals(expected, TemplateLibrary.generateI18N(
+				"Desc: {description}", osmTags, "fr"));
 
-        expected.clear();
-        expected.put("en", "Note: Note EN, Wheelchair description EN");
-        expected.put("fr", "Note: Note EN, Wheelchair description FR");
-        assertEquals(expected, TemplateLibrary.generateI18N(
-                "Note: {note}, {wheelchair:description}", osmTags, "en"));
+		expected.clear();
+		expected.put("en", "Note: Note EN, Wheelchair description EN");
+		expected.put("fr", "Note: Note EN, Wheelchair description FR");
+		assertEquals(expected, TemplateLibrary.generateI18N(
+				"Note: {note}, {wheelchair:description}", osmTags, "en"));
 
-        expected.clear();
-        expected.put("fr", "Note: Note EN, Wheelchair description FR, ");
-        assertEquals(expected, TemplateLibrary.generateI18N(
-                "Note: {note}, {wheelchair:description}, {foobar:description}", osmTags, "fr"));
+		expected.clear();
+		expected.put("fr", "Note: Note EN, Wheelchair description FR, ");
+		assertEquals(expected, TemplateLibrary.generateI18N(
+				"Note: {note}, {wheelchair:description}, {foobar:description}",
+				osmTags, "fr"));
 
-    }
+	}
 
 }

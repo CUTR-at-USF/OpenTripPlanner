@@ -47,42 +47,45 @@ public class YahooGeocoder implements Geocoder {
 	public void setAppId(String appId) {
 		this.appId = appId;
 	}
-	
+
 	public String getLocale() {
 		return locale;
 	}
-	
+
 	public void setLocale(String locale) {
 		this.locale = locale;
 	}
 
 	@Override
 	public GeocoderResults geocode(String address, Envelope bbox) {
-		if (appId == null) throw new NullPointerException("appid not set");
-		
+		if (appId == null)
+			throw new NullPointerException("appid not set");
+
 		String content = null;
-		
+
 		try {
 			// make json request
 			URL googleGeocoderUrl = getYahooGeocoderUrl(address);
-            URLConnection conn = googleGeocoderUrl.openConnection();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
-            
-            StringBuilder sb = new StringBuilder(128);
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-                sb.append("\n");
-            }
-            reader.close();
-            content = sb.toString();
+			URLConnection conn = googleGeocoderUrl.openConnection();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					conn.getInputStream(), "utf-8"));
+
+			StringBuilder sb = new StringBuilder(128);
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				sb.append(line);
+				sb.append("\n");
+			}
+			reader.close();
+			content = sb.toString();
 
 		} catch (IOException e) {
 			e.printStackTrace();
 			return noGeocoderResult("Error parsing geocoder response");
 		}
-		
-		YahooGeocoderResults yahooGeocoderResults = yahooJsonDeserializer.parseResults(content);
+
+		YahooGeocoderResults yahooGeocoderResults = yahooJsonDeserializer
+				.parseResults(content);
 		YahooGeocoderResultSet resultSet = yahooGeocoderResults.getResultSet();
 		List<YahooGeocoderResult> results = resultSet.getResults();
 		List<GeocoderResult> geocoderResults = new ArrayList<GeocoderResult>();
@@ -101,9 +104,10 @@ public class YahooGeocoder implements Geocoder {
 		}
 		return new GeocoderResults(geocoderResults);
 	}
-	
+
 	private URL getYahooGeocoderUrl(String address) throws IOException {
-		UriBuilder uriBuilder = UriBuilder.fromUri("http://where.yahooapis.com/geocode");
+		UriBuilder uriBuilder = UriBuilder
+				.fromUri("http://where.yahooapis.com/geocode");
 		uriBuilder.queryParam("location", address);
 		uriBuilder.queryParam("flags", "J");
 		uriBuilder.queryParam("appid", appId);
@@ -114,7 +118,6 @@ public class YahooGeocoder implements Geocoder {
 		URI uri = uriBuilder.build();
 		return new URL(uri.toString());
 	}
-
 
 	private GeocoderResults noGeocoderResult(String error) {
 		return new GeocoderResults(error);

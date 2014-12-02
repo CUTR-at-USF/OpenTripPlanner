@@ -27,7 +27,7 @@ public class GeometrySerializer extends JsonSerializer<Geometry> {
 	@Override
 	public void serialize(Geometry value, JsonGenerator jgen,
 			SerializerProvider provider) throws IOException,
-            JsonProcessingException {
+			JsonProcessingException {
 
 		writeGeometry(jgen, value);
 	}
@@ -37,7 +37,7 @@ public class GeometrySerializer extends JsonSerializer<Geometry> {
 		if (value instanceof Polygon) {
 			writePolygon(jgen, (Polygon) value);
 
-		} else if(value instanceof Point) {
+		} else if (value instanceof Point) {
 			writePoint(jgen, (Point) value);
 
 		} else if (value instanceof MultiPoint) {

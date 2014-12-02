@@ -18,11 +18,13 @@ import org.opentripplanner.common.geometry.ZSampleGrid.ZSamplePoint;
 import com.vividsolutions.jts.geom.Coordinate;
 
 /**
- * A generic indexed grid of TZ samples. TZ could be anything but is usually a vector of parameters.
+ * A generic indexed grid of TZ samples. TZ could be anything but is usually a
+ * vector of parameters.
  * 
- * We assume some sort of equirectangular project between the index coordinates (x,y) and the
- * geographic coordinates (lat, lon). The projection factor (cos phi, standard parallel) is given as
- * a cell size in lat,lon degrees (dLat,dLon)). The conversion is given by the following formulae:
+ * We assume some sort of equirectangular project between the index coordinates
+ * (x,y) and the geographic coordinates (lat, lon). The projection factor (cos
+ * phi, standard parallel) is given as a cell size in lat,lon degrees
+ * (dLat,dLon)). The conversion is given by the following formulae:
  * 
  * <code>
  * lon = lon0 + x.dLon;
@@ -33,91 +35,96 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public interface ZSampleGrid<TZ> extends Iterable<ZSamplePoint<TZ>> {
 
-    public interface ZSamplePoint<TZ> {
-        /**
-         * @return The X index of this sample point.
-         */
-        public int getX();
+	public interface ZSamplePoint<TZ> {
+		/**
+		 * @return The X index of this sample point.
+		 */
+		public int getX();
 
-        /**
-         * @return The Y index of this sample point.
-         */
-        public int getY();
+		/**
+		 * @return The Y index of this sample point.
+		 */
+		public int getY();
 
-        /**
-         * @return The Z value associated with this sample point.
-         */
-        public TZ getZ();
+		/**
+		 * @return The Z value associated with this sample point.
+		 */
+		public TZ getZ();
 
-        public void setZ(TZ z);
+		public void setZ(TZ z);
 
-        /**
-         * @return The neighboring sample point located at (x,y-1)
-         */
-        public ZSamplePoint<TZ> up();
+		/**
+		 * @return The neighboring sample point located at (x,y-1)
+		 */
+		public ZSamplePoint<TZ> up();
 
-        /**
-         * @return The neighboring sample point located at (x,y+1)
-         */
-        public ZSamplePoint<TZ> down();
+		/**
+		 * @return The neighboring sample point located at (x,y+1)
+		 */
+		public ZSamplePoint<TZ> down();
 
-        /**
-         * @return The neighboring sample point located at (x+1,y)
-         */
-        public ZSamplePoint<TZ> right();
+		/**
+		 * @return The neighboring sample point located at (x+1,y)
+		 */
+		public ZSamplePoint<TZ> right();
 
-        /**
-         * @return The neighboring sample point located at (x-1,y)
-         */
-        public ZSamplePoint<TZ> left();
+		/**
+		 * @return The neighboring sample point located at (x-1,y)
+		 */
+		public ZSamplePoint<TZ> left();
 
-    }
+	}
 
-    /**
-     * @param x
-     * @param y
-     * @return The sample point located at (x,y). Create a new one if not existing.
-     */
-    public ZSamplePoint<TZ> getOrCreate(int x, int y);
+	/**
+	 * @param x
+	 * @param y
+	 * @return The sample point located at (x,y). Create a new one if not
+	 *         existing.
+	 */
+	public ZSamplePoint<TZ> getOrCreate(int x, int y);
 
-    /**
-     * @param point The sample point
-     * @return The (lat,lon) coordinates of this sample point.
-     */
-    public Coordinate getCoordinates(ZSamplePoint<TZ> point);
+	/**
+	 * @param point
+	 *            The sample point
+	 * @return The (lat,lon) coordinates of this sample point.
+	 */
+	public Coordinate getCoordinates(ZSamplePoint<TZ> point);
 
-    /**
-     * @param C The geographical coordinate
-     * @return The (x,y) index of the lower-left index of the cell enclosing the point.
-     */
-    public int[] getLowerLeftIndex(Coordinate C);
+	/**
+	 * @param C
+	 *            The geographical coordinate
+	 * @return The (x,y) index of the lower-left index of the cell enclosing the
+	 *         point.
+	 */
+	public int[] getLowerLeftIndex(Coordinate C);
 
-    /**
-     * @return The base coordinate center (lat0,lon0)
-     */
-    public Coordinate getCenter();
+	/**
+	 * @return The base coordinate center (lat0,lon0)
+	 */
+	public Coordinate getCenter();
 
-    /**
-     * @return The cell size (dLat,dLon)
-     */
-    public Coordinate getCellSize();
+	/**
+	 * @return The cell size (dLat,dLon)
+	 */
+	public Coordinate getCellSize();
 
-    public int getXMin();
+	public int getXMin();
 
-    public int getXMax();
+	public int getXMax();
 
-    public int getYMin();
+	public int getYMin();
 
-    public int getYMax();
+	public int getYMax();
 
-    public int size();
+	public int size();
 
-    /**
-     * TODO The mapping between a ZSampleGrid and a DelaunayTriangulation should not be part of an
-     * interface but extracted to a converter. This assume that the conversion process does not rely
-     * on the inner working of the ZSampleGrid implementation, which should be the case.
-     * 
-     * @return This ZSampleGrid converted as a DelaunayTriangulation.
-     */
-    public DelaunayTriangulation<TZ> delaunayTriangulate();
+	/**
+	 * TODO The mapping between a ZSampleGrid and a DelaunayTriangulation should
+	 * not be part of an interface but extracted to a converter. This assume
+	 * that the conversion process does not rely on the inner working of the
+	 * ZSampleGrid implementation, which should be the case.
+	 * 
+	 * @return This ZSampleGrid converted as a DelaunayTriangulation.
+	 */
+	public DelaunayTriangulation<TZ> delaunayTriangulate();
 }

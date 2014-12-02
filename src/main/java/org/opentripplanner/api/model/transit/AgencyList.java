@@ -25,7 +25,7 @@ import org.opentripplanner.api.adapters.AgencyAdapter;
 @XmlRootElement(name = "AgencyList")
 public class AgencyList {
 
-    @XmlJavaTypeAdapter(value = AgencyAdapter.class)
-    @XmlElement(name = "Agency")
-    public Collection<Agency> agencies;
+	@XmlJavaTypeAdapter(value = AgencyAdapter.class)
+	@XmlElement(name = "Agency")
+	public Collection<Agency> agencies;
 }

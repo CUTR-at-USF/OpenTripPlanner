@@ -22,5 +22,5 @@ import java.awt.Color;
  */
 public interface ScalarColorPalette {
 
-    public Color getColor(double value);
+	public Color getColor(double value);
 }

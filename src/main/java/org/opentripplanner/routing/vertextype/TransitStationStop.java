@@ -10,7 +10,7 @@
 
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package org.opentripplanner.routing.vertextype;
 
 import org.onebusaway.gtfs.model.Stop;
@@ -18,9 +18,9 @@ import org.opentripplanner.gtfs.GtfsLibrary;
 import org.opentripplanner.routing.graph.Graph;
 
 public abstract class TransitStationStop extends OffboardVertex {
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public TransitStationStop(Graph graph, Stop stop) {
-        super(graph, GtfsLibrary.convertIdToString(stop.getId()), stop);
-    }
+	public TransitStationStop(Graph graph, Stop stop) {
+		super(graph, GtfsLibrary.convertIdToString(stop.getId()), stop);
+	}
 }

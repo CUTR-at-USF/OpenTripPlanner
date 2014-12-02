@@ -37,102 +37,104 @@ import org.opentripplanner.standalone.OTPServer;
 
 public class AlertPatchServiceImpl implements AlertPatchService {
 
-    private Graph graph;
+	private Graph graph;
 
-    private Map<String, AlertPatch> alertPatches = new HashMap<String, AlertPatch>();
-    private ListMultimap<AgencyAndId, AlertPatch> patchesByRoute = LinkedListMultimap.create();
-    private ListMultimap<AgencyAndId, AlertPatch> patchesByStop = LinkedListMultimap.create();
+	private Map<String, AlertPatch> alertPatches = new HashMap<String, AlertPatch>();
+	private ListMultimap<AgencyAndId, AlertPatch> patchesByRoute = LinkedListMultimap
+			.create();
+	private ListMultimap<AgencyAndId, AlertPatch> patchesByStop = LinkedListMultimap
+			.create();
 
-    public AlertPatchServiceImpl(Graph graph) {
-        this.graph = graph;
-    }
+	public AlertPatchServiceImpl(Graph graph) {
+		this.graph = graph;
+	}
 
-    @Override
-    public Collection<AlertPatch> getAllAlertPatches() {
-        return alertPatches.values();
-    }
+	@Override
+	public Collection<AlertPatch> getAllAlertPatches() {
+		return alertPatches.values();
+	}
 
-    @Override
-    public Collection<AlertPatch> getStopPatches(AgencyAndId stop) {
-        List<AlertPatch> result = patchesByStop.get(stop);
-        if (result == null) {
-            result = Collections.emptyList();
-        }
-        return result;
-    }
+	@Override
+	public Collection<AlertPatch> getStopPatches(AgencyAndId stop) {
+		List<AlertPatch> result = patchesByStop.get(stop);
+		if (result == null) {
+			result = Collections.emptyList();
+		}
+		return result;
+	}
 
-    @Override
-    public Collection<AlertPatch> getRoutePatches(AgencyAndId route) {
-        List<AlertPatch> result = patchesByRoute.get(route);
-        if (result == null) {
-            result = Collections.emptyList();
-        }
-        return result;
+	@Override
+	public Collection<AlertPatch> getRoutePatches(AgencyAndId route) {
+		List<AlertPatch> result = patchesByRoute.get(route);
+		if (result == null) {
+			result = Collections.emptyList();
+		}
+		return result;
 
-    }
+	}
 
-    @Override
-    public synchronized void apply(AlertPatch alertPatch) {
-        if (alertPatches.containsKey(alertPatch.getId())) {
-            expire(alertPatches.get(alertPatch.getId()));
-        }
+	@Override
+	public synchronized void apply(AlertPatch alertPatch) {
+		if (alertPatches.containsKey(alertPatch.getId())) {
+			expire(alertPatches.get(alertPatch.getId()));
+		}
 
-        alertPatch.apply(graph);
-        alertPatches.put(alertPatch.getId(), alertPatch);
+		alertPatch.apply(graph);
+		alertPatches.put(alertPatch.getId(), alertPatch);
 
-        AgencyAndId stop = alertPatch.getStop();
-        if (stop != null) {
-            patchesByStop.put(stop, alertPatch);
-        }
-        AgencyAndId route = alertPatch.getRoute();
-        if (route != null) {
-            patchesByRoute.put(route, alertPatch);
-        }
-    }
+		AgencyAndId stop = alertPatch.getStop();
+		if (stop != null) {
+			patchesByStop.put(stop, alertPatch);
+		}
+		AgencyAndId route = alertPatch.getRoute();
+		if (route != null) {
+			patchesByRoute.put(route, alertPatch);
+		}
+	}
 
-    @Override
-    public void expire(Set<String> purge) {
-        for (String patchId : purge) {
-            if (alertPatches.containsKey(patchId)) {
-                expire(alertPatches.get(patchId));
-            }
-        }
+	@Override
+	public void expire(Set<String> purge) {
+		for (String patchId : purge) {
+			if (alertPatches.containsKey(patchId)) {
+				expire(alertPatches.get(patchId));
+			}
+		}
 
-        alertPatches.keySet().removeAll(purge);
-    }
+		alertPatches.keySet().removeAll(purge);
+	}
 
-    @Override
-    public void expireAll() {
-        for (AlertPatch alertPatch : alertPatches.values()) {
-            expire(alertPatch);
-        }
-        alertPatches.clear();
-    }
+	@Override
+	public void expireAll() {
+		for (AlertPatch alertPatch : alertPatches.values()) {
+			expire(alertPatch);
+		}
+		alertPatches.clear();
+	}
 
-    @Override
-    public void expireAllExcept(Set<String> retain) {
-        ArrayList<String> toRemove = new ArrayList<String>();
+	@Override
+	public void expireAllExcept(Set<String> retain) {
+		ArrayList<String> toRemove = new ArrayList<String>();
 
-        for (Entry<String, AlertPatch> entry : alertPatches.entrySet()) {
-            final String key = entry.getKey();
-            if (!retain.contains(key)) {
-                toRemove.add(key);
-                expire(entry.getValue());
-            }
-        }
-        alertPatches.keySet().removeAll(toRemove);
-    }
+		for (Entry<String, AlertPatch> entry : alertPatches.entrySet()) {
+			final String key = entry.getKey();
+			if (!retain.contains(key)) {
+				toRemove.add(key);
+				expire(entry.getValue());
+			}
+		}
+		alertPatches.keySet().removeAll(toRemove);
+	}
 
-    private void expire(AlertPatch alertPatch) {
-        AgencyAndId stop = alertPatch.getStop();
-        if (stop != null) {
-            patchesByStop.remove(stop, alertPatch);
-        }
-        AgencyAndId route = alertPatch.getRoute();
-        if (route != null) {
-            patchesByRoute.remove(route, alertPatch);
-        }
+	private void expire(AlertPatch alertPatch) {
+		AgencyAndId stop = alertPatch.getStop();
+		if (stop != null) {
+			patchesByStop.remove(stop, alertPatch);
+		}
+		AgencyAndId route = alertPatch.getRoute();
+		if (route != null) {
+			patchesByRoute.remove(route, alertPatch);
+		}
 
-        alertPatch.remove(graph);
-    }
+		alertPatch.remove(graph);
+	}
 }

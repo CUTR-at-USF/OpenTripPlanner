@@ -14,14 +14,17 @@
 package org.opentripplanner.updater;
 
 /**
- * Interface for graph updaters. Objects that implement this interface should always be configured
- * via PreferencesConfigurable.configure after creating the object. GraphUpdaterConfigurator should
- * take care of that. Beware that updaters run in separate threads at the same time.
+ * Interface for graph updaters. Objects that implement this interface should
+ * always be configured via PreferencesConfigurable.configure after creating the
+ * object. GraphUpdaterConfigurator should take care of that. Beware that
+ * updaters run in separate threads at the same time.
  * 
- * The only allowed way to make changes to the graph in an updater is by executing (anonymous)
- * GraphWriterRunnable objects via GraphUpdaterManager.execute.
+ * The only allowed way to make changes to the graph in an updater is by
+ * executing (anonymous) GraphWriterRunnable objects via
+ * GraphUpdaterManager.execute.
  * 
- * Example implementations can be found in ExampleGraphUpdater and ExamplePollingGraphUpdater.
+ * Example implementations can be found in ExampleGraphUpdater and
+ * ExamplePollingGraphUpdater.
  * 
  * @see ExampleGraphUpdater
  * @see ExamplePollingGraphUpdater
@@ -30,31 +33,33 @@ package org.opentripplanner.updater;
  */
 public interface GraphUpdater extends PreferencesConfigurable {
 
-    /**
-     * Graph updaters must be aware of their manager to be able to execute GraphWriterRunnables.
-     * GraphUpdaterConfigurator should take care of calling this function.
-     * 
-     * @param updaterManager is the parent updater manager
-     * @see GraphWriterRunnable
-     * @see GraphUpdaterManager.execute
-     */
-    public void setGraphUpdaterManager(GraphUpdaterManager updaterManager);
+	/**
+	 * Graph updaters must be aware of their manager to be able to execute
+	 * GraphWriterRunnables. GraphUpdaterConfigurator should take care of
+	 * calling this function.
+	 * 
+	 * @param updaterManager
+	 *            is the parent updater manager
+	 * @see GraphWriterRunnable
+	 * @see GraphUpdaterManager.execute
+	 */
+	public void setGraphUpdaterManager(GraphUpdaterManager updaterManager);
 
-    /**
-     * Here the updater can be initialized. If it throws, the updater won't be started (i.e. the run
-     * method won't be called).
-     */
-    public void setup() throws Exception;
+	/**
+	 * Here the updater can be initialized. If it throws, the updater won't be
+	 * started (i.e. the run method won't be called).
+	 */
+	public void setup() throws Exception;
 
-    /**
-     * This is where the updater thread receives updates and applies them to the graph. This method
-     * only runs once.
-     */
-    public void run() throws Exception;
+	/**
+	 * This is where the updater thread receives updates and applies them to the
+	 * graph. This method only runs once.
+	 */
+	public void run() throws Exception;
 
-    /**
-     * Here the updater can cleanup after itself.
-     */
-    public void teardown();
+	/**
+	 * Here the updater can cleanup after itself.
+	 */
+	public void teardown();
 
 }

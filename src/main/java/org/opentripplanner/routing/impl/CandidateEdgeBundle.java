@@ -25,95 +25,97 @@ import org.opentripplanner.routing.edgetype.StreetTraversalPermission;
 import org.opentripplanner.routing.vertextype.StreetVertex;
 
 public class CandidateEdgeBundle extends ArrayList<CandidateEdge> {
-    private static final long serialVersionUID = 20120222L;
+	private static final long serialVersionUID = 20120222L;
 
-    // maximum difference in distance for two geometries to be considered coincident
-    public static final double DISTANCE_ERROR = 0.000001;
+	// maximum difference in distance for two geometries to be considered
+	// coincident
+	public static final double DISTANCE_ERROR = 0.000001;
 
-    private static final double DIRECTION_ERROR = 0.05;
+	private static final double DIRECTION_ERROR = 0.05;
 
-    public StreetVertex endwiseVertex = null;
+	public StreetVertex endwiseVertex = null;
 
-    public CandidateEdge best = null;
+	public CandidateEdge best = null;
 
-    public boolean add(CandidateEdge ce) {
-        if (best == null || ce.score < best.score) {
-            endwiseVertex = ce.endwiseVertex;
-            best = ce;
-        }
-        return super.add(ce);
-    }
+	public boolean add(CandidateEdge ce) {
+		if (best == null || ce.score < best.score) {
+			endwiseVertex = ce.endwiseVertex;
+			best = ce;
+		}
+		return super.add(ce);
+	}
 
-    public List<StreetEdge> toEdgeList() {
-        List<StreetEdge> ret = new ArrayList<StreetEdge>();
-        for (CandidateEdge ce : this) {
-            ret.add(ce.edge);
-        }
-        return ret;
-    }
+	public List<StreetEdge> toEdgeList() {
+		List<StreetEdge> ret = new ArrayList<StreetEdge>();
+		for (CandidateEdge ce : this) {
+			ret.add(ce.edge);
+		}
+		return ret;
+	}
 
-    static class DistanceAndAngle {
-        double distance;
+	static class DistanceAndAngle {
+		double distance;
 
-        double angle;
+		double angle;
 
-        boolean endwise;
+		boolean endwise;
 
-        public DistanceAndAngle(double distance, double angle, boolean endwise) {
-            this.distance = distance;
-            this.angle = angle;
-            this.endwise = endwise;
-        }
-    }
+		public DistanceAndAngle(double distance, double angle, boolean endwise) {
+			this.distance = distance;
+			this.angle = angle;
+			this.endwise = endwise;
+		}
+	}
 
-    public Collection<CandidateEdgeBundle> binByDistanceAndAngle() {
-        // Map of from distance, angle pairs to bundles of edges.
-        Map<DistanceAndAngle, CandidateEdgeBundle> bins = new HashMap<DistanceAndAngle, CandidateEdgeBundle>();
-        CANDIDATE: for (CandidateEdge ce : this) {
-            for (Entry<DistanceAndAngle, CandidateEdgeBundle> bin : bins.entrySet()) {
-                double distance = bin.getKey().distance;
-                double direction = bin.getKey().angle;
-                if (Math.abs(direction - ce.directionToEdge) < DIRECTION_ERROR
-                        && Math.abs(distance - ce.distance) < DISTANCE_ERROR
-                        && ce.endwise() == bin.getKey().endwise) {
-                    bin.getValue().add(ce);
-                    continue CANDIDATE;
-                }
-            }
-            DistanceAndAngle rTheta = new DistanceAndAngle(ce.distance, ce.directionToEdge,
-                    ce.endwise());
-            CandidateEdgeBundle bundle = new CandidateEdgeBundle();
-            bundle.add(ce);
-            bins.put(rTheta, bundle);
-        }
-        return bins.values();
-    }
+	public Collection<CandidateEdgeBundle> binByDistanceAndAngle() {
+		// Map of from distance, angle pairs to bundles of edges.
+		Map<DistanceAndAngle, CandidateEdgeBundle> bins = new HashMap<DistanceAndAngle, CandidateEdgeBundle>();
+		CANDIDATE: for (CandidateEdge ce : this) {
+			for (Entry<DistanceAndAngle, CandidateEdgeBundle> bin : bins
+					.entrySet()) {
+				double distance = bin.getKey().distance;
+				double direction = bin.getKey().angle;
+				if (Math.abs(direction - ce.directionToEdge) < DIRECTION_ERROR
+						&& Math.abs(distance - ce.distance) < DISTANCE_ERROR
+						&& ce.endwise() == bin.getKey().endwise) {
+					bin.getValue().add(ce);
+					continue CANDIDATE;
+				}
+			}
+			DistanceAndAngle rTheta = new DistanceAndAngle(ce.distance,
+					ce.directionToEdge, ce.endwise());
+			CandidateEdgeBundle bundle = new CandidateEdgeBundle();
+			bundle.add(ce);
+			bins.put(rTheta, bundle);
+		}
+		return bins.values();
+	}
 
-    public boolean endwise() {
-        return endwiseVertex != null;
-    }
+	public boolean endwise() {
+		return endwiseVertex != null;
+	}
 
-    public double getScore() {
-        return best.score;
-    }
+	public double getScore() {
+		return best.score;
+	}
 
-    public boolean isPlatform() {
-        for (CandidateEdge ce : CandidateEdgeBundle.this) {
-            StreetEdge e = ce.edge;
-            if ((e.getStreetClass() & StreetEdge.ANY_PLATFORM_MASK) != 0) {
-                return true;
-            }
-        }
-        return false;
-    }
+	public boolean isPlatform() {
+		for (CandidateEdge ce : CandidateEdgeBundle.this) {
+			StreetEdge e = ce.edge;
+			if ((e.getStreetClass() & StreetEdge.ANY_PLATFORM_MASK) != 0) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-    public boolean allowsCars() {
-        for (CandidateEdge ce : CandidateEdgeBundle.this) {
-            StreetEdge e = ce.edge;
-            if (e.getPermission().allows(StreetTraversalPermission.CAR)) {
-                return true;
-            }
-        }
-        return false;
-    }
+	public boolean allowsCars() {
+		for (CandidateEdge ce : CandidateEdgeBundle.this) {
+			StreetEdge e = ce.edge;
+			if (e.getPermission().allows(StreetTraversalPermission.CAR)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

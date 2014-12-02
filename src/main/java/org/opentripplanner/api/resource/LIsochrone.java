@@ -56,7 +56,8 @@ import com.google.common.io.Files;
 import com.vividsolutions.jts.geom.MultiPolygon;
 
 /**
- * Return isochrone geometry as a set of GeoJSON or zipped-shapefile multi-polygons.
+ * Return isochrone geometry as a set of GeoJSON or zipped-shapefile
+ * multi-polygons.
  * 
  * Example of request:
  * 
@@ -69,161 +70,174 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 @Path("/routers/{routerId}/isochrone")
 public class LIsochrone extends RoutingResource {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LIsochrone.class);
+	private static final Logger LOG = LoggerFactory.getLogger(LIsochrone.class);
 
-    @Context // FIXME inject Application context
-    private IsoChroneSPTRendererAccSampling accSamplingRenderer;
+	@Context
+	// FIXME inject Application context
+	private IsoChroneSPTRendererAccSampling accSamplingRenderer;
 
-    @Context // FIXME inject Application context
-    private IsoChroneSPTRendererRecursiveGrid recursiveGridRenderer;
+	@Context
+	// FIXME inject Application context
+	private IsoChroneSPTRendererRecursiveGrid recursiveGridRenderer;
 
-    @QueryParam("cutoffSec")
-    private List<Integer> cutoffSecList;
+	@QueryParam("cutoffSec")
+	private List<Integer> cutoffSecList;
 
-    @QueryParam("maxTimeSec")
-    private Integer maxTimeSec;
+	@QueryParam("maxTimeSec")
+	private Integer maxTimeSec;
 
-    @QueryParam("debug")
-    private Boolean debug;
+	@QueryParam("debug")
+	private Boolean debug;
 
-    @QueryParam("algorithm")
-    private String algorithm;
+	@QueryParam("algorithm")
+	private String algorithm;
 
-    @QueryParam("precisionMeters")
-    @DefaultValue("200")
-    private Integer precisionMeters;
+	@QueryParam("precisionMeters")
+	@DefaultValue("200")
+	private Integer precisionMeters;
 
-    @QueryParam("coordinateOrigin")
-    private String coordinateOrigin = null;
+	@QueryParam("coordinateOrigin")
+	private String coordinateOrigin = null;
 
-    private static final SimpleFeatureType contourSchema = makeContourSchema();
+	private static final SimpleFeatureType contourSchema = makeContourSchema();
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getGeoJsonIsochrone() throws Exception {
-        SimpleFeatureCollection contourFeatures = makeContourFeatures(computeIsochrone());
-        StringWriter writer = new StringWriter();
-        FeatureJSON fj = new FeatureJSON();
-        fj.writeFeatureCollection(contourFeatures, writer);
-        CacheControl cc = new CacheControl();
-        cc.setMaxAge(3600);
-        cc.setNoCache(false);
-        return Response.ok().entity(writer.toString()).cacheControl(cc).build();
-    }
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getGeoJsonIsochrone() throws Exception {
+		SimpleFeatureCollection contourFeatures = makeContourFeatures(computeIsochrone());
+		StringWriter writer = new StringWriter();
+		FeatureJSON fj = new FeatureJSON();
+		fj.writeFeatureCollection(contourFeatures, writer);
+		CacheControl cc = new CacheControl();
+		cc.setMaxAge(3600);
+		cc.setNoCache(false);
+		return Response.ok().entity(writer.toString()).cacheControl(cc).build();
+	}
 
-    @GET
-    @Produces("application/x-zip-compressed")
-    public Response getZippedShapefileIsochrone(@QueryParam("shpName") String shpName,
-            @QueryParam("stream") @DefaultValue("true") boolean stream) throws Exception {
-        SimpleFeatureCollection contourFeatures = makeContourFeatures(computeIsochrone());
-        /* Output the staged features to Shapefile */
-        final File shapeDir = Files.createTempDir();
-        File shapeFile = new File(shapeDir, shpName + ".shp");
-        LOG.debug("writing out shapefile {}", shapeFile);
-        ShapefileDataStore outStore = new ShapefileDataStore(shapeFile.toURI().toURL());
-        outStore.createSchema(contourSchema);
-        SimpleFeatureStore featureStore = (SimpleFeatureStore) outStore.getFeatureSource();
-        featureStore.addFeatures(contourFeatures);
-        shapeDir.deleteOnExit(); // Note: the order is important
-        for (File f : shapeDir.listFiles())
-            f.deleteOnExit();
-        /* Zip up the shapefile components */
-        StreamingOutput output = new DirectoryZipper(shapeDir);
-        if (stream) {
-            return Response.ok().entity(output).build();
-        } else {
-            File zipFile = new File(shapeDir, shpName + ".zip");
-            OutputStream fos = new FileOutputStream(zipFile);
-            output.write(fos);
-            zipFile.deleteOnExit();
-            return Response.ok().entity(zipFile).build();
-        }
-    }
+	@GET
+	@Produces("application/x-zip-compressed")
+	public Response getZippedShapefileIsochrone(
+			@QueryParam("shpName") String shpName,
+			@QueryParam("stream") @DefaultValue("true") boolean stream)
+			throws Exception {
+		SimpleFeatureCollection contourFeatures = makeContourFeatures(computeIsochrone());
+		/* Output the staged features to Shapefile */
+		final File shapeDir = Files.createTempDir();
+		File shapeFile = new File(shapeDir, shpName + ".shp");
+		LOG.debug("writing out shapefile {}", shapeFile);
+		ShapefileDataStore outStore = new ShapefileDataStore(shapeFile.toURI()
+				.toURL());
+		outStore.createSchema(contourSchema);
+		SimpleFeatureStore featureStore = (SimpleFeatureStore) outStore
+				.getFeatureSource();
+		featureStore.addFeatures(contourFeatures);
+		shapeDir.deleteOnExit(); // Note: the order is important
+		for (File f : shapeDir.listFiles())
+			f.deleteOnExit();
+		/* Zip up the shapefile components */
+		StreamingOutput output = new DirectoryZipper(shapeDir);
+		if (stream) {
+			return Response.ok().entity(output).build();
+		} else {
+			File zipFile = new File(shapeDir, shpName + ".zip");
+			OutputStream fos = new FileOutputStream(zipFile);
+			output.write(fos);
+			zipFile.deleteOnExit();
+			return Response.ok().entity(zipFile).build();
+		}
+	}
 
-    /**
-     * Create a geotools feature collection from a list of isochrones in the OTPA internal format.
-     * Once in a FeatureCollection, they can for example be exported as GeoJSON.
-     */
-    public static SimpleFeatureCollection makeContourFeatures(List<IsochroneData> isochrones) {
-        DefaultFeatureCollection featureCollection = new DefaultFeatureCollection(null,
-                contourSchema);
-        SimpleFeatureBuilder fbuilder = new SimpleFeatureBuilder(contourSchema);
-        for (IsochroneData isochrone : isochrones) {
-            fbuilder.add(isochrone.geometry);
-            fbuilder.add(isochrone.cutoffSec);
-            featureCollection.add(fbuilder.buildFeature(null));
-        }
-        return featureCollection;
-    }
+	/**
+	 * Create a geotools feature collection from a list of isochrones in the
+	 * OTPA internal format. Once in a FeatureCollection, they can for example
+	 * be exported as GeoJSON.
+	 */
+	public static SimpleFeatureCollection makeContourFeatures(
+			List<IsochroneData> isochrones) {
+		DefaultFeatureCollection featureCollection = new DefaultFeatureCollection(
+				null, contourSchema);
+		SimpleFeatureBuilder fbuilder = new SimpleFeatureBuilder(contourSchema);
+		for (IsochroneData isochrone : isochrones) {
+			fbuilder.add(isochrone.geometry);
+			fbuilder.add(isochrone.cutoffSec);
+			featureCollection.add(fbuilder.buildFeature(null));
+		}
+		return featureCollection;
+	}
 
-    /**
-     * Generic method to compute isochrones. Parse the request, call the adequate builder, and
-     * return a list of generic isochrone data.
-     * 
-     * @return
-     * @throws Exception
-     */
-    public List<IsochroneData> computeIsochrone() throws Exception {
+	/**
+	 * Generic method to compute isochrones. Parse the request, call the
+	 * adequate builder, and return a list of generic isochrone data.
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public List<IsochroneData> computeIsochrone() throws Exception {
 
-        if (debug == null)
-            debug = false;
-        if (precisionMeters < 10)
-            throw new IllegalArgumentException("Too small precisionMeters: " + precisionMeters);
+		if (debug == null)
+			debug = false;
+		if (precisionMeters < 10)
+			throw new IllegalArgumentException("Too small precisionMeters: "
+					+ precisionMeters);
 
-        IsoChroneRequest isoChroneRequest = new IsoChroneRequest(cutoffSecList);
-        isoChroneRequest.includeDebugGeometry = debug;
-        isoChroneRequest.precisionMeters = precisionMeters;
-        if (coordinateOrigin != null)
-            isoChroneRequest.coordinateOrigin = new GenericLocation(null, coordinateOrigin)
-                    .getCoordinate();
-        RoutingRequest sptRequest = buildRequest(0);
+		IsoChroneRequest isoChroneRequest = new IsoChroneRequest(cutoffSecList);
+		isoChroneRequest.includeDebugGeometry = debug;
+		isoChroneRequest.precisionMeters = precisionMeters;
+		if (coordinateOrigin != null)
+			isoChroneRequest.coordinateOrigin = new GenericLocation(null,
+					coordinateOrigin).getCoordinate();
+		RoutingRequest sptRequest = buildRequest(0);
 
-        if (maxTimeSec != null) {
-            isoChroneRequest.maxTimeSec = maxTimeSec;
-        } else {
-            isoChroneRequest.maxTimeSec = isoChroneRequest.maxCutoffSec;
-        }
+		if (maxTimeSec != null) {
+			isoChroneRequest.maxTimeSec = maxTimeSec;
+		} else {
+			isoChroneRequest.maxTimeSec = isoChroneRequest.maxCutoffSec;
+		}
 
-        List<IsochroneData> isochrones;
-        if (algorithm == null || "accSampling".equals(algorithm)) {
-            isochrones = accSamplingRenderer.getIsochrones(isoChroneRequest, sptRequest);
-        } else if ("recursiveGrid".equals(algorithm)) {
-            isochrones = recursiveGridRenderer.getIsochrones(isoChroneRequest, sptRequest);
-        } else {
-            throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
-        }
-        return isochrones;
-    }
+		List<IsochroneData> isochrones;
+		if (algorithm == null || "accSampling".equals(algorithm)) {
+			isochrones = accSamplingRenderer.getIsochrones(isoChroneRequest,
+					sptRequest);
+		} else if ("recursiveGrid".equals(algorithm)) {
+			isochrones = recursiveGridRenderer.getIsochrones(isoChroneRequest,
+					sptRequest);
+		} else {
+			throw new IllegalArgumentException("Unknown algorithm: "
+					+ algorithm);
+		}
+		return isochrones;
+	}
 
-    static SimpleFeatureType makeContourSchema() {
-        /* Create the output feature schema. */
-        SimpleFeatureTypeBuilder tbuilder = new SimpleFeatureTypeBuilder();
-        tbuilder.setName("contours");
-        tbuilder.setCRS(DefaultGeographicCRS.WGS84);
-        tbuilder.add("Geometry", MultiPolygon.class);
-        tbuilder.add("Time", Integer.class); // TODO change to something more descriptive and lowercase
-        return tbuilder.buildFeatureType();
-    }
+	static SimpleFeatureType makeContourSchema() {
+		/* Create the output feature schema. */
+		SimpleFeatureTypeBuilder tbuilder = new SimpleFeatureTypeBuilder();
+		tbuilder.setName("contours");
+		tbuilder.setCRS(DefaultGeographicCRS.WGS84);
+		tbuilder.add("Geometry", MultiPolygon.class);
+		tbuilder.add("Time", Integer.class); // TODO change to something more
+												// descriptive and lowercase
+		return tbuilder.buildFeatureType();
+	}
 
-    // TODO Extract this to utility package?
-    private static class DirectoryZipper implements StreamingOutput {
-        private File directory;
-        
-        DirectoryZipper(File directory){
-        	this.directory = directory;
-        }
+	// TODO Extract this to utility package?
+	private static class DirectoryZipper implements StreamingOutput {
+		private File directory;
 
-        @Override
-        public void write(OutputStream outStream) throws IOException {
-            ZipOutputStream zip = new ZipOutputStream(outStream);
-            for (File f : directory.listFiles()) {
-                zip.putNextEntry(new ZipEntry(f.getName()));
-                Files.copy(f, zip);
-                zip.closeEntry();
-                zip.flush();
-            }
-            zip.close();
-        }
-    }
+		DirectoryZipper(File directory) {
+			this.directory = directory;
+		}
+
+		@Override
+		public void write(OutputStream outStream) throws IOException {
+			ZipOutputStream zip = new ZipOutputStream(outStream);
+			for (File f : directory.listFiles()) {
+				zip.putNextEntry(new ZipEntry(f.getName()));
+				Files.copy(f, zip);
+				zip.closeEntry();
+				zip.flush();
+			}
+			zip.close();
+		}
+	}
 
 }

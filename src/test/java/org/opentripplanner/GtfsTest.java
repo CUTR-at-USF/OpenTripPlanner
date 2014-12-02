@@ -49,139 +49,161 @@ import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 
-/** Common base class for many test classes which need to load a GTFS feed in preparation for tests. */
+/**
+ * Common base class for many test classes which need to load a GTFS feed in
+ * preparation for tests.
+ */
 public abstract class GtfsTest extends TestCase {
 
-    public Graph graph;
-    AlertsUpdateHandler alertsUpdateHandler;
-    PlanGenerator planGenerator;
-    PathService pathService;
-    GenericAStarFactory genericAStar;
-    TimetableSnapshotSource timetableSnapshotSource;
-    AlertPatchServiceImpl alertPatchServiceImpl;
+	public Graph graph;
+	AlertsUpdateHandler alertsUpdateHandler;
+	PlanGenerator planGenerator;
+	PathService pathService;
+	GenericAStarFactory genericAStar;
+	TimetableSnapshotSource timetableSnapshotSource;
+	AlertPatchServiceImpl alertPatchServiceImpl;
 
-    public abstract String getFeedName();
+	public abstract String getFeedName();
 
-    public boolean isLongDistance() { return false; }
+	public boolean isLongDistance() {
+		return false;
+	}
 
-    private String agencyId;
+	private String agencyId;
 
-    public Itinerary itinerary = null;
+	public Itinerary itinerary = null;
 
-    protected void setUp() {
-        File gtfs = new File("src/test/resources/" + getFeedName());
-        File gtfsRealTime = new File("src/test/resources/" + getFeedName() + ".pb");
-        GtfsBundle gtfsBundle = new GtfsBundle(gtfs);
-        List<GtfsBundle> gtfsBundleList = Collections.singletonList(gtfsBundle);
-        GtfsGraphBuilderImpl gtfsGraphBuilderImpl = new GtfsGraphBuilderImpl(gtfsBundleList);
+	protected void setUp() {
+		File gtfs = new File("src/test/resources/" + getFeedName());
+		File gtfsRealTime = new File("src/test/resources/" + getFeedName()
+				+ ".pb");
+		GtfsBundle gtfsBundle = new GtfsBundle(gtfs);
+		List<GtfsBundle> gtfsBundleList = Collections.singletonList(gtfsBundle);
+		GtfsGraphBuilderImpl gtfsGraphBuilderImpl = new GtfsGraphBuilderImpl(
+				gtfsBundleList);
 
-        alertsUpdateHandler = new AlertsUpdateHandler();
-        graph = new Graph();
-        gtfsBundle.setTransfersTxtDefinesStationPaths(true);
-        gtfsGraphBuilderImpl.buildGraph(graph, null);
-        // Set the agency ID to be used for tests to the first one in the feed.
-        agencyId = graph.getAgencyIds().iterator().next();
-        System.out.printf("Set the agency ID for this test to %s\n", agencyId);
-        graph.index(new DefaultStreetVertexIndexFactory());
-        timetableSnapshotSource = new TimetableSnapshotSource(graph);
-        timetableSnapshotSource.purgeExpiredData = (false);
-        graph.timetableSnapshotSource = (timetableSnapshotSource);
-        alertPatchServiceImpl = new AlertPatchServiceImpl(graph);
-        alertsUpdateHandler.setAlertPatchService(alertPatchServiceImpl);
-        alertsUpdateHandler.setDefaultAgencyId("MMRI");
+		alertsUpdateHandler = new AlertsUpdateHandler();
+		graph = new Graph();
+		gtfsBundle.setTransfersTxtDefinesStationPaths(true);
+		gtfsGraphBuilderImpl.buildGraph(graph, null);
+		// Set the agency ID to be used for tests to the first one in the feed.
+		agencyId = graph.getAgencyIds().iterator().next();
+		System.out.printf("Set the agency ID for this test to %s\n", agencyId);
+		graph.index(new DefaultStreetVertexIndexFactory());
+		timetableSnapshotSource = new TimetableSnapshotSource(graph);
+		timetableSnapshotSource.purgeExpiredData = (false);
+		graph.timetableSnapshotSource = (timetableSnapshotSource);
+		alertPatchServiceImpl = new AlertPatchServiceImpl(graph);
+		alertsUpdateHandler.setAlertPatchService(alertPatchServiceImpl);
+		alertsUpdateHandler.setDefaultAgencyId("MMRI");
 
-        try {
-            InputStream inputStream = new FileInputStream(gtfsRealTime);
-            FeedMessage feedMessage = FeedMessage.PARSER.parseFrom(inputStream);
-            List<FeedEntity> feedEntityList = feedMessage.getEntityList();
-            List<TripUpdate> updates = new ArrayList<TripUpdate>(feedEntityList.size());
-            for (FeedEntity feedEntity : feedEntityList) {
-                updates.add(feedEntity.getTripUpdate());
-            }
-            timetableSnapshotSource.applyTripUpdates(updates, agencyId);
-            alertsUpdateHandler.update(feedMessage);
-        } catch (Exception exception) {}
+		try {
+			InputStream inputStream = new FileInputStream(gtfsRealTime);
+			FeedMessage feedMessage = FeedMessage.PARSER.parseFrom(inputStream);
+			List<FeedEntity> feedEntityList = feedMessage.getEntityList();
+			List<TripUpdate> updates = new ArrayList<TripUpdate>(
+					feedEntityList.size());
+			for (FeedEntity feedEntity : feedEntityList) {
+				updates.add(feedEntity.getTripUpdate());
+			}
+			timetableSnapshotSource.applyTripUpdates(updates, agencyId);
+			alertsUpdateHandler.update(feedMessage);
+		} catch (Exception exception) {
+		}
 
-        genericAStar = new GenericAStarFactory();
-        if (isLongDistance()) {
-            pathService = new LongDistancePathService(null, genericAStar);
-        } else {
-            pathService = new RetryingPathServiceImpl(null, genericAStar);
-        }
-        planGenerator = new PlanGenerator(null, pathService);
-    }
+		genericAStar = new GenericAStarFactory();
+		if (isLongDistance()) {
+			pathService = new LongDistancePathService(null, genericAStar);
+		} else {
+			pathService = new RetryingPathServiceImpl(null, genericAStar);
+		}
+		planGenerator = new PlanGenerator(null, pathService);
+	}
 
-    public Leg plan(long dateTime, String fromVertex, String toVertex, String onTripId,
-             boolean wheelchairAccessible, boolean preferLeastTransfers, TraverseMode preferredMode,
-             String excludedRoute, String excludedStop) {
-        return plan(dateTime, fromVertex, toVertex, onTripId, wheelchairAccessible,
-                preferLeastTransfers, preferredMode, excludedRoute, excludedStop, 1)[0];
-    }
+	public Leg plan(long dateTime, String fromVertex, String toVertex,
+			String onTripId, boolean wheelchairAccessible,
+			boolean preferLeastTransfers, TraverseMode preferredMode,
+			String excludedRoute, String excludedStop) {
+		return plan(dateTime, fromVertex, toVertex, onTripId,
+				wheelchairAccessible, preferLeastTransfers, preferredMode,
+				excludedRoute, excludedStop, 1)[0];
+	}
 
-    public Leg[] plan(long dateTime, String fromVertex, String toVertex, String onTripId,
-               boolean wheelchairAccessible, boolean preferLeastTransfers, TraverseMode preferredMode,
-               String excludedRoute, String excludedStop, int legCount) {
-        final TraverseMode mode = preferredMode != null ? preferredMode : TraverseMode.TRANSIT;
-        RoutingRequest routingRequest = new RoutingRequest();
-        routingRequest.setNumItineraries(1);
-        
-        routingRequest.setArriveBy(dateTime < 0);
-        routingRequest.dateTime = Math.abs(dateTime);
-        if (fromVertex != null && !fromVertex.isEmpty()) {
-            routingRequest.from = (new GenericLocation(null, agencyId + ":" + fromVertex));
-        }
-        if (toVertex != null && !toVertex.isEmpty()) {
-            routingRequest.to = new GenericLocation(null, agencyId + ":" + toVertex);
-        }
-        if (onTripId != null && !onTripId.isEmpty()) {
-            routingRequest.startingTransitTripId = (new AgencyAndId(agencyId, onTripId));
-        }
-        routingRequest.setRoutingContext(graph);
-        routingRequest.setWheelchairAccessible(wheelchairAccessible);
-        routingRequest.transferPenalty = (preferLeastTransfers ? 300 : 0);
-        routingRequest.setModes(new TraverseModeSet(TraverseMode.WALK, mode));
-        // TODO route matcher still using underscores because it's quite nonstandard and should be eliminated from the 1.0 release rather than reworked
-        if (excludedRoute != null && !excludedRoute.isEmpty()) {
-            routingRequest.setBannedRoutes(agencyId + "__" + excludedRoute);
-        }
-        if (excludedStop != null && !excludedStop.isEmpty()) {
-            routingRequest.setBannedStopsHard(agencyId + ":" + excludedStop);
-        }
-        routingRequest.setOtherThanPreferredRoutesPenalty(0);
-        // The walk board cost is set low because it interferes with test 2c1.
-        // As long as boarding has a very low cost, waiting should not be "better" than riding
-        // since this makes interlining _worse_ than alighting and re-boarding the same line.
-        // TODO rethink whether it makes sense to weight waiting to board _less_ than 1.
-        routingRequest.setWaitReluctance(1);
-        routingRequest.setWalkBoardCost(30);
+	public Leg[] plan(long dateTime, String fromVertex, String toVertex,
+			String onTripId, boolean wheelchairAccessible,
+			boolean preferLeastTransfers, TraverseMode preferredMode,
+			String excludedRoute, String excludedStop, int legCount) {
+		final TraverseMode mode = preferredMode != null ? preferredMode
+				: TraverseMode.TRANSIT;
+		RoutingRequest routingRequest = new RoutingRequest();
+		routingRequest.setNumItineraries(1);
 
-        TripPlan tripPlan = planGenerator.generate(routingRequest);
-        // Stored in instance field for use in individual tests
-        itinerary = tripPlan.itinerary.get(0);
+		routingRequest.setArriveBy(dateTime < 0);
+		routingRequest.dateTime = Math.abs(dateTime);
+		if (fromVertex != null && !fromVertex.isEmpty()) {
+			routingRequest.from = (new GenericLocation(null, agencyId + ":"
+					+ fromVertex));
+		}
+		if (toVertex != null && !toVertex.isEmpty()) {
+			routingRequest.to = new GenericLocation(null, agencyId + ":"
+					+ toVertex);
+		}
+		if (onTripId != null && !onTripId.isEmpty()) {
+			routingRequest.startingTransitTripId = (new AgencyAndId(agencyId,
+					onTripId));
+		}
+		routingRequest.setRoutingContext(graph);
+		routingRequest.setWheelchairAccessible(wheelchairAccessible);
+		routingRequest.transferPenalty = (preferLeastTransfers ? 300 : 0);
+		routingRequest.setModes(new TraverseModeSet(TraverseMode.WALK, mode));
+		// TODO route matcher still using underscores because it's quite
+		// nonstandard and should be eliminated from the 1.0 release rather than
+		// reworked
+		if (excludedRoute != null && !excludedRoute.isEmpty()) {
+			routingRequest.setBannedRoutes(agencyId + "__" + excludedRoute);
+		}
+		if (excludedStop != null && !excludedStop.isEmpty()) {
+			routingRequest.setBannedStopsHard(agencyId + ":" + excludedStop);
+		}
+		routingRequest.setOtherThanPreferredRoutesPenalty(0);
+		// The walk board cost is set low because it interferes with test 2c1.
+		// As long as boarding has a very low cost, waiting should not be
+		// "better" than riding
+		// since this makes interlining _worse_ than alighting and re-boarding
+		// the same line.
+		// TODO rethink whether it makes sense to weight waiting to board _less_
+		// than 1.
+		routingRequest.setWaitReluctance(1);
+		routingRequest.setWalkBoardCost(30);
 
-        assertEquals(legCount, itinerary.legs.size());
+		TripPlan tripPlan = planGenerator.generate(routingRequest);
+		// Stored in instance field for use in individual tests
+		itinerary = tripPlan.itinerary.get(0);
 
-        return itinerary.legs.toArray(new Leg[legCount]);
-    }
+		assertEquals(legCount, itinerary.legs.size());
 
-    public void validateLeg(Leg leg, long startTime, long endTime, String toStopId, String fromStopId,
-                     String alert) {
-        assertEquals(startTime, leg.startTime.getTimeInMillis());
-        assertEquals(endTime, leg.endTime.getTimeInMillis());
-        assertEquals(toStopId, leg.to.stopId.getId());
-        assertEquals(agencyId, leg.to.stopId.getAgencyId());
-        if (fromStopId != null) {
-            assertEquals(agencyId, leg.from.stopId.getAgencyId());
-            assertEquals(fromStopId, leg.from.stopId.getId());
-        } else {
-            assertNull(leg.from.stopId);
-        }
-        if (alert != null) {
-            assertNotNull(leg.alerts);
-            assertEquals(1, leg.alerts.size());
-            assertEquals(alert, leg.alerts.get(0).alertHeaderText.getSomeTranslation());
-        } else {
-            assertNull(leg.alerts);
-        }
-    }
+		return itinerary.legs.toArray(new Leg[legCount]);
+	}
+
+	public void validateLeg(Leg leg, long startTime, long endTime,
+			String toStopId, String fromStopId, String alert) {
+		assertEquals(startTime, leg.startTime.getTimeInMillis());
+		assertEquals(endTime, leg.endTime.getTimeInMillis());
+		assertEquals(toStopId, leg.to.stopId.getId());
+		assertEquals(agencyId, leg.to.stopId.getAgencyId());
+		if (fromStopId != null) {
+			assertEquals(agencyId, leg.from.stopId.getAgencyId());
+			assertEquals(fromStopId, leg.from.stopId.getId());
+		} else {
+			assertNull(leg.from.stopId);
+		}
+		if (alert != null) {
+			assertNotNull(leg.alerts);
+			assertEquals(1, leg.alerts.size());
+			assertEquals(alert,
+					leg.alerts.get(0).alertHeaderText.getSomeTranslation());
+		} else {
+			assertNull(leg.alerts);
+		}
+	}
 }

@@ -25,74 +25,75 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @XmlRootElement(name = "Calendar")
 public class ServiceCalendarType {
 
-    public ServiceCalendarType(AgencyAndId serviceId, int monday, int tuesday, int wednesday,
-            int thursday, int friday, int saturday, int sunday, long startDate, long endDate) {
-        this.serviceId = serviceId;
-        this.monday = monday;
-        this.tuesday = tuesday;
-        this.wednesday = wednesday;
-        this.thursday = thursday;
-        this.friday = friday;
-        this.saturday = saturday;
-        this.sunday = sunday;
-        this.startDate = startDate;
-        this.endDate = endDate;
-    }
+	public ServiceCalendarType(AgencyAndId serviceId, int monday, int tuesday,
+			int wednesday, int thursday, int friday, int saturday, int sunday,
+			long startDate, long endDate) {
+		this.serviceId = serviceId;
+		this.monday = monday;
+		this.tuesday = tuesday;
+		this.wednesday = wednesday;
+		this.thursday = thursday;
+		this.friday = friday;
+		this.saturday = saturday;
+		this.sunday = sunday;
+		this.startDate = startDate;
+		this.endDate = endDate;
+	}
 
-    public ServiceCalendarType(ServiceCalendar arg) {
-        this.serviceId = arg.getServiceId();
-        this.monday = arg.getMonday();
-        this.tuesday = arg.getTuesday();
-        this.wednesday = arg.getWednesday();
-        this.thursday = arg.getThursday();
-        this.friday = arg.getFriday();
-        this.saturday = arg.getSaturday();
-        this.sunday = arg.getSunday();
-        this.startDate = arg.getStartDate().getAsDate().getTime();
-        this.endDate = arg.getEndDate().getAsDate().getTime();
-    }
+	public ServiceCalendarType(ServiceCalendar arg) {
+		this.serviceId = arg.getServiceId();
+		this.monday = arg.getMonday();
+		this.tuesday = arg.getTuesday();
+		this.wednesday = arg.getWednesday();
+		this.thursday = arg.getThursday();
+		this.friday = arg.getFriday();
+		this.saturday = arg.getSaturday();
+		this.sunday = arg.getSunday();
+		this.startDate = arg.getStartDate().getAsDate().getTime();
+		this.endDate = arg.getEndDate().getAsDate().getTime();
+	}
 
-    public ServiceCalendarType() {
-    }
+	public ServiceCalendarType() {
+	}
 
-    @XmlJavaTypeAdapter(AgencyAndIdAdapter.class)
-    @JsonSerialize
-    AgencyAndId serviceId;
+	@XmlJavaTypeAdapter(AgencyAndIdAdapter.class)
+	@JsonSerialize
+	AgencyAndId serviceId;
 
-    @XmlAttribute
-    @JsonSerialize
-    Integer monday;
+	@XmlAttribute
+	@JsonSerialize
+	Integer monday;
 
-    @XmlAttribute
-    @JsonSerialize
-    Integer tuesday;
+	@XmlAttribute
+	@JsonSerialize
+	Integer tuesday;
 
-    @XmlAttribute
-    @JsonSerialize
-    Integer wednesday;
+	@XmlAttribute
+	@JsonSerialize
+	Integer wednesday;
 
-    @XmlAttribute
-    @JsonSerialize
-    Integer thursday;
+	@XmlAttribute
+	@JsonSerialize
+	Integer thursday;
 
-    @XmlAttribute
-    @JsonSerialize
-    Integer friday;
+	@XmlAttribute
+	@JsonSerialize
+	Integer friday;
 
-    @XmlAttribute
-    @JsonSerialize
-    Integer saturday;
+	@XmlAttribute
+	@JsonSerialize
+	Integer saturday;
 
-    @XmlAttribute
-    @JsonSerialize
-    Integer sunday;
+	@XmlAttribute
+	@JsonSerialize
+	Integer sunday;
 
-    @XmlAttribute
-    @JsonSerialize
-    Long startDate;
+	@XmlAttribute
+	@JsonSerialize
+	Long startDate;
 
-    @XmlAttribute
-    @JsonSerialize
-    Long endDate;
+	@XmlAttribute
+	@JsonSerialize
+	Long endDate;
 
 }

@@ -26,21 +26,21 @@ import org.opentripplanner.routing.graph.Graph;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 
 public class TripUpdateGraphWriterRunnableTest {
-    @Test
-    public void testTripUpdateGraphWriterRunnable() {
-        final String agencyId = "Agency ID";
-        final List<TripUpdate> updates =
-                Collections.singletonList(TripUpdate.newBuilder().buildPartial());
-        final TripUpdateGraphWriterRunnable tripUpdateGraphWriterRunnable =
-                new TripUpdateGraphWriterRunnable(updates, agencyId);
+	@Test
+	public void testTripUpdateGraphWriterRunnable() {
+		final String agencyId = "Agency ID";
+		final List<TripUpdate> updates = Collections.singletonList(TripUpdate
+				.newBuilder().buildPartial());
+		final TripUpdateGraphWriterRunnable tripUpdateGraphWriterRunnable = new TripUpdateGraphWriterRunnable(
+				updates, agencyId);
 
-        Graph graph = mock(Graph.class);
-        TimetableSnapshotSource timetableSnapshotSource = mock(TimetableSnapshotSource.class);
+		Graph graph = mock(Graph.class);
+		TimetableSnapshotSource timetableSnapshotSource = mock(TimetableSnapshotSource.class);
 
-        graph.timetableSnapshotSource = timetableSnapshotSource;
+		graph.timetableSnapshotSource = timetableSnapshotSource;
 
-        tripUpdateGraphWriterRunnable.run(graph);
+		tripUpdateGraphWriterRunnable.run(graph);
 
-        verify(timetableSnapshotSource).applyTripUpdates(updates, agencyId);
-    }
+		verify(timetableSnapshotSource).applyTripUpdates(updates, agencyId);
+	}
 }

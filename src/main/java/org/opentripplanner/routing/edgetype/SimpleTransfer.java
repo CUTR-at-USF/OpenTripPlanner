@@ -23,53 +23,55 @@ import org.opentripplanner.routing.vertextype.TransitStop;
 import com.vividsolutions.jts.geom.LineString;
 
 /**
- * Represents a transfer between stops that does not take the street network into account.
+ * Represents a transfer between stops that does not take the street network
+ * into account.
  */
 public class SimpleTransfer extends Edge {
-    private static final long serialVersionUID = 20140408L;
+	private static final long serialVersionUID = 20140408L;
 
-    private double distance;
-    
-    private LineString geometry;
+	private double distance;
 
-    public SimpleTransfer(TransitStop from, TransitStop to, double distance, LineString geometry) {
-        super(from, to);
-        this.distance = distance;
-        this.geometry = geometry;
-    }
+	private LineString geometry;
 
-    @Override
-    public State traverse(State s0) {
-        RoutingRequest rr = s0.getOptions();
-        double walkspeed = rr.walkSpeed;
-        StateEditor se = s0.edit(this);
-        se.setBackMode(TraverseMode.WALK);
-        int time = (int) Math.ceil(distance / walkspeed) + 2 * StreetTransitLink.STL_TRAVERSE_COST;
-        se.incrementTimeInSeconds(time);
-        se.incrementWeight(time * rr.walkReluctance);
-        se.incrementWalkDistance(distance);
-        return se.makeState();
-    }
+	public SimpleTransfer(TransitStop from, TransitStop to, double distance,
+			LineString geometry) {
+		super(from, to);
+		this.distance = distance;
+		this.geometry = geometry;
+	}
 
-    @Override
-    public String getName() {
-        return fromv.getName() + " => " + tov.getName();
-    }
+	@Override
+	public State traverse(State s0) {
+		RoutingRequest rr = s0.getOptions();
+		double walkspeed = rr.walkSpeed;
+		StateEditor se = s0.edit(this);
+		se.setBackMode(TraverseMode.WALK);
+		int time = (int) Math.ceil(distance / walkspeed) + 2
+				* StreetTransitLink.STL_TRAVERSE_COST;
+		se.incrementTimeInSeconds(time);
+		se.incrementWeight(time * rr.walkReluctance);
+		se.incrementWalkDistance(distance);
+		return se.makeState();
+	}
 
-    @Override
-    public double weightLowerBound(RoutingRequest rr) {
-        int time = (int) (distance / rr.walkSpeed); 
-        return (time * rr.walkReluctance);
-    }
-    
-    @Override
-    public double getDistance(){
-    	return this.distance;
-    }
-    
-    
-   @Override
-   public LineString getGeometry(){
-	   return this.geometry;
-   }
+	@Override
+	public String getName() {
+		return fromv.getName() + " => " + tov.getName();
+	}
+
+	@Override
+	public double weightLowerBound(RoutingRequest rr) {
+		int time = (int) (distance / rr.walkSpeed);
+		return (time * rr.walkReluctance);
+	}
+
+	@Override
+	public double getDistance() {
+		return this.distance;
+	}
+
+	@Override
+	public LineString getGeometry() {
+		return this.geometry;
+	}
 }

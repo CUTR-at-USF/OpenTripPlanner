@@ -22,8 +22,8 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public interface GeometryIndexService {
 
-    @SuppressWarnings("rawtypes")
-    List queryPedestrian(Envelope env);
+	@SuppressWarnings("rawtypes")
+	List queryPedestrian(Envelope env);
 
-    BoundingBox getBoundingBox(CoordinateReferenceSystem crs);
+	BoundingBox getBoundingBox(CoordinateReferenceSystem crs);
 }

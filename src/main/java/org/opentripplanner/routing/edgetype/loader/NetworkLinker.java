@@ -39,104 +39,120 @@ import org.slf4j.LoggerFactory;
 
 public class NetworkLinker {
 
-    private static Logger LOG = LoggerFactory.getLogger(NetworkLinker.class);
+	private static Logger LOG = LoggerFactory.getLogger(NetworkLinker.class);
 
-    private Graph graph;
+	private Graph graph;
 
-    private NetworkLinkerLibrary networkLinkerLibrary;
+	private NetworkLinkerLibrary networkLinkerLibrary;
 
-    public NetworkLinker(Graph graph, HashMap<Class<?>,Object> extra) {
-        this.graph = graph;
-        this.networkLinkerLibrary = new NetworkLinkerLibrary(graph, extra);
-        networkLinkerLibrary.options = new RoutingRequest(TraverseMode.BICYCLE);
-    }
+	public NetworkLinker(Graph graph, HashMap<Class<?>, Object> extra) {
+		this.graph = graph;
+		this.networkLinkerLibrary = new NetworkLinkerLibrary(graph, extra);
+		networkLinkerLibrary.options = new RoutingRequest(TraverseMode.BICYCLE);
+	}
 
-    public NetworkLinker(Graph graph) {
-        // we should be using Collections.emptyMap(), but it breaks Java's broken-ass type checker
-        this(graph, new HashMap<Class<?>, Object>());
-    }
+	public NetworkLinker(Graph graph) {
+		// we should be using Collections.emptyMap(), but it breaks Java's
+		// broken-ass type checker
+		this(graph, new HashMap<Class<?>, Object>());
+	}
 
-    /**
-     * Link the transit network to the street network. Connect each transit vertex to the nearest
-     * Street edge with a StreetTransitLink.
-     */
-    public void createLinkage() {
+	/**
+	 * Link the transit network to the street network. Connect each transit
+	 * vertex to the nearest Street edge with a StreetTransitLink.
+	 */
+	public void createLinkage() {
 
-        LOG.debug("creating linkages...");
-        // iterate over a copy of vertex list because it will be modified
-        ArrayList<Vertex> vertices = new ArrayList<Vertex>();
-        vertices.addAll(graph.getVertices());
+		LOG.debug("creating linkages...");
+		// iterate over a copy of vertex list because it will be modified
+		ArrayList<Vertex> vertices = new ArrayList<Vertex>();
+		vertices.addAll(graph.getVertices());
 
-        int nUnlinked = 0;
-        for (TransitStop ts : Iterables.filter(vertices, TransitStop.class)) {
-            // if the street is already linked there is no need to linked it again,
-            // could happened if using the prune isolated island
-            boolean alreadyLinked = false;
-            for(Edge e:ts.getOutgoing()){
-                if(e instanceof StreetTransitLink) {
-                    alreadyLinked = true;
-                    break;
-                }
-            }
-            if(alreadyLinked) continue;
-            // only connect transit stops that (a) are entrances, or (b) have no associated
-            // entrances
-            if (ts.isEntrance() || !ts.hasEntrances()) {
-                boolean wheelchairAccessible = ts.hasWheelchairEntrance();
-                if (!networkLinkerLibrary.connectVertexToStreets(ts, wheelchairAccessible).getResult()) {
-                    LOG.debug(graph.addBuilderAnnotation(new StopUnlinked(ts)));
-                    nUnlinked += 1;
-                }
-            }
-        }
-        if (nUnlinked > 0) {
-            LOG.warn("{} transit stops were not close enough to the street network to be connected to it.", nUnlinked);
-        }
-        //remove replaced edges
-        for (HashSet<StreetEdge> toRemove : networkLinkerLibrary.replacements.keySet()) {
-            for (StreetEdge edge : toRemove) {
-                edge.getFromVertex().removeOutgoing(edge);
-                edge.getToVertex().removeIncoming(edge);
-            }
-        }
-        //and add back in replacements
-        for (LinkedList<P2<StreetEdge>> toAdd : networkLinkerLibrary.replacements.values()) {
-            for (P2<StreetEdge> edges : toAdd) {
-                StreetEdge edge1 = edges.first;
-                if (edge1.getToVertex().getLabel().startsWith("split ") || edge1.getFromVertex().getLabel().startsWith("split ")) {
-                    continue;
-                }
-                edge1.getFromVertex().addOutgoing(edge1);
-                edge1.getToVertex().addIncoming(edge1);
-                StreetEdge edge2 = edges.second;
-                if (edge2 != null) {
-                    edge2.getFromVertex().addOutgoing(edge2);
-                    edge2.getToVertex().addIncoming(edge2);
-                }
-            }
-        }
+		int nUnlinked = 0;
+		for (TransitStop ts : Iterables.filter(vertices, TransitStop.class)) {
+			// if the street is already linked there is no need to linked it
+			// again,
+			// could happened if using the prune isolated island
+			boolean alreadyLinked = false;
+			for (Edge e : ts.getOutgoing()) {
+				if (e instanceof StreetTransitLink) {
+					alreadyLinked = true;
+					break;
+				}
+			}
+			if (alreadyLinked)
+				continue;
+			// only connect transit stops that (a) are entrances, or (b) have no
+			// associated
+			// entrances
+			if (ts.isEntrance() || !ts.hasEntrances()) {
+				boolean wheelchairAccessible = ts.hasWheelchairEntrance();
+				if (!networkLinkerLibrary.connectVertexToStreets(ts,
+						wheelchairAccessible).getResult()) {
+					LOG.debug(graph.addBuilderAnnotation(new StopUnlinked(ts)));
+					nUnlinked += 1;
+				}
+			}
+		}
+		if (nUnlinked > 0) {
+			LOG.warn(
+					"{} transit stops were not close enough to the street network to be connected to it.",
+					nUnlinked);
+		}
+		// remove replaced edges
+		for (HashSet<StreetEdge> toRemove : networkLinkerLibrary.replacements
+				.keySet()) {
+			for (StreetEdge edge : toRemove) {
+				edge.getFromVertex().removeOutgoing(edge);
+				edge.getToVertex().removeIncoming(edge);
+			}
+		}
+		// and add back in replacements
+		for (LinkedList<P2<StreetEdge>> toAdd : networkLinkerLibrary.replacements
+				.values()) {
+			for (P2<StreetEdge> edges : toAdd) {
+				StreetEdge edge1 = edges.first;
+				if (edge1.getToVertex().getLabel().startsWith("split ")
+						|| edge1.getFromVertex().getLabel()
+								.startsWith("split ")) {
+					continue;
+				}
+				edge1.getFromVertex().addOutgoing(edge1);
+				edge1.getToVertex().addIncoming(edge1);
+				StreetEdge edge2 = edges.second;
+				if (edge2 != null) {
+					edge2.getFromVertex().addOutgoing(edge2);
+					edge2.getToVertex().addIncoming(edge2);
+				}
+			}
+		}
 
-        /*
-         * TODO Those two steps should be in a separate builder, really. We re-use this builder to
-         * prevent having to spatially re-index several times the street network. Instead we could
-         * have a "spatial indexer" builder that add a spatial index to the graph, and make all
-         * builders that rely on spatial indexing to add a dependency to this builder. And we do not
-         * link stations directly in the OSM build as they can come from other builders (static bike
-         * rental or P+R builders) and street data can be coming from shapefiles.
-         */
-        LOG.debug("Linking bike rental stations...");
-        for (BikeRentalStationVertex brsv : Iterables.filter(vertices,
-                BikeRentalStationVertex.class)) {
-            if (!networkLinkerLibrary.connectVertexToStreets(brsv).getResult()) {
-                LOG.warn(graph.addBuilderAnnotation(new BikeRentalStationUnlinked(brsv)));
-            }
-        }
+		/*
+		 * TODO Those two steps should be in a separate builder, really. We
+		 * re-use this builder to prevent having to spatially re-index several
+		 * times the street network. Instead we could have a "spatial indexer"
+		 * builder that add a spatial index to the graph, and make all builders
+		 * that rely on spatial indexing to add a dependency to this builder.
+		 * And we do not link stations directly in the OSM build as they can
+		 * come from other builders (static bike rental or P+R builders) and
+		 * street data can be coming from shapefiles.
+		 */
+		LOG.debug("Linking bike rental stations...");
+		for (BikeRentalStationVertex brsv : Iterables.filter(vertices,
+				BikeRentalStationVertex.class)) {
+			if (!networkLinkerLibrary.connectVertexToStreets(brsv).getResult()) {
+				LOG.warn(graph
+						.addBuilderAnnotation(new BikeRentalStationUnlinked(
+								brsv)));
+			}
+		}
 
-        LOG.debug("Linking bike P+R stations...");
-        for (BikeParkVertex bprv : Iterables.filter(vertices, BikeParkVertex.class)) {
-            if (!networkLinkerLibrary.connectVertexToStreets(bprv).getResult()) {
-                LOG.warn(graph.addBuilderAnnotation(new BikeParkUnlinked(bprv)));
-            }
-        }
-    }
+		LOG.debug("Linking bike P+R stations...");
+		for (BikeParkVertex bprv : Iterables.filter(vertices,
+				BikeParkVertex.class)) {
+			if (!networkLinkerLibrary.connectVertexToStreets(bprv).getResult()) {
+				LOG.warn(graph.addBuilderAnnotation(new BikeParkUnlinked(bprv)));
+			}
+		}
+	}
 }

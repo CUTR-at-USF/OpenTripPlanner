@@ -60,261 +60,279 @@ import com.vividsolutions.jts.geom.LineString;
  * FIXME too: Even worse, it didn't even fail when OnBoardDepartServiceImpl turned out to be broken.
  */
 public class OnBoardDepartServiceImplTest {
-    OnBoardDepartServiceImpl onBoardDepartServiceImpl = new OnBoardDepartServiceImpl();
+	OnBoardDepartServiceImpl onBoardDepartServiceImpl = new OnBoardDepartServiceImpl();
 
-    @Test
-    public final void testOnBoardDepartureTime() {
-        Coordinate[] coordinates = new Coordinate[5];
-        coordinates[0] = new Coordinate(0.0, 0.0);
-        coordinates[1] = new Coordinate(0.0, 1.0);
-        coordinates[2] = new Coordinate(2.0, 1.0);
-        coordinates[3] = new Coordinate(5.0, 1.0);
-        coordinates[4] = new Coordinate(5.0, 5.0);
+	@Test
+	public final void testOnBoardDepartureTime() {
+		Coordinate[] coordinates = new Coordinate[5];
+		coordinates[0] = new Coordinate(0.0, 0.0);
+		coordinates[1] = new Coordinate(0.0, 1.0);
+		coordinates[2] = new Coordinate(2.0, 1.0);
+		coordinates[3] = new Coordinate(5.0, 1.0);
+		coordinates[4] = new Coordinate(5.0, 5.0);
 
-        PatternDepartVertex depart = mock(PatternDepartVertex.class);
-        PatternArriveVertex dwell = mock(PatternArriveVertex.class);
-        PatternArriveVertex arrive = mock(PatternArriveVertex.class);
-        Graph graph = mock(Graph.class);
-        RoutingRequest routingRequest = mock(RoutingRequest.class);
-        ServiceDay serviceDay = mock(ServiceDay.class);
+		PatternDepartVertex depart = mock(PatternDepartVertex.class);
+		PatternArriveVertex dwell = mock(PatternArriveVertex.class);
+		PatternArriveVertex arrive = mock(PatternArriveVertex.class);
+		Graph graph = mock(Graph.class);
+		RoutingRequest routingRequest = mock(RoutingRequest.class);
+		ServiceDay serviceDay = mock(ServiceDay.class);
 
-        when(graph.getTimeZone()).thenReturn(TimeZone.getTimeZone("GMT"));
+		when(graph.getTimeZone()).thenReturn(TimeZone.getTimeZone("GMT"));
 
-        GeometryFactory geometryFactory = GeometryUtils.getGeometryFactory();
-        CoordinateSequenceFactory coordinateSequenceFactory =
-                geometryFactory.getCoordinateSequenceFactory();
-        CoordinateSequence coordinateSequence = coordinateSequenceFactory.create(coordinates);
-        LineString geometry = new LineString(coordinateSequence, geometryFactory);
-        ArrayList<Edge> hops = new ArrayList<Edge>(2);
-        RoutingContext routingContext = new RoutingContext(routingRequest, graph, null, arrive);
-        AgencyAndId agencyAndId = new AgencyAndId("Agency", "ID");
-        Route route = new Route();
-        ArrayList<StopTime> stopTimes = new ArrayList<StopTime>(3);
-        StopTime stopDepartTime = new StopTime();
-        StopTime stopDwellTime = new StopTime();
-        StopTime stopArriveTime = new StopTime();
-        Stop stopDepart = new Stop();
-        Stop stopDwell = new Stop();
-        Stop stopArrive = new Stop();
-        Trip trip = new Trip();
+		GeometryFactory geometryFactory = GeometryUtils.getGeometryFactory();
+		CoordinateSequenceFactory coordinateSequenceFactory = geometryFactory
+				.getCoordinateSequenceFactory();
+		CoordinateSequence coordinateSequence = coordinateSequenceFactory
+				.create(coordinates);
+		LineString geometry = new LineString(coordinateSequence,
+				geometryFactory);
+		ArrayList<Edge> hops = new ArrayList<Edge>(2);
+		RoutingContext routingContext = new RoutingContext(routingRequest,
+				graph, null, arrive);
+		AgencyAndId agencyAndId = new AgencyAndId("Agency", "ID");
+		Route route = new Route();
+		ArrayList<StopTime> stopTimes = new ArrayList<StopTime>(3);
+		StopTime stopDepartTime = new StopTime();
+		StopTime stopDwellTime = new StopTime();
+		StopTime stopArriveTime = new StopTime();
+		Stop stopDepart = new Stop();
+		Stop stopDwell = new Stop();
+		Stop stopArrive = new Stop();
+		Trip trip = new Trip();
 
-        routingContext.serviceDays =
-                new ArrayList<ServiceDay>(Collections.singletonList(serviceDay));
-        route.setId(agencyAndId);
-        stopDepart.setId(agencyAndId);
-        stopDwell.setId(agencyAndId);
-        stopArrive.setId(agencyAndId);
-        stopDepartTime.setStop(stopDepart);
-        stopDepartTime.setDepartureTime(0);
-        stopDwellTime.setArrivalTime(20);
-        stopDwellTime.setStop(stopDwell);
-        stopDwellTime.setDepartureTime(40);
-        stopArriveTime.setArrivalTime(60);
-        stopArriveTime.setStop(stopArrive);
-        stopTimes.add(stopDepartTime);
-        stopTimes.add(stopDwellTime);
-        stopTimes.add(stopArriveTime);
-        trip.setId(agencyAndId);
-        trip.setTripHeadsign("The right");
+		routingContext.serviceDays = new ArrayList<ServiceDay>(
+				Collections.singletonList(serviceDay));
+		route.setId(agencyAndId);
+		stopDepart.setId(agencyAndId);
+		stopDwell.setId(agencyAndId);
+		stopArrive.setId(agencyAndId);
+		stopDepartTime.setStop(stopDepart);
+		stopDepartTime.setDepartureTime(0);
+		stopDwellTime.setArrivalTime(20);
+		stopDwellTime.setStop(stopDwell);
+		stopDwellTime.setDepartureTime(40);
+		stopArriveTime.setArrivalTime(60);
+		stopArriveTime.setStop(stopArrive);
+		stopTimes.add(stopDepartTime);
+		stopTimes.add(stopDwellTime);
+		stopTimes.add(stopArriveTime);
+		trip.setId(agencyAndId);
+		trip.setTripHeadsign("The right");
 
-        TripTimes tripTimes = new TripTimes(trip, stopTimes, new Deduplicator());
-        StopPattern stopPattern = new StopPattern(stopTimes);
-        TripPattern tripPattern = new TripPattern(route, stopPattern);
+		TripTimes tripTimes = new TripTimes(trip, stopTimes, new Deduplicator());
+		StopPattern stopPattern = new StopPattern(stopTimes);
+		TripPattern tripPattern = new TripPattern(route, stopPattern);
 
-        when(depart.getTripPattern()).thenReturn(tripPattern);
-        when(dwell.getTripPattern()).thenReturn(tripPattern);
+		when(depart.getTripPattern()).thenReturn(tripPattern);
+		when(dwell.getTripPattern()).thenReturn(tripPattern);
 
-        PatternHop patternHop0 = new PatternHop(depart, dwell, stopDepart, stopDwell, 0);
-        PatternHop patternHop1 = new PatternHop(dwell, arrive, stopDwell, stopArrive, 1);
+		PatternHop patternHop0 = new PatternHop(depart, dwell, stopDepart,
+				stopDwell, 0);
+		PatternHop patternHop1 = new PatternHop(dwell, arrive, stopDwell,
+				stopArrive, 1);
 
-        hops.add(patternHop0);
-        hops.add(patternHop1);
+		hops.add(patternHop0);
+		hops.add(patternHop1);
 
-        when(graph.getEdges()).thenReturn(hops);
-        when(depart.getCoordinate()).thenReturn(new Coordinate(0, 0));
-        when(dwell.getCoordinate()).thenReturn(new Coordinate(0, 0));
-        when(arrive.getCoordinate()).thenReturn(new Coordinate(0, 0));
-        routingRequest.from = new GenericLocation();
-        routingRequest.startingTransitTripId = agencyAndId;
-        when(serviceDay.secondsSinceMidnight(anyInt())).thenReturn(9);
+		when(graph.getEdges()).thenReturn(hops);
+		when(depart.getCoordinate()).thenReturn(new Coordinate(0, 0));
+		when(dwell.getCoordinate()).thenReturn(new Coordinate(0, 0));
+		when(arrive.getCoordinate()).thenReturn(new Coordinate(0, 0));
+		routingRequest.from = new GenericLocation();
+		routingRequest.startingTransitTripId = agencyAndId;
+		when(serviceDay.secondsSinceMidnight(anyInt())).thenReturn(9);
 
-        patternHop0.setGeometry(geometry);
-        tripPattern.add(tripTimes);
-        graph.index = new GraphIndex(graph);
+		patternHop0.setGeometry(geometry);
+		tripPattern.add(tripTimes);
+		graph.index = new GraphIndex(graph);
 
-        coordinates = new Coordinate[3];
-        coordinates[0] = new Coordinate(3.5, 1.0);
-        coordinates[1] = new Coordinate(5.0, 1.0);
-        coordinates[2] = new Coordinate(5.0, 5.0);
+		coordinates = new Coordinate[3];
+		coordinates[0] = new Coordinate(3.5, 1.0);
+		coordinates[1] = new Coordinate(5.0, 1.0);
+		coordinates[2] = new Coordinate(5.0, 5.0);
 
-        coordinateSequence = coordinateSequenceFactory.create(coordinates);
-        geometry = new LineString(coordinateSequence, geometryFactory);
+		coordinateSequence = coordinateSequenceFactory.create(coordinates);
+		geometry = new LineString(coordinateSequence, geometryFactory);
 
-        Vertex vertex = onBoardDepartServiceImpl.setupDepartOnBoard(routingContext);
-        Edge edge = vertex.getOutgoing().toArray(new Edge[1])[0];
+		Vertex vertex = onBoardDepartServiceImpl
+				.setupDepartOnBoard(routingContext);
+		Edge edge = vertex.getOutgoing().toArray(new Edge[1])[0];
 
-        assertEquals(vertex, edge.getFromVertex());
-        assertEquals(dwell, edge.getToVertex());
-        assertEquals("The right", edge.getDirection());
-        assertEquals(geometry, edge.getGeometry());
+		assertEquals(vertex, edge.getFromVertex());
+		assertEquals(dwell, edge.getToVertex());
+		assertEquals("The right", edge.getDirection());
+		assertEquals(geometry, edge.getGeometry());
 
-        assertEquals(coordinates[0].x, vertex.getX(), 0.0);
-        assertEquals(coordinates[0].y, vertex.getY(), 0.0);
-    }
+		assertEquals(coordinates[0].x, vertex.getX(), 0.0);
+		assertEquals(coordinates[0].y, vertex.getY(), 0.0);
+	}
 
-    @Test
-    public final void testOnBoardDepartureAtArrivalTime() {
-        Coordinate[] coordinates = new Coordinate[2];
-        coordinates[0] = new Coordinate(0.0, 0.0);
-        coordinates[1] = new Coordinate(0.0, 1.0);
+	@Test
+	public final void testOnBoardDepartureAtArrivalTime() {
+		Coordinate[] coordinates = new Coordinate[2];
+		coordinates[0] = new Coordinate(0.0, 0.0);
+		coordinates[1] = new Coordinate(0.0, 1.0);
 
-        TransitStop station0 = mock(TransitStop.class);
-        TransitStop station1 = mock(TransitStop.class);
-        PatternDepartVertex depart = mock(PatternDepartVertex.class);
-        PatternArriveVertex arrive = mock(PatternArriveVertex.class);
-        Graph graph = mock(Graph.class);
-        RoutingRequest routingRequest = mock(RoutingRequest.class);
-        ServiceDay serviceDay = mock(ServiceDay.class);
+		TransitStop station0 = mock(TransitStop.class);
+		TransitStop station1 = mock(TransitStop.class);
+		PatternDepartVertex depart = mock(PatternDepartVertex.class);
+		PatternArriveVertex arrive = mock(PatternArriveVertex.class);
+		Graph graph = mock(Graph.class);
+		RoutingRequest routingRequest = mock(RoutingRequest.class);
+		ServiceDay serviceDay = mock(ServiceDay.class);
 
-        when(graph.getTimeZone()).thenReturn(TimeZone.getTimeZone("GMT"));
-        when(station0.getX()).thenReturn(coordinates[0].x);
-        when(station0.getY()).thenReturn(coordinates[0].y);
-        when(station1.getX()).thenReturn(coordinates[1].x);
-        when(station1.getY()).thenReturn(coordinates[1].y);
+		when(graph.getTimeZone()).thenReturn(TimeZone.getTimeZone("GMT"));
+		when(station0.getX()).thenReturn(coordinates[0].x);
+		when(station0.getY()).thenReturn(coordinates[0].y);
+		when(station1.getX()).thenReturn(coordinates[1].x);
+		when(station1.getY()).thenReturn(coordinates[1].y);
 
-        RoutingContext routingContext = new RoutingContext(routingRequest, graph, null, arrive);
-        AgencyAndId agencyAndId = new AgencyAndId("Agency", "ID");
-        Route route = new Route();
-        ArrayList<StopTime> stopTimes = new ArrayList<StopTime>(2);
-        StopTime stopDepartTime = new StopTime();
-        StopTime stopArriveTime = new StopTime();
-        Stop stopDepart = new Stop();
-        Stop stopArrive = new Stop();
-        Trip trip = new Trip();
+		RoutingContext routingContext = new RoutingContext(routingRequest,
+				graph, null, arrive);
+		AgencyAndId agencyAndId = new AgencyAndId("Agency", "ID");
+		Route route = new Route();
+		ArrayList<StopTime> stopTimes = new ArrayList<StopTime>(2);
+		StopTime stopDepartTime = new StopTime();
+		StopTime stopArriveTime = new StopTime();
+		Stop stopDepart = new Stop();
+		Stop stopArrive = new Stop();
+		Trip trip = new Trip();
 
-        routingContext.serviceDays =
-                new ArrayList<ServiceDay>(Collections.singletonList(serviceDay));
-        route.setId(agencyAndId);
-        stopDepart.setId(new AgencyAndId("Station", "0"));
-        stopArrive.setId(new AgencyAndId("Station", "1"));
-        stopDepartTime.setStop(stopDepart);
-        stopDepartTime.setDepartureTime(0);
-        stopArriveTime.setArrivalTime(10);
-        stopArriveTime.setStop(stopArrive);
-        stopTimes.add(stopDepartTime);
-        stopTimes.add(stopArriveTime);
-        trip.setId(agencyAndId);
+		routingContext.serviceDays = new ArrayList<ServiceDay>(
+				Collections.singletonList(serviceDay));
+		route.setId(agencyAndId);
+		stopDepart.setId(new AgencyAndId("Station", "0"));
+		stopArrive.setId(new AgencyAndId("Station", "1"));
+		stopDepartTime.setStop(stopDepart);
+		stopDepartTime.setDepartureTime(0);
+		stopArriveTime.setArrivalTime(10);
+		stopArriveTime.setStop(stopArrive);
+		stopTimes.add(stopDepartTime);
+		stopTimes.add(stopArriveTime);
+		trip.setId(agencyAndId);
 
-        TripTimes tripTimes = new TripTimes(trip, stopTimes, new Deduplicator());
-        StopPattern stopPattern = new StopPattern(stopTimes);
-        TripPattern tripPattern = new TripPattern(route, stopPattern);
+		TripTimes tripTimes = new TripTimes(trip, stopTimes, new Deduplicator());
+		StopPattern stopPattern = new StopPattern(stopTimes);
+		TripPattern tripPattern = new TripPattern(route, stopPattern);
 
-        when(depart.getTripPattern()).thenReturn(tripPattern);
+		when(depart.getTripPattern()).thenReturn(tripPattern);
 
-        PatternHop patternHop = new PatternHop(depart, arrive, stopDepart, stopArrive, 0);
+		PatternHop patternHop = new PatternHop(depart, arrive, stopDepart,
+				stopArrive, 0);
 
-        when(graph.getEdges()).thenReturn(Collections.<Edge>singletonList(patternHop));
-        when(depart.getCoordinate()).thenReturn(new Coordinate(0, 0));
-        when(arrive.getCoordinate()).thenReturn(new Coordinate(0, 0));
-        routingRequest.from = new GenericLocation();
-        routingRequest.startingTransitTripId = agencyAndId;
-        when(serviceDay.secondsSinceMidnight(anyInt())).thenReturn(10);
-        when(graph.getVertex("Station_0")).thenReturn(station0);
-        when(graph.getVertex("Station_1")).thenReturn(station1);
+		when(graph.getEdges()).thenReturn(
+				Collections.<Edge> singletonList(patternHop));
+		when(depart.getCoordinate()).thenReturn(new Coordinate(0, 0));
+		when(arrive.getCoordinate()).thenReturn(new Coordinate(0, 0));
+		routingRequest.from = new GenericLocation();
+		routingRequest.startingTransitTripId = agencyAndId;
+		when(serviceDay.secondsSinceMidnight(anyInt())).thenReturn(10);
+		when(graph.getVertex("Station_0")).thenReturn(station0);
+		when(graph.getVertex("Station_1")).thenReturn(station1);
 
-        tripPattern.add(tripTimes);
-        graph.index = new GraphIndex(graph);
+		tripPattern.add(tripTimes);
+		graph.index = new GraphIndex(graph);
 
-        Vertex vertex = onBoardDepartServiceImpl.setupDepartOnBoard(routingContext);
+		Vertex vertex = onBoardDepartServiceImpl
+				.setupDepartOnBoard(routingContext);
 
-        assertEquals(coordinates[1].x, vertex.getX(), 0.0);
-        assertEquals(coordinates[1].y, vertex.getY(), 0.0);
-    }
+		assertEquals(coordinates[1].x, vertex.getX(), 0.0);
+		assertEquals(coordinates[1].y, vertex.getY(), 0.0);
+	}
 
-    @Test
-    public final void testOnBoardAtStation() {
-        TransitStop station0 = mock(TransitStop.class);
-        TransitStop station1 = mock(TransitStop.class);
-        TransitStop station2 = mock(TransitStop.class);
-        PatternDepartVertex depart = mock(PatternDepartVertex.class);
-        PatternArriveVertex dwell = mock(PatternArriveVertex.class);
-        PatternArriveVertex arrive = mock(PatternArriveVertex.class);
-        Graph graph = mock(Graph.class);
-        RoutingRequest routingRequest = mock(RoutingRequest.class);
-        ServiceDay serviceDay = mock(ServiceDay.class);
+	@Test
+	public final void testOnBoardAtStation() {
+		TransitStop station0 = mock(TransitStop.class);
+		TransitStop station1 = mock(TransitStop.class);
+		TransitStop station2 = mock(TransitStop.class);
+		PatternDepartVertex depart = mock(PatternDepartVertex.class);
+		PatternArriveVertex dwell = mock(PatternArriveVertex.class);
+		PatternArriveVertex arrive = mock(PatternArriveVertex.class);
+		Graph graph = mock(Graph.class);
+		RoutingRequest routingRequest = mock(RoutingRequest.class);
+		ServiceDay serviceDay = mock(ServiceDay.class);
 
-        when(graph.getTimeZone()).thenReturn(TimeZone.getTimeZone("GMT"));
+		when(graph.getTimeZone()).thenReturn(TimeZone.getTimeZone("GMT"));
 
-        ArrayList<Edge> hops = new ArrayList<Edge>(2);
-        RoutingContext routingContext = new RoutingContext(routingRequest, graph, null, arrive);
-        AgencyAndId agencyAndId = new AgencyAndId("Agency", "ID");
-        Route route = new Route();
-        ArrayList<StopTime> stopTimes = new ArrayList<StopTime>(2);
-        StopTime stopDepartTime = new StopTime();
-        StopTime stopDwellTime = new StopTime();
-        StopTime stopArriveTime = new StopTime();
-        Stop stopDepart = new Stop();
-        Stop stopDwell = new Stop();
-        Stop stopArrive = new Stop();
-        Trip trip = new Trip();
+		ArrayList<Edge> hops = new ArrayList<Edge>(2);
+		RoutingContext routingContext = new RoutingContext(routingRequest,
+				graph, null, arrive);
+		AgencyAndId agencyAndId = new AgencyAndId("Agency", "ID");
+		Route route = new Route();
+		ArrayList<StopTime> stopTimes = new ArrayList<StopTime>(2);
+		StopTime stopDepartTime = new StopTime();
+		StopTime stopDwellTime = new StopTime();
+		StopTime stopArriveTime = new StopTime();
+		Stop stopDepart = new Stop();
+		Stop stopDwell = new Stop();
+		Stop stopArrive = new Stop();
+		Trip trip = new Trip();
 
-        routingContext.serviceDays =
-                new ArrayList<ServiceDay>(Collections.singletonList(serviceDay));
-        route.setId(agencyAndId);
-        stopDepart.setId(new AgencyAndId("Station", "0"));
-        stopDwell.setId(new AgencyAndId("Station", "1"));
-        stopArrive.setId(new AgencyAndId("Station", "2"));
-        stopDepartTime.setStop(stopDepart);
-        stopDepartTime.setDepartureTime(0);
-        stopDwellTime.setArrivalTime(20);
-        stopDwellTime.setStop(stopDwell);
-        stopDwellTime.setDepartureTime(40);
-        stopArriveTime.setArrivalTime(60);
-        stopArriveTime.setStop(stopArrive);
-        stopTimes.add(stopDepartTime);
-        stopTimes.add(stopDwellTime);
-        stopTimes.add(stopArriveTime);
-        trip.setId(agencyAndId);
+		routingContext.serviceDays = new ArrayList<ServiceDay>(
+				Collections.singletonList(serviceDay));
+		route.setId(agencyAndId);
+		stopDepart.setId(new AgencyAndId("Station", "0"));
+		stopDwell.setId(new AgencyAndId("Station", "1"));
+		stopArrive.setId(new AgencyAndId("Station", "2"));
+		stopDepartTime.setStop(stopDepart);
+		stopDepartTime.setDepartureTime(0);
+		stopDwellTime.setArrivalTime(20);
+		stopDwellTime.setStop(stopDwell);
+		stopDwellTime.setDepartureTime(40);
+		stopArriveTime.setArrivalTime(60);
+		stopArriveTime.setStop(stopArrive);
+		stopTimes.add(stopDepartTime);
+		stopTimes.add(stopDwellTime);
+		stopTimes.add(stopArriveTime);
+		trip.setId(agencyAndId);
 
-        TripTimes tripTimes = new TripTimes(trip, stopTimes, new Deduplicator());
-        StopPattern stopPattern = new StopPattern(stopTimes);
-        TripPattern tripPattern = new TripPattern(route, stopPattern);
+		TripTimes tripTimes = new TripTimes(trip, stopTimes, new Deduplicator());
+		StopPattern stopPattern = new StopPattern(stopTimes);
+		TripPattern tripPattern = new TripPattern(route, stopPattern);
 
-        when(depart.getTripPattern()).thenReturn(tripPattern);
-        when(dwell.getTripPattern()).thenReturn(tripPattern);
+		when(depart.getTripPattern()).thenReturn(tripPattern);
+		when(dwell.getTripPattern()).thenReturn(tripPattern);
 
-        PatternHop patternHop0 = new PatternHop(depart, dwell, stopDepart, stopDwell, 0);
-        PatternHop patternHop1 = new PatternHop(dwell, arrive, stopDwell, stopArrive, 1);
+		PatternHop patternHop0 = new PatternHop(depart, dwell, stopDepart,
+				stopDwell, 0);
+		PatternHop patternHop1 = new PatternHop(dwell, arrive, stopDwell,
+				stopArrive, 1);
 
-        hops.add(patternHop0);
-        hops.add(patternHop1);
+		hops.add(patternHop0);
+		hops.add(patternHop1);
 
-        when(graph.getEdges()).thenReturn(hops);
-        when(depart.getCoordinate()).thenReturn(new Coordinate(0, 0));
-        when(dwell.getCoordinate()).thenReturn(new Coordinate(0, 0));
-        when(arrive.getCoordinate()).thenReturn(new Coordinate(0, 0));
-        routingRequest.from = new GenericLocation();
-        routingRequest.startingTransitTripId = agencyAndId;
-        when(graph.getVertex("Station_0")).thenReturn(station0);
-        when(graph.getVertex("Station_1")).thenReturn(station1);
-        when(graph.getVertex("Station_2")).thenReturn(station2);
+		when(graph.getEdges()).thenReturn(hops);
+		when(depart.getCoordinate()).thenReturn(new Coordinate(0, 0));
+		when(dwell.getCoordinate()).thenReturn(new Coordinate(0, 0));
+		when(arrive.getCoordinate()).thenReturn(new Coordinate(0, 0));
+		routingRequest.from = new GenericLocation();
+		routingRequest.startingTransitTripId = agencyAndId;
+		when(graph.getVertex("Station_0")).thenReturn(station0);
+		when(graph.getVertex("Station_1")).thenReturn(station1);
+		when(graph.getVertex("Station_2")).thenReturn(station2);
 
-        tripPattern.add(tripTimes);
-        graph.index = new GraphIndex(graph);
+		tripPattern.add(tripTimes);
+		graph.index = new GraphIndex(graph);
 
-        when(serviceDay.secondsSinceMidnight(anyInt())).thenReturn(0);
-        assertEquals(station0, onBoardDepartServiceImpl.setupDepartOnBoard(routingContext));
+		when(serviceDay.secondsSinceMidnight(anyInt())).thenReturn(0);
+		assertEquals(station0,
+				onBoardDepartServiceImpl.setupDepartOnBoard(routingContext));
 
-        when(serviceDay.secondsSinceMidnight(anyInt())).thenReturn(20);
-        assertEquals(station1, onBoardDepartServiceImpl.setupDepartOnBoard(routingContext));
+		when(serviceDay.secondsSinceMidnight(anyInt())).thenReturn(20);
+		assertEquals(station1,
+				onBoardDepartServiceImpl.setupDepartOnBoard(routingContext));
 
-        when(serviceDay.secondsSinceMidnight(anyInt())).thenReturn(30);
-        assertEquals(station1, onBoardDepartServiceImpl.setupDepartOnBoard(routingContext));
+		when(serviceDay.secondsSinceMidnight(anyInt())).thenReturn(30);
+		assertEquals(station1,
+				onBoardDepartServiceImpl.setupDepartOnBoard(routingContext));
 
-        when(serviceDay.secondsSinceMidnight(anyInt())).thenReturn(40);
-        assertEquals(station1, onBoardDepartServiceImpl.setupDepartOnBoard(routingContext));
+		when(serviceDay.secondsSinceMidnight(anyInt())).thenReturn(40);
+		assertEquals(station1,
+				onBoardDepartServiceImpl.setupDepartOnBoard(routingContext));
 
-        when(serviceDay.secondsSinceMidnight(anyInt())).thenReturn(60);
-        assertEquals(station2, onBoardDepartServiceImpl.setupDepartOnBoard(routingContext));
-    }
+		when(serviceDay.secondsSinceMidnight(anyInt())).thenReturn(60);
+		assertEquals(station2,
+				onBoardDepartServiceImpl.setupDepartOnBoard(routingContext));
+	}
 }

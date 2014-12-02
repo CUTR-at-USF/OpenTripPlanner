@@ -21,16 +21,16 @@ import java.util.Set;
 
 public class TransitType extends AbstractStopTester {
 
-    TraverseMode transitType;
+	TraverseMode transitType;
 
-
-    /**
-     * @retrun return true if a transit type of type transitType is pass through that stop
-     */
-    @Override
-    public boolean fulfillDemands(TransitStop ts, Graph graph) {
-        if (ts.getModes().contains(transitType))
-            return true;
-        return false;
-    }
+	/**
+	 * @retrun return true if a transit type of type transitType is pass through
+	 *         that stop
+	 */
+	@Override
+	public boolean fulfillDemands(TransitStop ts, Graph graph) {
+		if (ts.getModes().contains(transitType))
+			return true;
+		return false;
+	}
 }

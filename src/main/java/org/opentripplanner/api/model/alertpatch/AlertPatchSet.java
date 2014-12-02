@@ -21,10 +21,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.opentripplanner.routing.alertpatch.AlertPatch;
 
-@XmlRootElement(name="AlertPatchSet")
+@XmlRootElement(name = "AlertPatchSet")
 public class AlertPatchSet {
-    @XmlElements({
-        @XmlElement(name = "AlertPatch", type = AlertPatch.class)
-    })
-    public List<AlertPatch> alertPatches;
+	@XmlElements({ @XmlElement(name = "AlertPatch", type = AlertPatch.class) })
+	public List<AlertPatch> alertPatches;
 }

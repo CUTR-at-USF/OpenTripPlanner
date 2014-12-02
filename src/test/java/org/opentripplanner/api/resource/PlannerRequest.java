@@ -22,124 +22,150 @@ import org.opentripplanner.routing.core.OptimizeType;
 import org.opentripplanner.routing.core.TraverseModeSet;
 
 /**
- * Sample POJO for ReflectiveQueryScraper 
+ * Sample POJO for ReflectiveQueryScraper
  */
 public class PlannerRequest {
 
-    /** The router ID -- internal ID to switch between router implementation (or graphs) */
-    public String routerId;
-    
-    /** The start location -- either a Vertex name or latitude, longitude in degrees */
-    public String from;
-    
-    /** The start location's user-visible name */
-    public String fromName;
+	/**
+	 * The router ID -- internal ID to switch between router implementation (or
+	 * graphs)
+	 */
+	public String routerId;
 
-    /** The end location (see the from field for format) */
-    public String to;
+	/**
+	 * The start location -- either a Vertex name or latitude, longitude in
+	 * degrees
+	 */
+	public String from;
 
-    /** The end location's user-visible name */
-    public String toName;
+	/** The start location's user-visible name */
+	public String fromName;
 
-    /** An unordered list of intermediate locations to be visited (see the from field for format) */
-    public List<NamedPlace> intermediatePlaces;
+	/** The end location (see the from field for format) */
+	public String to;
 
-    /** The maximum distance (in meters) the user is willing to walk. Defaults to 1/2 mile  */
-    public double maxWalkDistance = Double.MAX_VALUE;
+	/** The end location's user-visible name */
+	public String toName;
 
-    /** The set of TraverseModes that a user is willing to use. Defaults to WALK | TRANSIT */
-    public TraverseModeSet mode; // defaults in constructor
+	/**
+	 * An unordered list of intermediate locations to be visited (see the from
+	 * field for format)
+	 */
+	public List<NamedPlace> intermediatePlaces;
 
-    /** The set of characteristics that the user wants to optimize for -- defaults to QUICK, or
-     *  optimize for transit time. */
-    public OptimizeType optimize = OptimizeType.QUICK;
-    
-    /** The date/time that the trip should depart (or arrive, for requests where arriveBy is true) */
-    public Date dateTime = new Date();
+	/**
+	 * The maximum distance (in meters) the user is willing to walk. Defaults to
+	 * 1/2 mile
+	 */
+	public double maxWalkDistance = Double.MAX_VALUE;
 
-    /** Whether the trip should depart at dateTime (false, the default), or arrive at dateTime */
-    public boolean arriveBy = false;
+	/**
+	 * The set of TraverseModes that a user is willing to use. Defaults to WALK
+	 * | TRANSIT
+	 */
+	public TraverseModeSet mode; // defaults in constructor
 
-    /** Whether the trip must be wheelchair accessible. */
-    public boolean wheelchair = false;
-  
-    /** The maximum number of possible itineraries to return. */
-    public int numItineraries = 3;
+	/**
+	 * The set of characteristics that the user wants to optimize for --
+	 * defaults to QUICK, or optimize for transit time.
+	 */
+	public OptimizeType optimize = OptimizeType.QUICK;
 
-    /** The maximum slope of streets for wheelchair trips. */
-    public double maxSlope = -1;
-    
-    /** Whether the planner should return intermediate stops lists for transit legs. */
-    public boolean showIntermediateStops = false;
-    
-    /** List of preffered routes. */
-    public String[] preferredRoutes;
-    
-    /** List of unpreferred routes. */
-    public String[] unpreferredRoutes;
-    
-    /** The complete list of parameters. */
-    public final HashMap<String, String> parameters = new HashMap<String, String>();
+	/**
+	 * The date/time that the trip should depart (or arrive, for requests where
+	 * arriveBy is true)
+	 */
+	public Date dateTime = new Date();
 
-    /** TODO: documentation */
-    public Integer minTransferTime;
+	/**
+	 * Whether the trip should depart at dateTime (false, the default), or
+	 * arrive at dateTime
+	 */
+	public boolean arriveBy = false;
 
-    /** TODO: documentation */
-    public String[] bannedRoutes;
-    
-    /** TODO: documentation */
-    public Integer transferPenalty;
-    
-    /** TODO: documentation */
-    public double walkSpeed;
-    
-    /** TODO: documentation */
-    public double bikeSpeed;
+	/** Whether the trip must be wheelchair accessible. */
+	public boolean wheelchair = false;
 
-    /** TODO: documentation */
-    public double triangleSafetyFactor;
-    
-    /** TODO: documentation */
-    public double triangleSlopeFactor;
-    
-    /** TODO: documentation */
-    public double triangleTimeFactor;
-    
-    /** TODO: documentation */
-    public Integer maxTransfers;
-    
-    /** TODO: documentation */
-    public boolean intermediatePlacesOrdered;
-    
-    /** Constructor. All defaults should be set here or in field declarations. */
-    public PlannerRequest() {
-        mode = new TraverseModeSet("TRANSIT,WALK");
-    }
+	/** The maximum number of possible itineraries to return. */
+	public int numItineraries = 3;
 
-    /** 
-     * Ideally this should block setting any field named 'fromPlace' from a query param
-     * of the same name, and this method's parameters should be filled in from
-     * query parameters of the same name. 
-     */
-    public void setFromPlace(String from) {
-        if (from.contains("::")) {
-            String[] parts = from.split("::");
-            this.fromName = parts[0];
-            this.from = parts[1];
-        } else {
-            this.from = from;
-        }
-    }
+	/** The maximum slope of streets for wheelchair trips. */
+	public double maxSlope = -1;
 
-    /** TODO: documentation */
-    public void setToPlace(String to) {
-        if (to.contains("::")) {
-            String[] parts = to.split("::");
-            this.toName = parts[0];
-            this.to = parts[1];
-        } else {
-            this.to = to;
-        }
-    }
+	/**
+	 * Whether the planner should return intermediate stops lists for transit
+	 * legs.
+	 */
+	public boolean showIntermediateStops = false;
+
+	/** List of preffered routes. */
+	public String[] preferredRoutes;
+
+	/** List of unpreferred routes. */
+	public String[] unpreferredRoutes;
+
+	/** The complete list of parameters. */
+	public final HashMap<String, String> parameters = new HashMap<String, String>();
+
+	/** TODO: documentation */
+	public Integer minTransferTime;
+
+	/** TODO: documentation */
+	public String[] bannedRoutes;
+
+	/** TODO: documentation */
+	public Integer transferPenalty;
+
+	/** TODO: documentation */
+	public double walkSpeed;
+
+	/** TODO: documentation */
+	public double bikeSpeed;
+
+	/** TODO: documentation */
+	public double triangleSafetyFactor;
+
+	/** TODO: documentation */
+	public double triangleSlopeFactor;
+
+	/** TODO: documentation */
+	public double triangleTimeFactor;
+
+	/** TODO: documentation */
+	public Integer maxTransfers;
+
+	/** TODO: documentation */
+	public boolean intermediatePlacesOrdered;
+
+	/** Constructor. All defaults should be set here or in field declarations. */
+	public PlannerRequest() {
+		mode = new TraverseModeSet("TRANSIT,WALK");
+	}
+
+	/**
+	 * Ideally this should block setting any field named 'fromPlace' from a
+	 * query param of the same name, and this method's parameters should be
+	 * filled in from query parameters of the same name.
+	 */
+	public void setFromPlace(String from) {
+		if (from.contains("::")) {
+			String[] parts = from.split("::");
+			this.fromName = parts[0];
+			this.from = parts[1];
+		} else {
+			this.from = from;
+		}
+	}
+
+	/** TODO: documentation */
+	public void setToPlace(String to) {
+		if (to.contains("::")) {
+			String[] parts = to.split("::");
+			this.toName = parts[0];
+			this.to = parts[1];
+		} else {
+			this.to = to;
+		}
+	}
 
 }

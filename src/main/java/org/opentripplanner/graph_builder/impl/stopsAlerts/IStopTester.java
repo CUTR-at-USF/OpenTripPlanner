@@ -17,6 +17,7 @@ import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.routing.vertextype.TransitStop;
 
 public interface IStopTester {
-    boolean fulfillDemands(TransitStop ts, Graph graph);
-    String getType();
+	boolean fulfillDemands(TransitStop ts, Graph graph);
+
+	String getType();
 }

@@ -18,14 +18,14 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 public class StateEditorTest {
-    @Test
-    public final void testIncrementTimeInSeconds() {
-        RoutingRequest routingRequest = new RoutingRequest();
-        StateEditor stateEditor = new StateEditor(routingRequest, null);
+	@Test
+	public final void testIncrementTimeInSeconds() {
+		RoutingRequest routingRequest = new RoutingRequest();
+		StateEditor stateEditor = new StateEditor(routingRequest, null);
 
-        stateEditor.setTimeSeconds(0);
-        stateEditor.incrementTimeInSeconds(999999999);
+		stateEditor.setTimeSeconds(0);
+		stateEditor.incrementTimeInSeconds(999999999);
 
-        assertEquals(999999999, stateEditor.child.getTimeSeconds());
-    }
+		assertEquals(999999999, stateEditor.child.getTimeSeconds());
+	}
 }

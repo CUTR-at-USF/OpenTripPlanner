@@ -24,9 +24,9 @@ import org.opentripplanner.routing.graph.Graph;
  * 
  */
 public interface CustomNamer {
-    public String name(OSMWithTags way, String defaultName);
+	public String name(OSMWithTags way, String defaultName);
 
-    public void nameWithEdge(OSMWithTags way, StreetEdge edge);
+	public void nameWithEdge(OSMWithTags way, StreetEdge edge);
 
-    public void postprocess(Graph graph);
+	public void postprocess(Graph graph);
 }

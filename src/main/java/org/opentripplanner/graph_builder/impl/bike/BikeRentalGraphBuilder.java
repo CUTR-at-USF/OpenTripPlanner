@@ -30,52 +30,56 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This graph builder allow one to statically build bike rental stations using the same source as
- * the dynamic bike rental updater. This may help when the source does not contain real-time info
- * (or one is not interested in), location of stations do not change that often, or development.
+ * This graph builder allow one to statically build bike rental stations using
+ * the same source as the dynamic bike rental updater. This may help when the
+ * source does not contain real-time info (or one is not interested in),
+ * location of stations do not change that often, or development.
  */
 public class BikeRentalGraphBuilder implements GraphBuilder {
 
-    private static Logger LOG = LoggerFactory.getLogger(BikeRentalGraphBuilder.class);
+	private static Logger LOG = LoggerFactory
+			.getLogger(BikeRentalGraphBuilder.class);
 
-    private BikeRentalDataSource dataSource;
+	private BikeRentalDataSource dataSource;
 
-    public void setDataSource(BikeRentalDataSource dataSource) {
-        this.dataSource = dataSource;
-    }
+	public void setDataSource(BikeRentalDataSource dataSource) {
+		this.dataSource = dataSource;
+	}
 
-    @Override
-    public void buildGraph(Graph graph, HashMap<Class<?>, Object> extra) {
+	@Override
+	public void buildGraph(Graph graph, HashMap<Class<?>, Object> extra) {
 
-        LOG.info("Building bike rental stations from static source...");
-        BikeRentalStationService service = graph.getService(BikeRentalStationService.class, true);
-        if (!dataSource.update()) {
-            LOG.warn("No bike rental found from the data source.");
-            return;
-        }
-        Collection<BikeRentalStation> stations = dataSource.getStations();
+		LOG.info("Building bike rental stations from static source...");
+		BikeRentalStationService service = graph.getService(
+				BikeRentalStationService.class, true);
+		if (!dataSource.update()) {
+			LOG.warn("No bike rental found from the data source.");
+			return;
+		}
+		Collection<BikeRentalStation> stations = dataSource.getStations();
 
-        for (BikeRentalStation station : stations) {
-            service.addBikeRentalStation(station);
-            BikeRentalStationVertex vertex = new BikeRentalStationVertex(graph, station);
-            new RentABikeOnEdge(vertex, vertex, station.networks);
-            if (station.allowDropoff)
-                new RentABikeOffEdge(vertex, vertex, station.networks);
-        }
-        LOG.info("Created " + stations.size() + " bike rental stations.");
-    }
+		for (BikeRentalStation station : stations) {
+			service.addBikeRentalStation(station);
+			BikeRentalStationVertex vertex = new BikeRentalStationVertex(graph,
+					station);
+			new RentABikeOnEdge(vertex, vertex, station.networks);
+			if (station.allowDropoff)
+				new RentABikeOffEdge(vertex, vertex, station.networks);
+		}
+		LOG.info("Created " + stations.size() + " bike rental stations.");
+	}
 
-    @Override
-    public List<String> provides() {
-        return Arrays.asList("bike_rental");
-    }
+	@Override
+	public List<String> provides() {
+		return Arrays.asList("bike_rental");
+	}
 
-    @Override
-    public List<String> getPrerequisites() {
-        return Arrays.asList("streets");
-    }
+	@Override
+	public List<String> getPrerequisites() {
+		return Arrays.asList("streets");
+	}
 
-    @Override
-    public void checkInputs() {
-    }
+	@Override
+	public void checkInputs() {
+	}
 }

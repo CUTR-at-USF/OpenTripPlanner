@@ -29,13 +29,18 @@ import org.opentripplanner.standalone.OTPServer;
 @XmlRootElement
 public class Metadata {
 
-    @Context OTPServer otpServer;
+	@Context
+	OTPServer otpServer;
 
-    /** Returns metadata about the graph -- presently, this is just the extent of the graph. */
-    @GET
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML + Q, MediaType.TEXT_XML + Q })
-    public GraphMetadata getMetadata(@PathParam("routerId") String routerId) {
-        return otpServer.graphService.getGraph(routerId).getMetadata();
-    }
+	/**
+	 * Returns metadata about the graph -- presently, this is just the extent of
+	 * the graph.
+	 */
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML + Q,
+			MediaType.TEXT_XML + Q })
+	public GraphMetadata getMetadata(@PathParam("routerId") String routerId) {
+		return otpServer.graphService.getGraph(routerId).getMetadata();
+	}
 
 }

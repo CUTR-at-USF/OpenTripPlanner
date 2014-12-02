@@ -30,102 +30,105 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.linearref.LinearLocation;
 
 public abstract class MatchState {
-    private static final RoutingRequest traverseOptions = new RoutingRequest(TraverseMode.CAR);
+	private static final RoutingRequest traverseOptions = new RoutingRequest(
+			TraverseMode.CAR);
 
-    protected static final double NEW_SEGMENT_PENALTY = 0.1;
+	protected static final double NEW_SEGMENT_PENALTY = 0.1;
 
-    protected static final double NO_TRAVERSE_PENALTY = 20;
+	protected static final double NO_TRAVERSE_PENALTY = 20;
 
-    private static DistanceLibrary distanceLibrary = SphericalDistanceLibrary.getInstance();
+	private static DistanceLibrary distanceLibrary = SphericalDistanceLibrary
+			.getInstance();
 
-    public double currentError;
+	public double currentError;
 
-    public double accumulatedError;
+	public double accumulatedError;
 
-    public MatchState parent;
+	public MatchState parent;
 
-    protected Edge edge;
+	protected Edge edge;
 
-    private double distanceAlongRoute = 0;
+	private double distanceAlongRoute = 0;
 
-    public MatchState(MatchState parent, Edge edge, double distanceAlongRoute) {
-        this.distanceAlongRoute = distanceAlongRoute;
-        this.parent = parent;
-        this.edge = edge;
-        if (parent != null) {
-            this.accumulatedError = parent.accumulatedError + parent.currentError;
-            this.distanceAlongRoute += parent.distanceAlongRoute;
-        }
-    }
+	public MatchState(MatchState parent, Edge edge, double distanceAlongRoute) {
+		this.distanceAlongRoute = distanceAlongRoute;
+		this.parent = parent;
+		this.edge = edge;
+		if (parent != null) {
+			this.accumulatedError = parent.accumulatedError
+					+ parent.currentError;
+			this.distanceAlongRoute += parent.distanceAlongRoute;
+		}
+	}
 
-    public abstract List<MatchState> getNextStates();
+	public abstract List<MatchState> getNextStates();
 
-    public Edge getEdge() {
-        return edge;
-    }
+	public Edge getEdge() {
+		return edge;
+	}
 
-    public double getTotalError() {
-        return accumulatedError + currentError;
-    }
+	public double getTotalError() {
+		return accumulatedError + currentError;
+	}
 
-    protected boolean carsCanTraverse(Edge edge) {
-        // should be done with a method on edge (canTraverse already exists on turnEdge) 
-        State s0 = new State(edge.getFromVertex(), traverseOptions);
-        State s1 = edge.traverse(s0);
-        return s1 != null;
-    }
+	protected boolean carsCanTraverse(Edge edge) {
+		// should be done with a method on edge (canTraverse already exists on
+		// turnEdge)
+		State s0 = new State(edge.getFromVertex(), traverseOptions);
+		State s1 = edge.traverse(s0);
+		return s1 != null;
+	}
 
-    protected List<Edge> getOutgoingMatchableEdges(Vertex vertex) {
-        List<Edge> edges = new ArrayList<Edge>();
-        for (Edge e : vertex.getOutgoing()) {
-            if (!(e instanceof StreetEdge))
-                continue;
-            if (e.getGeometry() == null)
-                continue;
-            edges.add(e);
-        }
-        return edges;
-    }
+	protected List<Edge> getOutgoingMatchableEdges(Vertex vertex) {
+		List<Edge> edges = new ArrayList<Edge>();
+		for (Edge e : vertex.getOutgoing()) {
+			if (!(e instanceof StreetEdge))
+				continue;
+			if (e.getGeometry() == null)
+				continue;
+			edges.add(e);
+		}
+		return edges;
+	}
 
+	public double getDistanceAlongRoute() {
+		return distanceAlongRoute;
+	}
 
-    public double getDistanceAlongRoute() {
-        return distanceAlongRoute;
-    }
+	/* computes the distance, in meters, along a geometry */
+	protected static double distanceAlongGeometry(Geometry geometry,
+			LinearLocation startIndex, LinearLocation endIndex) {
 
-    /* computes the distance, in meters, along a geometry */
-    protected static double distanceAlongGeometry(Geometry geometry, LinearLocation startIndex,
-            LinearLocation endIndex) {
+		if (endIndex == null) {
+			endIndex = LinearLocation.getEndLocation(geometry);
+		}
+		double total = 0;
+		LinearIterator it = new LinearIterator(geometry, startIndex);
+		LinearLocation index = startIndex;
+		Coordinate previousCoordinate = startIndex.getCoordinate(geometry);
 
-        if (endIndex == null) {
-            endIndex = LinearLocation.getEndLocation(geometry);
-        }
-        double total = 0;
-        LinearIterator it = new LinearIterator(geometry, startIndex);
-        LinearLocation index = startIndex;
-        Coordinate previousCoordinate = startIndex.getCoordinate(geometry);
+		it.next();
+		index = it.getLocation();
+		while (index.compareTo(endIndex) < 0) {
+			Coordinate thisCoordinate = index.getCoordinate(geometry);
+			double distance = distanceLibrary.fastDistance(previousCoordinate,
+					thisCoordinate);
+			total += distance;
+			previousCoordinate = thisCoordinate;
+			if (!it.hasNext())
+				break;
+			it.next();
+			index = it.getLocation();
+		}
+		// now, last bit of last segment
+		Coordinate finalCoordinate = endIndex.getCoordinate(geometry);
+		total += distanceLibrary.distance(previousCoordinate, finalCoordinate);
 
-        it.next();
-        index = it.getLocation();
-        while (index.compareTo(endIndex) < 0) {
-            Coordinate thisCoordinate = index.getCoordinate(geometry);
-            double distance = distanceLibrary.fastDistance(previousCoordinate, thisCoordinate);
-            total += distance;
-            previousCoordinate = thisCoordinate;
-            if (!it.hasNext())
-                break;
-            it.next();
-            index = it.getLocation();
-        }
-        //now, last bit of last segment
-        Coordinate finalCoordinate = endIndex.getCoordinate(geometry);
-        total += distanceLibrary.distance(previousCoordinate, finalCoordinate);
+		return total;
+	}
 
-        return total;
-    }
-
-    
-    protected static double distance(Coordinate from, Coordinate to) {
-        return distanceLibrary.fastDistance(from, to);
-    }
+	protected static double distance(Coordinate from, Coordinate to) {
+		return distanceLibrary.fastDistance(from, to);
+	}
 
 }

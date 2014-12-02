@@ -20,10 +20,11 @@ import org.slf4j.LoggerFactory;
 import java.util.prefs.Preferences;
 
 /**
- * This abstract class implements logic that is shared between all polling updaters.
+ * This abstract class implements logic that is shared between all polling
+ * updaters.
  * 
- * Usage example ('polling' name is an example and 'polling-updater' should be the type of a
- * concrete class derived from this abstract class):
+ * Usage example ('polling' name is an example and 'polling-updater' should be
+ * the type of a concrete class derived from this abstract class):
  * 
  * <pre>
  * polling.type = polling-updater
@@ -34,64 +35,70 @@ import java.util.prefs.Preferences;
  */
 public abstract class PollingGraphUpdater implements GraphUpdater {
 
-    private static Logger LOG = LoggerFactory.getLogger(PollingGraphUpdater.class);
+	private static Logger LOG = LoggerFactory
+			.getLogger(PollingGraphUpdater.class);
 
-    /**
-     * Mirrors GraphUpdater.run method. Only difference is that runPolling will be run multiple
-     * times with pauses in between. The length of the pause is defined in the preference
-     * frequencySec.
-     */
-    abstract protected void runPolling() throws Exception;
+	/**
+	 * Mirrors GraphUpdater.run method. Only difference is that runPolling will
+	 * be run multiple times with pauses in between. The length of the pause is
+	 * defined in the preference frequencySec.
+	 */
+	abstract protected void runPolling() throws Exception;
 
-    /**
-     * Mirrors GraphUpdater.configure method.
-     */
-    abstract protected void configurePolling(Graph graph, Preferences preferences) throws Exception;
+	/**
+	 * Mirrors GraphUpdater.configure method.
+	 */
+	abstract protected void configurePolling(Graph graph,
+			Preferences preferences) throws Exception;
 
-    /**
-     * The number of seconds between two polls
-     */
-    protected Integer frequencySec;
+	/**
+	 * The number of seconds between two polls
+	 */
+	protected Integer frequencySec;
 
-    /**
-     * The type name in the preferences
-     */
-    private String type;
+	/**
+	 * The type name in the preferences
+	 */
+	private String type;
 
-    @Override
-    final public void run() {
-        try {
-            LOG.info("Polling updater {}@{} started.", this.getClass().getName(), this.hashCode());
-            // Run "forever"
-            while (true) {
-                try {
-                    // Run concrete class' method
-                    runPolling();
-                } catch (InterruptedException e) {
-                    // Throw further up the stack
-                    throw e;
-                } catch (Exception e) {
-                    LOG.error("Error while running polling updater of type {}", type, e);
-                    // TODO Should we cancel the task? Or after n consecutive failures?
-                    // cancel();
-                }
+	@Override
+	final public void run() {
+		try {
+			LOG.info("Polling updater {}@{} started.", this.getClass()
+					.getName(), this.hashCode());
+			// Run "forever"
+			while (true) {
+				try {
+					// Run concrete class' method
+					runPolling();
+				} catch (InterruptedException e) {
+					// Throw further up the stack
+					throw e;
+				} catch (Exception e) {
+					LOG.error("Error while running polling updater of type {}",
+							type, e);
+					// TODO Should we cancel the task? Or after n consecutive
+					// failures?
+					// cancel();
+				}
 
-                // Sleep a given number of seconds
-                Thread.sleep(frequencySec * 1000);
-            }
-        } catch (InterruptedException e) {
-            // When updater is interrupted
-            LOG.error("Polling updater {}@{} is interrupted, updater stops.", this.getClass()
-                    .getName(), this.hashCode());
-        }
-    }
+				// Sleep a given number of seconds
+				Thread.sleep(frequencySec * 1000);
+			}
+		} catch (InterruptedException e) {
+			// When updater is interrupted
+			LOG.error("Polling updater {}@{} is interrupted, updater stops.",
+					this.getClass().getName(), this.hashCode());
+		}
+	}
 
-    @Override
-    final public void configure(Graph graph, Preferences preferences) throws Exception {
-        // Configure polling system
-        frequencySec = preferences.getInt("frequencySec", 60);
-        type = preferences.get("type", "");
-        // Configure concrete class
-        configurePolling(graph, preferences);
-    }
+	@Override
+	final public void configure(Graph graph, Preferences preferences)
+			throws Exception {
+		// Configure polling system
+		frequencySec = preferences.getInt("frequencySec", 60);
+		type = preferences.get("type", "");
+		// Configure concrete class
+		configurePolling(graph, preferences);
+	}
 }

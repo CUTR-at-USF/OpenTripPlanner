@@ -18,24 +18,24 @@ import org.opentripplanner.routing.vertextype.TransitStop;
 
 public class StopUnlinked extends GraphBuilderAnnotation {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public static final String FMT = "Stop %s not near any streets; it will not be usable.";
-    
-    final TransitStop stop;
-    
-    public StopUnlinked(TransitStop stop){
-    	this.stop = stop;
-    }
-    
-    @Override
-    public String getMessage() {
-        return String.format(FMT, stop);
-    }
+	public static final String FMT = "Stop %s not near any streets; it will not be usable.";
 
-    @Override
-    public Vertex getReferencedVertex() {
-        return this.stop;
-    }
-    
+	final TransitStop stop;
+
+	public StopUnlinked(TransitStop stop) {
+		this.stop = stop;
+	}
+
+	@Override
+	public String getMessage() {
+		return String.format(FMT, stop);
+	}
+
+	@Override
+	public Vertex getReferencedVertex() {
+		return this.stop;
+	}
+
 }

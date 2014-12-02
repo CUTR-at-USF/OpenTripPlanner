@@ -28,14 +28,14 @@ import com.vividsolutions.jts.geom.Geometry;
 
 @XmlRootElement(name = "RouterInfo")
 public class RouterInfo {
-    @XmlElement
-    public String routerId;
-    
-    @JsonSerialize(using=GeoJSONSerializer.class)
-    @JsonDeserialize(using=GeoJSONDeserializer.class)
-    @XmlJavaTypeAdapter(value=GeometryAdapter.class,type=Geometry.class)
-    public Geometry polygon;
+	@XmlElement
+	public String routerId;
 
-    @XmlElement
-    public Date buildTime;
+	@JsonSerialize(using = GeoJSONSerializer.class)
+	@JsonDeserialize(using = GeoJSONDeserializer.class)
+	@XmlJavaTypeAdapter(value = GeometryAdapter.class, type = Geometry.class)
+	public Geometry polygon;
+
+	@XmlElement
+	public Date buildTime;
 }

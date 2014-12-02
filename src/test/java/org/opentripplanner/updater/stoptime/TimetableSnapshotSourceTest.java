@@ -52,257 +52,282 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
 
 public class TimetableSnapshotSourceTest {
 
-    private static byte cancellation[];
+	private static byte cancellation[];
 
-    private static byte freqBasedUpdate1[];
+	private static byte freqBasedUpdate1[];
 
-    private static byte freqBasedUpdate2[];
+	private static byte freqBasedUpdate2[];
 
-    private static Graph graph = new Graph();
+	private static Graph graph = new Graph();
 
-    private static GtfsContext context;
+	private static GtfsContext context;
 
-    private static ServiceDate serviceDate = new ServiceDate();
+	private static ServiceDate serviceDate = new ServiceDate();
 
-    private TimetableSnapshotSource updater;
+	private TimetableSnapshotSource updater;
 
+	@BeforeClass
+	public static void setUpClass() throws Exception {
+		context = GtfsLibrary.readGtfs(new File(ConstantsForTests.FAKE_GTFS));
 
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-        context = GtfsLibrary.readGtfs(new File(ConstantsForTests.FAKE_GTFS));
+		GTFSPatternHopFactory factory = new GTFSPatternHopFactory(context);
+		factory.run(graph);
+		graph.index(new DefaultStreetVertexIndexFactory());
 
-        GTFSPatternHopFactory factory = new GTFSPatternHopFactory(context);
-        factory.run(graph);
-        graph.index(new DefaultStreetVertexIndexFactory());
+		TripDescriptor.Builder tripDescriptorBuilder = TripDescriptor
+				.newBuilder();
 
-        TripDescriptor.Builder tripDescriptorBuilder = TripDescriptor.newBuilder();
+		tripDescriptorBuilder.setTripId("1.1");
+		tripDescriptorBuilder
+				.setScheduleRelationship(TripDescriptor.ScheduleRelationship.CANCELED);
 
-        tripDescriptorBuilder.setTripId("1.1");
-        tripDescriptorBuilder.setScheduleRelationship(TripDescriptor.ScheduleRelationship.CANCELED);
+		TripUpdate.Builder tripUpdateBuilder = TripUpdate.newBuilder();
 
-        TripUpdate.Builder tripUpdateBuilder = TripUpdate.newBuilder();
+		tripUpdateBuilder.setTrip(tripDescriptorBuilder);
 
-        tripUpdateBuilder.setTrip(tripDescriptorBuilder);
+		cancellation = tripUpdateBuilder.build().toByteArray();
 
-        cancellation = tripUpdateBuilder.build().toByteArray();
+		// create update for frequencyBased trip
+		tripDescriptorBuilder.setTripId("15.1");
+		tripDescriptorBuilder
+				.setScheduleRelationship(TripDescriptor.ScheduleRelationship.UNSCHEDULED);
+		tripUpdateBuilder.setTrip(tripDescriptorBuilder);
 
-        // create update for frequencyBased trip
-        tripDescriptorBuilder.setTripId("15.1");
-        tripDescriptorBuilder
-                .setScheduleRelationship(TripDescriptor.ScheduleRelationship.UNSCHEDULED);
-        tripUpdateBuilder.setTrip(tripDescriptorBuilder);
+		StopTimeUpdate.Builder stopTimeUpdateBuilder = tripUpdateBuilder
+				.addStopTimeUpdateBuilder(0);
+		stopTimeUpdateBuilder.setStopSequence(2);
+		StopTimeEvent.Builder stopTimeEventBuilder = stopTimeUpdateBuilder
+				.getArrivalBuilder();
 
-        StopTimeUpdate.Builder stopTimeUpdateBuilder = tripUpdateBuilder
-                .addStopTimeUpdateBuilder(0);
-        stopTimeUpdateBuilder.setStopSequence(2);
-        StopTimeEvent.Builder stopTimeEventBuilder = stopTimeUpdateBuilder.getArrivalBuilder();
+		stopTimeEventBuilder.setTime((new java.util.Date().getTime()) / 1000);
+		VehicleDescriptor.Builder vehicleDescriptor = VehicleDescriptor
+				.newBuilder();
+		vehicleDescriptor.setId("a");
+		tripUpdateBuilder.setVehicle(vehicleDescriptor);
+		freqBasedUpdate1 = tripUpdateBuilder.build().toByteArray();
 
-        stopTimeEventBuilder.setTime((new java.util.Date().getTime()) / 1000);
-        VehicleDescriptor.Builder vehicleDescriptor = VehicleDescriptor.newBuilder();
-        vehicleDescriptor.setId("a");
-        tripUpdateBuilder.setVehicle(vehicleDescriptor);
-        freqBasedUpdate1 = tripUpdateBuilder.build().toByteArray();
-     
-        vehicleDescriptor.setId("b");
-        stopTimeEventBuilder = stopTimeUpdateBuilder.getArrivalBuilder();
-        stopTimeUpdateBuilder.setStopSequence(1);
-        tripUpdateBuilder.setVehicle(vehicleDescriptor);
-        freqBasedUpdate2 = tripUpdateBuilder.build().toByteArray();
-    }
+		vehicleDescriptor.setId("b");
+		stopTimeEventBuilder = stopTimeUpdateBuilder.getArrivalBuilder();
+		stopTimeUpdateBuilder.setStopSequence(1);
+		tripUpdateBuilder.setVehicle(vehicleDescriptor);
+		freqBasedUpdate2 = tripUpdateBuilder.build().toByteArray();
+	}
 
-    @Before
-    public void setUp() {
-        graph.putService(CalendarServiceData.class,
-                GtfsLibrary.createCalendarServiceData(context.getDao()));
-        updater = new TimetableSnapshotSource(graph);
+	@Before
+	public void setUp() {
+		graph.putService(CalendarServiceData.class,
+				GtfsLibrary.createCalendarServiceData(context.getDao()));
+		updater = new TimetableSnapshotSource(graph);
 
-    }
+	}
 
-    @Test
-    public void testGetSnapshot() throws InvalidProtocolBufferException {
-        updater.applyTripUpdates(Arrays.asList(TripUpdate.parseFrom(cancellation)), "agency");
+	@Test
+	public void testGetSnapshot() throws InvalidProtocolBufferException {
+		updater.applyTripUpdates(
+				Arrays.asList(TripUpdate.parseFrom(cancellation)), "agency");
 
-        TimetableResolver resolver = updater.getTimetableSnapshot();
-        assertNotNull(resolver);
-        assertSame(resolver, updater.getTimetableSnapshot());
+		TimetableResolver resolver = updater.getTimetableSnapshot();
+		assertNotNull(resolver);
+		assertSame(resolver, updater.getTimetableSnapshot());
 
-        updater.applyTripUpdates(Arrays.asList(TripUpdate.parseFrom(cancellation)), "agency");
-        assertSame(resolver, updater.getTimetableSnapshot());
+		updater.applyTripUpdates(
+				Arrays.asList(TripUpdate.parseFrom(cancellation)), "agency");
+		assertSame(resolver, updater.getTimetableSnapshot());
 
-        updater.maxSnapshotFrequency = (-1);
-        TimetableResolver newResolver = updater.getTimetableSnapshot();
-        assertNotNull(newResolver);
-        assertNotSame(resolver, newResolver);
+		updater.maxSnapshotFrequency = (-1);
+		TimetableResolver newResolver = updater.getTimetableSnapshot();
+		assertNotNull(newResolver);
+		assertNotSame(resolver, newResolver);
 
-        updater.applyTripUpdates(Arrays.asList(TripUpdate.parseFrom(freqBasedUpdate1)),
-                "agency");
-        resolver = updater.getTimetableSnapshot();
-        assertSame(resolver, updater.getTimetableSnapshot());
+		updater.applyTripUpdates(
+				Arrays.asList(TripUpdate.parseFrom(freqBasedUpdate1)), "agency");
+		resolver = updater.getTimetableSnapshot();
+		assertSame(resolver, updater.getTimetableSnapshot());
 
-        AgencyAndId tripId = new AgencyAndId("agency", "15.1");
-        Trip trip = graph.index.tripForId.get(tripId);
-        TripPattern pattern = graph.index.patternForTrip.get(trip);
- 
-        Timetable timeTable = resolver.resolve(pattern, serviceDate);
-        assertEquals(timeTable.getTripTimes(0).getVehicleID(), "a");
+		AgencyAndId tripId = new AgencyAndId("agency", "15.1");
+		Trip trip = graph.index.tripForId.get(tripId);
+		TripPattern pattern = graph.index.patternForTrip.get(trip);
 
-        // wait one second and send new trip update
-        try {
-            TimeUnit.SECONDS.sleep(1);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+		Timetable timeTable = resolver.resolve(pattern, serviceDate);
+		assertEquals(timeTable.getTripTimes(0).getVehicleID(), "a");
 
-        // make sure the reset procedure has removed the previous tripUpdate
-        updater.applyTripUpdates(Arrays.asList(TripUpdate.parseFrom(freqBasedUpdate2)),
-                "agency");
-        resolver = updater.getTimetableSnapshot();
-        assertSame(resolver, updater.getTimetableSnapshot());
- 
-        timeTable = resolver.resolve(pattern, serviceDate);
-        assertEquals(timeTable.getTripTimes(0).getVehicleID(), "b");
-    }
+		// wait one second and send new trip update
+		try {
+			TimeUnit.SECONDS.sleep(1);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-    @Test
-    public void testHandleCanceledTrip() throws InvalidProtocolBufferException {
-        AgencyAndId tripId = new AgencyAndId("agency", "1.1");
-        AgencyAndId tripId2 = new AgencyAndId("agency", "1.2");
-        Trip trip = graph.index.tripForId.get(tripId);
-        TripPattern pattern = graph.index.patternForTrip.get(trip);
-        int tripIndex = pattern.scheduledTimetable.getTripIndex(tripId);
-        int tripIndex2 = pattern.scheduledTimetable.getTripIndex(tripId2);
+		// make sure the reset procedure has removed the previous tripUpdate
+		updater.applyTripUpdates(
+				Arrays.asList(TripUpdate.parseFrom(freqBasedUpdate2)), "agency");
+		resolver = updater.getTimetableSnapshot();
+		assertSame(resolver, updater.getTimetableSnapshot());
 
-        updater.applyTripUpdates(Arrays.asList(TripUpdate.parseFrom(cancellation)), "agency");
+		timeTable = resolver.resolve(pattern, serviceDate);
+		assertEquals(timeTable.getTripTimes(0).getVehicleID(), "b");
+	}
 
-        TimetableResolver resolver = updater.getTimetableSnapshot();
-        Timetable forToday = resolver.resolve(pattern, serviceDate);
-        Timetable schedule = resolver.resolve(pattern, null);
-        assertNotSame(forToday, schedule);
-        assertNotSame(forToday.getTripTimes(tripIndex), schedule.getTripTimes(tripIndex));
-        assertSame(forToday.getTripTimes(tripIndex2), schedule.getTripTimes(tripIndex2));
+	@Test
+	public void testHandleCanceledTrip() throws InvalidProtocolBufferException {
+		AgencyAndId tripId = new AgencyAndId("agency", "1.1");
+		AgencyAndId tripId2 = new AgencyAndId("agency", "1.2");
+		Trip trip = graph.index.tripForId.get(tripId);
+		TripPattern pattern = graph.index.patternForTrip.get(trip);
+		int tripIndex = pattern.scheduledTimetable.getTripIndex(tripId);
+		int tripIndex2 = pattern.scheduledTimetable.getTripIndex(tripId2);
 
-        TripTimes tripTimes = forToday.getTripTimes(tripIndex);
-        for (int i = 0; i < tripTimes.getNumStops(); i++) {
-            assertEquals(TripTimes.UNAVAILABLE, tripTimes.getDepartureTime(i));
-            assertEquals(TripTimes.UNAVAILABLE, tripTimes.getArrivalTime(i));
-        }
-    }
+		updater.applyTripUpdates(
+				Arrays.asList(TripUpdate.parseFrom(cancellation)), "agency");
 
-    @Test
-    public void testHandleModifiedTrip() {
-        AgencyAndId tripId = new AgencyAndId("agency", "1.1");
-        AgencyAndId tripId2 = new AgencyAndId("agency", "1.2");
-        Trip trip = graph.index.tripForId.get(tripId);
-        TripPattern pattern = graph.index.patternForTrip.get(trip);
-        int tripIndex = pattern.scheduledTimetable.getTripIndex(tripId);
-        int tripIndex2 = pattern.scheduledTimetable.getTripIndex(tripId2);
+		TimetableResolver resolver = updater.getTimetableSnapshot();
+		Timetable forToday = resolver.resolve(pattern, serviceDate);
+		Timetable schedule = resolver.resolve(pattern, null);
+		assertNotSame(forToday, schedule);
+		assertNotSame(forToday.getTripTimes(tripIndex),
+				schedule.getTripTimes(tripIndex));
+		assertSame(forToday.getTripTimes(tripIndex2),
+				schedule.getTripTimes(tripIndex2));
 
-        TripDescriptor.Builder tripDescriptorBuilder = TripDescriptor.newBuilder();
+		TripTimes tripTimes = forToday.getTripTimes(tripIndex);
+		for (int i = 0; i < tripTimes.getNumStops(); i++) {
+			assertEquals(TripTimes.UNAVAILABLE, tripTimes.getDepartureTime(i));
+			assertEquals(TripTimes.UNAVAILABLE, tripTimes.getArrivalTime(i));
+		}
+	}
 
-        tripDescriptorBuilder.setTripId("1.1");
-        tripDescriptorBuilder
-                .setScheduleRelationship(TripDescriptor.ScheduleRelationship.SCHEDULED);
+	@Test
+	public void testHandleModifiedTrip() {
+		AgencyAndId tripId = new AgencyAndId("agency", "1.1");
+		AgencyAndId tripId2 = new AgencyAndId("agency", "1.2");
+		Trip trip = graph.index.tripForId.get(tripId);
+		TripPattern pattern = graph.index.patternForTrip.get(trip);
+		int tripIndex = pattern.scheduledTimetable.getTripIndex(tripId);
+		int tripIndex2 = pattern.scheduledTimetable.getTripIndex(tripId2);
 
-        TripUpdate.Builder tripUpdateBuilder = TripUpdate.newBuilder();
+		TripDescriptor.Builder tripDescriptorBuilder = TripDescriptor
+				.newBuilder();
 
-        tripUpdateBuilder.setTrip(tripDescriptorBuilder);
+		tripDescriptorBuilder.setTripId("1.1");
+		tripDescriptorBuilder
+				.setScheduleRelationship(TripDescriptor.ScheduleRelationship.SCHEDULED);
 
-        StopTimeUpdate.Builder stopTimeUpdateBuilder = tripUpdateBuilder.addStopTimeUpdateBuilder();
+		TripUpdate.Builder tripUpdateBuilder = TripUpdate.newBuilder();
 
-        stopTimeUpdateBuilder
-                .setScheduleRelationship(StopTimeUpdate.ScheduleRelationship.SCHEDULED);
-        stopTimeUpdateBuilder.setStopSequence(2);
+		tripUpdateBuilder.setTrip(tripDescriptorBuilder);
 
-        StopTimeEvent.Builder arrivalBuilder = stopTimeUpdateBuilder.getArrivalBuilder();
-        StopTimeEvent.Builder departureBuilder = stopTimeUpdateBuilder.getDepartureBuilder();
+		StopTimeUpdate.Builder stopTimeUpdateBuilder = tripUpdateBuilder
+				.addStopTimeUpdateBuilder();
 
-        arrivalBuilder.setDelay(1);
-        departureBuilder.setDelay(1);
+		stopTimeUpdateBuilder
+				.setScheduleRelationship(StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+		stopTimeUpdateBuilder.setStopSequence(2);
 
-        TripUpdate tripUpdate = tripUpdateBuilder.build();
+		StopTimeEvent.Builder arrivalBuilder = stopTimeUpdateBuilder
+				.getArrivalBuilder();
+		StopTimeEvent.Builder departureBuilder = stopTimeUpdateBuilder
+				.getDepartureBuilder();
 
-        updater.applyTripUpdates(Arrays.asList(tripUpdate), "agency");
+		arrivalBuilder.setDelay(1);
+		departureBuilder.setDelay(1);
 
-        TimetableResolver resolver = updater.getTimetableSnapshot();
-        Timetable forToday = resolver.resolve(pattern, serviceDate);
-        Timetable schedule = resolver.resolve(pattern, null);
-        assertNotSame(forToday, schedule);
-        assertNotSame(forToday.getTripTimes(tripIndex), schedule.getTripTimes(tripIndex));
-        assertSame(forToday.getTripTimes(tripIndex2), schedule.getTripTimes(tripIndex2));
-        assertEquals(1, forToday.getTripTimes(tripIndex).getArrivalDelay(1));
-        assertEquals(1, forToday.getTripTimes(tripIndex).getDepartureDelay(1));
-    }
+		TripUpdate tripUpdate = tripUpdateBuilder.build();
 
-    @Test
-    public void testPurgeExpiredData() throws InvalidProtocolBufferException {
-        AgencyAndId tripId = new AgencyAndId("agency", "1.1");
-        ServiceDate previously = serviceDate.previous().previous(); // Just to be safe...
-        Trip trip = graph.index.tripForId.get(tripId);
-        TripPattern pattern = graph.index.patternForTrip.get(trip);
+		updater.applyTripUpdates(Arrays.asList(tripUpdate), "agency");
 
-        updater.maxSnapshotFrequency = (0);
-        updater.purgeExpiredData = (false);
+		TimetableResolver resolver = updater.getTimetableSnapshot();
+		Timetable forToday = resolver.resolve(pattern, serviceDate);
+		Timetable schedule = resolver.resolve(pattern, null);
+		assertNotSame(forToday, schedule);
+		assertNotSame(forToday.getTripTimes(tripIndex),
+				schedule.getTripTimes(tripIndex));
+		assertSame(forToday.getTripTimes(tripIndex2),
+				schedule.getTripTimes(tripIndex2));
+		assertEquals(1, forToday.getTripTimes(tripIndex).getArrivalDelay(1));
+		assertEquals(1, forToday.getTripTimes(tripIndex).getDepartureDelay(1));
+	}
 
-        updater.applyTripUpdates(Arrays.asList(TripUpdate.parseFrom(cancellation)), "agency");
-        TimetableResolver resolverA = updater.getTimetableSnapshot();
+	@Test
+	public void testPurgeExpiredData() throws InvalidProtocolBufferException {
+		AgencyAndId tripId = new AgencyAndId("agency", "1.1");
+		ServiceDate previously = serviceDate.previous().previous(); // Just to
+																	// be
+																	// safe...
+		Trip trip = graph.index.tripForId.get(tripId);
+		TripPattern pattern = graph.index.patternForTrip.get(trip);
 
-        updater.purgeExpiredData = (true);
+		updater.maxSnapshotFrequency = (0);
+		updater.purgeExpiredData = (false);
 
-        TripDescriptor.Builder tripDescriptorBuilder = TripDescriptor.newBuilder();
+		updater.applyTripUpdates(
+				Arrays.asList(TripUpdate.parseFrom(cancellation)), "agency");
+		TimetableResolver resolverA = updater.getTimetableSnapshot();
 
-        tripDescriptorBuilder.setTripId("1.1");
-        tripDescriptorBuilder.setScheduleRelationship(TripDescriptor.ScheduleRelationship.CANCELED);
-        tripDescriptorBuilder.setStartDate(previously.getAsString());
+		updater.purgeExpiredData = (true);
 
-        TripUpdate.Builder tripUpdateBuilder = TripUpdate.newBuilder();
+		TripDescriptor.Builder tripDescriptorBuilder = TripDescriptor
+				.newBuilder();
 
-        tripUpdateBuilder.setTrip(tripDescriptorBuilder);
+		tripDescriptorBuilder.setTripId("1.1");
+		tripDescriptorBuilder
+				.setScheduleRelationship(TripDescriptor.ScheduleRelationship.CANCELED);
+		tripDescriptorBuilder.setStartDate(previously.getAsString());
 
-        TripUpdate tripUpdate = tripUpdateBuilder.build();
+		TripUpdate.Builder tripUpdateBuilder = TripUpdate.newBuilder();
 
-        updater.applyTripUpdates(Arrays.asList(tripUpdate), "agency");
-        TimetableResolver resolverB = updater.getTimetableSnapshot();
+		tripUpdateBuilder.setTrip(tripDescriptorBuilder);
 
-        assertNotSame(resolverA, resolverB);
+		TripUpdate tripUpdate = tripUpdateBuilder.build();
 
-        assertSame(resolverA.resolve(pattern, null), resolverB.resolve(pattern, null));
-        assertSame(resolverA.resolve(pattern, serviceDate), resolverB.resolve(pattern, serviceDate));
-        assertNotSame(resolverA.resolve(pattern, null), resolverA.resolve(pattern, serviceDate));
-        assertSame(resolverB.resolve(pattern, null), resolverB.resolve(pattern, previously));
+		updater.applyTripUpdates(Arrays.asList(tripUpdate), "agency");
+		TimetableResolver resolverB = updater.getTimetableSnapshot();
 
-        // TODO: write test for added trips
-    }
+		assertNotSame(resolverA, resolverB);
 
-    /**
-     * This class extends the {@link CalendarServiceData} class to allow for easier testing. It
-     * includes methods to return both the set of service ids and the time zone used for testing.
-     */
-    private static final SimpleTimeZone timeZone = new SimpleTimeZone(2, "CEST");
+		assertSame(resolverA.resolve(pattern, null),
+				resolverB.resolve(pattern, null));
+		assertSame(resolverA.resolve(pattern, serviceDate),
+				resolverB.resolve(pattern, serviceDate));
+		assertNotSame(resolverA.resolve(pattern, null),
+				resolverA.resolve(pattern, serviceDate));
+		assertSame(resolverB.resolve(pattern, null),
+				resolverB.resolve(pattern, previously));
 
-    private static final class CalendarServiceDataStub extends CalendarServiceData {
-        private static final long serialVersionUID = 1L;
+		// TODO: write test for added trips
+	}
 
-        final Set<AgencyAndId> serviceIds;
+	/**
+	 * This class extends the {@link CalendarServiceData} class to allow for
+	 * easier testing. It includes methods to return both the set of service ids
+	 * and the time zone used for testing.
+	 */
+	private static final SimpleTimeZone timeZone = new SimpleTimeZone(2, "CEST");
 
-        CalendarServiceDataStub(Set<AgencyAndId> serviceIds) {
-            this.serviceIds = serviceIds;
-        }
+	private static final class CalendarServiceDataStub extends
+			CalendarServiceData {
+		private static final long serialVersionUID = 1L;
 
-        @Override
-        public Set<AgencyAndId> getServiceIds() {
-            return serviceIds;
-        }
+		final Set<AgencyAndId> serviceIds;
 
-        @Override
-        public Set<AgencyAndId> getServiceIdsForDate(ServiceDate date) {
-            return serviceIds;
-        }
+		CalendarServiceDataStub(Set<AgencyAndId> serviceIds) {
+			this.serviceIds = serviceIds;
+		}
 
-        @Override
-        public TimeZone getTimeZoneForAgencyId(String agencyId) {
-            return timeZone;
-        }
-    }
+		@Override
+		public Set<AgencyAndId> getServiceIds() {
+			return serviceIds;
+		}
+
+		@Override
+		public Set<AgencyAndId> getServiceIdsForDate(ServiceDate date) {
+			return serviceIds;
+		}
+
+		@Override
+		public TimeZone getTimeZoneForAgencyId(String agencyId) {
+			return timeZone;
+		}
+	}
 
 }

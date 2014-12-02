@@ -22,17 +22,18 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public class SampleGridRequest {
 
-    public int precisionMeters = 200;
+	public int precisionMeters = 200;
 
-    public int maxTimeSec = 0;
+	public int maxTimeSec = 0;
 
-    public Coordinate coordinateOrigin;
+	public Coordinate coordinateOrigin;
 
-    public SampleGridRequest() {
-    }
+	public SampleGridRequest() {
+	}
 
-    public String toString() {
-        return String.format("<timegrid request, coordBase=%s precision=%d meters>",
-                coordinateOrigin, precisionMeters);
-    }
+	public String toString() {
+		return String.format(
+				"<timegrid request, coordBase=%s precision=%d meters>",
+				coordinateOrigin, precisionMeters);
+	}
 }

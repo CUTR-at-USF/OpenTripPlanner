@@ -20,35 +20,37 @@ import com.vividsolutions.jts.geom.Polygon;
 public class PointFeature implements Serializable {
 
 	private static final long serialVersionUID = -613136927314702334L;
-	
+
 	private String id;
 	private Geometry geom;
-	private Map<String,Integer> properties;
+	private Map<String, Integer> properties;
 	private double lat;
 	private double lon;
-	
-	public PointFeature(){
+
+	public PointFeature() {
 		// blank constructor for deserialization
 		this(null);
 	}
-	
-	public PointFeature(String id){
+
+	public PointFeature(String id) {
 		this.id = id;
 		this.geom = null;
-		this.properties = new HashMap<String,Integer>();
+		this.properties = new HashMap<String, Integer>();
 	}
-	
-	public PointFeature(String id, Geometry g,  HashMap<String,Integer> ad) throws EmptyPolygonException, UnsupportedGeometryException{
+
+	public PointFeature(String id, Geometry g, HashMap<String, Integer> ad)
+			throws EmptyPolygonException, UnsupportedGeometryException {
 		this.id = id;
 		this.setGeom(g);
 		this.properties = ad;
 	}
-	
-	public void addAttribute( String id, Integer val ){
+
+	public void addAttribute(String id, Integer val) {
 		this.properties.put(id, val);
 	}
 
-	public void setGeom(Geometry geom) throws EmptyPolygonException, UnsupportedGeometryException {
+	public void setGeom(Geometry geom) throws EmptyPolygonException,
+			UnsupportedGeometryException {
 		if (geom instanceof MultiPolygon) {
 			if (geom.isEmpty()) {
 				throw new EmptyPolygonException();
@@ -58,21 +60,22 @@ public class PointFeature implements Serializable {
 				// TODO percolate this warning up somehow
 			}
 			this.geom = geom.getGeometryN(0);
-		} else if( geom instanceof Point || geom instanceof Polygon){
+		} else if (geom instanceof Point || geom instanceof Polygon) {
 			this.geom = geom;
 		} else {
-			throw new UnsupportedGeometryException( "Non-point, non-polygon Geometry, not supported." );
+			throw new UnsupportedGeometryException(
+					"Non-point, non-polygon Geometry, not supported.");
 		}
-		
+
 		// cache a representative point
 		Point point = geom.getCentroid();
 		this.lat = point.getY();
 		this.lon = point.getX();
 	}
-	
-	public Polygon getPolygon(){
-		if( geom instanceof Polygon ){
-			return (Polygon)geom;
+
+	public Polygon getPolygon() {
+		if (geom instanceof Polygon) {
+			return (Polygon) geom;
 		} else {
 			return null;
 		}
@@ -82,7 +85,7 @@ public class PointFeature implements Serializable {
 		return geom;
 	}
 
-	public Map<String,Integer> getProperties() {
+	public Map<String, Integer> getProperties() {
 		return properties;
 	}
 
@@ -90,7 +93,8 @@ public class PointFeature implements Serializable {
 		return id;
 	}
 
-	public static PointFeature fromJsonNode(JsonNode feature) throws EmptyPolygonException, UnsupportedGeometryException {
+	public static PointFeature fromJsonNode(JsonNode feature)
+			throws EmptyPolygonException, UnsupportedGeometryException {
 		if (feature.getNodeType() != JsonNodeType.OBJECT)
 			return null;
 		JsonNode type = feature.get("type");
@@ -100,8 +104,9 @@ public class PointFeature implements Serializable {
 		if (props == null || props.getNodeType() != JsonNodeType.OBJECT)
 			return null;
 		JsonNode structured = props.get("structured");
-		Map<String,Integer> properties = new HashMap<String,Integer>();
-		if (structured != null && structured.getNodeType() == JsonNodeType.OBJECT) {
+		Map<String, Integer> properties = new HashMap<String, Integer>();
+		if (structured != null
+				&& structured.getNodeType() == JsonNodeType.OBJECT) {
 			Iterator<Entry<String, JsonNode>> catIter = structured.fields();
 			while (catIter.hasNext()) {
 				Entry<String, JsonNode> catEntry = catIter.next();
@@ -114,7 +119,7 @@ public class PointFeature implements Serializable {
 					int magnitude = propEntry.getValue().asInt();
 					// TODO Maybe we should be using a String[2] instead of
 					// joined strings.
-					properties.put(catName+":"+propName, magnitude);
+					properties.put(catName + ":" + propName, magnitude);
 				}
 			}
 		}
@@ -142,7 +147,7 @@ public class PointFeature implements Serializable {
 		return ret;
 	}
 
-	private void setAttributes(Map<String,Integer> properties) {
+	private void setAttributes(Map<String, Integer> properties) {
 		this.properties = properties;
 	}
 
@@ -153,7 +158,7 @@ public class PointFeature implements Serializable {
 	public double getLat() {
 		return this.lat;
 	}
-	
+
 	public double getLon() {
 		return this.lon;
 	}

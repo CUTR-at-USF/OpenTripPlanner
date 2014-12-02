@@ -29,77 +29,87 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public interface StreetVertexIndexService {
 
-    /**
-     * Returns the vertices intersecting with the specified envelope.
-     * 
-     * @param envelope
-     * @return
-     */
-    public Collection<Vertex> getVerticesForEnvelope(Envelope envelope);
+	/**
+	 * Returns the vertices intersecting with the specified envelope.
+	 * 
+	 * @param envelope
+	 * @return
+	 */
+	public Collection<Vertex> getVerticesForEnvelope(Envelope envelope);
 
-    /**
-     * Return the edges whose geometry intersect with the specified envelope. Warning: edges w/o
-     * geometry will not be indexed.
-     * 
-     * @param envelope
-     * @return
-     */
-    public Collection<Edge> getEdgesForEnvelope(Envelope envelope);
+	/**
+	 * Return the edges whose geometry intersect with the specified envelope.
+	 * Warning: edges w/o geometry will not be indexed.
+	 * 
+	 * @param envelope
+	 * @return
+	 */
+	public Collection<Edge> getEdgesForEnvelope(Envelope envelope);
 
-    /**
-     * Get the closest edges to this location are traversable given these preferences.
-     * 
-     * @param location
-     * @param extraEdges Additional edges to consider, may be null
-     * @param preferredEdges Edges which are preferred, may be null
-     * @param possibleTransitLinksOnly Only include possible transit links.
-     * @return
-     */
-    public CandidateEdgeBundle getClosestEdges(GenericLocation location,
-            TraversalRequirements reqs, List<Edge> extraEdges, Collection<Edge> preferredEdges,
-            boolean possibleTransitLinksOnly);
+	/**
+	 * Get the closest edges to this location are traversable given these
+	 * preferences.
+	 * 
+	 * @param location
+	 * @param extraEdges
+	 *            Additional edges to consider, may be null
+	 * @param preferredEdges
+	 *            Edges which are preferred, may be null
+	 * @param possibleTransitLinksOnly
+	 *            Only include possible transit links.
+	 * @return
+	 */
+	public CandidateEdgeBundle getClosestEdges(GenericLocation location,
+			TraversalRequirements reqs, List<Edge> extraEdges,
+			Collection<Edge> preferredEdges, boolean possibleTransitLinksOnly);
 
-    /**
-     * Get the closest edges to this location are traversable given these preferences.
-     * 
-     * Convenience wrapper for above.
-     * 
-     * @param location
-     * @return
-     */
-    public CandidateEdgeBundle getClosestEdges(GenericLocation location,
-            TraversalRequirements reqs);
+	/**
+	 * Get the closest edges to this location are traversable given these
+	 * preferences.
+	 * 
+	 * Convenience wrapper for above.
+	 * 
+	 * @param location
+	 * @return
+	 */
+	public CandidateEdgeBundle getClosestEdges(GenericLocation location,
+			TraversalRequirements reqs);
 
-    /**
-     * @param coordinate
-     * @param radiusMeters
-     * @return The transit stops within a certain radius of the given location.
-     */
-    public List<TransitStop> getNearbyTransitStops(Coordinate coordinate, double radiusMeters);
+	/**
+	 * @param coordinate
+	 * @param radiusMeters
+	 * @return The transit stops within a certain radius of the given location.
+	 */
+	public List<TransitStop> getNearbyTransitStops(Coordinate coordinate,
+			double radiusMeters);
 
-    /**
-     * @param envelope
-     * @return The transit stops within an envelope.
-     */
-    public List<TransitStop> getTransitStopForEnvelope(Envelope envelope);
+	/**
+	 * @param envelope
+	 * @return The transit stops within an envelope.
+	 */
+	public List<TransitStop> getTransitStopForEnvelope(Envelope envelope);
 
-    /**
-     * Finds the appropriate vertex for this location.
-     * 
-     * @param location
-     * @param options
-     * @return
-     */
-    public Vertex getVertexForLocation(GenericLocation location, RoutingRequest options);
+	/**
+	 * Finds the appropriate vertex for this location.
+	 * 
+	 * @param location
+	 * @param options
+	 * @return
+	 */
+	public Vertex getVertexForLocation(GenericLocation location,
+			RoutingRequest options);
 
-    /**
-     * Finds the appropriate vertex for this location.
-     * 
-     * @param place
-     * @param options
-     * @param other non-null when another vertex has already been found. Passed in so that any extra edges made when locating the previous vertex may
-     *        be used to locate this one as well.
-     * @return
-     */
-    public Vertex getVertexForLocation(GenericLocation place, RoutingRequest options, Vertex other);
+	/**
+	 * Finds the appropriate vertex for this location.
+	 * 
+	 * @param place
+	 * @param options
+	 * @param other
+	 *            non-null when another vertex has already been found. Passed in
+	 *            so that any extra edges made when locating the previous vertex
+	 *            may be used to locate this one as well.
+	 * @return
+	 */
+	public Vertex getVertexForLocation(GenericLocation place,
+			RoutingRequest options, Vertex other);
 }

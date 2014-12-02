@@ -40,33 +40,47 @@ import org.slf4j.LoggerFactory;
 // removed component, mixing spring and jersey annotations is bad?
 @Path("/routers/{routerId}/analyst/tile/{z}/{x}/{y}.png")
 public class TileService extends RoutingResource {
-    
-    private static final Logger LOG = LoggerFactory.getLogger(TileService.class);
 
-    @Context // FIXME inject Application context
-    private Renderer renderer;
+	private static final Logger LOG = LoggerFactory
+			.getLogger(TileService.class);
 
-    @PathParam("x") int x; 
-    @PathParam("y") int y;
-    @PathParam("z") int z;
-    
-    @QueryParam("layers")  @DefaultValue("traveltime") LayerList layers; 
-    @QueryParam("styles")  @DefaultValue("mask")       StyleList styles;
-    @QueryParam("format")  @DefaultValue("image/png")  MIMEImageFormat format;
+	@Context
+	// FIXME inject Application context
+	private Renderer renderer;
 
-    @GET @Produces("image/*")
-    public Response tileGet() throws Exception { 
-        
-        Envelope2D env = SlippyTile.tile2Envelope(x, y, z);
-        TileRequest tileRequest = new TileRequest("", env, 256, 256);
-        RoutingRequest sptRequestA = buildRequest(0);
-        RoutingRequest sptRequestB = buildRequest(1);
+	@PathParam("x")
+	int x;
+	@PathParam("y")
+	int y;
+	@PathParam("z")
+	int z;
 
-        Layer layer = layers.get(0);
-        Style style = styles.get(0);
-        RenderRequest renderRequest = new RenderRequest(format, layer, style, true, false);
+	@QueryParam("layers")
+	@DefaultValue("traveltime")
+	LayerList layers;
+	@QueryParam("styles")
+	@DefaultValue("mask")
+	StyleList styles;
+	@QueryParam("format")
+	@DefaultValue("image/png")
+	MIMEImageFormat format;
 
-        return null; //renderer.getResponse(tileRequest, sptRequestA, sptRequestB, renderRequest);
-    }
+	@GET
+	@Produces("image/*")
+	public Response tileGet() throws Exception {
+
+		Envelope2D env = SlippyTile.tile2Envelope(x, y, z);
+		TileRequest tileRequest = new TileRequest("", env, 256, 256);
+		RoutingRequest sptRequestA = buildRequest(0);
+		RoutingRequest sptRequestB = buildRequest(1);
+
+		Layer layer = layers.get(0);
+		Style style = styles.get(0);
+		RenderRequest renderRequest = new RenderRequest(format, layer, style,
+				true, false);
+
+		return null; // renderer.getResponse(tileRequest, sptRequestA,
+						// sptRequestB, renderRequest);
+	}
 
 }

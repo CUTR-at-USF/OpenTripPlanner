@@ -15,24 +15,24 @@ package org.opentripplanner.graph_builder.annotation;
 
 public class LevelAmbiguous extends GraphBuilderAnnotation {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public static final String FMT = "Could not infer floor number for layer called '%s' at %s. " +
-    		"Vertical movement will still be possible, but elevator cost might be incorrect. " +
-    		"Consider an OSM level map.";
-    
-    final String layerName;
+	public static final String FMT = "Could not infer floor number for layer called '%s' at %s. "
+			+ "Vertical movement will still be possible, but elevator cost might be incorrect. "
+			+ "Consider an OSM level map.";
 
-    final long osmNode;
-    
-    public LevelAmbiguous(String layerName, long osmNode){
-    	this.layerName = layerName;
-    	this.osmNode = osmNode;
-    }
-    
-    @Override
-    public String getMessage() {
-        return String.format(FMT, layerName, osmNode);
-    }
+	final String layerName;
+
+	final long osmNode;
+
+	public LevelAmbiguous(String layerName, long osmNode) {
+		this.layerName = layerName;
+		this.osmNode = osmNode;
+	}
+
+	@Override
+	public String getMessage() {
+		return String.format(FMT, layerName, osmNode);
+	}
 
 }

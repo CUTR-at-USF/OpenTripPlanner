@@ -15,7 +15,6 @@ package org.opentripplanner.model.json_serialization;
 
 import java.io.IOException;
 
-
 import org.geotools.geojson.geom.GeometryJSON;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -26,17 +25,18 @@ import com.vividsolutions.jts.geom.Geometry;
 
 public class GeoJSONSerializer extends JsonSerializer<Geometry> {
 
-    @Override
-    public void serialize(Geometry value, JsonGenerator jgen, SerializerProvider provider)
-            throws IOException, JsonProcessingException {
-        
-        GeometryJSON json = new GeometryJSON();
-        
-        jgen.writeRawValue(json.toString(value));
-    }
+	@Override
+	public void serialize(Geometry value, JsonGenerator jgen,
+			SerializerProvider provider) throws IOException,
+			JsonProcessingException {
 
-    @Override
-    public Class<Geometry> handledType() {
-        return Geometry.class;
-    }
+		GeometryJSON json = new GeometryJSON();
+
+		jgen.writeRawValue(json.toString(value));
+	}
+
+	@Override
+	public Class<Geometry> handledType() {
+		return Geometry.class;
+	}
 }

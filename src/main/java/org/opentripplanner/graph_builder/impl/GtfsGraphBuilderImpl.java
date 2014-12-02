@@ -60,312 +60,347 @@ import com.google.common.collect.Sets;
 
 public class GtfsGraphBuilderImpl implements GraphBuilder {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GtfsGraphBuilderImpl.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(GtfsGraphBuilderImpl.class);
 
-    private GtfsBundles _gtfsBundles;
+	private GtfsBundles _gtfsBundles;
 
-    EntityHandler counter = new EntityCounter();
+	EntityHandler counter = new EntityCounter();
 
-    private FareServiceFactory _fareServiceFactory;
+	private FareServiceFactory _fareServiceFactory;
 
-    /** will be applied to all bundles which do not have the cacheDirectory property set */
-    private File cacheDirectory; 
-    
-    /** will be applied to all bundles which do not have the useCached property set */
-    private Boolean useCached; 
+	/**
+	 * will be applied to all bundles which do not have the cacheDirectory
+	 * property set
+	 */
+	private File cacheDirectory;
 
-    Set<String> agencyIdsSeen = Sets.newHashSet();
+	/**
+	 * will be applied to all bundles which do not have the useCached property
+	 * set
+	 */
+	private Boolean useCached;
 
-    int nextAgencyId = 1; // used for generating agency IDs to resolve ID conflicts
+	Set<String> agencyIdsSeen = Sets.newHashSet();
 
-    /**
-     * Construct and set bundles all at once. 
-     * TODO why is there a wrapper class around a list of GTFS files?
-     * TODO why is there a wrapper around GTFS files at all?
-     */
-    public GtfsGraphBuilderImpl (List<GtfsBundle> gtfsBundles) {
-        GtfsBundles gtfsb = new GtfsBundles();
-        gtfsb.setBundles(gtfsBundles);
-        this.setGtfsBundles(gtfsb);
-    }
-    
-    public GtfsGraphBuilderImpl() { };
+	int nextAgencyId = 1; // used for generating agency IDs to resolve ID
+							// conflicts
 
-    public List<String> provides() {
-        List<String> result = new ArrayList<String>();
-        result.add("transit");
-        return result;
-    }
+	/**
+	 * Construct and set bundles all at once. TODO why is there a wrapper class
+	 * around a list of GTFS files? TODO why is there a wrapper around GTFS
+	 * files at all?
+	 */
+	public GtfsGraphBuilderImpl(List<GtfsBundle> gtfsBundles) {
+		GtfsBundles gtfsb = new GtfsBundles();
+		gtfsb.setBundles(gtfsBundles);
+		this.setGtfsBundles(gtfsb);
+	}
 
-    public List<String> getPrerequisites() {
-        return Collections.emptyList();
-    }
+	public GtfsGraphBuilderImpl() {
+	};
 
-    public void setGtfsBundles(GtfsBundles gtfsBundles) {
-        _gtfsBundles = gtfsBundles;
-        /* check for dups */
-        HashSet<String> bundles = new HashSet<String>();
-        for (GtfsBundle bundle : gtfsBundles.getBundles()) {
-            String key = bundle.getDataKey();
-            if (bundles.contains(key)) {
-                throw new RuntimeException("duplicate GTFS bundle " + key);
-            }
-            bundles.add(key);
-        }
-    }
+	public List<String> provides() {
+		List<String> result = new ArrayList<String>();
+		result.add("transit");
+		return result;
+	}
 
-    public void setFareServiceFactory(FareServiceFactory factory) {
-        _fareServiceFactory = factory;
-    }
+	public List<String> getPrerequisites() {
+		return Collections.emptyList();
+	}
 
-    @Override
-    public void buildGraph(Graph graph, HashMap<Class<?>, Object> extra) {
+	public void setGtfsBundles(GtfsBundles gtfsBundles) {
+		_gtfsBundles = gtfsBundles;
+		/* check for dups */
+		HashSet<String> bundles = new HashSet<String>();
+		for (GtfsBundle bundle : gtfsBundles.getBundles()) {
+			String key = bundle.getDataKey();
+			if (bundles.contains(key)) {
+				throw new RuntimeException("duplicate GTFS bundle " + key);
+			}
+			bundles.add(key);
+		}
+	}
 
-        MultiCalendarServiceImpl service = new MultiCalendarServiceImpl();
-        GtfsStopContext stopContext = new GtfsStopContext();
-        
-        try {
-            for (GtfsBundle gtfsBundle : _gtfsBundles.getBundles()) {
-                // apply global defaults to individual GTFSBundles (if globals have been set) 
-                if (cacheDirectory != null && gtfsBundle.cacheDirectory == null)
-                    gtfsBundle.cacheDirectory = cacheDirectory;
-                if (useCached != null && gtfsBundle.useCached == null)
-                    gtfsBundle.useCached = useCached;
-                GtfsMutableRelationalDao dao = new GtfsRelationalDaoImpl();
-                GtfsContext context = GtfsLibrary.createContext(dao, service);
-                GTFSPatternHopFactory hf = new GTFSPatternHopFactory(context);
-                hf.setStopContext(stopContext);
-                hf.setFareServiceFactory(_fareServiceFactory);
-                hf.setMaxStopToShapeSnapDistance(gtfsBundle.getMaxStopToShapeSnapDistance());
+	public void setFareServiceFactory(FareServiceFactory factory) {
+		_fareServiceFactory = factory;
+	}
 
-                loadBundle(gtfsBundle, graph, dao);
+	@Override
+	public void buildGraph(Graph graph, HashMap<Class<?>, Object> extra) {
 
-                CalendarServiceDataFactoryImpl csfactory = new CalendarServiceDataFactoryImpl();
-                csfactory.setGtfsDao(dao);
-                CalendarServiceData data = csfactory.createData();
-                service.addData(data, dao);
+		MultiCalendarServiceImpl service = new MultiCalendarServiceImpl();
+		GtfsStopContext stopContext = new GtfsStopContext();
 
-                hf.setDefaultStreetToStopTime(gtfsBundle.getDefaultStreetToStopTime());
-                hf.run(graph);
+		try {
+			for (GtfsBundle gtfsBundle : _gtfsBundles.getBundles()) {
+				// apply global defaults to individual GTFSBundles (if globals
+				// have been set)
+				if (cacheDirectory != null && gtfsBundle.cacheDirectory == null)
+					gtfsBundle.cacheDirectory = cacheDirectory;
+				if (useCached != null && gtfsBundle.useCached == null)
+					gtfsBundle.useCached = useCached;
+				GtfsMutableRelationalDao dao = new GtfsRelationalDaoImpl();
+				GtfsContext context = GtfsLibrary.createContext(dao, service);
+				GTFSPatternHopFactory hf = new GTFSPatternHopFactory(context);
+				hf.setStopContext(stopContext);
+				hf.setFareServiceFactory(_fareServiceFactory);
+				hf.setMaxStopToShapeSnapDistance(gtfsBundle
+						.getMaxStopToShapeSnapDistance());
 
-                if (gtfsBundle.doesTransfersTxtDefineStationPaths()) {
-                    hf.createTransfersTxtTransfers();
-                }
-                if (gtfsBundle.linkStopsToParentStations) {
-                    hf.linkStopsToParentStations(graph);
-                } 
-                if (gtfsBundle.parentStationTransfers) {
-                    hf.createParentStationTransfers();
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+				loadBundle(gtfsBundle, graph, dao);
 
-        // We need to save the calendar service data so we can use it later
-        CalendarServiceData data = service.getData();
-        graph.putService(CalendarServiceData.class, data);
-        graph.updateTransitFeedValidity(data);
+				CalendarServiceDataFactoryImpl csfactory = new CalendarServiceDataFactoryImpl();
+				csfactory.setGtfsDao(dao);
+				CalendarServiceData data = csfactory.createData();
+				service.addData(data, dao);
 
-    }
+				hf.setDefaultStreetToStopTime(gtfsBundle
+						.getDefaultStreetToStopTime());
+				hf.run(graph);
 
-    /****
-     * Private Methods
-     ****/
+				if (gtfsBundle.doesTransfersTxtDefineStationPaths()) {
+					hf.createTransfersTxtTransfers();
+				}
+				if (gtfsBundle.linkStopsToParentStations) {
+					hf.linkStopsToParentStations(graph);
+				}
+				if (gtfsBundle.parentStationTransfers) {
+					hf.createParentStationTransfers();
+				}
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 
-    private void loadBundle(GtfsBundle gtfsBundle, Graph graph, GtfsMutableRelationalDao dao)
-            throws IOException {
+		// We need to save the calendar service data so we can use it later
+		CalendarServiceData data = service.getData();
+		graph.putService(CalendarServiceData.class, data);
+		graph.updateTransitFeedValidity(data);
 
-        StoreImpl store = new StoreImpl(dao);
-        store.open();
-        LOG.info("reading {}", gtfsBundle.toString());
+	}
 
-        GtfsReader reader = new GtfsReader();
-        reader.setInputSource(gtfsBundle.getCsvInputSource());
-        reader.setEntityStore(store);
-        reader.setInternStrings(true);
+	/****
+	 * Private Methods
+	 ****/
 
-        if (LOG.isDebugEnabled())
-            reader.addEntityHandler(counter);
+	private void loadBundle(GtfsBundle gtfsBundle, Graph graph,
+			GtfsMutableRelationalDao dao) throws IOException {
 
-        if (gtfsBundle.getDefaultBikesAllowed())
-            reader.addEntityHandler(new EntityBikeability(true));
+		StoreImpl store = new StoreImpl(dao);
+		store.open();
+		LOG.info("reading {}", gtfsBundle.toString());
 
-        for (Class<?> entityClass : reader.getEntityClasses()) {
-            LOG.info("reading entities: " + entityClass.getName());
-            reader.readEntities(entityClass);
-            store.flush();
-            // NOTE that agencies are first in the list and read before all other entity types, so it is effective to
-            // set the agencyId here. Each feed ("bundle") is loaded by a separate reader, so there is no risk of
-            // agency mappings accumulating.
-            if (entityClass == Agency.class) {
-                String defaultAgencyId = null;
-                for (Agency agency : reader.getAgencies()) {
-                    String agencyId = agency.getId();
-                    LOG.info("This Agency has the ID {}", agencyId);
-                    // Somehow, when the agency's id field is missing, OBA replaces it with the agency's name.
-                    // TODO Figure out how and why this is happening.
-                    if (agencyId == null || agencyIdsSeen.contains(agencyId)) {
-                        // Loop in case generated name is already in use.
-                        String generatedAgencyId = null;
-                        while (generatedAgencyId == null || agencyIdsSeen.contains(generatedAgencyId)) {
-                            generatedAgencyId = "F" + nextAgencyId;
-                            nextAgencyId++;
-                        }
-                        LOG.warn("The agency ID '{}' was already seen, or I think it's bad. Replacing with '{}'.", agencyId, generatedAgencyId);
-                        reader.addAgencyIdMapping(agencyId, generatedAgencyId); // NULL key should work
-                        agency.setId(generatedAgencyId);
-                        agencyId = generatedAgencyId;
-                    }
-                    if (agencyId != null) agencyIdsSeen.add(agencyId);
-                    if (defaultAgencyId == null) defaultAgencyId = agencyId;
-                }
-                reader.setDefaultAgencyId(defaultAgencyId); // not sure this is a good idea, setting it to the first-of-many IDs.
-            }
-        }
+		GtfsReader reader = new GtfsReader();
+		reader.setInputSource(gtfsBundle.getCsvInputSource());
+		reader.setEntityStore(store);
+		reader.setInternStrings(true);
 
-        for (ShapePoint shapePoint : store.getAllEntitiesForType(ShapePoint.class)) {
-            shapePoint.getShapeId().setAgencyId(reader.getDefaultAgencyId());
-        }
-        for (Route route : store.getAllEntitiesForType(Route.class)) {
-            route.getId().setAgencyId(reader.getDefaultAgencyId());
-        }
-        for (Stop stop : store.getAllEntitiesForType(Stop.class)) {
-            stop.getId().setAgencyId(reader.getDefaultAgencyId());
-        }
-        for (Trip trip : store.getAllEntitiesForType(Trip.class)) {
-            trip.getId().setAgencyId(reader.getDefaultAgencyId());
-        }
-        for (ServiceCalendar serviceCalendar : store.getAllEntitiesForType(ServiceCalendar.class)) {
-            serviceCalendar.getServiceId().setAgencyId(reader.getDefaultAgencyId());
-        }
-        for (ServiceCalendarDate serviceCalendarDate : store.getAllEntitiesForType(ServiceCalendarDate.class)) {
-            serviceCalendarDate.getServiceId().setAgencyId(reader.getDefaultAgencyId());
-        }
-        for (FareAttribute fareAttribute : store.getAllEntitiesForType(FareAttribute.class)) {
-            fareAttribute.getId().setAgencyId(reader.getDefaultAgencyId());
-        }
-        for (Pathway pathway : store.getAllEntitiesForType(Pathway.class)) {
-            pathway.getId().setAgencyId(reader.getDefaultAgencyId());
-        }
+		if (LOG.isDebugEnabled())
+			reader.addEntityHandler(counter);
 
-        store.close();
+		if (gtfsBundle.getDefaultBikesAllowed())
+			reader.addEntityHandler(new EntityBikeability(true));
 
-    }
+		for (Class<?> entityClass : reader.getEntityClasses()) {
+			LOG.info("reading entities: " + entityClass.getName());
+			reader.readEntities(entityClass);
+			store.flush();
+			// NOTE that agencies are first in the list and read before all
+			// other entity types, so it is effective to
+			// set the agencyId here. Each feed ("bundle") is loaded by a
+			// separate reader, so there is no risk of
+			// agency mappings accumulating.
+			if (entityClass == Agency.class) {
+				String defaultAgencyId = null;
+				for (Agency agency : reader.getAgencies()) {
+					String agencyId = agency.getId();
+					LOG.info("This Agency has the ID {}", agencyId);
+					// Somehow, when the agency's id field is missing, OBA
+					// replaces it with the agency's name.
+					// TODO Figure out how and why this is happening.
+					if (agencyId == null || agencyIdsSeen.contains(agencyId)) {
+						// Loop in case generated name is already in use.
+						String generatedAgencyId = null;
+						while (generatedAgencyId == null
+								|| agencyIdsSeen.contains(generatedAgencyId)) {
+							generatedAgencyId = "F" + nextAgencyId;
+							nextAgencyId++;
+						}
+						LOG.warn(
+								"The agency ID '{}' was already seen, or I think it's bad. Replacing with '{}'.",
+								agencyId, generatedAgencyId);
+						reader.addAgencyIdMapping(agencyId, generatedAgencyId); // NULL
+																				// key
+																				// should
+																				// work
+						agency.setId(generatedAgencyId);
+						agencyId = generatedAgencyId;
+					}
+					if (agencyId != null)
+						agencyIdsSeen.add(agencyId);
+					if (defaultAgencyId == null)
+						defaultAgencyId = agencyId;
+				}
+				reader.setDefaultAgencyId(defaultAgencyId); // not sure this is
+															// a good idea,
+															// setting it to the
+															// first-of-many
+															// IDs.
+			}
+		}
 
-    private class StoreImpl implements GenericMutableDao {
+		for (ShapePoint shapePoint : store
+				.getAllEntitiesForType(ShapePoint.class)) {
+			shapePoint.getShapeId().setAgencyId(reader.getDefaultAgencyId());
+		}
+		for (Route route : store.getAllEntitiesForType(Route.class)) {
+			route.getId().setAgencyId(reader.getDefaultAgencyId());
+		}
+		for (Stop stop : store.getAllEntitiesForType(Stop.class)) {
+			stop.getId().setAgencyId(reader.getDefaultAgencyId());
+		}
+		for (Trip trip : store.getAllEntitiesForType(Trip.class)) {
+			trip.getId().setAgencyId(reader.getDefaultAgencyId());
+		}
+		for (ServiceCalendar serviceCalendar : store
+				.getAllEntitiesForType(ServiceCalendar.class)) {
+			serviceCalendar.getServiceId().setAgencyId(
+					reader.getDefaultAgencyId());
+		}
+		for (ServiceCalendarDate serviceCalendarDate : store
+				.getAllEntitiesForType(ServiceCalendarDate.class)) {
+			serviceCalendarDate.getServiceId().setAgencyId(
+					reader.getDefaultAgencyId());
+		}
+		for (FareAttribute fareAttribute : store
+				.getAllEntitiesForType(FareAttribute.class)) {
+			fareAttribute.getId().setAgencyId(reader.getDefaultAgencyId());
+		}
+		for (Pathway pathway : store.getAllEntitiesForType(Pathway.class)) {
+			pathway.getId().setAgencyId(reader.getDefaultAgencyId());
+		}
 
-        private GtfsMutableRelationalDao dao;
+		store.close();
 
-        StoreImpl(GtfsMutableRelationalDao dao) {
-            this.dao = dao;
-        }
+	}
 
-        @Override
-        public void open() {
-            dao.open();
-        }
+	private class StoreImpl implements GenericMutableDao {
 
-        @Override
-        public <T> T getEntityForId(Class<T> type, Serializable id) {
-            return dao.getEntityForId(type, id);
-        }
+		private GtfsMutableRelationalDao dao;
 
-        @Override
-        public void saveEntity(Object entity) {
-            dao.saveEntity(entity);
-        }
+		StoreImpl(GtfsMutableRelationalDao dao) {
+			this.dao = dao;
+		}
 
-        @Override
-        public void flush() {
-            dao.flush();
-        }
+		@Override
+		public void open() {
+			dao.open();
+		}
 
-        @Override
-        public void close() {
-            dao.close();
-        }
+		@Override
+		public <T> T getEntityForId(Class<T> type, Serializable id) {
+			return dao.getEntityForId(type, id);
+		}
 
-        @Override
-        public <T> void clearAllEntitiesForType(Class<T> type) {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public void saveEntity(Object entity) {
+			dao.saveEntity(entity);
+		}
 
-        @Override
-        public <K extends Serializable, T extends IdentityBean<K>> void removeEntity(T entity) {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public void flush() {
+			dao.flush();
+		}
 
-        @Override
-        public <T> Collection<T> getAllEntitiesForType(Class<T> type) {
-            return dao.getAllEntitiesForType(type);
-        }
+		@Override
+		public void close() {
+			dao.close();
+		}
 
-        @Override
-        public void saveOrUpdateEntity(Object entity) {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public <T> void clearAllEntitiesForType(Class<T> type) {
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public void updateEntity(Object entity) {
-            throw new UnsupportedOperationException();
-        }
-    }
+		@Override
+		public <K extends Serializable, T extends IdentityBean<K>> void removeEntity(
+				T entity) {
+			throw new UnsupportedOperationException();
+		}
 
-    private static class EntityCounter implements EntityHandler {
+		@Override
+		public <T> Collection<T> getAllEntitiesForType(Class<T> type) {
+			return dao.getAllEntitiesForType(type);
+		}
 
-        private Map<Class<?>, Integer> _count = new HashMap<Class<?>, Integer>();
+		@Override
+		public void saveOrUpdateEntity(Object entity) {
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public void handleEntity(Object bean) {
-            int count = incrementCount(bean.getClass());
-            if (count % 1000000 == 0)
-                if (LOG.isDebugEnabled()) {
-                    String name = bean.getClass().getName();
-                    int index = name.lastIndexOf('.');
-                    if (index != -1)
-                        name = name.substring(index + 1);
-                    LOG.debug("loading " + name + ": " + count);
-                }
-        }
+		@Override
+		public void updateEntity(Object entity) {
+			throw new UnsupportedOperationException();
+		}
+	}
 
-        private int incrementCount(Class<?> entityType) {
-            Integer value = _count.get(entityType);
-            if (value == null)
-                value = 0;
-            value++;
-            _count.put(entityType, value);
-            return value;
-        }
+	private static class EntityCounter implements EntityHandler {
 
-    }
+		private Map<Class<?>, Integer> _count = new HashMap<Class<?>, Integer>();
 
-    private static class EntityBikeability implements EntityHandler {
+		@Override
+		public void handleEntity(Object bean) {
+			int count = incrementCount(bean.getClass());
+			if (count % 1000000 == 0)
+				if (LOG.isDebugEnabled()) {
+					String name = bean.getClass().getName();
+					int index = name.lastIndexOf('.');
+					if (index != -1)
+						name = name.substring(index + 1);
+					LOG.debug("loading " + name + ": " + count);
+				}
+		}
 
-        private Boolean _defaultBikesAllowed;
+		private int incrementCount(Class<?> entityType) {
+			Integer value = _count.get(entityType);
+			if (value == null)
+				value = 0;
+			value++;
+			_count.put(entityType, value);
+			return value;
+		}
 
-        public EntityBikeability(Boolean defaultBikesAllowed) {
-            _defaultBikesAllowed = defaultBikesAllowed;
-        }
+	}
 
-        @Override
-        public void handleEntity(Object bean) {
-            if (!(bean instanceof Trip)) {
-                return;
-            }
+	private static class EntityBikeability implements EntityHandler {
 
-            Trip trip = (Trip) bean;
-            if (_defaultBikesAllowed && BikeAccess.fromTrip(trip) == BikeAccess.UNKNOWN) {
-                BikeAccess.setForTrip(trip, BikeAccess.ALLOWED);
-            }
-        }
-    }
+		private Boolean _defaultBikesAllowed;
 
-    @Override
-    public void checkInputs() {
-        for (GtfsBundle bundle : _gtfsBundles.getBundles()) {
-            bundle.checkInputs();
-        }
-    }
+		public EntityBikeability(Boolean defaultBikesAllowed) {
+			_defaultBikesAllowed = defaultBikesAllowed;
+		}
+
+		@Override
+		public void handleEntity(Object bean) {
+			if (!(bean instanceof Trip)) {
+				return;
+			}
+
+			Trip trip = (Trip) bean;
+			if (_defaultBikesAllowed
+					&& BikeAccess.fromTrip(trip) == BikeAccess.UNKNOWN) {
+				BikeAccess.setForTrip(trip, BikeAccess.ALLOWED);
+			}
+		}
+	}
+
+	@Override
+	public void checkInputs() {
+		for (GtfsBundle bundle : _gtfsBundles.getBundles()) {
+			bundle.checkInputs();
+		}
+	}
 
 }

@@ -38,132 +38,136 @@ import org.slf4j.LoggerFactory;
 import com.vividsolutions.jts.geom.Coordinate;
 
 /**
- * Download one-degree-wide, 1/3 arcsecond NED tiles from S3 (or get them from a directory of files
- * organized as USGS organizes them when you ship them a hard drive).
+ * Download one-degree-wide, 1/3 arcsecond NED tiles from S3 (or get them from a
+ * directory of files organized as USGS organizes them when you ship them a hard
+ * drive).
  *
  * @author novalis
  *
  */
 public class DegreeGridNEDTileSource implements NEDTileSource {
-    private static Logger log = LoggerFactory.getLogger(DegreeGridNEDTileSource.class);
+	private static Logger log = LoggerFactory
+			.getLogger(DegreeGridNEDTileSource.class);
 
-    private Graph graph;
+	private Graph graph;
 
-    private File cacheDirectory;
+	private File cacheDirectory;
 
-    private String awsAccessKey;
+	private String awsAccessKey;
 
-    private String awsSecretKey;
+	private String awsSecretKey;
 
-    @Override
-    public void setGraph(Graph graph) {
-        this.graph = graph;
-    }
+	@Override
+	public void setGraph(Graph graph) {
+		this.graph = graph;
+	}
 
-    @Override
-    public void setCacheDirectory(File cacheDirectory) {
-        this.cacheDirectory = cacheDirectory;
-    }
+	@Override
+	public void setCacheDirectory(File cacheDirectory) {
+		this.cacheDirectory = cacheDirectory;
+	}
 
-    @Override
-    public List<File> getNEDTiles() {
+	@Override
+	public List<File> getNEDTiles() {
 
-        HashSet<P2<Integer>> tiles = new HashSet<P2<Integer>>();
+		HashSet<P2<Integer>> tiles = new HashSet<P2<Integer>>();
 
-        for (Vertex v : graph.getVertices()) {
-            Coordinate coord = v.getCoordinate();
-            tiles.add(new P2<Integer>((int) coord.x, (int) coord.y));
-        }
+		for (Vertex v : graph.getVertices()) {
+			Coordinate coord = v.getCoordinate();
+			tiles.add(new P2<Integer>((int) coord.x, (int) coord.y));
+		}
 
-        List<File> paths = new ArrayList<File>();
-        for (P2<Integer> tile : tiles) {
-            int x = tile.first - 1;
-            int y = tile.second + 1;
-            paths.add(getPathToTile(x, y));
-        }
-        return paths;
-    }
+		List<File> paths = new ArrayList<File>();
+		for (P2<Integer> tile : tiles) {
+			int x = tile.first - 1;
+			int y = tile.second + 1;
+			paths.add(getPathToTile(x, y));
+		}
+		return paths;
+	}
 
-    private String formatLatLon(int x, int y) {
-        String northSouth, eastWest;
-        if (y < 0) {
-            northSouth = "s";
-            y = -y;
-        } else {
-            northSouth = "n";
-        }
-        if (x < 0) {
-            eastWest = "w";
-            x = -x;
-        } else {
-            eastWest = "e";
-        }
-        return String.format("%s%d%s%03d", northSouth, y, eastWest, x);
-    }
+	private String formatLatLon(int x, int y) {
+		String northSouth, eastWest;
+		if (y < 0) {
+			northSouth = "s";
+			y = -y;
+		} else {
+			northSouth = "n";
+		}
+		if (x < 0) {
+			eastWest = "w";
+			x = -x;
+		} else {
+			eastWest = "e";
+		}
+		return String.format("%s%d%s%03d", northSouth, y, eastWest, x);
+	}
 
-    private File getPathToTile(int x, int y) {
-        File path = new File(cacheDirectory, formatLatLon(x, y) + ".tiff");
-        if (path.exists()) {
-            return path;
-        } else {
-            path.getParentFile().mkdirs();
+	private File getPathToTile(int x, int y) {
+		File path = new File(cacheDirectory, formatLatLon(x, y) + ".tiff");
+		if (path.exists()) {
+			return path;
+		} else {
+			path.getParentFile().mkdirs();
 
-            if (awsAccessKey == null || awsSecretKey == null) {
-                throw new RuntimeException("Cannot download NED tiles from S3: awsAccessKey or awsSecretKey properties are not set");
-            }
-            log.debug("Downloading NED degree tile " + path);
-            // download the file from S3.
-            AWSCredentials awsCredentials = new AWSCredentials(awsAccessKey, awsSecretKey);
-            try {
-                S3Service s3Service = new RestS3Service(awsCredentials);
-                String key = formatLatLon(x, y) + ".tiff";
-                S3Object object = s3Service.getObject("ned13", key);
+			if (awsAccessKey == null || awsSecretKey == null) {
+				throw new RuntimeException(
+						"Cannot download NED tiles from S3: awsAccessKey or awsSecretKey properties are not set");
+			}
+			log.debug("Downloading NED degree tile " + path);
+			// download the file from S3.
+			AWSCredentials awsCredentials = new AWSCredentials(awsAccessKey,
+					awsSecretKey);
+			try {
+				S3Service s3Service = new RestS3Service(awsCredentials);
+				String key = formatLatLon(x, y) + ".tiff";
+				S3Object object = s3Service.getObject("ned13", key);
 
-                InputStream istream = object.getDataInputStream();
-                FileOutputStream ostream = new FileOutputStream(path);
+				InputStream istream = object.getDataInputStream();
+				FileOutputStream ostream = new FileOutputStream(path);
 
-                byte[] buffer = new byte[4096];
-                while (true) {
-                    int read = istream.read(buffer);
-                    if (read == -1) {
-                        break;
-                    }
-                    ostream.write(buffer, 0, read);
-                }
-                ostream.close();
-                istream.close();
-            } catch (S3ServiceException e) {
-                path.deleteOnExit();
-                throw new RuntimeException(e);
-            } catch (ServiceException e) {
-                path.deleteOnExit();
-                throw new RuntimeException(e);
-            } catch (FileNotFoundException e) {
-                path.deleteOnExit();
-                throw new RuntimeException(e);
-            } catch (IOException e) {
-                path.deleteOnExit();
-                throw new RuntimeException(e);
-            }
-            return path;
-        }
+				byte[] buffer = new byte[4096];
+				while (true) {
+					int read = istream.read(buffer);
+					if (read == -1) {
+						break;
+					}
+					ostream.write(buffer, 0, read);
+				}
+				ostream.close();
+				istream.close();
+			} catch (S3ServiceException e) {
+				path.deleteOnExit();
+				throw new RuntimeException(e);
+			} catch (ServiceException e) {
+				path.deleteOnExit();
+				throw new RuntimeException(e);
+			} catch (FileNotFoundException e) {
+				path.deleteOnExit();
+				throw new RuntimeException(e);
+			} catch (IOException e) {
+				path.deleteOnExit();
+				throw new RuntimeException(e);
+			}
+			return path;
+		}
 
-    }
+	}
 
-    public String getAwsAccessKey() {
-        return awsAccessKey;
-    }
+	public String getAwsAccessKey() {
+		return awsAccessKey;
+	}
 
-    public void setAwsAccessKey(String awsAccessKey) {
-        this.awsAccessKey = awsAccessKey;
-    }
+	public void setAwsAccessKey(String awsAccessKey) {
+		this.awsAccessKey = awsAccessKey;
+	}
 
-    public String getAwsSecretKey() {
-        return awsSecretKey;
-    }
+	public String getAwsSecretKey() {
+		return awsSecretKey;
+	}
 
-    public void setAwsSecretKey(String awsSecretKey) {
-        this.awsSecretKey = awsSecretKey;
-    }
+	public void setAwsSecretKey(String awsSecretKey) {
+		this.awsSecretKey = awsSecretKey;
+	}
 
 }

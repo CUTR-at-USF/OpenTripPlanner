@@ -19,173 +19,183 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IntUtils {
-    private static final Logger LOG = LoggerFactory.getLogger(IntUtils.class);
-    public  static final String POINT_PREFIX = "POINT("; 
-    
-    /** does this string appear to be a coordinate of some sort */
-    public static boolean looksLikeCoordinate(String str)
-    {
-        if(str != null && (str.contains(POINT_PREFIX) || str.matches("[\\s]*[0-9\\-.]+[,\\s]+[0-9\\-.]+[\\s]*")))
-            return true;
+	private static final Logger LOG = LoggerFactory.getLogger(IntUtils.class);
+	public static final String POINT_PREFIX = "POINT(";
 
-        return false;
-    }
+	/** does this string appear to be a coordinate of some sort */
+	public static boolean looksLikeCoordinate(String str) {
+		if (str != null
+				&& (str.contains(POINT_PREFIX) || str
+						.matches("[\\s]*[0-9\\-.]+[,\\s]+[0-9\\-.]+[\\s]*")))
+			return true;
 
-    public static final double roundDouble(double d, int places) {
-        return Math.round(d * Math.pow(10, places)) / Math.pow(10, places);
-    }
+		return false;
+	}
 
-    /** take a string of ints (eg: 1,2,3,4), and return a List of Integers */
-    static public List<Integer> asList(String str) {
-        return asList(str, ",");
-    }
+	public static final double roundDouble(double d, int places) {
+		return Math.round(d * Math.pow(10, places)) / Math.pow(10, places);
+	}
 
-    /** take a string of ints (eg: 1[sep]2[sep]3[sep]4), and return a List of Integers */
-    static public List<Integer> asList(String str, String sep) {
-        List<Integer> retVal = new ArrayList<Integer>();
-        try {
-            String[] s = str.split(sep);
-            for (int i = 0; i < s.length; i++) {
-                Integer k = null;
-                try {
-                    k = Integer.parseInt(s[i].trim());
-                } catch (Exception m) {
-                }
-                if (k != null)
-                    retVal.add(k);
-            }
-        } catch (Exception e) {
-        }
+	/** take a string of ints (eg: 1,2,3,4), and return a List of Integers */
+	static public List<Integer> asList(String str) {
+		return asList(str, ",");
+	}
 
-        return retVal;
-    }
+	/**
+	 * take a string of ints (eg: 1[sep]2[sep]3[sep]4), and return a List of
+	 * Integers
+	 */
+	static public List<Integer> asList(String str, String sep) {
+		List<Integer> retVal = new ArrayList<Integer>();
+		try {
+			String[] s = str.split(sep);
+			for (int i = 0; i < s.length; i++) {
+				Integer k = null;
+				try {
+					k = Integer.parseInt(s[i].trim());
+				} catch (Exception m) {
+				}
+				if (k != null)
+					retVal.add(k);
+			}
+		} catch (Exception e) {
+		}
 
-    static public Integer getZipFromString(String zipStr) {
-        Integer retVal = null;
-        try {
-            retVal = getIntegerFromSubString(zipStr, "-");
-            if (retVal == null) {
-                retVal = getIntegerFromString(zipStr);
-            }
-        } catch (Exception e) {
-            retVal = null;
-        }
+		return retVal;
+	}
 
-        return retVal;
-    }
+	static public Integer getZipFromString(String zipStr) {
+		Integer retVal = null;
+		try {
+			retVal = getIntegerFromSubString(zipStr, "-");
+			if (retVal == null) {
+				retVal = getIntegerFromString(zipStr);
+			}
+		} catch (Exception e) {
+			retVal = null;
+		}
 
-    public static short getShortFromString(String input) {
-        return (short) getIntFromString(input);
-    }
+		return retVal;
+	}
 
-    public static int getIntFromString(String input) {
-        int retVal = 0;
+	public static short getShortFromString(String input) {
+		return (short) getIntFromString(input);
+	}
 
-        Integer n = getIntegerFromString(input);
-        if (n != null)
-            retVal = n.intValue();
-        else if (input != null)
-            retVal = input.hashCode();
+	public static int getIntFromString(String input) {
+		int retVal = 0;
 
-        return retVal;
-    }
+		Integer n = getIntegerFromString(input);
+		if (n != null)
+			retVal = n.intValue();
+		else if (input != null)
+			retVal = input.hashCode();
 
-    public static Integer getIntegerFromString(String input) {
-        try {
-            return new Integer(input);
-        } catch (Exception e) {
-            try {
-                String in = input.replaceAll("\\D", "");
-                return new Integer(in);
-            } catch (Exception ee) {
-                return null;
-            }
-        }
-    }
+		return retVal;
+	}
 
-    public static Integer getIntegerFromString(String input, Integer def) {
-        Integer retVal = getIntegerFromString(input);
-        if (retVal == null)
-            retVal = def;
+	public static Integer getIntegerFromString(String input) {
+		try {
+			return new Integer(input);
+		} catch (Exception e) {
+			try {
+				String in = input.replaceAll("\\D", "");
+				return new Integer(in);
+			} catch (Exception ee) {
+				return null;
+			}
+		}
+	}
 
-        return retVal;
-    }
+	public static Integer getIntegerFromString(String input, Integer def) {
+		Integer retVal = getIntegerFromString(input);
+		if (retVal == null)
+			retVal = def;
 
-    public static Integer getIntegerFromSubString(String input, int len) {
-        String tmp = input.substring(len);
-        return getIntegerFromString(tmp.trim());
-    }
+		return retVal;
+	}
 
-    /**
-     * expect an Integer between prefix and suffix
-     * 
-     * eg: if is this is our string "Hi there #2112, how are you" then a call of
-     * getIntegerFromSubString("Hi there #2112, how are you", "#", ","); will return 2112
-     * 
-     * note: if " " is specified, and there is no space from prefix to end of line, then the whole
-     * line is evaluated
-     * 
-     * @param target
-     * @param prefix
-     * @param suffix
-     * @return
-     */
-    public static Integer getIntegerFromSubString(String target, String prefix, String suffix) {
-        if (target == null)
-            return null;
+	public static Integer getIntegerFromSubString(String input, int len) {
+		String tmp = input.substring(len);
+		return getIntegerFromString(tmp.trim());
+	}
 
-        Integer retVal = null;
-        try {
-            String tmp = target;
-            if (prefix != null && target.contains(prefix)) {
-                // get the line from the end of the prefix to end of line
-                int sz = prefix.length();
-                int in = target.indexOf(prefix);
-                tmp = target.substring(in + sz);
-            }
+	/**
+	 * expect an Integer between prefix and suffix
+	 * 
+	 * eg: if is this is our string "Hi there #2112, how are you" then a call of
+	 * getIntegerFromSubString("Hi there #2112, how are you", "#", ","); will
+	 * return 2112
+	 * 
+	 * note: if " " is specified, and there is no space from prefix to end of
+	 * line, then the whole line is evaluated
+	 * 
+	 * @param target
+	 * @param prefix
+	 * @param suffix
+	 * @return
+	 */
+	public static Integer getIntegerFromSubString(String target, String prefix,
+			String suffix) {
+		if (target == null)
+			return null;
 
-            if (tmp != null && suffix != null && target.contains(suffix)) {
-                // get suffix endpoint -- and compensate for whitespace / end of line (same thing)
-                int suf = tmp.indexOf(suffix);
-                if (suf <= 0 && suffix.equals(" "))
-                    suf = tmp.length();
+		Integer retVal = null;
+		try {
+			String tmp = target;
+			if (prefix != null && target.contains(prefix)) {
+				// get the line from the end of the prefix to end of line
+				int sz = prefix.length();
+				int in = target.indexOf(prefix);
+				tmp = target.substring(in + sz);
+			}
 
-                tmp = tmp.substring(0, suf);
-                retVal = IntUtils.getIntegerFromString(tmp.trim());
-            }
-        } catch (Exception e) {
-            // not too big a deal if this dies...just return null, as if we couldn't find an int
-            // there
-            LOG.info("Not a big deal that we couldn't find an int from substring...going to return null", e);
-            retVal = null;
-        }
+			if (tmp != null && suffix != null && target.contains(suffix)) {
+				// get suffix endpoint -- and compensate for whitespace / end of
+				// line (same thing)
+				int suf = tmp.indexOf(suffix);
+				if (suf <= 0 && suffix.equals(" "))
+					suf = tmp.length();
 
-        return retVal;
-    }
+				tmp = tmp.substring(0, suf);
+				retVal = IntUtils.getIntegerFromString(tmp.trim());
+			}
+		} catch (Exception e) {
+			// not too big a deal if this dies...just return null, as if we
+			// couldn't find an int
+			// there
+			LOG.info(
+					"Not a big deal that we couldn't find an int from substring...going to return null",
+					e);
+			retVal = null;
+		}
 
-    public static Integer getIntegerFromSubString(String target, String suffix) {
-        return getIntegerFromSubString(target, null, suffix);
-    }
+		return retVal;
+	}
 
-    public static Double getDoubleFromString(String input) {
-        try {
-            return new Double(input);
-        } catch (Exception e) {
-            LOG.info("Not a big deal...going to return null", e);
-            return null;
-        }
-    }
+	public static Integer getIntegerFromSubString(String target, String suffix) {
+		return getIntegerFromSubString(target, null, suffix);
+	}
 
-    public static long getLongFromString(String input) {
-        return getLongFromString(input, -111);
-    }
+	public static Double getDoubleFromString(String input) {
+		try {
+			return new Double(input);
+		} catch (Exception e) {
+			LOG.info("Not a big deal...going to return null", e);
+			return null;
+		}
+	}
 
-    public static long getLongFromString(String input, long def) {
-        try {
-            return new Long(input);
-        } catch (Exception e) {
-            LOG.info("Not a big deal...going to return default value", e);
-            return def;
-        }
-    }
+	public static long getLongFromString(String input) {
+		return getLongFromString(input, -111);
+	}
+
+	public static long getLongFromString(String input, long def) {
+		try {
+			return new Long(input);
+		} catch (Exception e) {
+			LOG.info("Not a big deal...going to return default value", e);
+			return def;
+		}
+	}
 }

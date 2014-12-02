@@ -15,18 +15,18 @@ package org.opentripplanner.graph_builder.annotation;
 
 public class StreetCarSpeedZero extends GraphBuilderAnnotation {
 
-    private static final long serialVersionUID = 6872784791854835184L;
+	private static final long serialVersionUID = 6872784791854835184L;
 
-    public static final String FMT = "Way %s has car speed zero";
-    
-    final long way;
-    
-    public StreetCarSpeedZero(long way){
-    	this.way = way;
-    }
-    
-    @Override
-    public String getMessage() {
-        return String.format(FMT, way);
-    }
+	public static final String FMT = "Way %s has car speed zero";
+
+	final long way;
+
+	public StreetCarSpeedZero(long way) {
+		this.way = way;
+	}
+
+	@Override
+	public String getMessage() {
+		return String.format(FMT, way);
+	}
 }

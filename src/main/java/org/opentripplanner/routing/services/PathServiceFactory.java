@@ -13,18 +13,19 @@
 
 package org.opentripplanner.routing.services;
 
-
 public interface PathServiceFactory {
 
-    /**
-     * Return PathService implementation based on some graph ID.
-     * 
-     * @param routerID - Client ID for a specific graph. Maybe null or empty. In such a case
-     *        implementation may choose to either throw an error, or return a default graph.
-     * @return
-     */
-    public PathService getPathService(String routerID);
+	/**
+	 * Return PathService implementation based on some graph ID.
+	 * 
+	 * @param routerID
+	 *            - Client ID for a specific graph. Maybe null or empty. In such
+	 *            a case implementation may choose to either throw an error, or
+	 *            return a default graph.
+	 * @return
+	 */
+	public PathService getPathService(String routerID);
 
-    public AlertPatchService getAlertPatchService(String routerID);
+	public AlertPatchService getAlertPatchService(String routerID);
 
 }

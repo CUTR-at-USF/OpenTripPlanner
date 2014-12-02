@@ -19,14 +19,14 @@ import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.graph.Vertex;
 
 /**
- * Interface for classes that provides an admissible estimate of (lower bound on) 
- * the time needed to reach the target, starting from a given state and taking its
- * TraverseOptions into account.
+ * Interface for classes that provides an admissible estimate of (lower bound
+ * on) the time needed to reach the target, starting from a given state and
+ * taking its TraverseOptions into account.
  */
 public interface RemainingTimeHeuristic extends Serializable {
-	
-    public void timeInitialize(State s, Vertex target);
 
-    public double timeLowerBound(State s);
+	public void timeInitialize(State s, Vertex target);
+
+	public double timeLowerBound(State s);
 
 }

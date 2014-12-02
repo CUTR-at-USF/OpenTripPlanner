@@ -21,8 +21,8 @@ import org.opentripplanner.routing.graph.Vertex;
 /**
  * A vertex for a bike park.
  * 
- * Connected to streets by StreetBikeParkLink. Transition for parking the bike is handled by
- * BikeParkEdge.
+ * Connected to streets by StreetBikeParkLink. Transition for parking the bike
+ * is handled by BikeParkEdge.
  * 
  * Bike park-and-ride and "OV-fiets mode" development has been funded by GoAbout
  * (https://goabout.com/).
@@ -33,31 +33,32 @@ import org.opentripplanner.routing.graph.Vertex;
  */
 public class BikeParkVertex extends Vertex {
 
-    private static final long serialVersionUID = MavenVersion.VERSION.getUID();
+	private static final long serialVersionUID = MavenVersion.VERSION.getUID();
 
-    private int spacesAvailable;
+	private int spacesAvailable;
 
-    private String id;
+	private String id;
 
-    public BikeParkVertex(Graph g, BikePark bikePark) {
-        super(g, "bike park " + bikePark.id, bikePark.x, bikePark.y, bikePark.name);
-        this.setId(bikePark.id);
-        this.setSpacesAvailable(bikePark.spacesAvailable);
-    }
+	public BikeParkVertex(Graph g, BikePark bikePark) {
+		super(g, "bike park " + bikePark.id, bikePark.x, bikePark.y,
+				bikePark.name);
+		this.setId(bikePark.id);
+		this.setSpacesAvailable(bikePark.spacesAvailable);
+	}
 
-    public int getSpacesAvailable() {
-        return spacesAvailable;
-    }
+	public int getSpacesAvailable() {
+		return spacesAvailable;
+	}
 
-    public void setSpacesAvailable(int spaces) {
-        this.spacesAvailable = spaces;
-    }
+	public void setSpacesAvailable(int spaces) {
+		this.spacesAvailable = spaces;
+	}
 
-    public String getId() {
-        return id;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public void setId(String id) {
-        this.id = id;
-    }
+	public void setId(String id) {
+		this.id = id;
+	}
 }

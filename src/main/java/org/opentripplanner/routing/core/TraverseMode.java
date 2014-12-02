@@ -20,45 +20,45 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Set;
 
-@XmlType(name="TraverseMode")  
+@XmlType(name = "TraverseMode")
 public enum TraverseMode {
-    WALK, BICYCLE, CAR,
-    TRAM, SUBWAY, RAIL, BUS, FERRY,
-    CABLE_CAR, GONDOLA, FUNICULAR,
-    TRANSIT, TRAINISH, BUSISH, LEG_SWITCH,
-    // A motor vehicle that requires custom configuration
-    // e.g. a truck, motor bike, airport shuttle service.
-    CUSTOM_MOTOR_VEHICLE;
+	WALK, BICYCLE, CAR, TRAM, SUBWAY, RAIL, BUS, FERRY, CABLE_CAR, GONDOLA, FUNICULAR, TRANSIT, TRAINISH, BUSISH, LEG_SWITCH,
+	// A motor vehicle that requires custom configuration
+	// e.g. a truck, motor bike, airport shuttle service.
+	CUSTOM_MOTOR_VEHICLE;
 
-    private static HashMap <Set<TraverseMode>, Set<TraverseMode>> setMap = 
-            new HashMap <Set<TraverseMode>, Set<TraverseMode>>();
+	private static HashMap<Set<TraverseMode>, Set<TraverseMode>> setMap = new HashMap<Set<TraverseMode>, Set<TraverseMode>>();
 
-    public static Set<TraverseMode> internSet (Set<TraverseMode> modeSet) {
-        if (modeSet == null)
-            return null;
-        Set<TraverseMode> ret = setMap.get(modeSet);
-        if (ret == null) {
-            EnumSet<TraverseMode> backingSet = EnumSet.noneOf(TraverseMode.class);
-            backingSet.addAll(modeSet);
-            Set<TraverseMode> unmodifiableSet = Collections.unmodifiableSet(backingSet);
-            setMap.put(unmodifiableSet, unmodifiableSet);
-            ret = unmodifiableSet;
-        }
-        return ret;
-    }
+	public static Set<TraverseMode> internSet(Set<TraverseMode> modeSet) {
+		if (modeSet == null)
+			return null;
+		Set<TraverseMode> ret = setMap.get(modeSet);
+		if (ret == null) {
+			EnumSet<TraverseMode> backingSet = EnumSet
+					.noneOf(TraverseMode.class);
+			backingSet.addAll(modeSet);
+			Set<TraverseMode> unmodifiableSet = Collections
+					.unmodifiableSet(backingSet);
+			setMap.put(unmodifiableSet, unmodifiableSet);
+			ret = unmodifiableSet;
+		}
+		return ret;
+	}
 
-    public boolean isTransit() {
-        return this == TRAM || this == SUBWAY || this == RAIL || this == BUS || this == FERRY
-                || this == CABLE_CAR || this == GONDOLA || this == FUNICULAR || this == TRANSIT
-                || this == TRAINISH || this == BUSISH;
-    }
+	public boolean isTransit() {
+		return this == TRAM || this == SUBWAY || this == RAIL || this == BUS
+				|| this == FERRY || this == CABLE_CAR || this == GONDOLA
+				|| this == FUNICULAR || this == TRANSIT || this == TRAINISH
+				|| this == BUSISH;
+	}
 
-    public boolean isOnStreetNonTransit() {
-        return this == WALK || this == BICYCLE || this == CAR || this == CUSTOM_MOTOR_VEHICLE;
-    }
-    
-    public boolean isDriving() {
-        return this == CAR || this == CUSTOM_MOTOR_VEHICLE;
-    }
+	public boolean isOnStreetNonTransit() {
+		return this == WALK || this == BICYCLE || this == CAR
+				|| this == CUSTOM_MOTOR_VEHICLE;
+	}
+
+	public boolean isDriving() {
+		return this == CAR || this == CUSTOM_MOTOR_VEHICLE;
+	}
 
 }

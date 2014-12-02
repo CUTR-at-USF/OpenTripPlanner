@@ -25,40 +25,41 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @XmlRootElement(name = "trip")
 public class TripsModelInfo implements Serializable {
 
-    private static final long serialVersionUID = -4853941297409355512L;
+	private static final long serialVersionUID = -4853941297409355512L;
 
-    public TripsModelInfo(String headsign, Integer number, String calendarId, AgencyAndId tripId) {
-        this.headsign = headsign;
-        this.numberOfTrips = number;
-        this.calendarId = calendarId;
-        this.id = tripId.getId();
-        this.agency = tripId.getAgencyId();
-    }
+	public TripsModelInfo(String headsign, Integer number, String calendarId,
+			AgencyAndId tripId) {
+		this.headsign = headsign;
+		this.numberOfTrips = number;
+		this.calendarId = calendarId;
+		this.id = tripId.getId();
+		this.agency = tripId.getAgencyId();
+	}
 
-    public TripsModelInfo() {
-    }
+	public TripsModelInfo() {
+	}
 
-    public String getId() {
-        return id;
-    }
+	public String getId() {
+		return id;
+	}
 
-    @XmlAttribute
-    @JsonSerialize
-    String headsign;
+	@XmlAttribute
+	@JsonSerialize
+	String headsign;
 
-    @XmlAttribute
-    @JsonSerialize
-    Integer numberOfTrips;
+	@XmlAttribute
+	@JsonSerialize
+	Integer numberOfTrips;
 
-    @XmlAttribute
-    @JsonSerialize
-    String calendarId;
+	@XmlAttribute
+	@JsonSerialize
+	String calendarId;
 
-    @XmlAttribute
-    @JsonSerialize
-    String id;
+	@XmlAttribute
+	@JsonSerialize
+	String id;
 
-    @XmlAttribute
-    @JsonSerialize
-    String agency;
+	@XmlAttribute
+	@JsonSerialize
+	String agency;
 }

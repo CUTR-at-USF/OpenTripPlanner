@@ -21,56 +21,56 @@ import org.opentripplanner.routing.graph.Edge;
 
 public class VisualTraverseVisitor implements TraverseVisitor {
 
-    private ShowGraph gui;
+	private ShowGraph gui;
 
-    private final int SLEEP_AFTER = 50;
-    private final int SLEEP_LEN = 1;
-    
-    private int sleepAfter = SLEEP_AFTER;
-    
-    public VisualTraverseVisitor(ShowGraph gui) {
-        this.gui = gui;
-    }
+	private final int SLEEP_AFTER = 50;
+	private final int SLEEP_LEN = 1;
 
-    @Override
-    public void visitEdge(Edge edge, State state) {
-        gui.enqueueHighlightedEdge(edge);
-        //gui.highlightVertex(state.getVertex());
-    }
+	private int sleepAfter = SLEEP_AFTER;
 
-    @Override
-    public void visitVertex(State state) {
-    	// every SLEEP_AFTER visits of the vertex, sleep for SLEEP_LEN
-    	// this slows down the search so it animates prettily
-        if (--sleepAfter <= 0) {
-            sleepAfter = SLEEP_AFTER;
-            try {
-                Thread.sleep(SLEEP_LEN);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        gui.addNewSPTEdge( state );
-    }
+	public VisualTraverseVisitor(ShowGraph gui) {
+		this.gui = gui;
+	}
 
-    @Override
-    public void visitEnqueue(State state) {
-//        Edge e = state.getBackEdge();
-//        if (e instanceof Edge) {
-//            gui.enqueueHighlightedEdge((Edge) e);
-//        }
-    }
-    
-    public GenericAStarFactory getAStarSearchFactory() {
-        return new GenericAStarFactory() {
+	@Override
+	public void visitEdge(Edge edge, State state) {
+		gui.enqueueHighlightedEdge(edge);
+		// gui.highlightVertex(state.getVertex());
+	}
 
-            @Override
-            public GenericAStar createAStarInstance() {
-                GenericAStar astar = new GenericAStar();
-                astar.setTraverseVisitor(VisualTraverseVisitor.this);
-                return astar;
-            }
-        };
-    }
+	@Override
+	public void visitVertex(State state) {
+		// every SLEEP_AFTER visits of the vertex, sleep for SLEEP_LEN
+		// this slows down the search so it animates prettily
+		if (--sleepAfter <= 0) {
+			sleepAfter = SLEEP_AFTER;
+			try {
+				Thread.sleep(SLEEP_LEN);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		gui.addNewSPTEdge(state);
+	}
+
+	@Override
+	public void visitEnqueue(State state) {
+		// Edge e = state.getBackEdge();
+		// if (e instanceof Edge) {
+		// gui.enqueueHighlightedEdge((Edge) e);
+		// }
+	}
+
+	public GenericAStarFactory getAStarSearchFactory() {
+		return new GenericAStarFactory() {
+
+			@Override
+			public GenericAStar createAStarInstance() {
+				GenericAStar astar = new GenericAStar();
+				astar.setTraverseVisitor(VisualTraverseVisitor.this);
+				return astar;
+			}
+		};
+	}
 
 }

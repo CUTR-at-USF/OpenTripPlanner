@@ -32,96 +32,104 @@ import org.slf4j.LoggerFactory;
 
 public class ParetoPathService implements PathService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ParetoPathService.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(ParetoPathService.class);
 
-    private GraphService graphService;
-    private SPTServiceFactory sptServiceFactory;
-    
-    private SPTVisitor sptVisitor = null;
+	private GraphService graphService;
+	private SPTServiceFactory sptServiceFactory;
 
-    private double timeout = 0; // seconds
-    
-    public ParetoPathService(GraphService gs, SPTServiceFactory spts) {
+	private SPTVisitor sptVisitor = null;
+
+	private double timeout = 0; // seconds
+
+	public ParetoPathService(GraphService gs, SPTServiceFactory spts) {
 		this.graphService = gs;
 		this.sptServiceFactory = spts;
 	}
 
-	/** Give up on searching for itineraries after this many seconds have elapsed. */
-    public void setTimeout (double seconds) {
-        timeout = seconds;
-    }
+	/**
+	 * Give up on searching for itineraries after this many seconds have
+	 * elapsed.
+	 */
+	public void setTimeout(double seconds) {
+		timeout = seconds;
+	}
 
-	public void setSPTVisitor(SPTVisitor sptVisitor){
+	public void setSPTVisitor(SPTVisitor sptVisitor) {
 		this.sptVisitor = sptVisitor;
 	}
 
-    @Override
-    public List<GraphPath> getPaths(RoutingRequest options) {
-    	
-    	SPTService sptService = this.sptServiceFactory.instantiate();
+	@Override
+	public List<GraphPath> getPaths(RoutingRequest options) {
 
-        ArrayList<GraphPath> paths = new ArrayList<GraphPath>();
+		SPTService sptService = this.sptServiceFactory.instantiate();
 
-        // make sure the options has a routing context *before* cloning it (otherwise you get
-        // orphan RoutingContexts leaving temporary edges in the graph until GC)
-        if (options.rctx == null) {
-            options.setRoutingContext(graphService.getGraph(options.routerId));
-            options.rctx.pathParsers = new PathParser[] { new BasicPathParser(),
-                    new NoThruTrafficPathParser() };
-        }
+		ArrayList<GraphPath> paths = new ArrayList<GraphPath>();
 
-        long searchBeginTime = System.currentTimeMillis();
-        
-        ShortestPathTree spt = sptService.getShortestPathTree(options, timeout);
-        
-        if(sptVisitor!=null){
-        	System.out.println( "setting spt" );
-        	sptVisitor.spt = spt;
-        } else {
-        	System.out.println( "no spt visitor" );
-        }
-        
-        if (spt == null) {
-            // Serious failure, no paths provided. This could be signaled with an exception.
-            LOG.warn("Aborting search. {} paths found, elapsed time {} sec", 
-                    paths.size(), (System.currentTimeMillis() - searchBeginTime) / 1000.0);
-            return null;
-        }
-        for( GraphPath gp : spt.getPaths() ) {
-        	paths.add(gp);
-        }
-        LOG.debug("SPT provides {} paths to target.", paths.size());
+		// make sure the options has a routing context *before* cloning it
+		// (otherwise you get
+		// orphan RoutingContexts leaving temporary edges in the graph until GC)
+		if (options.rctx == null) {
+			options.setRoutingContext(graphService.getGraph(options.routerId));
+			options.rctx.pathParsers = new PathParser[] {
+					new BasicPathParser(), new NoThruTrafficPathParser() };
+		}
 
-        LOG.debug("{} / {} itineraries", paths.size(), options.numItineraries);
-        if (options.rctx.aborted) {
-            // search was cleanly aborted, probably due to a timeout. 
-            // There may be useful paths, but we should stop retrying.
-            return null;
-        }
+		long searchBeginTime = System.currentTimeMillis();
 
-        if (paths.size() == 0) {
-            return null;
-        }
-        
-        // We order the list of returned paths by the time of arrival or departure (not path duration)
-        Collections.sort(paths, new PathComparator(options.arriveBy));
-        return paths;
-    }
+		ShortestPathTree spt = sptService.getShortestPathTree(options, timeout);
 
-    public GraphService getGraphService() {
-        return graphService;
-    }
+		if (sptVisitor != null) {
+			System.out.println("setting spt");
+			sptVisitor.spt = spt;
+		} else {
+			System.out.println("no spt visitor");
+		}
 
-    public void setGraphService(GraphService graphService) {
-        this.graphService = graphService;
-    }
+		if (spt == null) {
+			// Serious failure, no paths provided. This could be signaled with
+			// an exception.
+			LOG.warn("Aborting search. {} paths found, elapsed time {} sec",
+					paths.size(),
+					(System.currentTimeMillis() - searchBeginTime) / 1000.0);
+			return null;
+		}
+		for (GraphPath gp : spt.getPaths()) {
+			paths.add(gp);
+		}
+		LOG.debug("SPT provides {} paths to target.", paths.size());
 
-    public SPTServiceFactory getSptServiceFactory() {
-        return sptServiceFactory;
-    }
+		LOG.debug("{} / {} itineraries", paths.size(), options.numItineraries);
+		if (options.rctx.aborted) {
+			// search was cleanly aborted, probably due to a timeout.
+			// There may be useful paths, but we should stop retrying.
+			return null;
+		}
 
-    public void setSptServiceFactory(SPTServiceFactory sptServiceFactory) {
-        this.sptServiceFactory = sptServiceFactory;
-    }
+		if (paths.size() == 0) {
+			return null;
+		}
+
+		// We order the list of returned paths by the time of arrival or
+		// departure (not path duration)
+		Collections.sort(paths, new PathComparator(options.arriveBy));
+		return paths;
+	}
+
+	public GraphService getGraphService() {
+		return graphService;
+	}
+
+	public void setGraphService(GraphService graphService) {
+		this.graphService = graphService;
+	}
+
+	public SPTServiceFactory getSptServiceFactory() {
+		return sptServiceFactory;
+	}
+
+	public void setSptServiceFactory(SPTServiceFactory sptServiceFactory) {
+		this.sptServiceFactory = sptServiceFactory;
+	}
 
 }

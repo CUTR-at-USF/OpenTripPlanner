@@ -39,59 +39,67 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
 /**
- * This index is used in Analyst and does not need to be instantiated if you are not performing
- * Analyst requests.
+ * This index is used in Analyst and does not need to be instantiated if you are
+ * not performing Analyst requests.
  */
 public class GeometryIndex implements GeometryIndexService {
-    
-    private static final Logger LOG = LoggerFactory.getLogger(GeometryIndex.class);
-    private static final double SEARCH_RADIUS_M = 100; // meters
-    private static final double SEARCH_RADIUS_DEG = SphericalDistanceLibrary.metersToDegrees(SEARCH_RADIUS_M);
 
-    GraphService graphService;
-    
-    private STRtree pedestrianIndex;
+	private static final Logger LOG = LoggerFactory
+			.getLogger(GeometryIndex.class);
+	private static final double SEARCH_RADIUS_M = 100; // meters
+	private static final double SEARCH_RADIUS_DEG = SphericalDistanceLibrary
+			.metersToDegrees(SEARCH_RADIUS_M);
 
-    public GeometryIndex(Graph graph) {
-        if (graph == null) { 
-            String message = "Could not retrieve default Graph from GraphService. Check its configuration.";
-            LOG.error(message);
-            throw new IllegalStateException(message);
-        }
-        Map<ReversibleLineStringWrapper, StreetEdge> edges = Maps.newHashMap();
-        for (StreetVertex vertex : Iterables.filter(graph.getVertices(), StreetVertex.class)) {
-            for (StreetEdge e: Iterables.filter(vertex.getOutgoing(), StreetEdge.class)) {
-                LineString geom = e.getGeometry();
-                if (e.getPermission().allows(StreetTraversalPermission.PEDESTRIAN)) {
-                    edges.put(new ReversibleLineStringWrapper(geom), e);
-                }
-            }
-        }
-        // insert unique edges
-        pedestrianIndex = new STRtree();
-        for (StreetEdge e : edges.values()) {
-            LineString geom = e.getGeometry();
-            pedestrianIndex.insert(geom.getEnvelopeInternal(), e);
-        }
-        pedestrianIndex.build();
-        LOG.debug("spatial index size: {}", pedestrianIndex.size());
-    }
-    
-    @SuppressWarnings("rawtypes")
-    public List queryPedestrian(Envelope env) {
-        return pedestrianIndex.query(env);
-    }
-    
-    @Override
-    public BoundingBox getBoundingBox(CoordinateReferenceSystem crs) {
-        try {
-            Envelope bounds = (Envelope) pedestrianIndex.getRoot().getBounds();
-            ReferencedEnvelope refEnv = new ReferencedEnvelope(bounds, CRS.decode("EPSG:4326", true));
-            return refEnv.toBounds(crs);
-        } catch (Exception e) {
-            LOG.error("error transforming graph bounding box to request CRS : {}", crs);
-            return null;
-        }
-    }
-    
+	GraphService graphService;
+
+	private STRtree pedestrianIndex;
+
+	public GeometryIndex(Graph graph) {
+		if (graph == null) {
+			String message = "Could not retrieve default Graph from GraphService. Check its configuration.";
+			LOG.error(message);
+			throw new IllegalStateException(message);
+		}
+		Map<ReversibleLineStringWrapper, StreetEdge> edges = Maps.newHashMap();
+		for (StreetVertex vertex : Iterables.filter(graph.getVertices(),
+				StreetVertex.class)) {
+			for (StreetEdge e : Iterables.filter(vertex.getOutgoing(),
+					StreetEdge.class)) {
+				LineString geom = e.getGeometry();
+				if (e.getPermission().allows(
+						StreetTraversalPermission.PEDESTRIAN)) {
+					edges.put(new ReversibleLineStringWrapper(geom), e);
+				}
+			}
+		}
+		// insert unique edges
+		pedestrianIndex = new STRtree();
+		for (StreetEdge e : edges.values()) {
+			LineString geom = e.getGeometry();
+			pedestrianIndex.insert(geom.getEnvelopeInternal(), e);
+		}
+		pedestrianIndex.build();
+		LOG.debug("spatial index size: {}", pedestrianIndex.size());
+	}
+
+	@SuppressWarnings("rawtypes")
+	public List queryPedestrian(Envelope env) {
+		return pedestrianIndex.query(env);
+	}
+
+	@Override
+	public BoundingBox getBoundingBox(CoordinateReferenceSystem crs) {
+		try {
+			Envelope bounds = (Envelope) pedestrianIndex.getRoot().getBounds();
+			ReferencedEnvelope refEnv = new ReferencedEnvelope(bounds,
+					CRS.decode("EPSG:4326", true));
+			return refEnv.toBounds(crs);
+		} catch (Exception e) {
+			LOG.error(
+					"error transforming graph bounding box to request CRS : {}",
+					crs);
+			return null;
+		}
+	}
+
 }

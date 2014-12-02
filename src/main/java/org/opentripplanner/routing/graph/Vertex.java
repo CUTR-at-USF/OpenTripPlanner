@@ -31,342 +31,355 @@ import org.slf4j.LoggerFactory;
 import com.vividsolutions.jts.geom.Coordinate;
 
 /**
- * A vertex in the graph. Each vertex has a longitude/latitude location, as well as a set of
- * incoming and outgoing edges.
+ * A vertex in the graph. Each vertex has a longitude/latitude location, as well
+ * as a set of incoming and outgoing edges.
  */
 public abstract class Vertex implements Serializable, Cloneable {
-    private static final long serialVersionUID = MavenVersion.VERSION.getUID();
+	private static final long serialVersionUID = MavenVersion.VERSION.getUID();
 
-    private static final Logger LOG = LoggerFactory.getLogger(Vertex.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Vertex.class);
 
-    private static int maxIndex = 0;
+	private static int maxIndex = 0;
 
-    private int index;
-    
-    /* short debugging name */
-    private final String label;
-    
-    /* Longer human-readable name for the client */
-    private String name;
+	private int index;
 
-    private final double x;
+	/* short debugging name */
+	private final String label;
 
-    private final double y;
-    
-    private transient Edge[] incoming = new Edge[0];
+	/* Longer human-readable name for the client */
+	private String name;
 
-    private transient Edge[] outgoing = new Edge[0];
+	private final double x;
 
-    
-    /* PUBLIC CONSTRUCTORS */
+	private final double y;
 
-    public Vertex(Graph g, String label, double x, double y) {
-        this.label = label;
-        this.x = x;
-        this.y = y;
-        this.index = maxIndex  ++;
-        // null graph means temporary vertex
-        if (g != null)
-            g.addVertex(this);
-        this.name = "(no name provided)";
-    }
+	private transient Edge[] incoming = new Edge[0];
 
-    protected Vertex(Graph g, String label, double x, double y, String name) {
-        this(g, label, x, y);
-        this.name = name;
-    }
+	private transient Edge[] outgoing = new Edge[0];
 
-    /* PUBLIC METHODS */
+	/* PUBLIC CONSTRUCTORS */
 
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<").append(this.getLabel());
-        if (this.getCoordinate() != null) {
-            sb.append(" lat,lng=").append(this.getCoordinate().y);
-            sb.append(",").append(this.getCoordinate().x);
-        }
-        sb.append(">");
-        return sb.toString();
-    }
+	public Vertex(Graph g, String label, double x, double y) {
+		this.label = label;
+		this.x = x;
+		this.y = y;
+		this.index = maxIndex++;
+		// null graph means temporary vertex
+		if (g != null)
+			g.addVertex(this);
+		this.name = "(no name provided)";
+	}
 
-    public int hashCode() {
-        return index;
-    }
+	protected Vertex(Graph g, String label, double x, double y, String name) {
+		this(g, label, x, y);
+		this.name = name;
+	}
 
-    /* EDGE UTILITY METHODS (use arrays to eliminate copy-on-write set objects) */
+	/* PUBLIC METHODS */
 
-    /**
-     * A static helper method to avoid repeated code for outgoing and incoming lists.
-     * Synchronization must be handled by the caller, to avoid passing edge array pointers that may be invalidated.
-     */
-    private static Edge[] addEdge(Edge[] existing, Edge e) {
-        Edge[] copy = new Edge[existing.length + 1];
-        int i;
-        for (i = 0; i < existing.length; i++) {
-            if (existing[i] == e) {
-                LOG.error("repeatedly added edge {}", e);
-                return existing;
-            }
-            copy[i] = existing[i];
-        }
-        copy[i] = e; // append the new edge to the copy of the existing array
-        return copy;
-    }
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<").append(this.getLabel());
+		if (this.getCoordinate() != null) {
+			sb.append(" lat,lng=").append(this.getCoordinate().y);
+			sb.append(",").append(this.getCoordinate().x);
+		}
+		sb.append(">");
+		return sb.toString();
+	}
 
-    /**
-     * A static helper method to avoid repeated code for outgoing and incoming lists.
-     * Synchronization must be handled by the caller, to avoid passing edge array pointers that may be invalidated.
-     */
-    public static Edge[] removeEdge(Edge[] existing, Edge e) {
-        int nfound = 0;
-        for (int i = 0, j = 0; i < existing.length; i++) {
-            if (existing[i] == e) nfound++;
-        }
-        if (nfound == 0) {
-            LOG.error("Requested removal of an edge which isn't connected to this vertex.");
-            return existing;
-        }
-        if (nfound > 1) {
-            LOG.error("There are multiple copies of the edge to be removed.)");
-        }
-        Edge[] copy = new Edge[existing.length - nfound];
-        for (int i = 0, j = 0; i < existing.length; i++) {
-            if (existing[i] != e) copy[j++] = existing[i];
-        }
-        return copy;
-    }
+	public int hashCode() {
+		return index;
+	}
 
-    /* FIELD ACCESSOR METHODS : READ/WRITE */
+	/* EDGE UTILITY METHODS (use arrays to eliminate copy-on-write set objects) */
 
-    public void addOutgoing(Edge edge) {
-        synchronized (this) {
-            outgoing = addEdge(outgoing, edge);
-        }
-    }
+	/**
+	 * A static helper method to avoid repeated code for outgoing and incoming
+	 * lists. Synchronization must be handled by the caller, to avoid passing
+	 * edge array pointers that may be invalidated.
+	 */
+	private static Edge[] addEdge(Edge[] existing, Edge e) {
+		Edge[] copy = new Edge[existing.length + 1];
+		int i;
+		for (i = 0; i < existing.length; i++) {
+			if (existing[i] == e) {
+				LOG.error("repeatedly added edge {}", e);
+				return existing;
+			}
+			copy[i] = existing[i];
+		}
+		copy[i] = e; // append the new edge to the copy of the existing array
+		return copy;
+	}
 
-    /** @return whether the edge was found and removed. */
-    public boolean removeOutgoing(Edge edge) {
-        synchronized (this) {
-            int n = outgoing.length;
-            outgoing = removeEdge(outgoing, edge);
-            return (outgoing.length < n);
-        }
-    }
+	/**
+	 * A static helper method to avoid repeated code for outgoing and incoming
+	 * lists. Synchronization must be handled by the caller, to avoid passing
+	 * edge array pointers that may be invalidated.
+	 */
+	public static Edge[] removeEdge(Edge[] existing, Edge e) {
+		int nfound = 0;
+		for (int i = 0, j = 0; i < existing.length; i++) {
+			if (existing[i] == e)
+				nfound++;
+		}
+		if (nfound == 0) {
+			LOG.error("Requested removal of an edge which isn't connected to this vertex.");
+			return existing;
+		}
+		if (nfound > 1) {
+			LOG.error("There are multiple copies of the edge to be removed.)");
+		}
+		Edge[] copy = new Edge[existing.length - nfound];
+		for (int i = 0, j = 0; i < existing.length; i++) {
+			if (existing[i] != e)
+				copy[j++] = existing[i];
+		}
+		return copy;
+	}
 
+	/* FIELD ACCESSOR METHODS : READ/WRITE */
 
-    public void addIncoming(Edge edge) {
-        synchronized (this) {
-            incoming = addEdge(incoming, edge);
-        }
-    }
+	public void addOutgoing(Edge edge) {
+		synchronized (this) {
+			outgoing = addEdge(outgoing, edge);
+		}
+	}
 
-    /** @return whether the edge was found and removed. */
-    public boolean removeIncoming(Edge edge) {
-        synchronized (this) {
-            int n = incoming.length;
-            incoming = removeEdge(incoming, edge);
-            return (incoming.length < n);
-        }
-    }
+	/** @return whether the edge was found and removed. */
+	public boolean removeOutgoing(Edge edge) {
+		synchronized (this) {
+			int n = outgoing.length;
+			outgoing = removeEdge(outgoing, edge);
+			return (outgoing.length < n);
+		}
+	}
 
-    /**
-     * Get a collection containing all the edges leading from this vertex to other vertices.
-     * There is probably some overhead to creating the wrapper ArrayList objects, but this
-     * allows filtering and combining edge lists using stock Collection-based methods.
-     */
-    public Collection<Edge> getOutgoing() {
-        return Arrays.asList(outgoing);
-    }
+	public void addIncoming(Edge edge) {
+		synchronized (this) {
+			incoming = addEdge(incoming, edge);
+		}
+	}
 
-    /** Get a collection containing all the edges leading from other vertices to this vertex. */
-    public Collection<Edge> getIncoming() {
-        return Arrays.asList(incoming);
-    }
+	/** @return whether the edge was found and removed. */
+	public boolean removeIncoming(Edge edge) {
+		synchronized (this) {
+			int n = incoming.length;
+			incoming = removeEdge(incoming, edge);
+			return (incoming.length < n);
+		}
+	}
 
-    @XmlTransient
-    public int getDegreeOut() {
-        return outgoing.length;
-    }
+	/**
+	 * Get a collection containing all the edges leading from this vertex to
+	 * other vertices. There is probably some overhead to creating the wrapper
+	 * ArrayList objects, but this allows filtering and combining edge lists
+	 * using stock Collection-based methods.
+	 */
+	public Collection<Edge> getOutgoing() {
+		return Arrays.asList(outgoing);
+	}
 
-    @XmlTransient
-    public int getDegreeIn() {
-        return incoming.length;
-    }
-    
-    /** Get the longitude of the vertex */
-    public double getX() {
-        return x;
-    }
+	/**
+	 * Get a collection containing all the edges leading from other vertices to
+	 * this vertex.
+	 */
+	public Collection<Edge> getIncoming() {
+		return Arrays.asList(incoming);
+	}
 
-    /** Get the latitude of the vertex */
-    public double getY() {
-        return y;
-    }
+	@XmlTransient
+	public int getDegreeOut() {
+		return outgoing.length;
+	}
 
-    /** Get the longitude of the vertex */
-    public double getLon() {
-        return x;
-    }
+	@XmlTransient
+	public int getDegreeIn() {
+		return incoming.length;
+	}
 
-    /** Get the latitude of the vertex */
-    public double getLat() {
-        return y;
-    }
+	/** Get the longitude of the vertex */
+	public double getX() {
+		return x;
+	}
 
-    /** If this vertex is located on only one street, get that street's name. */
-    public String getName() {
-        return this.name;
-    }
+	/** Get the latitude of the vertex */
+	public double getY() {
+		return y;
+	}
 
-    public void setStreetName(String name) {
-        this.name = name;
-    }
+	/** Get the longitude of the vertex */
+	public double getLon() {
+		return x;
+	}
 
+	/** Get the latitude of the vertex */
+	public double getLat() {
+		return y;
+	}
 
-    /* FIELD ACCESSOR METHODS : READ ONLY */
+	/** If this vertex is located on only one street, get that street's name. */
+	public String getName() {
+		return this.name;
+	}
 
-    /** Every vertex has a label which is globally unique. */
-    public String getLabel() {
-        return label;
-    }
+	public void setStreetName(String name) {
+		this.name = name;
+	}
 
-    @XmlTransient
-    public Coordinate getCoordinate() {
-        return new Coordinate(getX(), getY());
-    }
+	/* FIELD ACCESSOR METHODS : READ ONLY */
 
-    /** Get the bearing, in degrees, between this vertex and another coordinate. */
-    public double azimuthTo(Coordinate other) {
-        return DirectionUtils.getAzimuth(getCoordinate(), other);
-    }
+	/** Every vertex has a label which is globally unique. */
+	public String getLabel() {
+		return label;
+	}
 
-    /** Get the bearing, in degrees, between this vertex and another. */
-    public double azimuthTo(Vertex other) {
-        return azimuthTo(other.getCoordinate());
-    }
+	@XmlTransient
+	public Coordinate getCoordinate() {
+		return new Coordinate(getX(), getY());
+	}
 
-    /** Get this vertex's unique index, that can serve as a hashcode or an index into a table */
-    @XmlTransient
-    public int getIndex() {
-        return index;
-    }
+	/** Get the bearing, in degrees, between this vertex and another coordinate. */
+	public double azimuthTo(Coordinate other) {
+		return DirectionUtils.getAzimuth(getCoordinate(), other);
+	}
 
-    public void setIndex(int index) {
-        this.index = index;
-    }
+	/** Get the bearing, in degrees, between this vertex and another. */
+	public double azimuthTo(Vertex other) {
+		return azimuthTo(other.getCoordinate());
+	}
 
-    public static int getMaxIndex() {
-        return maxIndex;
-    }
+	/**
+	 * Get this vertex's unique index, that can serve as a hashcode or an index
+	 * into a table
+	 */
+	@XmlTransient
+	public int getIndex() {
+		return index;
+	}
 
+	public void setIndex(int index) {
+		this.index = index;
+	}
 
-    /* SERIALIZATION METHODS */
+	public static int getMaxIndex() {
+		return maxIndex;
+	}
 
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        // edge lists are transient
-        out.defaultWriteObject();
-    }
+	/* SERIALIZATION METHODS */
 
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        this.incoming = new Edge[0];
-        this.outgoing = new Edge[0];
-        index = maxIndex++;
-    }
+	private void writeObject(ObjectOutputStream out) throws IOException {
+		// edge lists are transient
+		out.defaultWriteObject();
+	}
 
-    /* UTILITY METHODS FOR SEARCHING, GRAPH BUILDING, AND GENERATING WALKSTEPS */
+	private void readObject(ObjectInputStream in) throws IOException,
+			ClassNotFoundException {
+		in.defaultReadObject();
+		this.incoming = new Edge[0];
+		this.outgoing = new Edge[0];
+		index = maxIndex++;
+	}
 
-    @XmlTransient
-    public List<Edge> getOutgoingStreetEdges() {
-        List<Edge> result = new ArrayList<Edge>();
-        for (Edge out : this.getOutgoing()) {
-            if (!(out instanceof StreetEdge)) {
-                continue;
-            }
-            result.add((StreetEdge) out);
-        }
-        return result;
-    }
+	/* UTILITY METHODS FOR SEARCHING, GRAPH BUILDING, AND GENERATING WALKSTEPS */
 
-    /**
-     * Clear this vertex's outgoing and incoming edge lists, and remove all the edges
-     * they contained from this vertex's neighbors.
-     */
-    public void removeAllEdges() {
-        for (Edge e : outgoing) {
-            Vertex target = e.getToVertex();
-            if (target != null) {
-                target.removeIncoming(e);
-            }
-        }
-        for (Edge e : incoming) {
-            Vertex source = e.getFromVertex();
-            if (source != null) {
-                source.removeOutgoing(e);
-            }
-        }
-        incoming = new Edge[0];
-        outgoing = new Edge[0];
-    }
+	@XmlTransient
+	public List<Edge> getOutgoingStreetEdges() {
+		List<Edge> result = new ArrayList<Edge>();
+		for (Edge out : this.getOutgoing()) {
+			if (!(out instanceof StreetEdge)) {
+				continue;
+			}
+			result.add((StreetEdge) out);
+		}
+		return result;
+	}
 
+	/**
+	 * Clear this vertex's outgoing and incoming edge lists, and remove all the
+	 * edges they contained from this vertex's neighbors.
+	 */
+	public void removeAllEdges() {
+		for (Edge e : outgoing) {
+			Vertex target = e.getToVertex();
+			if (target != null) {
+				target.removeIncoming(e);
+			}
+		}
+		for (Edge e : incoming) {
+			Vertex source = e.getFromVertex();
+			if (source != null) {
+				source.removeOutgoing(e);
+			}
+		}
+		incoming = new Edge[0];
+		outgoing = new Edge[0];
+	}
 
-    /* GRAPH COHERENCY AND TYPE CHECKING */
+	/* GRAPH COHERENCY AND TYPE CHECKING */
 
-    // Parameterized Class<? extends Edge) gets ugly fast here
-    @SuppressWarnings("unchecked")
-    private static final ValidEdgeTypes VALID_EDGE_TYPES = new ValidEdgeTypes(Edge.class);
+	// Parameterized Class<? extends Edge) gets ugly fast here
+	@SuppressWarnings("unchecked")
+	private static final ValidEdgeTypes VALID_EDGE_TYPES = new ValidEdgeTypes(
+			Edge.class);
 
-    @XmlTransient
-    public ValidEdgeTypes getValidOutgoingEdgeTypes() {
-        return VALID_EDGE_TYPES;
-    }
+	@XmlTransient
+	public ValidEdgeTypes getValidOutgoingEdgeTypes() {
+		return VALID_EDGE_TYPES;
+	}
 
-    @XmlTransient
-    public ValidEdgeTypes getValidIncomingEdgeTypes() {
-        return VALID_EDGE_TYPES ;
-    }
+	@XmlTransient
+	public ValidEdgeTypes getValidIncomingEdgeTypes() {
+		return VALID_EDGE_TYPES;
+	}
 
-    /**
-     * Check that all of this Vertex's incoming and outgoing edges are of the proper types.
-     * This may not be necessary if edge constructor types are strictly specified
-     * and addOutgoing is protected
-     */
-    public boolean edgeTypesValid() {
-        ValidEdgeTypes validOutgoingTypes = getValidOutgoingEdgeTypes();
-        for (Edge e : getOutgoing())
-            if (!validOutgoingTypes.isValid(e))
-                return false;
-        ValidEdgeTypes validIncomingTypes = getValidIncomingEdgeTypes();
-        for (Edge e : getIncoming())
-            if (!validIncomingTypes.isValid(e))
-                return false;
-        return true;
-    }
+	/**
+	 * Check that all of this Vertex's incoming and outgoing edges are of the
+	 * proper types. This may not be necessary if edge constructor types are
+	 * strictly specified and addOutgoing is protected
+	 */
+	public boolean edgeTypesValid() {
+		ValidEdgeTypes validOutgoingTypes = getValidOutgoingEdgeTypes();
+		for (Edge e : getOutgoing())
+			if (!validOutgoingTypes.isValid(e))
+				return false;
+		ValidEdgeTypes validIncomingTypes = getValidIncomingEdgeTypes();
+		for (Edge e : getIncoming())
+			if (!validIncomingTypes.isValid(e))
+				return false;
+		return true;
+	}
 
-    public static final class ValidEdgeTypes {
-        private final Class<? extends Edge>[] classes;
-        // varargs constructor:
-        // a loophole in the law against arrays/collections of parameterized generics
-        public ValidEdgeTypes (Class<? extends Edge>... classes) {
-            this.classes = classes;
-        }
-        public boolean isValid (Edge e) {
-            for (Class<? extends Edge> c : classes) {
-                if (c.isInstance(e))
-                    return true;
-            }
-            return false;
-        }
-    }
+	public static final class ValidEdgeTypes {
+		private final Class<? extends Edge>[] classes;
 
-    /**
-     * Clean up before garbage collection. Usually this method does nothing, but temporary vertices
-     * must provide a method to remove their associated temporary edges from adjacent vertices'
-     * edge lists, usually by simply calling detach() on them.
-     * @return the number of edges affected by the cleanup.
-     */
-    public int removeTemporaryEdges(Graph graph) {
-        // do nothing, signal 0 other objects affected
-        return 0;
-    }
+		// varargs constructor:
+		// a loophole in the law against arrays/collections of parameterized
+		// generics
+		public ValidEdgeTypes(Class<? extends Edge>... classes) {
+			this.classes = classes;
+		}
+
+		public boolean isValid(Edge e) {
+			for (Class<? extends Edge> c : classes) {
+				if (c.isInstance(e))
+					return true;
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * Clean up before garbage collection. Usually this method does nothing, but
+	 * temporary vertices must provide a method to remove their associated
+	 * temporary edges from adjacent vertices' edge lists, usually by simply
+	 * calling detach() on them.
+	 * 
+	 * @return the number of edges affected by the cleanup.
+	 */
+	public int removeTemporaryEdges(Graph graph) {
+		// do nothing, signal 0 other objects affected
+		return 0;
+	}
 }

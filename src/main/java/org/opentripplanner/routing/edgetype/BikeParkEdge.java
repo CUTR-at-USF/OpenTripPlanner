@@ -25,10 +25,11 @@ import com.vividsolutions.jts.geom.LineString;
 /**
  * Parking a bike edge.
  * 
- * Note: There is an edge only in the "park" direction. We do not handle (yet) unparking a bike, as
- * you would need to know where you have parked your car, and is probably better handled by the
- * client by issuing two requests (first one from your origin to your bike, second one from your
- * bike to your destination).
+ * Note: There is an edge only in the "park" direction. We do not handle (yet)
+ * unparking a bike, as you would need to know where you have parked your car,
+ * and is probably better handled by the client by issuing two requests (first
+ * one from your origin to your bike, second one from your bike to your
+ * destination).
  * 
  * Cost is the time to park a bike, estimated.
  * 
@@ -40,91 +41,94 @@ import com.vividsolutions.jts.geom.LineString;
  */
 public class BikeParkEdge extends Edge {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public BikeParkEdge(BikeParkVertex bikeParkVertex) {
-        super(bikeParkVertex, bikeParkVertex);
-    }
+	public BikeParkEdge(BikeParkVertex bikeParkVertex) {
+		super(bikeParkVertex, bikeParkVertex);
+	}
 
-    @Override
-    public State traverse(State s0) {
-        RoutingRequest options = s0.getOptions();
-        if (options.arriveBy) {
-            return traverseUnpark(s0);
-        } else {
-            return traversePark(s0);
-        }
-    }
+	@Override
+	public State traverse(State s0) {
+		RoutingRequest options = s0.getOptions();
+		if (options.arriveBy) {
+			return traverseUnpark(s0);
+		} else {
+			return traversePark(s0);
+		}
+	}
 
-    protected State traverseUnpark(State s0) {
-        RoutingRequest options = s0.getOptions();
-        /*
-         * To unpark a bike, we need to be walking, and be allowed to bike.
-         */
-        if (s0.getNonTransitMode() != TraverseMode.WALK || !options.modes.getBicycle())
-            return null;
+	protected State traverseUnpark(State s0) {
+		RoutingRequest options = s0.getOptions();
+		/*
+		 * To unpark a bike, we need to be walking, and be allowed to bike.
+		 */
+		if (s0.getNonTransitMode() != TraverseMode.WALK
+				|| !options.modes.getBicycle())
+			return null;
 
-        StateEditor s0e = s0.edit(this);
-        s0e.incrementWeight(options.bikeParkCost);
-        s0e.incrementTimeInSeconds(options.bikeParkTime);
-        s0e.setBackMode(TraverseMode.LEG_SWITCH);
-        s0e.setBikeParked(false);
-        State s1 = s0e.makeState();
-        return s1;
-    }
+		StateEditor s0e = s0.edit(this);
+		s0e.incrementWeight(options.bikeParkCost);
+		s0e.incrementTimeInSeconds(options.bikeParkTime);
+		s0e.setBackMode(TraverseMode.LEG_SWITCH);
+		s0e.setBikeParked(false);
+		State s1 = s0e.makeState();
+		return s1;
+	}
 
-    protected State traversePark(State s0) {
-        RoutingRequest options = s0.getOptions();
-        /*
-         * To park a bike, we need to be riding one, (not rented) and be allowed to walk and to park
-         * it.
-         */
-        if (s0.getNonTransitMode() != TraverseMode.BICYCLE || !options.modes.getWalk()
-                || s0.isBikeRenting() || s0.isBikeParked())
-            return null;
-        BikeParkVertex bikeParkVertex = (BikeParkVertex) tov;
-        if (bikeParkVertex.getSpacesAvailable() == 0) {
-            return null;
-        }
+	protected State traversePark(State s0) {
+		RoutingRequest options = s0.getOptions();
+		/*
+		 * To park a bike, we need to be riding one, (not rented) and be allowed
+		 * to walk and to park it.
+		 */
+		if (s0.getNonTransitMode() != TraverseMode.BICYCLE
+				|| !options.modes.getWalk() || s0.isBikeRenting()
+				|| s0.isBikeParked())
+			return null;
+		BikeParkVertex bikeParkVertex = (BikeParkVertex) tov;
+		if (bikeParkVertex.getSpacesAvailable() == 0) {
+			return null;
+		}
 
-        StateEditor s0e = s0.edit(this);
-        s0e.incrementWeight(options.bikeParkCost);
-        s0e.incrementTimeInSeconds(options.bikeParkTime);
-        s0e.setBackMode(TraverseMode.LEG_SWITCH);
-        s0e.setBikeParked(true);
-        State s1 = s0e.makeState();
-        return s1;
-    }
+		StateEditor s0e = s0.edit(this);
+		s0e.incrementWeight(options.bikeParkCost);
+		s0e.incrementTimeInSeconds(options.bikeParkTime);
+		s0e.setBackMode(TraverseMode.LEG_SWITCH);
+		s0e.setBikeParked(true);
+		State s1 = s0e.makeState();
+		return s1;
+	}
 
-    @Override
-    public double getDistance() {
-        return 0;
-    }
+	@Override
+	public double getDistance() {
+		return 0;
+	}
 
-    @Override
-    public LineString getGeometry() {
-        return null;
-    }
+	@Override
+	public LineString getGeometry() {
+		return null;
+	}
 
-    @Override
-    public String getName() {
-        return getToVertex().getName();
-    }
+	@Override
+	public String getName() {
+		return getToVertex().getName();
+	}
 
-    @Override
-    public boolean hasBogusName() {
-        return false;
-    }
+	@Override
+	public boolean hasBogusName() {
+		return false;
+	}
 
-    public boolean equals(Object o) {
-        if (o instanceof BikeParkEdge) {
-            BikeParkEdge other = (BikeParkEdge) o;
-            return other.getFromVertex().equals(fromv) && other.getToVertex().equals(tov);
-        }
-        return false;
-    }
+	public boolean equals(Object o) {
+		if (o instanceof BikeParkEdge) {
+			BikeParkEdge other = (BikeParkEdge) o;
+			return other.getFromVertex().equals(fromv)
+					&& other.getToVertex().equals(tov);
+		}
+		return false;
+	}
 
-    public String toString() {
-        return "BikeParkEdge(" + fromv + " -> " + tov + ")";
-    }
+	public String toString() {
+		return "BikeParkEdge(" + fromv + " -> " + tov + ")";
+	}
 }

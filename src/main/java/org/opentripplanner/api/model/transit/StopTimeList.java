@@ -31,16 +31,16 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion;
 
 @XmlRootElement(name = "StopTimeList")
 public class StopTimeList {
-    @XmlElement(name = "stop")
-    public AgencyAndId stop;
+	@XmlElement(name = "stop")
+	public AgencyAndId stop;
 
-    @JsonSerialize(include = Inclusion.NON_NULL)
-    @XmlElementWrapper
-    @XmlElement(name = "route")
-    @XmlJavaTypeAdapter(RouteAdapter.class)
-    public HashSet<Route> routes;
+	@JsonSerialize(include = Inclusion.NON_NULL)
+	@XmlElementWrapper
+	@XmlElement(name = "route")
+	@XmlJavaTypeAdapter(RouteAdapter.class)
+	public HashSet<Route> routes;
 
-    @XmlElements(value = @XmlElement(name = "stopTime"))
-    public List<StopTime> stopTimes;
+	@XmlElements(value = @XmlElement(name = "stopTime"))
+	public List<StopTime> stopTimes;
 
 }

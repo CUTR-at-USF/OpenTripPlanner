@@ -26,12 +26,12 @@ import com.vividsolutions.jts.geom.Geometry;
 
 public class GeoJSONDeserializer extends JsonDeserializer<Geometry> {
 
-    @Override
-    public Geometry deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException,
-            JsonProcessingException {
-        GeometryJSON json = new GeometryJSON();
-        String text = jp.getText();
-        ByteArrayInputStream stream = new ByteArrayInputStream(text.getBytes());
-        return json.read(stream);
-    }
+	@Override
+	public Geometry deserialize(JsonParser jp, DeserializationContext ctxt)
+			throws IOException, JsonProcessingException {
+		GeometryJSON json = new GeometryJSON();
+		String text = jp.getText();
+		ByteArrayInputStream stream = new ByteArrayInputStream(text.getBytes());
+		return json.read(stream);
+	}
 }

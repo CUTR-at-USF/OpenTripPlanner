@@ -36,166 +36,189 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 /**
  * Part of concurrency control for stoptime updates.
  *
- * All updates should be performed on a snapshot before it is handed off to any searches.
- * A single snapshot should be used for an entire search, and should remain unchanged
- * for that duration to provide a consistent view not only of trips that have been boarded, but of
- * relative arrival and departure times of other trips that have not necessarily been boarded.
+ * All updates should be performed on a snapshot before it is handed off to any
+ * searches. A single snapshot should be used for an entire search, and should
+ * remain unchanged for that duration to provide a consistent view not only of
+ * trips that have been boarded, but of relative arrival and departure times of
+ * other trips that have not necessarily been boarded.
  *
  * At this point, only one writing thread at a time is supported.
  */
 public class TimetableResolver {
 
-	protected static class SortedTimetableComparator implements Comparator<Timetable> {
-        @Override
-        public int compare(Timetable t1, Timetable t2) {
-            return t1.serviceDate.compareTo(t2.serviceDate);
-        }
-    }
+	protected static class SortedTimetableComparator implements
+			Comparator<Timetable> {
+		@Override
+		public int compare(Timetable t1, Timetable t2) {
+			return t1.serviceDate.compareTo(t2.serviceDate);
+		}
+	}
 
-    private static final Logger LOG = LoggerFactory.getLogger(TimetableResolver.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(TimetableResolver.class);
 
-    // Use HashMap not Map so we can clone.
-    // if this turns out to be slow/spacious we can use an array with integer pattern indexes
-    // The SortedSet members are copy-on-write
-    // FIXME: this could be made into a flat hashtable with compound keys.
-    public HashMap<TripPattern, SortedSet<Timetable>> timetables =
-            new HashMap<TripPattern, SortedSet<Timetable>>();
+	// Use HashMap not Map so we can clone.
+	// if this turns out to be slow/spacious we can use an array with integer
+	// pattern indexes
+	// The SortedSet members are copy-on-write
+	// FIXME: this could be made into a flat hashtable with compound keys.
+	public HashMap<TripPattern, SortedSet<Timetable>> timetables = new HashMap<TripPattern, SortedSet<Timetable>>();
 
-    /** A set of all timetables which have been modified and are waiting to be indexed. */
-    private Set<Timetable> dirty = new HashSet<Timetable>();
+	/**
+	 * A set of all timetables which have been modified and are waiting to be
+	 * indexed.
+	 */
+	private Set<Timetable> dirty = new HashSet<Timetable>();
 
-    /**
-     * Returns an updated timetable for the specified pattern if one is available in this snapshot,
-     * or the originally scheduled timetable if there are no updates in this snapshot.
-     */
-    public Timetable resolve(TripPattern pattern, ServiceDate serviceDate) {
-        SortedSet<Timetable> sortedTimetables = timetables.get(pattern);
+	/**
+	 * Returns an updated timetable for the specified pattern if one is
+	 * available in this snapshot, or the originally scheduled timetable if
+	 * there are no updates in this snapshot.
+	 */
+	public Timetable resolve(TripPattern pattern, ServiceDate serviceDate) {
+		SortedSet<Timetable> sortedTimetables = timetables.get(pattern);
 
-        if(sortedTimetables != null && serviceDate != null) {
-            for(Timetable timetable : sortedTimetables) {
-                if (timetable != null && timetable.isValidFor(serviceDate)) {
-                    LOG.trace("returning modified timetable");
-                    return timetable;
-                }
-            }
-        }
+		if (sortedTimetables != null && serviceDate != null) {
+			for (Timetable timetable : sortedTimetables) {
+				if (timetable != null && timetable.isValidFor(serviceDate)) {
+					LOG.trace("returning modified timetable");
+					return timetable;
+				}
+			}
+		}
 
-        return pattern.scheduledTimetable;
-    }
+		return pattern.scheduledTimetable;
+	}
 
-    /**
-     * @return whether or not the update was actually applied
-     */
-    public boolean update(TripPattern pattern, TripUpdate tripUpdate, String agencyId,
-            TimeZone timeZone, ServiceDate serviceDate) {
-        // synchronization prevents commits/snapshots while update is in progress
-        synchronized(this) {
-            if (dirty == null)
-                throw new ConcurrentModificationException("This TimetableResolver is read-only.");
-            Timetable tt = resolve(pattern, serviceDate);
-            // we need to perform the copy of Timetable here rather than in Timetable.update()
-            // to avoid repeatedly copying in case several updates are applied to the same timetable
-            if ( ! dirty.contains(tt)) {
-                Timetable old = tt;
-                tt = new Timetable(tt, serviceDate);
-                SortedSet<Timetable> sortedTimetables = timetables.get(pattern);
-                if(sortedTimetables == null) {
-                    sortedTimetables = new TreeSet<Timetable>(new SortedTimetableComparator());
-                } else {
-                    SortedSet<Timetable> temp =
-                            new TreeSet<Timetable>(new SortedTimetableComparator());
-                    temp.addAll(sortedTimetables);
-                    sortedTimetables = temp;
-                }
-                if(old.serviceDate != null)
-                    sortedTimetables.remove(old);
-                sortedTimetables.add(tt);
-                timetables.put(pattern, sortedTimetables);
-                dirty.add(tt);
-            }
-            // Assume all trips in a pattern are from the same feed, which should be the case.
-            if (tripUpdate.getTrip().getScheduleRelationship() == ScheduleRelationship.UNSCHEDULED)
-            	return tt.updateFreqTrip(tripUpdate, timeZone, serviceDate);
-            else
-            	return tt.update(tripUpdate, timeZone, serviceDate);
-        }
-    }
+	/**
+	 * @return whether or not the update was actually applied
+	 */
+	public boolean update(TripPattern pattern, TripUpdate tripUpdate,
+			String agencyId, TimeZone timeZone, ServiceDate serviceDate) {
+		// synchronization prevents commits/snapshots while update is in
+		// progress
+		synchronized (this) {
+			if (dirty == null)
+				throw new ConcurrentModificationException(
+						"This TimetableResolver is read-only.");
+			Timetable tt = resolve(pattern, serviceDate);
+			// we need to perform the copy of Timetable here rather than in
+			// Timetable.update()
+			// to avoid repeatedly copying in case several updates are applied
+			// to the same timetable
+			if (!dirty.contains(tt)) {
+				Timetable old = tt;
+				tt = new Timetable(tt, serviceDate);
+				SortedSet<Timetable> sortedTimetables = timetables.get(pattern);
+				if (sortedTimetables == null) {
+					sortedTimetables = new TreeSet<Timetable>(
+							new SortedTimetableComparator());
+				} else {
+					SortedSet<Timetable> temp = new TreeSet<Timetable>(
+							new SortedTimetableComparator());
+					temp.addAll(sortedTimetables);
+					sortedTimetables = temp;
+				}
+				if (old.serviceDate != null)
+					sortedTimetables.remove(old);
+				sortedTimetables.add(tt);
+				timetables.put(pattern, sortedTimetables);
+				dirty.add(tt);
+			}
+			// Assume all trips in a pattern are from the same feed, which
+			// should be the case.
+			if (tripUpdate.getTrip().getScheduleRelationship() == ScheduleRelationship.UNSCHEDULED)
+				return tt.updateFreqTrip(tripUpdate, timeZone, serviceDate);
+			else
+				return tt.update(tripUpdate, timeZone, serviceDate);
+		}
+	}
 
-    /**
-     * This produces a small delay of typically around 50ms, which is almost entirely due to
-     * the indexing step. Cloning the map is much faster (2ms).
-     * It is perhaps better to index timetables as they are changed to avoid experiencing all
-     * this lag at once, but we want to avoid re-indexing when receiving multiple updates for
-     * the same timetable in rapid succession. This compromise is expressed by the
-     * maxSnapshotFrequency property of StoptimeUpdater. The indexing could be made much more
-     * efficient as well.
-     * @return an immutable copy of this TimetableResolver with all updates applied
-     */
-    public TimetableResolver commit() {
-        return commit(false);
-    }
+	/**
+	 * This produces a small delay of typically around 50ms, which is almost
+	 * entirely due to the indexing step. Cloning the map is much faster (2ms).
+	 * It is perhaps better to index timetables as they are changed to avoid
+	 * experiencing all this lag at once, but we want to avoid re-indexing when
+	 * receiving multiple updates for the same timetable in rapid succession.
+	 * This compromise is expressed by the maxSnapshotFrequency property of
+	 * StoptimeUpdater. The indexing could be made much more efficient as well.
+	 * 
+	 * @return an immutable copy of this TimetableResolver with all updates
+	 *         applied
+	 */
+	public TimetableResolver commit() {
+		return commit(false);
+	}
 
-    @SuppressWarnings("unchecked")
-    public TimetableResolver commit(boolean force) {
-        TimetableResolver ret = new TimetableResolver();
-        // synchronization prevents updates while commit/snapshot in progress
-        synchronized(this) {
-            if (dirty == null) {
-                throw new ConcurrentModificationException("This TimetableResolver is read-only.");
-            }
-            if (!force && !this.isDirty()) return null;
-            for (Timetable tt : dirty) {
-                tt.finish(); // summarize, index, etc. the new timetables
-            }
-            ret.timetables =
-                    (HashMap<TripPattern, SortedSet<Timetable>>) this.timetables.clone();
-            this.dirty.clear();
-        }
-        ret.dirty = null; // mark the snapshot as henceforth immutable
-        return ret;
-    }
+	@SuppressWarnings("unchecked")
+	public TimetableResolver commit(boolean force) {
+		TimetableResolver ret = new TimetableResolver();
+		// synchronization prevents updates while commit/snapshot in progress
+		synchronized (this) {
+			if (dirty == null) {
+				throw new ConcurrentModificationException(
+						"This TimetableResolver is read-only.");
+			}
+			if (!force && !this.isDirty())
+				return null;
+			for (Timetable tt : dirty) {
+				tt.finish(); // summarize, index, etc. the new timetables
+			}
+			ret.timetables = (HashMap<TripPattern, SortedSet<Timetable>>) this.timetables
+					.clone();
+			this.dirty.clear();
+		}
+		ret.dirty = null; // mark the snapshot as henceforth immutable
+		return ret;
+	}
 
-    /**
-     * Removes all Timetables which are valid for a ServiceDate on-or-before the one supplied.
-     */
-    public boolean purgeExpiredData(ServiceDate serviceDate) {
-        synchronized(this) {
-            if (dirty == null) {
-                throw new ConcurrentModificationException("This TimetableResolver is read-only.");
-            }
+	/**
+	 * Removes all Timetables which are valid for a ServiceDate on-or-before the
+	 * one supplied.
+	 */
+	public boolean purgeExpiredData(ServiceDate serviceDate) {
+		synchronized (this) {
+			if (dirty == null) {
+				throw new ConcurrentModificationException(
+						"This TimetableResolver is read-only.");
+			}
 
-            boolean modified = false;
-            for (Iterator<TripPattern> it = timetables.keySet().iterator(); it.hasNext();){
-                TripPattern pattern = it.next();
-                SortedSet<Timetable> sortedTimetables = timetables.get(pattern);
-                SortedSet<Timetable> toKeepTimetables =
-                        new TreeSet<Timetable>(new SortedTimetableComparator());
-                for(Timetable timetable : sortedTimetables) {
-                    if(serviceDate.compareTo(timetable.serviceDate) < 0) {
-                        toKeepTimetables.add(timetable);
-                    } else {
-                        modified = true;
-                    }
-                }
+			boolean modified = false;
+			for (Iterator<TripPattern> it = timetables.keySet().iterator(); it
+					.hasNext();) {
+				TripPattern pattern = it.next();
+				SortedSet<Timetable> sortedTimetables = timetables.get(pattern);
+				SortedSet<Timetable> toKeepTimetables = new TreeSet<Timetable>(
+						new SortedTimetableComparator());
+				for (Timetable timetable : sortedTimetables) {
+					if (serviceDate.compareTo(timetable.serviceDate) < 0) {
+						toKeepTimetables.add(timetable);
+					} else {
+						modified = true;
+					}
+				}
 
-                if(toKeepTimetables.isEmpty()) {
-                    it.remove();
-                } else {
-                    timetables.put(pattern, toKeepTimetables);
-                }
-            }
+				if (toKeepTimetables.isEmpty()) {
+					it.remove();
+				} else {
+					timetables.put(pattern, toKeepTimetables);
+				}
+			}
 
-            return modified;
-        }
-    }
+			return modified;
+		}
+	}
 
-    public boolean isDirty() {
-        if (dirty == null) return false;
-        return dirty.size() > 0;
-    }
+	public boolean isDirty() {
+		if (dirty == null)
+			return false;
+		return dirty.size() > 0;
+	}
 
-    public String toString() {
-        String d = dirty == null ? "committed" : String.format("%d dirty", dirty.size());
-        return String.format("Timetable snapshot: %d timetables (%s)", timetables.size(), d);
-    }
+	public String toString() {
+		String d = dirty == null ? "committed" : String.format("%d dirty",
+				dirty.size());
+		return String.format("Timetable snapshot: %d timetables (%s)",
+				timetables.size(), d);
+	}
 }

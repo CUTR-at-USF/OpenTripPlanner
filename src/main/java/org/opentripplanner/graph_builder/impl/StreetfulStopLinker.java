@@ -56,146 +56,164 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 
 /**
- * {@link GraphBuilder} plugin that links up the stops of a transit network among themselves.
+ * {@link GraphBuilder} plugin that links up the stops of a transit network
+ * among themselves.
  */
 public class StreetfulStopLinker implements GraphBuilder {
-    private static Logger LOG = LoggerFactory.getLogger(StreetfulStopLinker.class);
+	private static Logger LOG = LoggerFactory
+			.getLogger(StreetfulStopLinker.class);
 
-    int maxDuration = 60 * 10;
+	int maxDuration = 60 * 10;
 
-    DistanceLibrary distanceLibrary = SphericalDistanceLibrary.getInstance();
+	DistanceLibrary distanceLibrary = SphericalDistanceLibrary.getInstance();
 
-    public List<String> provides() {
-        return Arrays.asList("linking");
-    }
+	public List<String> provides() {
+		return Arrays.asList("linking");
+	}
 
-    public List<String> getPrerequisites() {
-        return Arrays.asList("street to transit");
-    }
+	public List<String> getPrerequisites() {
+		return Arrays.asList("street to transit");
+	}
 
-    @Override
-    public void buildGraph(Graph graph, HashMap<Class<?>, Object> extra) {
-        final Parser parser[] = new Parser[] {new Parser()};
-        GeometryFactory geometryFactory = GeometryUtils.getGeometryFactory();
-        EarliestArrivalSPTService earliestArrivalSPTService = new EarliestArrivalSPTService();
-        earliestArrivalSPTService.maxDuration = (maxDuration);
+	@Override
+	public void buildGraph(Graph graph, HashMap<Class<?>, Object> extra) {
+		final Parser parser[] = new Parser[] { new Parser() };
+		GeometryFactory geometryFactory = GeometryUtils.getGeometryFactory();
+		EarliestArrivalSPTService earliestArrivalSPTService = new EarliestArrivalSPTService();
+		earliestArrivalSPTService.maxDuration = (maxDuration);
 
-        for (TransitStop ts : Iterables.filter(graph.getVertices(), TransitStop.class)) {
-            // Only link street linkable stops
-            if (!ts.isStreetLinkable())
-                continue;
-            LOG.trace("linking stop '{}' {}", ts.getStop(), ts);
+		for (TransitStop ts : Iterables.filter(graph.getVertices(),
+				TransitStop.class)) {
+			// Only link street linkable stops
+			if (!ts.isStreetLinkable())
+				continue;
+			LOG.trace("linking stop '{}' {}", ts.getStop(), ts);
 
-            // Determine the set of pathway/transfer destinations
-            Set<TransitStop> pathwayDestinations = new HashSet<TransitStop>();
-            for (Edge e : ts.getOutgoing()) {
-                if (e instanceof PathwayEdge || e instanceof SimpleTransfer) {
-                    if (e.getToVertex() instanceof TransitStop) {
-                        TransitStop to = (TransitStop) e.getToVertex();
-                        pathwayDestinations.add(to);
-                    }
-                }
-            }
+			// Determine the set of pathway/transfer destinations
+			Set<TransitStop> pathwayDestinations = new HashSet<TransitStop>();
+			for (Edge e : ts.getOutgoing()) {
+				if (e instanceof PathwayEdge || e instanceof SimpleTransfer) {
+					if (e.getToVertex() instanceof TransitStop) {
+						TransitStop to = (TransitStop) e.getToVertex();
+						pathwayDestinations.add(to);
+					}
+				}
+			}
 
-            int n = 0;
-            RoutingRequest routingRequest = new RoutingRequest(TraverseMode.WALK);
-            routingRequest.clampInitialWait = (0L);
-            routingRequest.setRoutingContext(graph, ts, null);
-            routingRequest.rctx.pathParsers = parser;
-            ShortestPathTree spt = earliestArrivalSPTService.getShortestPathTree(routingRequest);
+			int n = 0;
+			RoutingRequest routingRequest = new RoutingRequest(
+					TraverseMode.WALK);
+			routingRequest.clampInitialWait = (0L);
+			routingRequest.setRoutingContext(graph, ts, null);
+			routingRequest.rctx.pathParsers = parser;
+			ShortestPathTree spt = earliestArrivalSPTService
+					.getShortestPathTree(routingRequest);
 
-            if (spt != null) {
-                for (State state : spt.getAllStates()) {
-                    Vertex vertex = state.getVertex();
-                    if (ts == vertex) continue;
+			if (spt != null) {
+				for (State state : spt.getAllStates()) {
+					Vertex vertex = state.getVertex();
+					if (ts == vertex)
+						continue;
 
-                    if (vertex instanceof TransitStop) {
-                        TransitStop other = (TransitStop) vertex;
-                        if (!other.isStreetLinkable())
-                            continue;
-                        if (pathwayDestinations.contains(other)) {
-                            LOG.trace("Skipping '{}', {}, already connected.", other.getStop(),
-                                    other);
-                            continue;
-                        }
-                        double distance = 0.0;
-                        GraphPath graphPath = new GraphPath(state, false);
-                        CoordinateArrayListSequence coordinates = new CoordinateArrayListSequence();
+					if (vertex instanceof TransitStop) {
+						TransitStop other = (TransitStop) vertex;
+						if (!other.isStreetLinkable())
+							continue;
+						if (pathwayDestinations.contains(other)) {
+							LOG.trace("Skipping '{}', {}, already connected.",
+									other.getStop(), other);
+							continue;
+						}
+						double distance = 0.0;
+						GraphPath graphPath = new GraphPath(state, false);
+						CoordinateArrayListSequence coordinates = new CoordinateArrayListSequence();
 
-                        for (Edge edge : graphPath.edges) {
-                            if (edge instanceof StreetEdge) {
-                                LineString geometry = edge.getGeometry();
+						for (Edge edge : graphPath.edges) {
+							if (edge instanceof StreetEdge) {
+								LineString geometry = edge.getGeometry();
 
-                                if (geometry != null) {
-                                    if (coordinates.size() == 0) {
-                                        coordinates.extend(geometry.getCoordinates());
-                                    } else {
-                                        coordinates.extend(geometry.getCoordinates(), 1);
-                                    }
-                                }
+								if (geometry != null) {
+									if (coordinates.size() == 0) {
+										coordinates.extend(geometry
+												.getCoordinates());
+									} else {
+										coordinates.extend(
+												geometry.getCoordinates(), 1);
+									}
+								}
 
-                                distance += edge.getDistance();
-                            }
-                        }
+								distance += edge.getDistance();
+							}
+						}
 
-                        if (coordinates.size() < 2) {   // Otherwise the walk step generator breaks.
-                            ArrayList<Coordinate> coordinateList = new ArrayList<Coordinate>(2);
-                            coordinateList.add(graphPath.states.get(1).getVertex().getCoordinate());
-                            State lastState = graphPath.states.getLast().getBackState();
-                            coordinateList.add(lastState.getVertex().getCoordinate());
-                            coordinates = new CoordinateArrayListSequence(coordinateList);
-                        }
+						if (coordinates.size() < 2) { // Otherwise the walk step
+														// generator breaks.
+							ArrayList<Coordinate> coordinateList = new ArrayList<Coordinate>(
+									2);
+							coordinateList.add(graphPath.states.get(1)
+									.getVertex().getCoordinate());
+							State lastState = graphPath.states.getLast()
+									.getBackState();
+							coordinateList.add(lastState.getVertex()
+									.getCoordinate());
+							coordinates = new CoordinateArrayListSequence(
+									coordinateList);
+						}
 
-                        LineString geometry = geometryFactory.createLineString(new
-                                PackedCoordinateSequence.Double(coordinates.toCoordinateArray()));
-                        LOG.trace("  to stop: '{}' {} ({}m) [{}]", other.getStop(), other, distance, geometry);
-                        new SimpleTransfer(ts, other, distance, geometry);
-                        n++;
-                    }
-                }
-            }
+						LineString geometry = geometryFactory
+								.createLineString(new PackedCoordinateSequence.Double(
+										coordinates.toCoordinateArray()));
+						LOG.trace("  to stop: '{}' {} ({}m) [{}]",
+								other.getStop(), other, distance, geometry);
+						new SimpleTransfer(ts, other, distance, geometry);
+						n++;
+					}
+				}
+			}
 
-            LOG.trace("linked to {} others.", n);
-            if (n == 0) {
-                LOG.warn(graph.addBuilderAnnotation(new StopNotLinkedForTransfers(ts)));
-            }
-        }
-    }
+			LOG.trace("linked to {} others.", n);
+			if (n == 0) {
+				LOG.warn(graph
+						.addBuilderAnnotation(new StopNotLinkedForTransfers(ts)));
+			}
+		}
+	}
 
-    @Override
-    public void checkInputs() {
-        // No inputs
-    }
+	@Override
+	public void checkInputs() {
+		// No inputs
+	}
 
-    private static class Parser extends PathParser {
-        private static final int OTHER  = 0;
-        private static final int STREET = 1;
-        private static final int LINK   = 2;
+	private static class Parser extends PathParser {
+		private static final int OTHER = 0;
+		private static final int STREET = 1;
+		private static final int LINK = 2;
 
-        private final DFA DFA;
+		private final DFA DFA;
 
-        Parser() {
-            Nonterminal streets   = star(STREET);
+		Parser() {
+			Nonterminal streets = star(STREET);
 
-            Nonterminal itinerary = seq(LINK, streets, LINK);
+			Nonterminal itinerary = seq(LINK, streets, LINK);
 
-            DFA = itinerary.toDFA().minimize();
-        }
+			DFA = itinerary.toDFA().minimize();
+		}
 
-        @Override
-        public int terminalFor(State state) {
-            Edge edge = state.getBackEdge();
+		@Override
+		public int terminalFor(State state) {
+			Edge edge = state.getBackEdge();
 
-            if (edge instanceof StreetEdge)   return STREET;
-            if (edge instanceof StreetTransitLink) return LINK;
+			if (edge instanceof StreetEdge)
+				return STREET;
+			if (edge instanceof StreetTransitLink)
+				return LINK;
 
-            return OTHER;
-        }
-        
-        @Override
-		protected
-        DFA getDFA() {
-        	return this.DFA;
-        }
-    }
+			return OTHER;
+		}
+
+		@Override
+		protected DFA getDFA() {
+			return this.DFA;
+		}
+	}
 }

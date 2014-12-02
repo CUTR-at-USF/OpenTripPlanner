@@ -30,49 +30,49 @@ import junit.framework.TestCase;
  * Test ignoring realtime updates.
  */
 public class TestIgnoreRealtimeUpdates extends TestCase {
-    
-    public void testIgnoreRealtimeUpdates() throws Exception {
-        // Create routing request
-        RoutingRequest options = new RoutingRequest();
-        
-        // Check that realtime updates are not ignored
-        assertFalse(options.ignoreRealtimeUpdates);
-        
-        // Create (very simple) new graph
-        Graph graph = new Graph();
-        
-        Stop stop1 = new Stop();
-        stop1.setId(new AgencyAndId("agency", "stop1"));
-        Stop stop2 = new Stop();
-        stop2.setId(new AgencyAndId("agency", "stop2"));
-        
-        Vertex from = new TransitStop(graph, stop1);
-        Vertex to = new TransitStop(graph, stop2);
-        
-        // Create dummy TimetableResolver
-        TimetableResolver resolver = new TimetableResolver();
-        
-        // Mock TimetableSnapshotSource to return dummy TimetableResolver
-        TimetableSnapshotSource source = mock(TimetableSnapshotSource.class);
-        when(source.getTimetableSnapshot()).thenReturn(resolver);
-        graph.timetableSnapshotSource = (source);
-        
-        // Create routing context
-        RoutingContext rctx = new RoutingContext(options, graph, from, to);
-        
-        // Check that the resolver is set as timetable snapshot
-        assertNotNull(rctx.timetableSnapshot);
-        
-        // Now set routing request to ignore realtime updates
-        options.ignoreRealtimeUpdates = (true);
-        
-        // Check that realtime updates are ignored
-        assertTrue(options.ignoreRealtimeUpdates);
-        
-        // Create new routing context
-        rctx = new RoutingContext(options, graph, from, to);
-        
-        // Check that the timetable snapshot is null in the new routing context
-        assertNull(rctx.timetableSnapshot);
-    }
+
+	public void testIgnoreRealtimeUpdates() throws Exception {
+		// Create routing request
+		RoutingRequest options = new RoutingRequest();
+
+		// Check that realtime updates are not ignored
+		assertFalse(options.ignoreRealtimeUpdates);
+
+		// Create (very simple) new graph
+		Graph graph = new Graph();
+
+		Stop stop1 = new Stop();
+		stop1.setId(new AgencyAndId("agency", "stop1"));
+		Stop stop2 = new Stop();
+		stop2.setId(new AgencyAndId("agency", "stop2"));
+
+		Vertex from = new TransitStop(graph, stop1);
+		Vertex to = new TransitStop(graph, stop2);
+
+		// Create dummy TimetableResolver
+		TimetableResolver resolver = new TimetableResolver();
+
+		// Mock TimetableSnapshotSource to return dummy TimetableResolver
+		TimetableSnapshotSource source = mock(TimetableSnapshotSource.class);
+		when(source.getTimetableSnapshot()).thenReturn(resolver);
+		graph.timetableSnapshotSource = (source);
+
+		// Create routing context
+		RoutingContext rctx = new RoutingContext(options, graph, from, to);
+
+		// Check that the resolver is set as timetable snapshot
+		assertNotNull(rctx.timetableSnapshot);
+
+		// Now set routing request to ignore realtime updates
+		options.ignoreRealtimeUpdates = (true);
+
+		// Check that realtime updates are ignored
+		assertTrue(options.ignoreRealtimeUpdates);
+
+		// Create new routing context
+		rctx = new RoutingContext(options, graph, from, to);
+
+		// Check that the timetable snapshot is null in the new routing context
+		assertNull(rctx.timetableSnapshot);
+	}
 }

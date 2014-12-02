@@ -49,256 +49,259 @@ import com.vividsolutions.jts.linearref.LocationIndexedLine;
 
 public class GraphStats {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GraphStats.class);
+	private static final Logger LOG = LoggerFactory.getLogger(GraphStats.class);
 
-    @Parameter(names = { "-v", "--verbose" }, description = "Verbose output")
-    private boolean verbose = false;
-   
-    @Parameter(names = { "-d", "--debug"}, description = "Debug mode")
-    private boolean debug = false;
+	@Parameter(names = { "-v", "--verbose" }, description = "Verbose output")
+	private boolean verbose = false;
 
-    @Parameter(names = { "-h", "--help"}, description = "Print this help message and exit", help = true)
-    private boolean help;
+	@Parameter(names = { "-d", "--debug" }, description = "Debug mode")
+	private boolean debug = false;
 
-    @Parameter(names = { "-g", "--graph"}, description = "path to the graph file", required = true)
-    private String graphPath;
+	@Parameter(names = { "-h", "--help" }, description = "Print this help message and exit", help = true)
+	private boolean help;
 
-    @Parameter(names = { "-o", "--out"}, description = "output file")
-    private String outPath;
+	@Parameter(names = { "-g", "--graph" }, description = "path to the graph file", required = true)
+	private String graphPath;
 
-    private CommandEndpoints commandEndpoints = new CommandEndpoints(); 
-    
-    private CommandSpeedStats commandSpeedStats = new CommandSpeedStats();  
+	@Parameter(names = { "-o", "--out" }, description = "output file")
+	private String outPath;
 
-    private CommandPatternStats commandPatternStats = new CommandPatternStats();  
+	private CommandEndpoints commandEndpoints = new CommandEndpoints();
 
-    private JCommander jc;
-    
-    private Graph graph;
-    
-    private CsvWriter writer;
-    
-    public static void main(String[] args) {
-        GraphStats graphStats = new GraphStats(args);
-        graphStats.run();
-    }
-    
-    private GraphStats(String[] args) {
-        jc = new JCommander(this);
-        jc.addCommand(commandEndpoints);
-        jc.addCommand(commandSpeedStats);
-        jc.addCommand(commandPatternStats);
-        
-        try {
-            jc.parse(args);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            jc.usage();
-            System.exit(1);
-        }
-        
-        if (help || jc.getParsedCommand() == null) {
-            jc.usage();
-            System.exit(0);
-        }
-    }
-   
-    private void run() {
+	private CommandSpeedStats commandSpeedStats = new CommandSpeedStats();
 
-        /* open input graph (same for all commands) */
-        File graphFile = new File(graphPath);
-        try {
-            graph = Graph.load(graphFile, Graph.LoadLevel.FULL);
-        } catch (Exception e) {
-            LOG.error("Exception while loading graph from " + graphFile);
-            return;
-        }
+	private CommandPatternStats commandPatternStats = new CommandPatternStats();
 
-        /* open output stream (same for all commands) */
-        if (outPath != null) {
-            try {
-                writer = new CsvWriter(outPath, ',', Charset.forName("UTF8"));
-            } catch (Exception e) {
-                LOG.error("Exception while opening output file " + outPath);
-                return;
-            }
-        } else {
-            writer = new CsvWriter(System.out, ',', Charset.forName("UTF8"));
-        }
-        LOG.info("done loading graph.");
-        
-        String command = jc.getParsedCommand();
-        if (command.equals("endpoints")) {
-            commandEndpoints.run();
-        } else if (command.equals("speedstats")) {
-            commandSpeedStats.run();
-        } else if (command.equals("patternstats")) {
-            commandPatternStats.run();
-        }
-        writer.close();
+	private JCommander jc;
 
-    }
+	private Graph graph;
 
-    @Parameters(commandNames = "endpoints", commandDescription = "Generate random endpoints for performance testing") 
-    class CommandEndpoints {
+	private CsvWriter writer;
 
-        @Parameter(names = { "-r", "--radius"}, description = "perturbation radius in meters")
-        private double radius = 100;
+	public static void main(String[] args) {
+		GraphStats graphStats = new GraphStats(args);
+		graphStats.run();
+	}
 
-        @Parameter(names = { "-n", "--number"}, description = "number of endpoints to generate")
-        private int n = 20;
+	private GraphStats(String[] args) {
+		jc = new JCommander(this);
+		jc.addCommand(commandEndpoints);
+		jc.addCommand(commandSpeedStats);
+		jc.addCommand(commandPatternStats);
 
-        @Parameter(names = { "-s", "--stops"}, description = "choose endpoints near stops not street vertices")
-        private boolean useStops = false;
+		try {
+			jc.parse(args);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			jc.usage();
+			System.exit(1);
+		}
 
-        @Parameter(names = { "-rs", "--seed"}, description = "random seed, allows reproducible results")
-        private Long seed = null;
+		if (help || jc.getParsedCommand() == null) {
+			jc.usage();
+			System.exit(0);
+		}
+	}
 
-        // go along road then random
-        public void run() {
-            LOG.info(String.format("Producing %d random endpoints within radius %2.2fm around %s.",
-                    n, radius, useStops ? "stops" : "streets"));
-            List<Vertex> vertices = new ArrayList<Vertex>();
-            GeodeticCalculator gc = new GeodeticCalculator();
-            Class<?> klasse = useStops ? TransitStop.class : StreetVertex.class;
-            for (Vertex v : graph.getVertices())
-                if (klasse.isInstance(v))
-                    vertices.add(v);
-            Random random = new Random();
-            if (seed != null)
-                random.setSeed(seed);
-            Collections.shuffle(vertices, random);
-            vertices = vertices.subList(0, n);
-            try {
-                writer.writeRecord( new String[] {"n", "name", "lon", "lat"} );
-                int i = 0;
-                for (Vertex v : vertices) {
-                    Coordinate c;
-                    if (v instanceof StreetVertex) {
-                        LineString ls = ((StreetVertex)v).getOutgoing().iterator().next().getGeometry();
-                        int numPoints = ls.getNumPoints();
-                        LocationIndexedLine lil = new LocationIndexedLine(ls);
-                        int seg = random.nextInt(numPoints);
-                        double frac = random.nextDouble();
-                        LinearLocation ll = new LinearLocation(seg, frac);
-                        c = lil.extractPoint(ll);
-                    } else {
-                        c = v.getCoordinate();
-                    }
-                    // perturb
-                    double distance = random.nextDouble() * radius;
-                    double azimuth = random.nextDouble() * 360 - 180;
-                    // double x = c.x + r * Math.cos(theta);
-                    // double y = c.y + r * Math.sin(theta);
-                    gc.setStartingGeographicPoint(c.x, c.y);
-                    gc.setDirection(azimuth, distance);
-                    Point2D dest = gc.getDestinationGeographicPoint();
-                    String name = v.getName();
-                    String[] entries = new String[] {
-                            Integer.toString(i), name, 
-                            Double.toString(dest.getX()), Double.toString(dest.getY())
-                    };
-                    writer.writeRecord(entries);
-                    i += 1;
-                }
-            } catch (IOException ioe) {
-                LOG.error("Excpetion while writing CSV: {}", ioe.getMessage());
-            }
-            LOG.info("done."); 
-        }
-    }
+	private void run() {
 
-    @Parameters(commandNames = "speedstats", commandDescription = "speed stats") 
-    class CommandSpeedStats {
+		/* open input graph (same for all commands) */
+		File graphFile = new File(graphPath);
+		try {
+			graph = Graph.load(graphFile, Graph.LoadLevel.FULL);
+		} catch (Exception e) {
+			LOG.error("Exception while loading graph from " + graphFile);
+			return;
+		}
 
-        public void run() {
-            LOG.info("dumping hop info...");
-            try {
-                writer.writeRecord( new String[] {"route", "distance", "time", "speed"} );
-                for (Vertex v : graph.getVertices()) {
-                    for (PatternHop ph : Iterables.filter(v.getOutgoing(), PatternHop.class)) {
-                        // Vertex fromv = ph.getFromVertex();
-                        // Vertex tov = ph.getToVertex();
-                        double distance = ph.getDistance();
-                        if (distance < 3)
-                            continue;
-                        TripPattern ttp = ph.getPattern();
-                        List<Trip> trips = ttp.getTrips();
-                        int hop = ph.stopIndex;
-                        String route = ttp.route.getId().toString();
-                        for (int trip = 0; trip < trips.size(); trip++){
-                            int time = ttp.scheduledTimetable.getTripTimes(trip).getRunningTime(hop);
-                            double speed = distance / time;
-                            if (Double.isInfinite(speed) || Double.isNaN(speed))
-                                continue;
-                            String[] entries = new String[] { 
-                                    route, Double.toString(distance), Integer.toString(time), 
-                                    Double.toString(speed)
-                            };
-                            writer.writeRecord(entries);
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                LOG.error("Exception writing CSV: {}", e.getMessage());
-                return;
-            }
-            LOG.info("done.");
-        }
+		/* open output stream (same for all commands) */
+		if (outPath != null) {
+			try {
+				writer = new CsvWriter(outPath, ',', Charset.forName("UTF8"));
+			} catch (Exception e) {
+				LOG.error("Exception while opening output file " + outPath);
+				return;
+			}
+		} else {
+			writer = new CsvWriter(System.out, ',', Charset.forName("UTF8"));
+		}
+		LOG.info("done loading graph.");
 
-    }
+		String command = jc.getParsedCommand();
+		if (command.equals("endpoints")) {
+			commandEndpoints.run();
+		} else if (command.equals("speedstats")) {
+			commandSpeedStats.run();
+		} else if (command.equals("patternstats")) {
+			commandPatternStats.run();
+		}
+		writer.close();
 
-    @Parameters(commandNames = "patternstats", commandDescription = "trip pattern stats") 
-    class CommandPatternStats {
-        
-        public void run() {
-            LOG.info("counting number of trips per pattern...");
-            try {
-                writer.writeRecord( new String[] {
-                        "nTripsInPattern", "frequency", 
-                        "cumulativePatterns", "empiricalDistPatterns",
-                        "cumulativeTrips", "empiricalDistTrips" } );
-                Set<TripPattern> patterns = new HashSet<TripPattern>();
-                for (Vertex v : graph.getVertices()) {
-                    for (PatternHop ph : Iterables.filter(v.getOutgoing(), PatternHop.class)) {
-                        TripPattern ttp = ph.getPattern();
-                        patterns.add(ttp);
-                    }
-                }
-                Multiset<Integer> counts = TreeMultiset.create();
-                int nPatterns = patterns.size();
-                LOG.info("total number of patterns is: {}", nPatterns);
-                int nTrips = 0;
-                for (TripPattern ttp : patterns) {
-                    List<Trip> trips = ttp.getTrips();
-                    counts.add(trips.size());
-                    nTrips += trips.size();
-                }
-                LOG.info("total number of trips is: {}", nTrips);
-                LOG.info("average number of trips per pattern is: {}", nTrips/nPatterns);
-                int cPatterns = 0;
-                int cTrips = 0;
-                for (Multiset.Entry<Integer> count : counts.entrySet()) {
-                    cPatterns += count.getCount();
-                    cTrips += count.getCount() * count.getElement();
-                    writer.writeRecord( new String[] {
-                        count.getElement().toString(),
-                        Integer.toString(count.getCount()),
-                        Integer.toString(cPatterns),
-                        Double.toString(cPatterns / (double) nPatterns),
-                        Integer.toString(cTrips),
-                        Double.toString(cTrips / (double) nTrips)
-                    } );
-                }
-            } catch (IOException e) {
-                LOG.error("Exception writing CSV: {}", e.getMessage());
-                return;
-            }
-            LOG.info("done.");
-        }
+	}
 
-    }
+	@Parameters(commandNames = "endpoints", commandDescription = "Generate random endpoints for performance testing")
+	class CommandEndpoints {
+
+		@Parameter(names = { "-r", "--radius" }, description = "perturbation radius in meters")
+		private double radius = 100;
+
+		@Parameter(names = { "-n", "--number" }, description = "number of endpoints to generate")
+		private int n = 20;
+
+		@Parameter(names = { "-s", "--stops" }, description = "choose endpoints near stops not street vertices")
+		private boolean useStops = false;
+
+		@Parameter(names = { "-rs", "--seed" }, description = "random seed, allows reproducible results")
+		private Long seed = null;
+
+		// go along road then random
+		public void run() {
+			LOG.info(String
+					.format("Producing %d random endpoints within radius %2.2fm around %s.",
+							n, radius, useStops ? "stops" : "streets"));
+			List<Vertex> vertices = new ArrayList<Vertex>();
+			GeodeticCalculator gc = new GeodeticCalculator();
+			Class<?> klasse = useStops ? TransitStop.class : StreetVertex.class;
+			for (Vertex v : graph.getVertices())
+				if (klasse.isInstance(v))
+					vertices.add(v);
+			Random random = new Random();
+			if (seed != null)
+				random.setSeed(seed);
+			Collections.shuffle(vertices, random);
+			vertices = vertices.subList(0, n);
+			try {
+				writer.writeRecord(new String[] { "n", "name", "lon", "lat" });
+				int i = 0;
+				for (Vertex v : vertices) {
+					Coordinate c;
+					if (v instanceof StreetVertex) {
+						LineString ls = ((StreetVertex) v).getOutgoing()
+								.iterator().next().getGeometry();
+						int numPoints = ls.getNumPoints();
+						LocationIndexedLine lil = new LocationIndexedLine(ls);
+						int seg = random.nextInt(numPoints);
+						double frac = random.nextDouble();
+						LinearLocation ll = new LinearLocation(seg, frac);
+						c = lil.extractPoint(ll);
+					} else {
+						c = v.getCoordinate();
+					}
+					// perturb
+					double distance = random.nextDouble() * radius;
+					double azimuth = random.nextDouble() * 360 - 180;
+					// double x = c.x + r * Math.cos(theta);
+					// double y = c.y + r * Math.sin(theta);
+					gc.setStartingGeographicPoint(c.x, c.y);
+					gc.setDirection(azimuth, distance);
+					Point2D dest = gc.getDestinationGeographicPoint();
+					String name = v.getName();
+					String[] entries = new String[] { Integer.toString(i),
+							name, Double.toString(dest.getX()),
+							Double.toString(dest.getY()) };
+					writer.writeRecord(entries);
+					i += 1;
+				}
+			} catch (IOException ioe) {
+				LOG.error("Excpetion while writing CSV: {}", ioe.getMessage());
+			}
+			LOG.info("done.");
+		}
+	}
+
+	@Parameters(commandNames = "speedstats", commandDescription = "speed stats")
+	class CommandSpeedStats {
+
+		public void run() {
+			LOG.info("dumping hop info...");
+			try {
+				writer.writeRecord(new String[] { "route", "distance", "time",
+						"speed" });
+				for (Vertex v : graph.getVertices()) {
+					for (PatternHop ph : Iterables.filter(v.getOutgoing(),
+							PatternHop.class)) {
+						// Vertex fromv = ph.getFromVertex();
+						// Vertex tov = ph.getToVertex();
+						double distance = ph.getDistance();
+						if (distance < 3)
+							continue;
+						TripPattern ttp = ph.getPattern();
+						List<Trip> trips = ttp.getTrips();
+						int hop = ph.stopIndex;
+						String route = ttp.route.getId().toString();
+						for (int trip = 0; trip < trips.size(); trip++) {
+							int time = ttp.scheduledTimetable
+									.getTripTimes(trip).getRunningTime(hop);
+							double speed = distance / time;
+							if (Double.isInfinite(speed) || Double.isNaN(speed))
+								continue;
+							String[] entries = new String[] { route,
+									Double.toString(distance),
+									Integer.toString(time),
+									Double.toString(speed) };
+							writer.writeRecord(entries);
+						}
+					}
+				}
+			} catch (IOException e) {
+				LOG.error("Exception writing CSV: {}", e.getMessage());
+				return;
+			}
+			LOG.info("done.");
+		}
+
+	}
+
+	@Parameters(commandNames = "patternstats", commandDescription = "trip pattern stats")
+	class CommandPatternStats {
+
+		public void run() {
+			LOG.info("counting number of trips per pattern...");
+			try {
+				writer.writeRecord(new String[] { "nTripsInPattern",
+						"frequency", "cumulativePatterns",
+						"empiricalDistPatterns", "cumulativeTrips",
+						"empiricalDistTrips" });
+				Set<TripPattern> patterns = new HashSet<TripPattern>();
+				for (Vertex v : graph.getVertices()) {
+					for (PatternHop ph : Iterables.filter(v.getOutgoing(),
+							PatternHop.class)) {
+						TripPattern ttp = ph.getPattern();
+						patterns.add(ttp);
+					}
+				}
+				Multiset<Integer> counts = TreeMultiset.create();
+				int nPatterns = patterns.size();
+				LOG.info("total number of patterns is: {}", nPatterns);
+				int nTrips = 0;
+				for (TripPattern ttp : patterns) {
+					List<Trip> trips = ttp.getTrips();
+					counts.add(trips.size());
+					nTrips += trips.size();
+				}
+				LOG.info("total number of trips is: {}", nTrips);
+				LOG.info("average number of trips per pattern is: {}", nTrips
+						/ nPatterns);
+				int cPatterns = 0;
+				int cTrips = 0;
+				for (Multiset.Entry<Integer> count : counts.entrySet()) {
+					cPatterns += count.getCount();
+					cTrips += count.getCount() * count.getElement();
+					writer.writeRecord(new String[] {
+							count.getElement().toString(),
+							Integer.toString(count.getCount()),
+							Integer.toString(cPatterns),
+							Double.toString(cPatterns / (double) nPatterns),
+							Integer.toString(cTrips),
+							Double.toString(cTrips / (double) nTrips) });
+				}
+			} catch (IOException e) {
+				LOG.error("Exception writing CSV: {}", e.getMessage());
+				return;
+			}
+			LOG.info("done.");
+		}
+
+	}
 
 }
-
-

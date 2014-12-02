@@ -15,20 +15,20 @@ package org.opentripplanner.graph_builder.annotation;
 
 public class TurnRestrictionException extends GraphBuilderAnnotation {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public static final String FMT = "Turn restriction with bicycle exception at node %s from %s";
-    
-    final long node, way;
-    
-    public TurnRestrictionException(long node, long way){
-    	this.node = node;
-    	this.way = way;
-    }
-    
-    @Override
-    public String getMessage() {
-        return String.format(FMT, node, way);
-    }
+	public static final String FMT = "Turn restriction with bicycle exception at node %s from %s";
+
+	final long node, way;
+
+	public TurnRestrictionException(long node, long way) {
+		this.node = node;
+		this.way = way;
+	}
+
+	@Override
+	public String getMessage() {
+		return String.format(FMT, node, way);
+	}
 
 }

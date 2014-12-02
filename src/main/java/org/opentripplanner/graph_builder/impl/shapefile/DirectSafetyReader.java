@@ -21,20 +21,20 @@ import org.opentripplanner.graph_builder.services.shapefile.SimpleFeatureConvert
  * Read safety factors directly from shapefiles (contributed by Guillaume Barreau)
  */
 public class DirectSafetyReader implements SimpleFeatureConverter<P2<Double>> {
-    private String safetyAttributeName;
+	private String safetyAttributeName;
 
-    public static final P2<Double> oneone = new P2<Double>(1.0, 1.0);
+	public static final P2<Double> oneone = new P2<Double>(1.0, 1.0);
 
-    @Override
-    public P2<Double> convert(SimpleFeature feature) {
-        Double d = (Double) feature.getAttribute(safetyAttributeName);
-        if (d == null) {
-            return oneone;
-        }
-        return new P2<Double>(d, d);
-    }
+	@Override
+	public P2<Double> convert(SimpleFeature feature) {
+		Double d = (Double) feature.getAttribute(safetyAttributeName);
+		if (d == null) {
+			return oneone;
+		}
+		return new P2<Double>(d, d);
+	}
 
-    public void setSafetyAttributeName(String safetyAttributeName) {
-        this.safetyAttributeName = safetyAttributeName;
-    }
+	public void setSafetyAttributeName(String safetyAttributeName) {
+		this.safetyAttributeName = safetyAttributeName;
+	}
 }

@@ -17,19 +17,19 @@ import org.opentripplanner.routing.vertextype.BikeRentalStationVertex;
 
 public class BikeRentalStationUnlinked extends GraphBuilderAnnotation {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public static final String FMT = "Bike rental station %s not near any streets; it will not be usable.";
-    
-    final BikeRentalStationVertex station;
-    
-    public BikeRentalStationUnlinked(BikeRentalStationVertex station){
-    	this.station = station;
-    }
-    
-    @Override
-    public String getMessage() {
-        return String.format(FMT, station);
-    }
+	public static final String FMT = "Bike rental station %s not near any streets; it will not be usable.";
+
+	final BikeRentalStationVertex station;
+
+	public BikeRentalStationUnlinked(BikeRentalStationVertex station) {
+		this.station = station;
+	}
+
+	@Override
+	public String getMessage() {
+		return String.format(FMT, station);
+	}
 
 }

@@ -24,6 +24,6 @@ import org.opentripplanner.api.adapters.RouteType;
 
 @XmlRootElement(name = "RouteList")
 public class RouteList {
-    @XmlElements(value = { @XmlElement(name = "route") })
-    public List<RouteType> routes = new ArrayList<RouteType>();
+	@XmlElements(value = { @XmlElement(name = "route") })
+	public List<RouteType> routes = new ArrayList<RouteType>();
 }

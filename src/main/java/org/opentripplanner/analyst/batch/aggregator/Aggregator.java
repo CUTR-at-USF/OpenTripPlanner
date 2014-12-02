@@ -17,7 +17,8 @@ import org.opentripplanner.analyst.batch.ResultSet;
 
 /**
  * An interface for classes that provide an aggregate function over populations
- * of places. Can be used to provide various accessibility calculations, for example.
+ * of places. Can be used to provide various accessibility calculations, for
+ * example.
  * 
  * @author andrewbyrd
  */

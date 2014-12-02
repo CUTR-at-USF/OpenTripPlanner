@@ -24,50 +24,50 @@ import org.opentripplanner.api.adapters.MapAdapter;
 
 @XmlType
 public class TranslatedString implements Serializable {
-    private static final long serialVersionUID = 2163930399727941628L;
+	private static final long serialVersionUID = 2163930399727941628L;
 
-    @XmlElement
-    @XmlJavaTypeAdapter(MapAdapter.class)
-    public TreeMap<String, String> translations = new TreeMap<String, String>();
+	@XmlElement
+	@XmlJavaTypeAdapter(MapAdapter.class)
+	public TreeMap<String, String> translations = new TreeMap<String, String>();
 
-    public TranslatedString(String language, String note) {
-        translations.put(language.intern(), note);
-    }
+	public TranslatedString(String language, String note) {
+		translations.put(language.intern(), note);
+	}
 
-    public TranslatedString() {
-    }
+	public TranslatedString() {
+	}
 
-    public TranslatedString(String v) {
-        this(Alert.defaultLanguage, v);
-    }
+	public TranslatedString(String v) {
+		this(Alert.defaultLanguage, v);
+	}
 
-    public boolean equals(Object o) {
-        if (!(o instanceof TranslatedString)) {
-            return false;
-        }
-        TranslatedString tso = (TranslatedString) o;
-        return tso.translations.equals(translations);
-    }
+	public boolean equals(Object o) {
+		if (!(o instanceof TranslatedString)) {
+			return false;
+		}
+		TranslatedString tso = (TranslatedString) o;
+		return tso.translations.equals(translations);
+	}
 
-    public int hashCode() {
-        return translations.hashCode() + 1;
-    }
+	public int hashCode() {
+		return translations.hashCode() + 1;
+	}
 
-    public void addTranslation(String language, String note) {
-        translations.put(language.intern(), note);
-    }
+	public void addTranslation(String language, String note) {
+		translations.put(language.intern(), note);
+	}
 
-    // fixme: need to get en-US when requested language is "en"
-    public String getTranslation(String language) {
-        return translations.get(language);
-    }
+	// fixme: need to get en-US when requested language is "en"
+	public String getTranslation(String language) {
+		return translations.get(language);
+	}
 
-    public String getSomeTranslation() {
-        if (translations.isEmpty()) {
-            return null;
-        }
-        return translations.values().iterator().next();
-    }
+	public String getSomeTranslation() {
+		if (translations.isEmpty()) {
+			return null;
+		}
+		return translations.values().iterator().next();
+	}
 
 	public String toString() {
 		return "TranslateString(" + getSomeTranslation() + ")";

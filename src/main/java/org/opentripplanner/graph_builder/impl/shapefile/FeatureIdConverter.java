@@ -18,9 +18,9 @@ import org.opentripplanner.graph_builder.services.shapefile.SimpleFeatureConvert
 
 public class FeatureIdConverter implements SimpleFeatureConverter<String> {
 
-    @Override
-    public String convert(SimpleFeature feature) {
-        return feature.getID();
-    }
+	@Override
+	public String convert(SimpleFeature feature) {
+		return feature.getID();
+	}
 
 }

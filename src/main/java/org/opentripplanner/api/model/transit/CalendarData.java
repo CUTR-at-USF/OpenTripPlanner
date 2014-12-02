@@ -26,12 +26,12 @@ import org.opentripplanner.api.adapters.ServiceCalendarType;
 @XmlRootElement(name = "CalendarData")
 public class CalendarData {
 
-    @XmlElementWrapper
-    @XmlElements(value = { @XmlElement(name = "calendar") })
-    public List<ServiceCalendarType> calendarList;
-    
-    @XmlElementWrapper
-    @XmlElements(value = { @XmlElement(name = "calendarDate") })
-    public List<ServiceCalendarDateType> calendarDatesList;
+	@XmlElementWrapper
+	@XmlElements(value = { @XmlElement(name = "calendar") })
+	public List<ServiceCalendarType> calendarList;
+
+	@XmlElementWrapper
+	@XmlElements(value = { @XmlElement(name = "calendarDate") })
+	public List<ServiceCalendarDateType> calendarDatesList;
 
 }

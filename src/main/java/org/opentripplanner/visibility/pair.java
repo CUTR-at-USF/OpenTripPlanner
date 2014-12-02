@@ -26,23 +26,23 @@ package org.opentripplanner.visibility;
 //c++'s std::pair -- it's only used a few places, so
 //we might as well just copy it
 class pair<T, U> {
-    public T first;
+	public T first;
 
-    public U second;
+	public U second;
 
-    public pair() {
-    }
+	public pair() {
+	}
 
-    public pair(T one, U two) {
-        first = one;
-        second = two;
-    }
+	public pair(T one, U two) {
+		first = one;
+		second = two;
+	}
 
-    public T first() {
-        return first;
-    }
+	public T first() {
+		return first;
+	}
 
-    public U second() {
-        return second;
-    }
+	public U second() {
+		return second;
+	}
 }

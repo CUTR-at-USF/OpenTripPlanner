@@ -30,58 +30,68 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is the primary entry point for the trip planning web service.
- * All parameters are passed in the query string. These parameters are defined in the abstract
- * SearchResource superclass, which also has methods for building routing requests from query
- * parameters. In order for inheritance to work, the REST resources are actually request-scoped 
- * rather than singleton-scoped.
+ * This is the primary entry point for the trip planning web service. All
+ * parameters are passed in the query string. These parameters are defined in
+ * the abstract SearchResource superclass, which also has methods for building
+ * routing requests from query parameters. In order for inheritance to work, the
+ * REST resources are actually request-scoped rather than singleton-scoped.
  * 
- * Some parameters may not be honored by the trip planner for some or all itineraries. For
- * example, maxWalkDistance may be relaxed if the alternative is to not provide a route.
+ * Some parameters may not be honored by the trip planner for some or all
+ * itineraries. For example, maxWalkDistance may be relaxed if the alternative
+ * is to not provide a route.
  * 
- * @return Returns either an XML or a JSON document, depending on the HTTP Accept header of the
- *         client making the request.
+ * @return Returns either an XML or a JSON document, depending on the HTTP
+ *         Accept header of the client making the request.
  */
-@Path("routers/{routerId}/plan") // final element needed here rather than on method to distinguish from routers API
+@Path("routers/{routerId}/plan")
+// final element needed here rather than on method to distinguish from routers
+// API
 public class Planner extends RoutingResource {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Planner.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Planner.class);
 
-    // We inject info about the incoming request so we can include the incoming query
-    // parameters in the outgoing response. This is a TriMet requirement.
-    // Jersey uses @Context to inject internal types and @InjectParam or @Resource for DI objects.
-    @GET
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML + Q, MediaType.TEXT_XML + Q })
-    public Response getItineraries(@Context OTPServer otpServer, @Context UriInfo uriInfo) {
+	// We inject info about the incoming request so we can include the incoming
+	// query
+	// parameters in the outgoing response. This is a TriMet requirement.
+	// Jersey uses @Context to inject internal types and @InjectParam or
+	// @Resource for DI objects.
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML + Q,
+			MediaType.TEXT_XML + Q })
+	public Response getItineraries(@Context OTPServer otpServer,
+			@Context UriInfo uriInfo) {
 
-        /*
-         * TODO: add Lang / Locale parameter, and thus get localized content (Messages & more...)
-         * TODO: from/to inputs should be converted / geocoded / etc... here, and maybe send coords 
-         *       or vertex ids to planner (or error back to user)
-         * TODO: org.opentripplanner.routing.impl.PathServiceImpl has COOORD parsing. Abstract that
-         *       out so it's used here too...
-         */
-        
-        // create response object, containing a copy of all request parameters
-        Response response = new Response(uriInfo);
-        RoutingRequest request = null;
-        try {
-            // fill in request from query parameters via shared superclass method
-            request = super.buildRequest();
-            TripPlan plan = otpServer.planGenerator.generate(request);
-            response.setPlan(plan);
-        } catch (Exception e) {
-            PlannerError error = new PlannerError(e);
-            if(!PlannerError.isPlanningError(e.getClass()))
-                LOG.warn("Error while planning path: ", e);
-            response.setError(error);
-        } finally {
-            if (request != null) {
-                response.debugOutput = request.rctx.debugOutput;
-                request.cleanup(); // TODO verify that this is being done on Analyst web services
-            }       
-        }
-        return response;
-    }
+		/*
+		 * TODO: add Lang / Locale parameter, and thus get localized content
+		 * (Messages & more...) TODO: from/to inputs should be converted /
+		 * geocoded / etc... here, and maybe send coords or vertex ids to
+		 * planner (or error back to user) TODO:
+		 * org.opentripplanner.routing.impl.PathServiceImpl has COOORD parsing.
+		 * Abstract that out so it's used here too...
+		 */
+
+		// create response object, containing a copy of all request parameters
+		Response response = new Response(uriInfo);
+		RoutingRequest request = null;
+		try {
+			// fill in request from query parameters via shared superclass
+			// method
+			request = super.buildRequest();
+			TripPlan plan = otpServer.planGenerator.generate(request);
+			response.setPlan(plan);
+		} catch (Exception e) {
+			PlannerError error = new PlannerError(e);
+			if (!PlannerError.isPlanningError(e.getClass()))
+				LOG.warn("Error while planning path: ", e);
+			response.setError(error);
+		} finally {
+			if (request != null) {
+				response.debugOutput = request.rctx.debugOutput;
+				request.cleanup(); // TODO verify that this is being done on
+									// Analyst web services
+			}
+		}
+		return response;
+	}
 
 }

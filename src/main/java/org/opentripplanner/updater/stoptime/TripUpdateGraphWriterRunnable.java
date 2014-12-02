@@ -24,29 +24,30 @@ import org.slf4j.LoggerFactory;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 
 public class TripUpdateGraphWriterRunnable implements GraphWriterRunnable {
-    private static Logger LOG = LoggerFactory.getLogger(TripUpdateGraphWriterRunnable.class);
+	private static Logger LOG = LoggerFactory
+			.getLogger(TripUpdateGraphWriterRunnable.class);
 
-    /**
-     * The list with updates to apply to the graph
-     */
-    private List<TripUpdate> updates;
+	/**
+	 * The list with updates to apply to the graph
+	 */
+	private List<TripUpdate> updates;
 
-    private String feedId;
+	private String feedId;
 
-    public TripUpdateGraphWriterRunnable(List<TripUpdate> updates, String feedId) {
+	public TripUpdateGraphWriterRunnable(List<TripUpdate> updates, String feedId) {
 		this.updates = updates;
 		this.feedId = feedId;
 	}
 
 	@Override
-    public void run(Graph graph) {
-        // Apply updates to graph using realtime snapshot source
-        TimetableSnapshotSource snapshotSource = graph.timetableSnapshotSource;
-        if (snapshotSource != null) {
-            snapshotSource.applyTripUpdates(updates, feedId);
-        } else {
-            LOG.error("Could not find realtime data snapshot source in graph."
-                    + " The following updates are not applied: {}", updates);
-        }
-    }
+	public void run(Graph graph) {
+		// Apply updates to graph using realtime snapshot source
+		TimetableSnapshotSource snapshotSource = graph.timetableSnapshotSource;
+		if (snapshotSource != null) {
+			snapshotSource.applyTripUpdates(updates, feedId);
+		} else {
+			LOG.error("Could not find realtime data snapshot source in graph."
+					+ " The following updates are not applied: {}", updates);
+		}
+	}
 }

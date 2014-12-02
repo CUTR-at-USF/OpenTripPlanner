@@ -25,5 +25,5 @@ import org.opentripplanner.routing.graph.Vertex;
  */
 public interface OnBoardDepartService extends Serializable {
 
-    public abstract Vertex setupDepartOnBoard(RoutingContext ctx);
+	public abstract Vertex setupDepartOnBoard(RoutingContext ctx);
 }

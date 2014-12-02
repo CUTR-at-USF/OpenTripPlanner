@@ -29,31 +29,31 @@ import org.opentripplanner.routing.services.FareService;
  */
 public class FareServiceGraphBuilderImpl implements GraphBuilder {
 
-    private ChainedFareService service;
+	private ChainedFareService service;
 
-    @Override
-    public void buildGraph(Graph graph, HashMap<Class<?>, Object> extra) {
-        FareService existingService = graph.getService(FareService.class);
-        service.setNextService(existingService);
-        graph.putService(FareService.class, service);
-    }
+	@Override
+	public void buildGraph(Graph graph, HashMap<Class<?>, Object> extra) {
+		FareService existingService = graph.getService(FareService.class);
+		service.setNextService(existingService);
+		graph.putService(FareService.class, service);
+	}
 
-    public void setService(ChainedFareService service) {
-        this.service = service;
-    }
+	public void setService(ChainedFareService service) {
+		this.service = service;
+	}
 
-    @Override
-    public List<String> provides() {
-        return Arrays.asList("fares");
-    }
+	@Override
+	public List<String> provides() {
+		return Arrays.asList("fares");
+	}
 
-    @Override
-    public List<String> getPrerequisites() {
-        return Collections.emptyList();
-    }
+	@Override
+	public List<String> getPrerequisites() {
+		return Collections.emptyList();
+	}
 
-    @Override
-    public void checkInputs() {
-        // nothing to do
-    }
+	@Override
+	public void checkInputs() {
+		// nothing to do
+	}
 }

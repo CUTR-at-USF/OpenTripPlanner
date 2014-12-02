@@ -22,9 +22,9 @@ import org.opentripplanner.routing.graph.Edge;
 import java.util.Collection;
 
 public class EdgesForRoute {
-    public Multimap<Route, Edge> edgesForRoute = ArrayListMultimap.create();
+	public Multimap<Route, Edge> edgesForRoute = ArrayListMultimap.create();
 
-    public Collection<Edge> get(Route route) {
-        return edgesForRoute.get(route);
-    }
+	public Collection<Edge> get(Route route) {
+		return edgesForRoute.get(route);
+	}
 }

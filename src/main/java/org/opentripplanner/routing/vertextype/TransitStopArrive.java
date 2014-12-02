@@ -20,20 +20,20 @@ import org.opentripplanner.routing.graph.Graph;
 
 public class TransitStopArrive extends OffboardVertex {
 
-    private static final long serialVersionUID = 9213431651426739857L;
-    private TransitStop stopVertex;
+	private static final long serialVersionUID = 9213431651426739857L;
+	private TransitStop stopVertex;
 
-    public TransitStopArrive(Graph g, Stop stop, TransitStop stopVertex) {
-        super(g, GtfsLibrary.convertIdToString(stop.getId()) + "_arrive", stop);
-        this.stopVertex = stopVertex;
-    }
+	public TransitStopArrive(Graph g, Stop stop, TransitStop stopVertex) {
+		super(g, GtfsLibrary.convertIdToString(stop.getId()) + "_arrive", stop);
+		this.stopVertex = stopVertex;
+	}
 
-    public TransitStop getStopVertex() {
-        return stopVertex;
-    }
+	public TransitStop getStopVertex() {
+		return stopVertex;
+	}
 
-    @Override
-    public AgencyAndId getStopId() {
-        return stopVertex.getStopId();
-    }
+	@Override
+	public AgencyAndId getStopId() {
+		return stopVertex.getStopId();
+	}
 }

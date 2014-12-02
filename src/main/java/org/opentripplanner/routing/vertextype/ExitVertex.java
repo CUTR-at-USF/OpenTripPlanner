@@ -16,23 +16,23 @@ package org.opentripplanner.routing.vertextype;
 import org.opentripplanner.routing.graph.Graph;
 
 public class ExitVertex extends IntersectionVertex {
-    
-    private static final long serialVersionUID = -1403959315797898914L;
-    private String exitName;
-    
-    public ExitVertex(Graph g, String label, double x, double y) {
-        super(g, label, x, y);
-    }
 
-    public String getExitName() {
-        return exitName;
-    }
+	private static final long serialVersionUID = -1403959315797898914L;
+	private String exitName;
 
-    public void setExitName(String exitName) {
-        this.exitName = exitName;
-    }
+	public ExitVertex(Graph g, String label, double x, double y) {
+		super(g, label, x, y);
+	}
 
-    public String toString() {
-        return "ExitVertex(" + super.toString() + ")";
-    }
+	public String getExitName() {
+		return exitName;
+	}
+
+	public void setExitName(String exitName) {
+		this.exitName = exitName;
+	}
+
+	public String toString() {
+		return "ExitVertex(" + super.toString() + ")";
+	}
 }

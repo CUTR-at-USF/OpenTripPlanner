@@ -30,57 +30,59 @@ import org.opentripplanner.routing.vertextype.TransitStationStop;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineString;
 
-/** Link graph based on transfers.txt.  Intended for testing */
+/** Link graph based on transfers.txt. Intended for testing */
 @Deprecated
 public class TransferGraphLinker {
 
-    private Graph graph;
-    private DistanceLibrary distanceLibrary = SphericalDistanceLibrary.getInstance();
+	private Graph graph;
+	private DistanceLibrary distanceLibrary = SphericalDistanceLibrary
+			.getInstance();
 
-    public TransferGraphLinker(Graph graph) {
-        this.graph = graph;
-    }
-    
-    public void run() {
-        // Create a mapping from StopId to StopVertices
-        Map<AgencyAndId, TransitStationStop> stopNodes = new HashMap<AgencyAndId, TransitStationStop>();
-        for (Vertex v : graph.getVertices()) {
-            if (v instanceof TransitStationStop) {
-                TransitStationStop transitStationStop = (TransitStationStop) v;
-                Stop stop = transitStationStop.getStop();
-                stopNodes.put(stop.getId(), transitStationStop);
-            }
-        } 
-        
-        // Create edges
-        for (TransferTable.Transfer transfer : graph.getTransferTable().getAllFirstSpecificTransfers()) {
-            TransitStationStop fromVertex = stopNodes.get(transfer.fromStopId);
-            TransitStationStop toVertex = stopNodes.get(transfer.toStopId);
+	public TransferGraphLinker(Graph graph) {
+		this.graph = graph;
+	}
 
-            double distance = distanceLibrary.distance(fromVertex.getCoordinate(), 
-                    toVertex.getCoordinate());
-            TransferEdge edge = null;
-            switch (transfer.seconds) {
-                case StopTransfer.FORBIDDEN_TRANSFER:
-                case StopTransfer.UNKNOWN_TRANSFER:
-                    break;
-                case StopTransfer.PREFERRED_TRANSFER:
-                case StopTransfer.TIMED_TRANSFER:
-                    edge = new TransferEdge(fromVertex,
-                            toVertex, distance);
-                    break;
-                default:
-                    edge = new TransferEdge(fromVertex,
-                            toVertex, distance, transfer.seconds);
-            }
-            
-            if (edge != null) {
-                LineString geometry = GeometryUtils.getGeometryFactory().createLineString(new Coordinate[] {
-                        fromVertex.getCoordinate(),
-                        toVertex.getCoordinate() });
-                edge.setGeometry(geometry);
-            }
-        }
-    }
+	public void run() {
+		// Create a mapping from StopId to StopVertices
+		Map<AgencyAndId, TransitStationStop> stopNodes = new HashMap<AgencyAndId, TransitStationStop>();
+		for (Vertex v : graph.getVertices()) {
+			if (v instanceof TransitStationStop) {
+				TransitStationStop transitStationStop = (TransitStationStop) v;
+				Stop stop = transitStationStop.getStop();
+				stopNodes.put(stop.getId(), transitStationStop);
+			}
+		}
+
+		// Create edges
+		for (TransferTable.Transfer transfer : graph.getTransferTable()
+				.getAllFirstSpecificTransfers()) {
+			TransitStationStop fromVertex = stopNodes.get(transfer.fromStopId);
+			TransitStationStop toVertex = stopNodes.get(transfer.toStopId);
+
+			double distance = distanceLibrary.distance(
+					fromVertex.getCoordinate(), toVertex.getCoordinate());
+			TransferEdge edge = null;
+			switch (transfer.seconds) {
+			case StopTransfer.FORBIDDEN_TRANSFER:
+			case StopTransfer.UNKNOWN_TRANSFER:
+				break;
+			case StopTransfer.PREFERRED_TRANSFER:
+			case StopTransfer.TIMED_TRANSFER:
+				edge = new TransferEdge(fromVertex, toVertex, distance);
+				break;
+			default:
+				edge = new TransferEdge(fromVertex, toVertex, distance,
+						transfer.seconds);
+			}
+
+			if (edge != null) {
+				LineString geometry = GeometryUtils.getGeometryFactory()
+						.createLineString(
+								new Coordinate[] { fromVertex.getCoordinate(),
+										toVertex.getCoordinate() });
+				edge.setGeometry(geometry);
+			}
+		}
+	}
 
 }

@@ -12,33 +12,40 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 public class StopShort {
 
-    public AgencyAndId id;
-    public String name;
-    public double lat;
-    public double lon;
-    public String cluster;
+	public AgencyAndId id;
+	public String name;
+	public double lat;
+	public double lon;
+	public String cluster;
 
-    /** Distance to the stop when it is returned from a location-based query. */
-    @JsonInclude(Include.NON_NULL) public Integer dist;
-    
-    public StopShort (Stop stop) {
-        id = stop.getId();
-        name = stop.getName();
-        lat = stop.getLat();
-        lon = stop.getLon();
-        cluster = stop.getParentStation(); // TODO harmonize these names, maybe use "station" everywhere
-    }
+	/** Distance to the stop when it is returned from a location-based query. */
+	@JsonInclude(Include.NON_NULL)
+	public Integer dist;
 
-    /** @param distance in integral meters, to avoid serializing a bunch of decimal places. */
-    public StopShort(Stop stop, int distance) {
-        this(stop);
-        this.dist = distance;
-    }
+	public StopShort(Stop stop) {
+		id = stop.getId();
+		name = stop.getName();
+		lat = stop.getLat();
+		lon = stop.getLon();
+		cluster = stop.getParentStation(); // TODO harmonize these names, maybe
+											// use "station" everywhere
+	}
 
-    public static List<StopShort> list (Collection<Stop> in) {
-        List<StopShort> out = Lists.newArrayList();
-        for (Stop stop : in) out.add(new StopShort(stop));
-        return out;
-    }    
+	/**
+	 * @param distance
+	 *            in integral meters, to avoid serializing a bunch of decimal
+	 *            places.
+	 */
+	public StopShort(Stop stop, int distance) {
+		this(stop);
+		this.dist = distance;
+	}
+
+	public static List<StopShort> list(Collection<Stop> in) {
+		List<StopShort> out = Lists.newArrayList();
+		for (Stop stop : in)
+			out.add(new StopShort(stop));
+		return out;
+	}
 
 }

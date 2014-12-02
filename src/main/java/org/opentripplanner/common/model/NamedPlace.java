@@ -20,33 +20,33 @@ package org.opentripplanner.common.model;
  * 
  */
 public class NamedPlace {
-    /**
-     * some human-readable text string e.g. W 34th St
-     * */
-    public String name;
+	/**
+	 * some human-readable text string e.g. W 34th St
+	 * */
+	public String name;
 
-    /**
-     * "latitude,longitude", or the name of a graph vertex
-     */
-    public String place;
+	/**
+	 * "latitude,longitude", or the name of a graph vertex
+	 */
+	public String place;
 
-    public NamedPlace(String name, String place) {
-        this.name = name;
-        this.place = place;
-    }
+	public NamedPlace(String name, String place) {
+		this.name = name;
+		this.place = place;
+	}
 
-    public NamedPlace(String place) {
-        this.place = place;
-    }
+	public NamedPlace(String place) {
+		this.place = place;
+	}
 
-    public String getRepresentation() {
-        if (name == null) {
-            return place;
-        }
-        return name + "::" + place;
-    }
+	public String getRepresentation() {
+		if (name == null) {
+			return place;
+		}
+		return name + "::" + place;
+	}
 
-    public String toString() {
-        return "NamedPlace(" + name + ", " + place + ")";
-    }
+	public String toString() {
+		return "NamedPlace(" + name + ", " + place + ")";
+	}
 }

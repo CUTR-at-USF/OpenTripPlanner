@@ -18,43 +18,56 @@ import com.vividsolutions.jts.geom.LineString;
 
 public interface DistanceLibrary {
 
-    public abstract double distance(Coordinate from, Coordinate to);
+	public abstract double distance(Coordinate from, Coordinate to);
 
-    public abstract double fastDistance(Coordinate from, Coordinate to);
+	public abstract double fastDistance(Coordinate from, Coordinate to);
 
-    /**
-     * Compute an (approximated) distance between two points, with a known cos(lat).
-     * Be careful, this is approximated and never check for the validity of input cos(lat). 
-     */
-    public abstract double fastDistance(Coordinate from, Coordinate to, double cosLat);
+	/**
+	 * Compute an (approximated) distance between two points, with a known
+	 * cos(lat). Be careful, this is approximated and never check for the
+	 * validity of input cos(lat).
+	 */
+	public abstract double fastDistance(Coordinate from, Coordinate to,
+			double cosLat);
 
-    /**
-     * Compute an (approximated) distance between a point and a linestring expressed in standard geographical
-     * coordinates (lon, lat in degrees).
-     * @param point The coordinates of the point (longitude, latitude degrees).
-     * @param lineString The set of points representing the polyline, in the same coordinate system.
-     * @return The (approximated) distance, in meters, between the point and the linestring.
-     */
-    public abstract double fastDistance(Coordinate point, LineString lineString);
-    
-    /**
-     * Compute the (approximated) length of a polyline
-     * @param lineString The polyline in (longitude, latitude degrees).
-     * @return The (approximated) length, in meters, of the linestring.
-     */
-    public abstract double fastLength(LineString lineString);
+	/**
+	 * Compute an (approximated) distance between a point and a linestring
+	 * expressed in standard geographical coordinates (lon, lat in degrees).
+	 * 
+	 * @param point
+	 *            The coordinates of the point (longitude, latitude degrees).
+	 * @param lineString
+	 *            The set of points representing the polyline, in the same
+	 *            coordinate system.
+	 * @return The (approximated) distance, in meters, between the point and the
+	 *         linestring.
+	 */
+	public abstract double fastDistance(Coordinate point, LineString lineString);
 
-    /**
-     * Compute the (approximated) length of a polyline, with known cos(lat).
-     * @param lineString The polyline in (longitude, latitude degrees).
-     * @return The (approximated) length, in meters, of the linestring.
-     */
-    public abstract double fastLength(LineString lineString, double cosLat);
+	/**
+	 * Compute the (approximated) length of a polyline
+	 * 
+	 * @param lineString
+	 *            The polyline in (longitude, latitude degrees).
+	 * @return The (approximated) length, in meters, of the linestring.
+	 */
+	public abstract double fastLength(LineString lineString);
 
-    public abstract double distance(double lat1, double lon1, double lat2, double lon2);
+	/**
+	 * Compute the (approximated) length of a polyline, with known cos(lat).
+	 * 
+	 * @param lineString
+	 *            The polyline in (longitude, latitude degrees).
+	 * @return The (approximated) length, in meters, of the linestring.
+	 */
+	public abstract double fastLength(LineString lineString, double cosLat);
 
-    public abstract double fastDistance(double lat1, double lon1, double lat2, double lon2);
+	public abstract double distance(double lat1, double lon1, double lat2,
+			double lon2);
 
-    public abstract double distance(double lat1, double lon1, double lat2, double lon2,
-            double radius);
+	public abstract double fastDistance(double lat1, double lon1, double lat2,
+			double lon2);
+
+	public abstract double distance(double lat1, double lon1, double lat2,
+			double lon2, double radius);
 }

@@ -18,6 +18,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "AlertPatchCreationResponse")
 public class AlertPatchCreationResponse {
-    @XmlElement
-    public String status;
+	@XmlElement
+	public String status;
 }

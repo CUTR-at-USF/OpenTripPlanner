@@ -37,11 +37,13 @@ import com.ning.http.client.websocket.WebSocketListener;
 import com.ning.http.client.websocket.WebSocketUpgradeHandler;
 
 /**
- * This class starts an HTTP client which opens a websocket connection to a GTFS-RT data source. A
- * callback is registered which handles incoming GTFS-RT messages as they stream in by placing a
- * GTFS-RT decoder Runnable task in the single-threaded executor for handling.
+ * This class starts an HTTP client which opens a websocket connection to a
+ * GTFS-RT data source. A callback is registered which handles incoming GTFS-RT
+ * messages as they stream in by placing a GTFS-RT decoder Runnable task in the
+ * single-threaded executor for handling.
  *
- * Usage example ('websocket' name is an example) in the file 'Graph.properties':
+ * Usage example ('websocket' name is an example) in the file
+ * 'Graph.properties':
  *
  * <pre>
  * websocket.type = websocket-gtfs-rt-updater
@@ -51,145 +53,165 @@ import com.ning.http.client.websocket.WebSocketUpgradeHandler;
  *
  */
 public class WebsocketGtfsRealtimeUpdater implements GraphUpdater {
-    /**
-     * Number of seconds to wait before checking again whether we are still connected
-     */
-    private static final int CHECK_CONNECTION_PERIOD_SEC = 1;
+	/**
+	 * Number of seconds to wait before checking again whether we are still
+	 * connected
+	 */
+	private static final int CHECK_CONNECTION_PERIOD_SEC = 1;
 
-    private static final int DEFAULT_RECONNECT_PERIOD_SEC = 300; // Five minutes
+	private static final int DEFAULT_RECONNECT_PERIOD_SEC = 300; // Five minutes
 
-    private static Logger LOG = LoggerFactory.getLogger(WebsocketGtfsRealtimeUpdater.class);
+	private static Logger LOG = LoggerFactory
+			.getLogger(WebsocketGtfsRealtimeUpdater.class);
 
-    /**
-     * Parent update manager. Is used to execute graph writer runnables.
-     */
-    private GraphUpdaterManager updaterManager;
+	/**
+	 * Parent update manager. Is used to execute graph writer runnables.
+	 */
+	private GraphUpdaterManager updaterManager;
 
-    /**
-     * Url of the websocket server
-     */
-    private String url;
+	/**
+	 * Url of the websocket server
+	 */
+	private String url;
 
-    /**
-     * The ID for the static feed to which these TripUpdates are applied
-     */
-    private String feedId;
+	/**
+	 * The ID for the static feed to which these TripUpdates are applied
+	 */
+	private String feedId;
 
-    /**
-     * The number of seconds to wait before reconnecting after a failed connection.
-     */
-    private int reconnectPeriodSec;
+	/**
+	 * The number of seconds to wait before reconnecting after a failed
+	 * connection.
+	 */
+	private int reconnectPeriodSec;
 
-    @Override
-    public void setGraphUpdaterManager(GraphUpdaterManager updaterManager) {
-        this.updaterManager = updaterManager;
-    }
+	@Override
+	public void setGraphUpdaterManager(GraphUpdaterManager updaterManager) {
+		this.updaterManager = updaterManager;
+	}
 
-    @Override
-    public void configure(Graph graph, Preferences preferences) throws Exception {
-        // Read configuration
-        url = preferences.get("url", null);
-        feedId = preferences.get("feedId", "");
-        reconnectPeriodSec = preferences.getInt("reconnectPeriodSec", DEFAULT_RECONNECT_PERIOD_SEC);
-    }
+	@Override
+	public void configure(Graph graph, Preferences preferences)
+			throws Exception {
+		// Read configuration
+		url = preferences.get("url", null);
+		feedId = preferences.get("feedId", "");
+		reconnectPeriodSec = preferences.getInt("reconnectPeriodSec",
+				DEFAULT_RECONNECT_PERIOD_SEC);
+	}
 
-    @Override
-    public void setup() throws InterruptedException, ExecutionException {
-        // Create a realtime data snapshot source and wait for runnable to be executed
-        updaterManager.executeBlocking(new GraphWriterRunnable() {
-            @Override
-            public void run(Graph graph) {
-                // Only create a realtime data snapshot source if none exists already
-                if (graph.timetableSnapshotSource == null) {
-                    TimetableSnapshotSource snapshotSource = new TimetableSnapshotSource(graph);
-                    // Add snapshot source to graph
-                    graph.timetableSnapshotSource = (snapshotSource);
-                }
-            }
-        });
-    }
+	@Override
+	public void setup() throws InterruptedException, ExecutionException {
+		// Create a realtime data snapshot source and wait for runnable to be
+		// executed
+		updaterManager.executeBlocking(new GraphWriterRunnable() {
+			@Override
+			public void run(Graph graph) {
+				// Only create a realtime data snapshot source if none exists
+				// already
+				if (graph.timetableSnapshotSource == null) {
+					TimetableSnapshotSource snapshotSource = new TimetableSnapshotSource(
+							graph);
+					// Add snapshot source to graph
+					graph.timetableSnapshotSource = (snapshotSource);
+				}
+			}
+		});
+	}
 
-    @Override
-    public void run() throws InterruptedException {
-        // The AsyncHttpClient library uses Netty by default (it has a dependency on Netty).
-        // It can also make use of Grizzly for the HTTP layer, but the Jersey-Grizzly integration
-        // forces us to use a version of Grizzly that is too old to be compatible with the current
-        // AsyncHttpClient. This would be done as follows:
-        // AsyncHttpClientConfig config = new AsyncHttpClientConfig.Builder().build();
-        // AsyncHttpClient client = new AsyncHttpClient(new GrizzlyAsyncHttpProvider(config),
-        // config);
-        // Using Netty by default:
+	@Override
+	public void run() throws InterruptedException {
+		// The AsyncHttpClient library uses Netty by default (it has a
+		// dependency on Netty).
+		// It can also make use of Grizzly for the HTTP layer, but the
+		// Jersey-Grizzly integration
+		// forces us to use a version of Grizzly that is too old to be
+		// compatible with the current
+		// AsyncHttpClient. This would be done as follows:
+		// AsyncHttpClientConfig config = new
+		// AsyncHttpClientConfig.Builder().build();
+		// AsyncHttpClient client = new AsyncHttpClient(new
+		// GrizzlyAsyncHttpProvider(config),
+		// config);
+		// Using Netty by default:
 
-        while (true) {
-            AsyncHttpClient client = new AsyncHttpClient();
-            WebSocketListener listener = new Listener();
-            WebSocketUpgradeHandler handler = new WebSocketUpgradeHandler.Builder()
-                    .addWebSocketListener(listener).build();
-            WebSocket socket = null;
-            boolean connectionSuccessful = true;
-            // Try to create a websocket connection
-            try {
-                socket = client.prepareGet(url).execute(handler).get();
-                LOG.info("Successfully connected to {}.", url);
-            } catch (ExecutionException e) {
-                LOG.error("Could not connect to {}: {}", url, e.getCause().getMessage());
-                connectionSuccessful = false;
-            } catch (Exception e) {
-                LOG.error("Unknown exception when trying to connect to {}:", url, e);
-                connectionSuccessful = false;
-            }
+		while (true) {
+			AsyncHttpClient client = new AsyncHttpClient();
+			WebSocketListener listener = new Listener();
+			WebSocketUpgradeHandler handler = new WebSocketUpgradeHandler.Builder()
+					.addWebSocketListener(listener).build();
+			WebSocket socket = null;
+			boolean connectionSuccessful = true;
+			// Try to create a websocket connection
+			try {
+				socket = client.prepareGet(url).execute(handler).get();
+				LOG.info("Successfully connected to {}.", url);
+			} catch (ExecutionException e) {
+				LOG.error("Could not connect to {}: {}", url, e.getCause()
+						.getMessage());
+				connectionSuccessful = false;
+			} catch (Exception e) {
+				LOG.error("Unknown exception when trying to connect to {}:",
+						url, e);
+				connectionSuccessful = false;
+			}
 
-            // If connection was unsuccessful, wait some time before trying again
-            if (!connectionSuccessful) {
-                Thread.sleep(reconnectPeriodSec * 1000);
-            }
+			// If connection was unsuccessful, wait some time before trying
+			// again
+			if (!connectionSuccessful) {
+				Thread.sleep(reconnectPeriodSec * 1000);
+			}
 
-            // Keep checking whether connection is still open
-            while (true) {
-                if (socket == null || !socket.isOpen()) {
-                    // The connection is closed somehow, try to reconnect
-                    if (connectionSuccessful) {
-                        LOG.warn("Connection to {} was lost. Trying to reconnect...", url);
-                    }
-                    break;
-                }
-                Thread.sleep(CHECK_CONNECTION_PERIOD_SEC * 1000);
-            }
+			// Keep checking whether connection is still open
+			while (true) {
+				if (socket == null || !socket.isOpen()) {
+					// The connection is closed somehow, try to reconnect
+					if (connectionSuccessful) {
+						LOG.warn(
+								"Connection to {} was lost. Trying to reconnect...",
+								url);
+					}
+					break;
+				}
+				Thread.sleep(CHECK_CONNECTION_PERIOD_SEC * 1000);
+			}
 
-            client.close();
-        }
-    }
+			client.close();
+		}
+	}
 
-    @Override
-    public void teardown() {
-    }
+	@Override
+	public void teardown() {
+	}
 
-    /**
-     * Auxiliary class to handle incoming messages via the websocket connection
-     */
-    private class Listener extends DefaultWebSocketListener {
-        @Override
-        public void onMessage(byte[] message) {
-            FeedMessage feedMessage = null;
-            List<FeedEntity> feedEntityList = null;
-            List<TripUpdate> updates = null;
-            try {
-                // Decode message into List of TripUpdates
-                feedMessage = FeedMessage.PARSER.parseFrom(message);
-                feedEntityList = feedMessage.getEntityList();
-                updates = new ArrayList<TripUpdate>(feedEntityList.size());
-                for (FeedEntity feedEntity : feedEntityList) {
-                    if (feedEntity.hasTripUpdate()) updates.add(feedEntity.getTripUpdate());
-                }
-            } catch (InvalidProtocolBufferException e) {
-                LOG.error("Could not decode gtfs-rt message:", e);
-            }
+	/**
+	 * Auxiliary class to handle incoming messages via the websocket connection
+	 */
+	private class Listener extends DefaultWebSocketListener {
+		@Override
+		public void onMessage(byte[] message) {
+			FeedMessage feedMessage = null;
+			List<FeedEntity> feedEntityList = null;
+			List<TripUpdate> updates = null;
+			try {
+				// Decode message into List of TripUpdates
+				feedMessage = FeedMessage.PARSER.parseFrom(message);
+				feedEntityList = feedMessage.getEntityList();
+				updates = new ArrayList<TripUpdate>(feedEntityList.size());
+				for (FeedEntity feedEntity : feedEntityList) {
+					if (feedEntity.hasTripUpdate())
+						updates.add(feedEntity.getTripUpdate());
+				}
+			} catch (InvalidProtocolBufferException e) {
+				LOG.error("Could not decode gtfs-rt message:", e);
+			}
 
-            if (updates != null && updates.size() > 0) {
-                // Handle trip updates via graph writer runnable
-                TripUpdateGraphWriterRunnable runnable = new TripUpdateGraphWriterRunnable(updates, feedId);
-                updaterManager.execute(runnable);
-            }
-        }
-    }
+			if (updates != null && updates.size() > 0) {
+				// Handle trip updates via graph writer runnable
+				TripUpdateGraphWriterRunnable runnable = new TripUpdateGraphWriterRunnable(
+						updates, feedId);
+				updaterManager.execute(runnable);
+			}
+		}
+	}
 }

@@ -24,30 +24,31 @@ import com.vividsolutions.jts.geom.LineString;
 
 public class DefaultStreetEdgeFactory implements StreetEdgeFactory {
 
-    public boolean useElevationData = false;
+	public boolean useElevationData = false;
 
-    @Override
-    public StreetEdge createEdge(IntersectionVertex startEndpoint, IntersectionVertex endEndpoint,
-            LineString geometry, String name, double length, StreetTraversalPermission permissions,
-            boolean back) {
-        StreetEdge pse;
-        if (useElevationData) {
-            pse = new StreetWithElevationEdge(startEndpoint, endEndpoint, geometry, name, length,
-                    permissions, back);
-        } else {
-            pse = new StreetEdge(startEndpoint, endEndpoint, geometry, name, length, permissions,
-                    back);
-        }
-        return pse;
-    }
+	@Override
+	public StreetEdge createEdge(IntersectionVertex startEndpoint,
+			IntersectionVertex endEndpoint, LineString geometry, String name,
+			double length, StreetTraversalPermission permissions, boolean back) {
+		StreetEdge pse;
+		if (useElevationData) {
+			pse = new StreetWithElevationEdge(startEndpoint, endEndpoint,
+					geometry, name, length, permissions, back);
+		} else {
+			pse = new StreetEdge(startEndpoint, endEndpoint, geometry, name,
+					length, permissions, back);
+		}
+		return pse;
+	}
 
-    @Override
-    public AreaEdge createAreaEdge(IntersectionVertex startEndpoint,
-            IntersectionVertex endEndpoint, LineString geometry, String name, double length,
-            StreetTraversalPermission permissions, boolean back, AreaEdgeList area) {
-        // By default AreaEdge are elevation-capable so nothing to do.
-        AreaEdge ae = new AreaEdge(startEndpoint, endEndpoint, geometry, name, length, permissions,
-                back, area);
-        return ae;
-    }
+	@Override
+	public AreaEdge createAreaEdge(IntersectionVertex startEndpoint,
+			IntersectionVertex endEndpoint, LineString geometry, String name,
+			double length, StreetTraversalPermission permissions, boolean back,
+			AreaEdgeList area) {
+		// By default AreaEdge are elevation-capable so nothing to do.
+		AreaEdge ae = new AreaEdge(startEndpoint, endEndpoint, geometry, name,
+				length, permissions, back, area);
+		return ae;
+	}
 }

@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "TripList")
 public class TripList {
-    @XmlElements(value = { @XmlElement(name = "tripMatch") })
-    public List<TripMatch> tripMatches = new ArrayList<TripMatch>();
+	@XmlElements(value = { @XmlElement(name = "tripMatch") })
+	public List<TripMatch> tripMatches = new ArrayList<TripMatch>();
 
 }

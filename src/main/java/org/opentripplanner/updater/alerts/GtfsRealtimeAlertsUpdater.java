@@ -42,88 +42,92 @@ import com.google.transit.realtime.GtfsRealtime.FeedMessage;
  * </pre>
  */
 public class GtfsRealtimeAlertsUpdater extends PollingGraphUpdater {
-    private static final Logger LOG = LoggerFactory.getLogger(GtfsRealtimeAlertsUpdater.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(GtfsRealtimeAlertsUpdater.class);
 
-    private GraphUpdaterManager updaterManager;
+	private GraphUpdaterManager updaterManager;
 
-    private Long lastTimestamp = Long.MIN_VALUE;
+	private Long lastTimestamp = Long.MIN_VALUE;
 
-    private String url;
+	private String url;
 
-    private String defaultAgencyId;
+	private String defaultAgencyId;
 
-    private AlertPatchService alertPatchService;
+	private AlertPatchService alertPatchService;
 
-    private long earlyStart;
+	private long earlyStart;
 
-    private AlertsUpdateHandler updateHandler = null;
+	private AlertsUpdateHandler updateHandler = null;
 
-    @Override
-    public void setGraphUpdaterManager(GraphUpdaterManager updaterManager) {
-        this.updaterManager = updaterManager;
-    }
+	@Override
+	public void setGraphUpdaterManager(GraphUpdaterManager updaterManager) {
+		this.updaterManager = updaterManager;
+	}
 
-    @Override
-    protected void configurePolling(Graph graph, Preferences preferences) throws Exception {
-        // TODO: add options to choose different patch services
-        AlertPatchService alertPatchService = new AlertPatchServiceImpl(graph);
-        this.alertPatchService = alertPatchService;
-        String url = preferences.get("url", null);
-        if (url == null) {
-            throw new IllegalArgumentException("Missing mandatory 'url' parameter");
-        }
-        this.url = url;
-        this.earlyStart = preferences.getInt("earlyStartSec", 0);
-        this.defaultAgencyId = preferences.get("defaultAgencyId", null);
-        LOG.info("Creating real-time alert updater running every {} seconds : {}",
-        		frequencySec, url);
-    }
+	@Override
+	protected void configurePolling(Graph graph, Preferences preferences)
+			throws Exception {
+		// TODO: add options to choose different patch services
+		AlertPatchService alertPatchService = new AlertPatchServiceImpl(graph);
+		this.alertPatchService = alertPatchService;
+		String url = preferences.get("url", null);
+		if (url == null) {
+			throw new IllegalArgumentException(
+					"Missing mandatory 'url' parameter");
+		}
+		this.url = url;
+		this.earlyStart = preferences.getInt("earlyStartSec", 0);
+		this.defaultAgencyId = preferences.get("defaultAgencyId", null);
+		LOG.info(
+				"Creating real-time alert updater running every {} seconds : {}",
+				frequencySec, url);
+	}
 
-    @Override
-    public void setup() {
-        if (updateHandler == null) {
-            updateHandler = new AlertsUpdateHandler();
-        }
-        updateHandler.setEarlyStart(earlyStart);
-        updateHandler.setDefaultAgencyId(defaultAgencyId);
-        updateHandler.setAlertPatchService(alertPatchService);
-    }
+	@Override
+	public void setup() {
+		if (updateHandler == null) {
+			updateHandler = new AlertsUpdateHandler();
+		}
+		updateHandler.setEarlyStart(earlyStart);
+		updateHandler.setDefaultAgencyId(defaultAgencyId);
+		updateHandler.setAlertPatchService(alertPatchService);
+	}
 
-    @Override
-    protected void runPolling() {
-        try {
-            InputStream data = HttpUtils.getData(url);
-            if (data == null) {
-                throw new RuntimeException("Failed to get data from url " + url);
-            }
+	@Override
+	protected void runPolling() {
+		try {
+			InputStream data = HttpUtils.getData(url);
+			if (data == null) {
+				throw new RuntimeException("Failed to get data from url " + url);
+			}
 
-            final FeedMessage feed = FeedMessage.PARSER.parseFrom(data);
+			final FeedMessage feed = FeedMessage.PARSER.parseFrom(data);
 
-            long feedTimestamp = feed.getHeader().getTimestamp();
-            if (feedTimestamp <= lastTimestamp) {
-                LOG.info("Ignoring feed with an old timestamp.");
-                return;
-            }
+			long feedTimestamp = feed.getHeader().getTimestamp();
+			if (feedTimestamp <= lastTimestamp) {
+				LOG.info("Ignoring feed with an old timestamp.");
+				return;
+			}
 
-            // Handle update in graph writer runnable
-            updaterManager.execute(new GraphWriterRunnable() {
-                @Override
-                public void run(Graph graph) {
-                    updateHandler.update(feed);
-                }
-            });
+			// Handle update in graph writer runnable
+			updaterManager.execute(new GraphWriterRunnable() {
+				@Override
+				public void run(Graph graph) {
+					updateHandler.update(feed);
+				}
+			});
 
-            lastTimestamp = feedTimestamp;
-        } catch (Exception e) {
-            LOG.error("Error reading gtfs-realtime feed from " + url, e);
-        }
-    }
+			lastTimestamp = feedTimestamp;
+		} catch (Exception e) {
+			LOG.error("Error reading gtfs-realtime feed from " + url, e);
+		}
+	}
 
-    @Override
-    public void teardown() {
-    }
+	@Override
+	public void teardown() {
+	}
 
-    public String toString() {
-        return "GtfsRealtimeUpdater(" + url + ")";
-    }
+	public String toString() {
+		return "GtfsRealtimeUpdater(" + url + ")";
+	}
 }

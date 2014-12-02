@@ -34,51 +34,58 @@ import org.opentripplanner.routing.vertextype.TransitStop;
 import org.opentripplanner.util.TestUtils;
 
 public class TestGraphPath extends TestCase {
-    
-    private Graph graph;
 
-    private GenericAStar aStar = new GenericAStar();
+	private Graph graph;
 
-    public void setUp() throws Exception {
-        GtfsContext context = GtfsLibrary.readGtfs(new File(ConstantsForTests.FAKE_GTFS));
-        graph = new Graph();
-        GTFSPatternHopFactory hl = new GTFSPatternHopFactory(context);
-        hl.run(graph);
-        graph.putService(CalendarServiceData.class, GtfsLibrary.createCalendarServiceData(context.getDao()));
-    }
+	private GenericAStar aStar = new GenericAStar();
 
-    public void testGraphPathOptimize() throws Exception {
+	public void setUp() throws Exception {
+		GtfsContext context = GtfsLibrary.readGtfs(new File(
+				ConstantsForTests.FAKE_GTFS));
+		graph = new Graph();
+		GTFSPatternHopFactory hl = new GTFSPatternHopFactory(context);
+		hl.run(graph);
+		graph.putService(CalendarServiceData.class,
+				GtfsLibrary.createCalendarServiceData(context.getDao()));
+	}
 
-        Vertex stop_a = graph.getVertex("agency:A");
-        Vertex stop_c = graph.getVertex("agency:C");
-        Vertex stop_e = graph.getVertex("agency:E");
+	public void testGraphPathOptimize() throws Exception {
 
-        ShortestPathTree spt;
-        GraphPath path;
+		Vertex stop_a = graph.getVertex("agency:A");
+		Vertex stop_c = graph.getVertex("agency:C");
+		Vertex stop_e = graph.getVertex("agency:E");
 
-        RoutingRequest options = new RoutingRequest();
-        options.dateTime = TestUtils.dateInSeconds("America/New_York", 2009, 8, 7, 0, 0, 0);
-        options.setRoutingContext(graph, stop_a.getLabel(), stop_e.getLabel());
-        spt = aStar.getShortestPathTree(options);
+		ShortestPathTree spt;
+		GraphPath path;
 
-        path = spt.getPath(stop_e, false); /* do not optimize yet, since we are testing optimization */
-        assertNotNull(path);
+		RoutingRequest options = new RoutingRequest();
+		options.dateTime = TestUtils.dateInSeconds("America/New_York", 2009, 8,
+				7, 0, 0, 0);
+		options.setRoutingContext(graph, stop_a.getLabel(), stop_e.getLabel());
+		spt = aStar.getShortestPathTree(options);
 
-        // Check that the resulting path visits the stops in the right order.
-        List<Vertex> stopvs = Lists.newArrayList();
-        for (State state : path.states) {
-            if (state.getVertex() instanceof TransitStop) {
-                stopvs.add(state.getVertex());
-            }
-        }
-        assertTrue(stopvs.get(0) == stop_a);
-        assertTrue(stopvs.get(1) == stop_c);
-        assertTrue(stopvs.get(2) == stop_e);
+		path = spt.getPath(stop_e, false); /*
+											 * do not optimize yet, since we are
+											 * testing optimization
+											 */
+		assertNotNull(path);
 
-        long bestStart = TestUtils.dateInSeconds("America/New_York", 2009, 8, 7, 0, 20, 0);
-        assertNotSame(bestStart, path.getStartTime());
+		// Check that the resulting path visits the stops in the right order.
+		List<Vertex> stopvs = Lists.newArrayList();
+		for (State state : path.states) {
+			if (state.getVertex() instanceof TransitStop) {
+				stopvs.add(state.getVertex());
+			}
+		}
+		assertTrue(stopvs.get(0) == stop_a);
+		assertTrue(stopvs.get(1) == stop_c);
+		assertTrue(stopvs.get(2) == stop_e);
 
-        path = spt.getPath(stop_e, true); /* optimize */
-        assertEquals(bestStart, path.getStartTime());
-    }
+		long bestStart = TestUtils.dateInSeconds("America/New_York", 2009, 8,
+				7, 0, 20, 0);
+		assertNotSame(bestStart, path.getStartTime());
+
+		path = spt.getPath(stop_e, true); /* optimize */
+		assertEquals(bestStart, path.getStartTime());
+	}
 }

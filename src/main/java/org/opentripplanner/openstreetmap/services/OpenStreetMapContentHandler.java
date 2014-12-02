@@ -27,33 +27,33 @@ import org.opentripplanner.openstreetmap.model.OSMWay;
 
 public interface OpenStreetMapContentHandler {
 
-  /**
-   * Stores a node.
-   */
-  public void addNode(OSMNode node);
+	/**
+	 * Stores a node.
+	 */
+	public void addNode(OSMNode node);
 
-  /**
-   * Stores a way.
-   */
-  public void addWay(OSMWay way);
+	/**
+	 * Stores a way.
+	 */
+	public void addWay(OSMWay way);
 
-  /**
-   * Stores a relation.
-   */
-  public void addRelation(OSMRelation relation);
+	/**
+	 * Stores a relation.
+	 */
+	public void addRelation(OSMRelation relation);
 
-  /**
-   * Called after the first phase, when all relations are loaded.
-   */
-  public void doneFirstPhaseRelations();
+	/**
+	 * Called after the first phase, when all relations are loaded.
+	 */
+	public void doneFirstPhaseRelations();
 
-  /**
-   * Called after the second phase, when all ways are loaded.
-   */
-  public void doneSecondPhaseWays();
+	/**
+	 * Called after the second phase, when all ways are loaded.
+	 */
+	public void doneSecondPhaseWays();
 
-  /**
-   * Called after the third and final phase, when all nodes are loaded.
-   */
-  public void doneThirdPhaseNodes();
+	/**
+	 * Called after the third and final phase, when all nodes are loaded.
+	 */
+	public void doneThirdPhaseNodes();
 }

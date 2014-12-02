@@ -17,8 +17,8 @@ import org.opentripplanner.routing.algorithm.GenericAStar;
 import org.opentripplanner.routing.core.RoutingRequest;
 
 /**
- * This strategy allows you to override the creation of a {@link GenericAStar} instance, providing a
- * point for custom configuration.
+ * This strategy allows you to override the creation of a {@link GenericAStar}
+ * instance, providing a point for custom configuration.
  * 
  * @author bdferris
  * @see GenericAStar
@@ -26,6 +26,6 @@ import org.opentripplanner.routing.core.RoutingRequest;
  */
 public interface GenericAStarFactory {
 
-    public GenericAStar createAStarInstance();
-    
+	public GenericAStar createAStarInstance();
+
 }

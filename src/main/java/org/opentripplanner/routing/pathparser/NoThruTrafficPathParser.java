@@ -27,38 +27,44 @@ import org.opentripplanner.routing.edgetype.StreetEdge;
  */
 public class NoThruTrafficPathParser extends PathParser {
 
-    private static final int TRANSIT = 1;
-    private static final int NOTRAFFIC = 2;
-    private static final int REGULAR = 3;
+	private static final int TRANSIT = 1;
+	private static final int NOTRAFFIC = 2;
+	private static final int REGULAR = 3;
 
-    // 3,4,5 come from StreetEdge.java
+	// 3,4,5 come from StreetEdge.java
 
-    private static final DFA DFA;
-    static {
+	private static final DFA DFA;
+	static {
 
-        //T*I*N*I*(T+I*N*I*)*
-        Nonterminal rule = seq(star(TRANSIT), star(NOTRAFFIC), star(REGULAR), star(NOTRAFFIC), star(plus(TRANSIT), star(NOTRAFFIC), star(REGULAR), star(NOTRAFFIC)));
-        DFA = rule.toDFA().minimize();
-        // System.out.println(DFA.toGraphViz());
-        // System.out.println(DFA.dumpTable());
-    }
+		// T*I*N*I*(T+I*N*I*)*
+		Nonterminal rule = seq(
+				star(TRANSIT),
+				star(NOTRAFFIC),
+				star(REGULAR),
+				star(NOTRAFFIC),
+				star(plus(TRANSIT), star(NOTRAFFIC), star(REGULAR),
+						star(NOTRAFFIC)));
+		DFA = rule.toDFA().minimize();
+		// System.out.println(DFA.toGraphViz());
+		// System.out.println(DFA.dumpTable());
+	}
 
-    @Override
-    protected DFA getDFA() {
-        return DFA;
-    }
+	@Override
+	protected DFA getDFA() {
+		return DFA;
+	}
 
-    @Override
-    public int terminalFor(State state) {
-        if (state.getBackEdge() instanceof StreetEdge) {
-            if (((StreetEdge)state.getBackEdge()).isNoThruTraffic()) {
-                return NOTRAFFIC;
-            } else {
-                return REGULAR;
-            }
-        } else {
-            return TRANSIT;
-        }
-    }
+	@Override
+	public int terminalFor(State state) {
+		if (state.getBackEdge() instanceof StreetEdge) {
+			if (((StreetEdge) state.getBackEdge()).isNoThruTraffic()) {
+				return NOTRAFFIC;
+			} else {
+				return REGULAR;
+			}
+		} else {
+			return TRANSIT;
+		}
+	}
 
 }

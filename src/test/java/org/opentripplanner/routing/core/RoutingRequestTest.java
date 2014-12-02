@@ -27,70 +27,71 @@ import static org.opentripplanner.routing.core.TraverseMode.CUSTOM_MOTOR_VEHICLE
 
 public class RoutingRequestTest {
 
-    private GenericLocation randomLocation() {
-        return new GenericLocation(Math.random(), Math.random());
-    }
+	private GenericLocation randomLocation() {
+		return new GenericLocation(Math.random(), Math.random());
+	}
 
-    @Test
-    public void testRequest() {
-        RoutingRequest request = new RoutingRequest();
+	@Test
+	public void testRequest() {
+		RoutingRequest request = new RoutingRequest();
 
-        request.addMode(CAR);
-        assertTrue(request.modes.getCar());
-        request.removeMode(CAR);
-        assertFalse(request.modes.getCar());
+		request.addMode(CAR);
+		assertTrue(request.modes.getCar());
+		request.removeMode(CAR);
+		assertFalse(request.modes.getCar());
 
-        request.addMode(CUSTOM_MOTOR_VEHICLE);
-        assertFalse(request.modes.getCar());
-        assertTrue(request.modes.getDriving());
-        request.removeMode(CUSTOM_MOTOR_VEHICLE);
-        assertFalse(request.modes.getCar());
-        assertFalse(request.modes.getDriving());
+		request.addMode(CUSTOM_MOTOR_VEHICLE);
+		assertFalse(request.modes.getCar());
+		assertTrue(request.modes.getDriving());
+		request.removeMode(CUSTOM_MOTOR_VEHICLE);
+		assertFalse(request.modes.getCar());
+		assertFalse(request.modes.getDriving());
 
-        request.setModes(new TraverseModeSet("BICYCLE,WALK"));
-        assertFalse(request.modes.getCar());
-        assertTrue(request.modes.getBicycle());
-        assertTrue(request.modes.getWalk());
-    }
+		request.setModes(new TraverseModeSet("BICYCLE,WALK"));
+		assertFalse(request.modes.getCar());
+		assertTrue(request.modes.getBicycle());
+		assertTrue(request.modes.getWalk());
+	}
 
-    @Test
-    public void testIntermediatePlaces() {
-        RoutingRequest req = new RoutingRequest();
-        assertFalse(req.hasIntermediatePlaces());
-        assertFalse(req.intermediatesEffectivelyOrdered());
-        
-        req.clearIntermediatePlaces();
-        assertFalse(req.hasIntermediatePlaces());
-        assertFalse(req.intermediatesEffectivelyOrdered());
-        
-        req.addIntermediatePlace(randomLocation());
-        assertTrue(req.hasIntermediatePlaces());
-        
-        // There is only one intermediate, so they are effectively ordered.
-        assertTrue(req.intermediatesEffectivelyOrdered());
-        
-        req.clearIntermediatePlaces();
-        assertFalse(req.hasIntermediatePlaces());
-        assertFalse(req.intermediatesEffectivelyOrdered());
-        
-        req.addIntermediatePlace(randomLocation());
-        req.addIntermediatePlace(randomLocation());
-        assertTrue(req.hasIntermediatePlaces());
-        assertFalse(req.intermediatesEffectivelyOrdered());
-        
-        req.intermediatePlacesOrdered = true;
-        assertTrue(req.intermediatesEffectivelyOrdered());        
-    }
+	@Test
+	public void testIntermediatePlaces() {
+		RoutingRequest req = new RoutingRequest();
+		assertFalse(req.hasIntermediatePlaces());
+		assertFalse(req.intermediatesEffectivelyOrdered());
 
-    @Test
-    public void testPreferencesPenaltyForRoute() {
-        AgencyAndId agencyAndId = new AgencyAndId();
-        Route route = new Route();
-        Trip trip = new Trip();
-        RoutingRequest routingRequest = new RoutingRequest();
+		req.clearIntermediatePlaces();
+		assertFalse(req.hasIntermediatePlaces());
+		assertFalse(req.intermediatesEffectivelyOrdered());
 
-        trip.setRoute(route);
-        route.setId(agencyAndId);
-        assertEquals(0, routingRequest.preferencesPenaltyForRoute(trip.getRoute()));
-    }
+		req.addIntermediatePlace(randomLocation());
+		assertTrue(req.hasIntermediatePlaces());
+
+		// There is only one intermediate, so they are effectively ordered.
+		assertTrue(req.intermediatesEffectivelyOrdered());
+
+		req.clearIntermediatePlaces();
+		assertFalse(req.hasIntermediatePlaces());
+		assertFalse(req.intermediatesEffectivelyOrdered());
+
+		req.addIntermediatePlace(randomLocation());
+		req.addIntermediatePlace(randomLocation());
+		assertTrue(req.hasIntermediatePlaces());
+		assertFalse(req.intermediatesEffectivelyOrdered());
+
+		req.intermediatePlacesOrdered = true;
+		assertTrue(req.intermediatesEffectivelyOrdered());
+	}
+
+	@Test
+	public void testPreferencesPenaltyForRoute() {
+		AgencyAndId agencyAndId = new AgencyAndId();
+		Route route = new Route();
+		Trip trip = new Trip();
+		RoutingRequest routingRequest = new RoutingRequest();
+
+		trip.setRoute(route);
+		route.setId(agencyAndId);
+		assertEquals(0,
+				routingRequest.preferencesPenaltyForRoute(trip.getRoute()));
+	}
 }

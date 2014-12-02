@@ -17,29 +17,29 @@ import org.onebusaway.gtfs.model.Trip;
 
 public class HopSpeedFast extends GraphBuilderAnnotation {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public static final String FMT = "Excessive speed of %f m/sec over %fm on route %s trip %s " +
-    		"stop sequence %d.";
-    
-    final float speed;
+	public static final String FMT = "Excessive speed of %f m/sec over %fm on route %s trip %s "
+			+ "stop sequence %d.";
 
-    final float distance;
-    
-    final Trip trip;
-    
-    final int seq;
-    
-    public HopSpeedFast(float speed, float distance, Trip trip, int seq){
-    	this.speed = speed;
-    	this.distance = distance;
-    	this.trip = trip;
-    	this.seq = seq;
-    }
-    
-    @Override
-    public String getMessage() {
-        return String.format(FMT, speed, distance, trip.getRoute(), trip, seq);
-    }
+	final float speed;
+
+	final float distance;
+
+	final Trip trip;
+
+	final int seq;
+
+	public HopSpeedFast(float speed, float distance, Trip trip, int seq) {
+		this.speed = speed;
+		this.distance = distance;
+		this.trip = trip;
+		this.seq = seq;
+	}
+
+	@Override
+	public String getMessage() {
+		return String.format(FMT, speed, distance, trip.getRoute(), trip, seq);
+	}
 
 }

@@ -28,51 +28,54 @@ import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 
-public class GtfsRealtimeHttpTripUpdateSource implements TripUpdateSource, PreferencesConfigurable {
-    private static final Logger LOG =
-            LoggerFactory.getLogger(GtfsRealtimeHttpTripUpdateSource.class);
+public class GtfsRealtimeHttpTripUpdateSource implements TripUpdateSource,
+		PreferencesConfigurable {
+	private static final Logger LOG = LoggerFactory
+			.getLogger(GtfsRealtimeHttpTripUpdateSource.class);
 
-    /**
-     * Default agency id that is used for the trip ids in the TripUpdates
-     */
-    private String agencyId;
+	/**
+	 * Default agency id that is used for the trip ids in the TripUpdates
+	 */
+	private String agencyId;
 
-    private String url;
+	private String url;
 
-    @Override
-    public void configure(Graph graph, Preferences preferences) throws Exception {
-        String url = preferences.get("url", null);
-        if (url == null) {
-            throw new IllegalArgumentException("Missing mandatory 'url' parameter");
-        }
-        this.url = url;
-        this.agencyId = preferences.get("defaultAgencyId", null);
-    }
+	@Override
+	public void configure(Graph graph, Preferences preferences)
+			throws Exception {
+		String url = preferences.get("url", null);
+		if (url == null) {
+			throw new IllegalArgumentException(
+					"Missing mandatory 'url' parameter");
+		}
+		this.url = url;
+		this.agencyId = preferences.get("defaultAgencyId", null);
+	}
 
-    @Override
-    public List<TripUpdate> getUpdates() {
-        FeedMessage feedMessage = null;
-        List<FeedEntity> feedEntityList = null;
-        List<TripUpdate> updates = null;
-        try {
-            InputStream is = HttpUtils.getData(url);
-            if (is != null) {
-                feedMessage = FeedMessage.PARSER.parseFrom(is);
-                feedEntityList = feedMessage.getEntityList();
-                updates = new ArrayList<TripUpdate>(feedEntityList.size());
-                for (FeedEntity feedEntity : feedEntityList) {
-                    updates.add(feedEntity.getTripUpdate());
-                }
-            }
-        } catch (Exception e) {
-            LOG.warn("Failed to parse gtfs-rt feed from " + url + ":", e);
-        }
-        return updates;
-    }
+	@Override
+	public List<TripUpdate> getUpdates() {
+		FeedMessage feedMessage = null;
+		List<FeedEntity> feedEntityList = null;
+		List<TripUpdate> updates = null;
+		try {
+			InputStream is = HttpUtils.getData(url);
+			if (is != null) {
+				feedMessage = FeedMessage.PARSER.parseFrom(is);
+				feedEntityList = feedMessage.getEntityList();
+				updates = new ArrayList<TripUpdate>(feedEntityList.size());
+				for (FeedEntity feedEntity : feedEntityList) {
+					updates.add(feedEntity.getTripUpdate());
+				}
+			}
+		} catch (Exception e) {
+			LOG.warn("Failed to parse gtfs-rt feed from " + url + ":", e);
+		}
+		return updates;
+	}
 
-    public String toString() {
-        return "GtfsRealtimeHttpUpdateStreamer(" + url + ")";
-    }
+	public String toString() {
+		return "GtfsRealtimeHttpUpdateStreamer(" + url + ")";
+	}
 
 	@Override
 	public String getAgencyId() {

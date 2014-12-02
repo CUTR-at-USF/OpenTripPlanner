@@ -27,7 +27,7 @@ import com.vividsolutions.jts.geom.Geometry;
  * We can use this if we patch the graph to remove the stop from the
  * trip/pattern.
  */
-public class RouteSegment implements Serializable  {
+public class RouteSegment implements Serializable {
 	private static final long serialVersionUID = -3486047425509893460L;
 	public Edge hopIn;
 	public Edge hopOut;
@@ -35,12 +35,13 @@ public class RouteSegment implements Serializable  {
 	public Edge alight;
 	public Edge dwell;
 	public AgencyAndId stop;
+
 	public RouteSegment(AgencyAndId stop) {
 		this.stop = stop;
 	}
 
-	@JsonSerialize(using=GeoJSONSerializer.class)
+	@JsonSerialize(using = GeoJSONSerializer.class)
 	public Geometry getGeometry() {
-	    return hopOut.getGeometry();
+		return hopOut.getGeometry();
 	}
 }

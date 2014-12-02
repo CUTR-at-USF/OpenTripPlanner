@@ -19,42 +19,47 @@ import org.opentripplanner.routing.graph.Vertex;
 import org.opentripplanner.routing.services.RemainingWeightHeuristicFactory;
 
 /**
- * A trivial heuristic that always returns 0, which is always admissible. 
- * For use in testing and troubleshooting.
+ * A trivial heuristic that always returns 0, which is always admissible. For
+ * use in testing and troubleshooting.
  * 
  * @author andrewbyrd
  */
-public class TrivialRemainingWeightHeuristic implements RemainingWeightHeuristic {
+public class TrivialRemainingWeightHeuristic implements
+		RemainingWeightHeuristic {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    @Override
-    public void initialize(RoutingRequest options, Vertex origin, Vertex target, long abortTime) {}
+	@Override
+	public void initialize(RoutingRequest options, Vertex origin,
+			Vertex target, long abortTime) {
+	}
 
-    @Override
-    public double computeForwardWeight(State s, Vertex target) {
-        return 0;
-    }
+	@Override
+	public double computeForwardWeight(State s, Vertex target) {
+		return 0;
+	}
 
-    @Override
-    public double computeReverseWeight(State s, Vertex target) {
-        return 0;
-    }
+	@Override
+	public double computeReverseWeight(State s, Vertex target) {
+		return 0;
+	}
 
-    /** 
-     * Factory that turns off goal-direction heuristics in OTP for comparison. 
-     * results should be identical when heuristics are switched off.
-     */
-    public static class Factory implements RemainingWeightHeuristicFactory {
-        @Override
-        public RemainingWeightHeuristic getInstanceForSearch(RoutingRequest opt) {
-            return new TrivialRemainingWeightHeuristic();
-        }
-    }
+	/**
+	 * Factory that turns off goal-direction heuristics in OTP for comparison.
+	 * results should be identical when heuristics are switched off.
+	 */
+	public static class Factory implements RemainingWeightHeuristicFactory {
+		@Override
+		public RemainingWeightHeuristic getInstanceForSearch(RoutingRequest opt) {
+			return new TrivialRemainingWeightHeuristic();
+		}
+	}
 
-    @Override
-    public void reset() {}
-    
-    @Override
-    public void doSomeWork() {}
+	@Override
+	public void reset() {
+	}
+
+	@Override
+	public void doSomeWork() {
+	}
 }

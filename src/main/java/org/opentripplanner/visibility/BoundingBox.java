@@ -24,5 +24,5 @@
 package org.opentripplanner.visibility;
 
 class BoundingBox {
-    double x_min, x_max, y_min, y_max;
+	double x_min, x_max, y_min, y_max;
 }

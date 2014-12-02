@@ -36,76 +36,89 @@ import org.opentripplanner.util.TestUtils;
 
 public class TestFares extends TestCase {
 
-    private GenericAStar aStar = new GenericAStar();
-    
-    public void testBasic() throws Exception {
+	private GenericAStar aStar = new GenericAStar();
 
-        Graph gg = new Graph();
-        GtfsContext context = GtfsLibrary.readGtfs(new File(ConstantsForTests.CALTRAIN_GTFS));
-        GTFSPatternHopFactory factory = new GTFSPatternHopFactory(context);
-        factory.run(gg);
-        gg.putService(CalendarServiceData.class, GtfsLibrary.createCalendarServiceData(context.getDao()));
-        RoutingRequest options = new RoutingRequest();
-        long startTime = TestUtils.dateInSeconds("America/Los_Angeles", 2009, 8, 7, 12, 0, 0);
-        options.dateTime = startTime;
-        options.setRoutingContext(gg, "Caltrain:Millbrae Caltrain", "Caltrain:Mountain View Caltrain");
-        ShortestPathTree spt;
-        GraphPath path = null;
-        spt = aStar.getShortestPathTree(options);
+	public void testBasic() throws Exception {
 
-        path = spt.getPath(gg.getVertex("Caltrain:Mountain View Caltrain"), true);
+		Graph gg = new Graph();
+		GtfsContext context = GtfsLibrary.readGtfs(new File(
+				ConstantsForTests.CALTRAIN_GTFS));
+		GTFSPatternHopFactory factory = new GTFSPatternHopFactory(context);
+		factory.run(gg);
+		gg.putService(CalendarServiceData.class,
+				GtfsLibrary.createCalendarServiceData(context.getDao()));
+		RoutingRequest options = new RoutingRequest();
+		long startTime = TestUtils.dateInSeconds("America/Los_Angeles", 2009,
+				8, 7, 12, 0, 0);
+		options.dateTime = startTime;
+		options.setRoutingContext(gg, "Caltrain:Millbrae Caltrain",
+				"Caltrain:Mountain View Caltrain");
+		ShortestPathTree spt;
+		GraphPath path = null;
+		spt = aStar.getShortestPathTree(options);
 
-        FareService fareService = gg.getService(FareService.class);
-        
-        Fare cost = fareService.getCost(path);
-        assertEquals(cost.getFare(FareType.regular), new Money(new WrappedCurrency("USD"), 425));
-    }
+		path = spt.getPath(gg.getVertex("Caltrain:Mountain View Caltrain"),
+				true);
 
-    public void testPortland() throws Exception {
+		FareService fareService = gg.getService(FareService.class);
 
-        Graph gg = ConstantsForTests.getInstance().getPortlandGraph();
-        RoutingRequest options = new RoutingRequest();
-        ShortestPathTree spt;
-        GraphPath path = null;
-        long startTime = TestUtils.dateInSeconds("America/Los_Angeles", 2009, 11, 1, 12, 0, 0);
-        options.dateTime = startTime;
-        options.setRoutingContext(gg, "TriMet:10579", "TriMet:8371");
-        // from zone 3 to zone 2
-        spt = aStar.getShortestPathTree(options);
+		Fare cost = fareService.getCost(path);
+		assertEquals(cost.getFare(FareType.regular), new Money(
+				new WrappedCurrency("USD"), 425));
+	}
 
-        path = spt.getPath(gg.getVertex("TriMet:8371"), true);
-        assertNotNull(path);
+	public void testPortland() throws Exception {
 
-        FareService fareService = gg.getService(FareService.class);
-        Fare cost = fareService.getCost(path);
-        assertEquals(new Money(new WrappedCurrency("USD"), 200), cost.getFare(FareType.regular));
+		Graph gg = ConstantsForTests.getInstance().getPortlandGraph();
+		RoutingRequest options = new RoutingRequest();
+		ShortestPathTree spt;
+		GraphPath path = null;
+		long startTime = TestUtils.dateInSeconds("America/Los_Angeles", 2009,
+				11, 1, 12, 0, 0);
+		options.dateTime = startTime;
+		options.setRoutingContext(gg, "TriMet:10579", "TriMet:8371");
+		// from zone 3 to zone 2
+		spt = aStar.getShortestPathTree(options);
 
-        // long trip
+		path = spt.getPath(gg.getVertex("TriMet:8371"), true);
+		assertNotNull(path);
 
-        startTime = TestUtils.dateInSeconds("America/Los_Angeles", 2009, 11, 1, 14, 0, 0);
-        options.dateTime = startTime;
-        options.setRoutingContext(gg, "TriMet:8389", "TriMet:1252");
-        spt = aStar.getShortestPathTree(options);
+		FareService fareService = gg.getService(FareService.class);
+		Fare cost = fareService.getCost(path);
+		assertEquals(new Money(new WrappedCurrency("USD"), 200),
+				cost.getFare(FareType.regular));
 
-        path = spt.getPath(gg.getVertex("TriMet:1252"), true);
-        assertNotNull(path);
-        cost = fareService.getCost(path);
-        
-        //assertEquals(cost.getFare(FareType.regular), new Money(new WrappedCurrency("USD"), 460));
-        
-        // complex trip
-        options.maxTransfers = 5;
-        startTime = TestUtils.dateInSeconds("America/Los_Angeles", 2009, 11, 1, 14, 0, 0);
-        options.dateTime = startTime;
-        options.setRoutingContext(gg, "TriMet:10428", "TriMet:4231");
-        spt = aStar.getShortestPathTree(options);
+		// long trip
 
-        path = spt.getPath(gg.getVertex("TriMet:4231"), true);
-        assertNotNull(path);
-        cost = fareService.getCost(path);
-        //
-        // this is commented out because portland's fares are, I think, broken in the gtfs. see
-        // thread on gtfs-changes.
-        // assertEquals(cost.getFare(FareType.regular), new Money(new WrappedCurrency("USD"), 430));
-    }
+		startTime = TestUtils.dateInSeconds("America/Los_Angeles", 2009, 11, 1,
+				14, 0, 0);
+		options.dateTime = startTime;
+		options.setRoutingContext(gg, "TriMet:8389", "TriMet:1252");
+		spt = aStar.getShortestPathTree(options);
+
+		path = spt.getPath(gg.getVertex("TriMet:1252"), true);
+		assertNotNull(path);
+		cost = fareService.getCost(path);
+
+		// assertEquals(cost.getFare(FareType.regular), new Money(new
+		// WrappedCurrency("USD"), 460));
+
+		// complex trip
+		options.maxTransfers = 5;
+		startTime = TestUtils.dateInSeconds("America/Los_Angeles", 2009, 11, 1,
+				14, 0, 0);
+		options.dateTime = startTime;
+		options.setRoutingContext(gg, "TriMet:10428", "TriMet:4231");
+		spt = aStar.getShortestPathTree(options);
+
+		path = spt.getPath(gg.getVertex("TriMet:4231"), true);
+		assertNotNull(path);
+		cost = fareService.getCost(path);
+		//
+		// this is commented out because portland's fares are, I think, broken
+		// in the gtfs. see
+		// thread on gtfs-changes.
+		// assertEquals(cost.getFare(FareType.regular), new Money(new
+		// WrappedCurrency("USD"), 430));
+	}
 }

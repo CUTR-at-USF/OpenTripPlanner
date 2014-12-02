@@ -23,22 +23,22 @@ import org.opentripplanner.routing.alertpatch.Alert;
  * @author laurent
  */
 public class MatcherAndAlert implements Serializable {
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public MatcherAndAlert(NoteMatcher matcher, Alert note) {
-        this.matcher = matcher;
-        this.note = note;
-    }
+	public MatcherAndAlert(NoteMatcher matcher, Alert note) {
+		this.matcher = matcher;
+		this.note = note;
+	}
 
-    private NoteMatcher matcher;
+	private NoteMatcher matcher;
 
-    private Alert note;
+	private Alert note;
 
-    public NoteMatcher getMatcher() {
-        return matcher;
-    }
+	public NoteMatcher getMatcher() {
+		return matcher;
+	}
 
-    public Alert getNote() {
-        return note;
-    }
+	public Alert getNote() {
+		return note;
+	}
 }

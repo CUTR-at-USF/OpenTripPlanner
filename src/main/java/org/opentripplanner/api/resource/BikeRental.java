@@ -39,47 +39,53 @@ import com.vividsolutions.jts.geom.Envelope;
 @XmlRootElement
 public class BikeRental {
 
-    @Context
-    OTPServer server;
+	@Context
+	OTPServer server;
 
-    @GET
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML + Q, MediaType.TEXT_XML + Q })
-    public BikeRentalStationList getBikeRentalStations(
-            @QueryParam("lowerLeft") String lowerLeft,
-            @QueryParam("upperRight") String upperRight,
-            @PathParam("routerId") String routerId) {
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML + Q,
+			MediaType.TEXT_XML + Q })
+	public BikeRentalStationList getBikeRentalStations(
+			@QueryParam("lowerLeft") String lowerLeft,
+			@QueryParam("upperRight") String upperRight,
+			@PathParam("routerId") String routerId) {
 
-        Graph graph = server.graphService.getGraph(routerId);
-        if (graph == null) return null;
-        BikeRentalStationService bikeRentalService = graph.getService(BikeRentalStationService.class);
-        if (bikeRentalService == null) return new BikeRentalStationList();
-        Envelope envelope;
-        if (lowerLeft != null) {
-            envelope = getEnvelope(lowerLeft, upperRight);
-        } else {
-            envelope = new Envelope(-180,180,-90,90); 
-        }
-        Collection<BikeRentalStation> stations = bikeRentalService.getBikeRentalStations();
-        List<BikeRentalStation> out = new ArrayList<BikeRentalStation>();
-        for (BikeRentalStation station : stations) {
-            if (envelope.contains(station.x, station.y)) {
-                out.add(station);
-            }
-        }
-        BikeRentalStationList brsl = new BikeRentalStationList();
-        brsl.stations = out;
-        return brsl;
-    }
+		Graph graph = server.graphService.getGraph(routerId);
+		if (graph == null)
+			return null;
+		BikeRentalStationService bikeRentalService = graph
+				.getService(BikeRentalStationService.class);
+		if (bikeRentalService == null)
+			return new BikeRentalStationList();
+		Envelope envelope;
+		if (lowerLeft != null) {
+			envelope = getEnvelope(lowerLeft, upperRight);
+		} else {
+			envelope = new Envelope(-180, 180, -90, 90);
+		}
+		Collection<BikeRentalStation> stations = bikeRentalService
+				.getBikeRentalStations();
+		List<BikeRentalStation> out = new ArrayList<BikeRentalStation>();
+		for (BikeRentalStation station : stations) {
+			if (envelope.contains(station.x, station.y)) {
+				out.add(station);
+			}
+		}
+		BikeRentalStationList brsl = new BikeRentalStationList();
+		brsl.stations = out;
+		return brsl;
+	}
 
-    /** Envelopes are in latitude, longitude format */
-    public static Envelope getEnvelope(String lowerLeft, String upperRight) {
-        String[] lowerLeftParts = lowerLeft.split(",");
-        String[] upperRightParts = upperRight.split(",");
+	/** Envelopes are in latitude, longitude format */
+	public static Envelope getEnvelope(String lowerLeft, String upperRight) {
+		String[] lowerLeftParts = lowerLeft.split(",");
+		String[] upperRightParts = upperRight.split(",");
 
-        Envelope envelope = new Envelope(Double.parseDouble(lowerLeftParts[1]),
-                Double.parseDouble(upperRightParts[1]), Double.parseDouble(lowerLeftParts[0]),
-                Double.parseDouble(upperRightParts[0]));
-        return envelope;
-    }
+		Envelope envelope = new Envelope(Double.parseDouble(lowerLeftParts[1]),
+				Double.parseDouble(upperRightParts[1]),
+				Double.parseDouble(lowerLeftParts[0]),
+				Double.parseDouble(upperRightParts[0]));
+		return envelope;
+	}
 
 }

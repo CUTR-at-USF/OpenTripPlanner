@@ -24,18 +24,20 @@ import com.vividsolutions.jts.geom.LineString;
 /**
  * Edge factory to build StreetEdge and AreaEdge.
  * 
- * We use a factory to be able to build either StreetEdge or StreetWithElevationEdge, depending on
- * whether you want elevation data later on or not.
+ * We use a factory to be able to build either StreetEdge or
+ * StreetWithElevationEdge, depending on whether you want elevation data later
+ * on or not.
  * 
  */
 public interface StreetEdgeFactory {
 
-    public StreetEdge createEdge(IntersectionVertex startEndpoint, IntersectionVertex endEndpoint,
-            LineString geometry, String name, double length, StreetTraversalPermission permissions,
-            boolean back);
+	public StreetEdge createEdge(IntersectionVertex startEndpoint,
+			IntersectionVertex endEndpoint, LineString geometry, String name,
+			double length, StreetTraversalPermission permissions, boolean back);
 
-    public AreaEdge createAreaEdge(IntersectionVertex startEndpoint,
-            IntersectionVertex endEndpoint, LineString geometry, String name, double length,
-            StreetTraversalPermission permissions, boolean back, AreaEdgeList area);
+	public AreaEdge createAreaEdge(IntersectionVertex startEndpoint,
+			IntersectionVertex endEndpoint, LineString geometry, String name,
+			double length, StreetTraversalPermission permissions, boolean back,
+			AreaEdgeList area);
 
 }

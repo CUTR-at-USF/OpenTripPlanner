@@ -26,86 +26,90 @@ import org.opentripplanner.routing.graph.Graph;
 
 public class ConstantsForTests {
 
-    public static final String CALTRAIN_GTFS = "src/test/resources/caltrain_gtfs.zip";
+	public static final String CALTRAIN_GTFS = "src/test/resources/caltrain_gtfs.zip";
 
-    public static final String PORTLAND_GTFS = "src/test/resources/google_transit.zip";
+	public static final String PORTLAND_GTFS = "src/test/resources/google_transit.zip";
 
-    public static final String FAKE_GTFS = "src/test/resources/testagency.zip";
-    public static final String FAKE_Freq_GTFS = "src/test/resources/testFrequencyGTFS.zip";
+	public static final String FAKE_GTFS = "src/test/resources/testagency.zip";
+	public static final String FAKE_Freq_GTFS = "src/test/resources/testFrequencyGTFS.zip";
 
-    public static final String GENERATED_GTFS = "src/test/resources/generated.gtfs.zip";
+	public static final String GENERATED_GTFS = "src/test/resources/generated.gtfs.zip";
 
-    public static final double WALKING_SPEED = 1.33; // meters/sec
-                                                     // (http://en.wikipedia.org/wiki/Walking),
+	public static final double WALKING_SPEED = 1.33; // meters/sec
+														// (http://en.wikipedia.org/wiki/Walking),
 
-    // roughly 3mph
+	// roughly 3mph
 
-    public static final String NY_GTFS = "src/test/resources/subway.zip";
+	public static final String NY_GTFS = "src/test/resources/subway.zip";
 
-    private static ConstantsForTests instance = null;
+	private static ConstantsForTests instance = null;
 
-    private Graph portlandGraph = null;
+	private Graph portlandGraph = null;
 
-    private GtfsContext portlandContext = null;
+	private GtfsContext portlandContext = null;
 
-    private ConstantsForTests() {
+	private ConstantsForTests() {
 
-    }
+	}
 
-    public static ConstantsForTests getInstance() {
-        if (instance == null) {
-            instance = new ConstantsForTests();
-        }
-        return instance;
-    }
+	public static ConstantsForTests getInstance() {
+		if (instance == null) {
+			instance = new ConstantsForTests();
+		}
+		return instance;
+	}
 
-    public GtfsContext getPortlandContext() {
-        if (portlandGraph == null) {
-            setupPortland();
-        }
-        return portlandContext;
-    }
+	public GtfsContext getPortlandContext() {
+		if (portlandGraph == null) {
+			setupPortland();
+		}
+		return portlandContext;
+	}
 
-    public Graph getPortlandGraph() {
-        if (portlandGraph == null) {
-            setupPortland();
-        }
-        return portlandGraph;
-    }
+	public Graph getPortlandGraph() {
+		if (portlandGraph == null) {
+			setupPortland();
+		}
+		return portlandGraph;
+	}
 
-    private void setupPortland() {
-        try {
-            portlandContext = GtfsLibrary.readGtfs(new File(ConstantsForTests.PORTLAND_GTFS));
-            portlandGraph = new Graph();
-            GTFSPatternHopFactory factory = new GTFSPatternHopFactory(portlandContext);
-            factory.run(portlandGraph);
-            TransferGraphLinker linker = new TransferGraphLinker(portlandGraph);
-            linker.run();
-            // TODO: eliminate GTFSContext
-            // this is now making a duplicate calendarservicedata but it's oh so practical
-            portlandGraph.putService(CalendarServiceData.class, 
-                    GtfsLibrary.createCalendarServiceData(portlandContext.getDao()));
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-        NetworkLinker nl = new NetworkLinker(portlandGraph);
-        nl.createLinkage();
-    }
-    
-    public static Graph buildGraph(String path) {
-        GtfsContext context;
-        try {
-            context = GtfsLibrary.readGtfs(new File(path));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-        Graph graph = new Graph();
-        GTFSPatternHopFactory factory = new GTFSPatternHopFactory(context);
-        factory.run(graph);
-        graph.putService(CalendarServiceData.class, GtfsLibrary.createCalendarServiceData(context.getDao()));
-        return graph;
-    }
+	private void setupPortland() {
+		try {
+			portlandContext = GtfsLibrary.readGtfs(new File(
+					ConstantsForTests.PORTLAND_GTFS));
+			portlandGraph = new Graph();
+			GTFSPatternHopFactory factory = new GTFSPatternHopFactory(
+					portlandContext);
+			factory.run(portlandGraph);
+			TransferGraphLinker linker = new TransferGraphLinker(portlandGraph);
+			linker.run();
+			// TODO: eliminate GTFSContext
+			// this is now making a duplicate calendarservicedata but it's oh so
+			// practical
+			portlandGraph.putService(CalendarServiceData.class, GtfsLibrary
+					.createCalendarServiceData(portlandContext.getDao()));
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+		NetworkLinker nl = new NetworkLinker(portlandGraph);
+		nl.createLinkage();
+	}
+
+	public static Graph buildGraph(String path) {
+		GtfsContext context;
+		try {
+			context = GtfsLibrary.readGtfs(new File(path));
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+		Graph graph = new Graph();
+		GTFSPatternHopFactory factory = new GTFSPatternHopFactory(context);
+		factory.run(graph);
+		graph.putService(CalendarServiceData.class,
+				GtfsLibrary.createCalendarServiceData(context.getDao()));
+		return graph;
+	}
 
 }

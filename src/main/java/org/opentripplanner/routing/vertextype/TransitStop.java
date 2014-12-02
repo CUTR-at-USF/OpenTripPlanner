@@ -10,7 +10,7 @@
 
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package org.opentripplanner.routing.vertextype;
 
 import org.onebusaway.gtfs.model.Stop;
@@ -21,69 +21,70 @@ import org.opentripplanner.routing.graph.Edge;
 import org.opentripplanner.routing.graph.Graph;
 
 public class TransitStop extends TransitStationStop {
-    private TraverseModeSet modes = new TraverseModeSet();
+	private TraverseModeSet modes = new TraverseModeSet();
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private boolean wheelchairEntrance;
+	private boolean wheelchairEntrance;
 
-    private boolean isEntrance;
+	private boolean isEntrance;
 
-    /**
-     * For stops that are deep underground, there is a time cost to entering and exiting the stop;
-     * all stops are assumed to be at street level unless we have configuration to the contrary
-     */
-    private int streetToStopTime = 0;
+	/**
+	 * For stops that are deep underground, there is a time cost to entering and
+	 * exiting the stop; all stops are assumed to be at street level unless we
+	 * have configuration to the contrary
+	 */
+	private int streetToStopTime = 0;
 
-    /*
-      We sometimes want a reference to a TransitStop's corresponding arrive or depart vertex.
-      Rather than making a Map in the GraphIndex, we just store them here.
-      This should also help make the GTFS-loading context object unnecessary, and eventually help
-      eliminate explicit transit edges.
-    */
-    public TransitStopArrive arriveVertex;
-    public TransitStopDepart departVertex;
+	/*
+	 * We sometimes want a reference to a TransitStop's corresponding arrive or
+	 * depart vertex. Rather than making a Map in the GraphIndex, we just store
+	 * them here. This should also help make the GTFS-loading context object
+	 * unnecessary, and eventually help eliminate explicit transit edges.
+	 */
+	public TransitStopArrive arriveVertex;
+	public TransitStopDepart departVertex;
 
-    public TransitStop(Graph graph, Stop stop) {
-        super(graph, stop);
-        this.wheelchairEntrance = stop.getWheelchairBoarding() != 2;
-        isEntrance = stop.getLocationType() == 2;
-    }
+	public TransitStop(Graph graph, Stop stop) {
+		super(graph, stop);
+		this.wheelchairEntrance = stop.getWheelchairBoarding() != 2;
+		isEntrance = stop.getLocationType() == 2;
+	}
 
-    public boolean hasWheelchairEntrance() {
-        return wheelchairEntrance;
-    }
+	public boolean hasWheelchairEntrance() {
+		return wheelchairEntrance;
+	}
 
-    public boolean isEntrance() {
-        return isEntrance;
-    }
+	public boolean isEntrance() {
+		return isEntrance;
+	}
 
-    public boolean hasEntrances() {
-        for (Edge e : this.getOutgoing()) {
-            if (e instanceof PathwayEdge) {
-                return true;
-            }
-        }
-        return false;
-    }
+	public boolean hasEntrances() {
+		for (Edge e : this.getOutgoing()) {
+			if (e instanceof PathwayEdge) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-    public int getStreetToStopTime() {
-        return streetToStopTime;
-    }
+	public int getStreetToStopTime() {
+		return streetToStopTime;
+	}
 
-    public void setStreetToStopTime(int streetToStopTime) {
-        this.streetToStopTime = streetToStopTime;
-    }
+	public void setStreetToStopTime(int streetToStopTime) {
+		this.streetToStopTime = streetToStopTime;
+	}
 
-    public TraverseModeSet getModes() {
-        return modes;
-    }
+	public TraverseModeSet getModes() {
+		return modes;
+	}
 
-    public void addMode(TraverseMode mode) {
-        modes.setMode(mode, true);
-    }
-    
-    public boolean isStreetLinkable() {
-        return isEntrance() || !hasEntrances();
-    }
+	public void addMode(TraverseMode mode) {
+		modes.setMode(mode, true);
+	}
+
+	public boolean isStreetLinkable() {
+		return isEntrance() || !hasEntrances();
+	}
 }

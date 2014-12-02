@@ -17,18 +17,17 @@ import java.util.Collection;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-
 public class GeocoderMultipleResultsStubImpl implements Geocoder {
-    
-    private Collection<GeocoderResult> results;
 
-    public GeocoderMultipleResultsStubImpl(Collection<GeocoderResult> results) {
-        this.results = results;
-    }
+	private Collection<GeocoderResult> results;
 
-    @Override
-    public GeocoderResults geocode(String address, Envelope bbox) {
-        return new GeocoderResults(results);
-    }
+	public GeocoderMultipleResultsStubImpl(Collection<GeocoderResult> results) {
+		this.results = results;
+	}
+
+	@Override
+	public GeocoderResults geocode(String address, Envelope bbox) {
+		return new GeocoderResults(results);
+	}
 
 }

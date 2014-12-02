@@ -24,7 +24,6 @@ import org.opentripplanner.routing.core.TraverseMode;
 public class ModeList {
 
 	@XmlElementWrapper
-	public
-	List<TraverseMode> modes;
-	
+	public List<TraverseMode> modes;
+
 }

@@ -32,20 +32,21 @@ public class GeometryDeserializer extends JsonDeserializer<Geometry> {
 	public Geometry parseGeometry(JsonNode root) {
 		String typeName = root.get("type").asText();
 		if (typeName.equals("Point")) {
-			return gf.createPoint(parseCoordinate(root
-					.get("coordinates")));
+			return gf.createPoint(parseCoordinate(root.get("coordinates")));
 
-		} else if(typeName.equals("MultiPoint")) {
-			return gf.createMultiPoint(parseLineString(root.get("coordinates")));
-			
-		} else if(typeName.equals("LineString")) {
-			return gf.createLineString(parseLineString(root.get("coordinates")));
+		} else if (typeName.equals("MultiPoint")) {
+			return gf
+					.createMultiPoint(parseLineString(root.get("coordinates")));
+
+		} else if (typeName.equals("LineString")) {
+			return gf
+					.createLineString(parseLineString(root.get("coordinates")));
 
 		} else if (typeName.equals("MultiLineString")) {
 			return gf.createMultiLineString(parseLineStrings(root
 					.get("coordinates")));
 
-		} else if(typeName.equals("Polygon")) {
+		} else if (typeName.equals("Polygon")) {
 			JsonNode arrayOfRings = root.get("coordinates");
 			return parsePolygonCoordinates(arrayOfRings);
 
@@ -63,7 +64,7 @@ public class GeometryDeserializer extends JsonDeserializer<Geometry> {
 
 	private Geometry[] parseGeometries(JsonNode arrayOfGeoms) {
 		Geometry[] items = new Geometry[arrayOfGeoms.size()];
-		for(int i=0;i!=arrayOfGeoms.size();++i) {
+		for (int i = 0; i != arrayOfGeoms.size(); ++i) {
 			items[i] = parseGeometry(arrayOfGeoms.get(i));
 		}
 		return items;

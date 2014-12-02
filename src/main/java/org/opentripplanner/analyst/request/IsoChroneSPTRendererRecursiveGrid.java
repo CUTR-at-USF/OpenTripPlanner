@@ -35,106 +35,113 @@ import org.slf4j.LoggerFactory;
 import com.vividsolutions.jts.geom.Coordinate;
 
 /**
- * Compute isochrones out of a shortest path tree request (RecursiveGrid isoline algorithm).
+ * Compute isochrones out of a shortest path tree request (RecursiveGrid isoline
+ * algorithm).
  * 
  * @author laurent
  */
 public class IsoChroneSPTRendererRecursiveGrid implements IsoChroneSPTRenderer {
 
-    private static final Logger LOG = LoggerFactory
-            .getLogger(IsoChroneSPTRendererRecursiveGrid.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(IsoChroneSPTRendererRecursiveGrid.class);
 
-    private GraphService graphService;
-    private SPTService sptService;
-    private SampleSource sampleSource;
+	private GraphService graphService;
+	private SPTService sptService;
+	private SampleSource sampleSource;
 
-    public IsoChroneSPTRendererRecursiveGrid(GraphService graphService, SPTService sptService, SampleSource sampleSource) {
-        this.graphService = graphService;
-        this.sptService = sptService;
-        this.sampleSource = sampleSource;
-    }
+	public IsoChroneSPTRendererRecursiveGrid(GraphService graphService,
+			SPTService sptService, SampleSource sampleSource) {
+		this.graphService = graphService;
+		this.sptService = sptService;
+		this.sampleSource = sampleSource;
+	}
 
-    /**
-     * @param isoChroneRequest
-     * @param sptRequest
-     * @return
-     */
-    @Override
-    public List<IsochroneData> getIsochrones(IsoChroneRequest isoChroneRequest,
-            RoutingRequest sptRequest) {
+	/**
+	 * @param isoChroneRequest
+	 * @param sptRequest
+	 * @return
+	 */
+	@Override
+	public List<IsochroneData> getIsochrones(IsoChroneRequest isoChroneRequest,
+			RoutingRequest sptRequest) {
 
-        if (sptRequest.routerId != null && !sptRequest.routerId.isEmpty())
-            throw new IllegalArgumentException(
-                    "TODO: SampleSource is not multi-router compatible (yet).");
+		if (sptRequest.routerId != null && !sptRequest.routerId.isEmpty())
+			throw new IllegalArgumentException(
+					"TODO: SampleSource is not multi-router compatible (yet).");
 
-        // 1. Compute the Shortest Path Tree.
-        long t0 = System.currentTimeMillis();
-        sptRequest.worstTime = (sptRequest.dateTime
-                + (sptRequest.arriveBy ? -isoChroneRequest.maxCutoffSec : isoChroneRequest.maxCutoffSec));
-        sptRequest.batch = true;
-        sptRequest.setRoutingContext(graphService.getGraph(sptRequest.routerId));
-        final ShortestPathTree spt = sptService.getShortestPathTree(sptRequest);
-        sptRequest.cleanup();
+		// 1. Compute the Shortest Path Tree.
+		long t0 = System.currentTimeMillis();
+		sptRequest.worstTime = (sptRequest.dateTime + (sptRequest.arriveBy ? -isoChroneRequest.maxCutoffSec
+				: isoChroneRequest.maxCutoffSec));
+		sptRequest.batch = true;
+		sptRequest
+				.setRoutingContext(graphService.getGraph(sptRequest.routerId));
+		final ShortestPathTree spt = sptService.getShortestPathTree(sptRequest);
+		sptRequest.cleanup();
 
-        // 2. Compute the set of initial points
-        long t1 = System.currentTimeMillis();
-        List<Coordinate> initialPoints = computeInitialPoints(spt);
+		// 2. Compute the set of initial points
+		long t1 = System.currentTimeMillis();
+		List<Coordinate> initialPoints = computeInitialPoints(spt);
 
-        // 3. Compute the isochrone based on the SPT.
-        ZFunc timeFunc = new ZFunc() {
-            @Override
-            public long z(Coordinate c) {
-                // TODO Make the sample source multi-router compatible
-                Sample sample = sampleSource.getSample(c.x, c.y);
-                if (sample == null) {
-                    return Long.MAX_VALUE;
-                }
-                Long z = sample.eval(spt);
-                return z;
-            }
-        };
-        // TODO Snap the center as XYZ tile grid for better sample-reuse (if using sample cache).
-        Coordinate center = sptRequest.from.getCoordinate();
-        double gridSizeMeters = isoChroneRequest.precisionMeters;
-        double dY = Math.toDegrees(gridSizeMeters / SphericalDistanceLibrary.RADIUS_OF_EARTH_IN_M);
-        double dX = dY / Math.cos(Math.toRadians(center.x));
-        LOG.info("dX={}, dY={}", dX, dY);
-        RecursiveGridIsolineBuilder isolineBuilder = new RecursiveGridIsolineBuilder(dX, dY,
-                center, timeFunc, initialPoints);
-        isolineBuilder.setDebugCrossingEdges(isoChroneRequest.includeDebugGeometry);
-        isolineBuilder.setDebugSeedGrid(isoChroneRequest.includeDebugGeometry);
-        List<IsochroneData> isochrones = new ArrayList<IsochroneData>();
-        for (Integer cutoffSec : isoChroneRequest.cutoffSecList) {
-            IsochroneData isochrone = new IsochroneData(cutoffSec,
-                    isolineBuilder.computeIsoline(cutoffSec));
-            if (isoChroneRequest.includeDebugGeometry)
-                isochrone.debugGeometry = isolineBuilder.getDebugGeometry();
-            isochrones.add(isochrone);
-        }
-        long t2 = System.currentTimeMillis();
-        LOG.info("Computed SPT in {}msec, {} isochrones in {}msec", (int) (t1 - t0),
-                isochrones.size(), (int) (t2 - t1));
+		// 3. Compute the isochrone based on the SPT.
+		ZFunc timeFunc = new ZFunc() {
+			@Override
+			public long z(Coordinate c) {
+				// TODO Make the sample source multi-router compatible
+				Sample sample = sampleSource.getSample(c.x, c.y);
+				if (sample == null) {
+					return Long.MAX_VALUE;
+				}
+				Long z = sample.eval(spt);
+				return z;
+			}
+		};
+		// TODO Snap the center as XYZ tile grid for better sample-reuse (if
+		// using sample cache).
+		Coordinate center = sptRequest.from.getCoordinate();
+		double gridSizeMeters = isoChroneRequest.precisionMeters;
+		double dY = Math.toDegrees(gridSizeMeters
+				/ SphericalDistanceLibrary.RADIUS_OF_EARTH_IN_M);
+		double dX = dY / Math.cos(Math.toRadians(center.x));
+		LOG.info("dX={}, dY={}", dX, dY);
+		RecursiveGridIsolineBuilder isolineBuilder = new RecursiveGridIsolineBuilder(
+				dX, dY, center, timeFunc, initialPoints);
+		isolineBuilder
+				.setDebugCrossingEdges(isoChroneRequest.includeDebugGeometry);
+		isolineBuilder.setDebugSeedGrid(isoChroneRequest.includeDebugGeometry);
+		List<IsochroneData> isochrones = new ArrayList<IsochroneData>();
+		for (Integer cutoffSec : isoChroneRequest.cutoffSecList) {
+			IsochroneData isochrone = new IsochroneData(cutoffSec,
+					isolineBuilder.computeIsoline(cutoffSec));
+			if (isoChroneRequest.includeDebugGeometry)
+				isochrone.debugGeometry = isolineBuilder.getDebugGeometry();
+			isochrones.add(isochrone);
+		}
+		long t2 = System.currentTimeMillis();
+		LOG.info("Computed SPT in {}msec, {} isochrones in {}msec",
+				(int) (t1 - t0), isochrones.size(), (int) (t2 - t1));
 
-        return isochrones;
-    }
+		return isochrones;
+	}
 
-    /**
-     * Compute a set of initial coordinates for the given SPT
-     * 
-     * @param spt
-     * @return
-     */
-    private List<Coordinate> computeInitialPoints(ShortestPathTree spt) {
-        List<Coordinate> retval = new ArrayList<Coordinate>(spt.getVertexCount());
-        for (State s : spt.getAllStates()) {
-            Vertex v = s.getVertex();
-            // Take only street
-            if (v instanceof StreetVertex) {
-                retval.add(v.getCoordinate());
-            }
-        }
-        LOG.debug("Created {} initial points from {} vertexes.", retval.size(),
-                spt.getVertexCount());
-        return retval;
-    }
+	/**
+	 * Compute a set of initial coordinates for the given SPT
+	 * 
+	 * @param spt
+	 * @return
+	 */
+	private List<Coordinate> computeInitialPoints(ShortestPathTree spt) {
+		List<Coordinate> retval = new ArrayList<Coordinate>(
+				spt.getVertexCount());
+		for (State s : spt.getAllStates()) {
+			Vertex v = s.getVertex();
+			// Take only street
+			if (v instanceof StreetVertex) {
+				retval.add(v.getCoordinate());
+			}
+		}
+		LOG.debug("Created {} initial points from {} vertexes.", retval.size(),
+				spt.getVertexCount());
+		return retval;
+	}
 }

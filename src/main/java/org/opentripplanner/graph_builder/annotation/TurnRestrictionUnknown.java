@@ -15,19 +15,19 @@ package org.opentripplanner.graph_builder.annotation;
 
 public class TurnRestrictionUnknown extends GraphBuilderAnnotation {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public static final String FMT = "Invalid turn restriction %s";
-    
-    final String tagval;
-    
-    public TurnRestrictionUnknown(String tagval){
-    	this.tagval = tagval;
-    }
-    
-    @Override
-    public String getMessage() {
-        return String.format(FMT, tagval);
-    }
+	public static final String FMT = "Invalid turn restriction %s";
+
+	final String tagval;
+
+	public TurnRestrictionUnknown(String tagval) {
+		this.tagval = tagval;
+	}
+
+	@Override
+	public String getMessage() {
+		return String.format(FMT, tagval);
+	}
 
 }

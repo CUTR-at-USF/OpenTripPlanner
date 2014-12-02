@@ -36,10 +36,11 @@ import org.opentripplanner.inspector.TileRenderer;
 import org.opentripplanner.standalone.OTPServer;
 
 /**
- * Slippy map tile API for rendering various graph information for inspection/debugging purpose
- * (bike safety factor, connectivity...).
+ * Slippy map tile API for rendering various graph information for
+ * inspection/debugging purpose (bike safety factor, connectivity...).
  * 
- * One can easily add a new layer by adding the following kind of code to a leaflet map:
+ * One can easily add a new layer by adding the following kind of code to a
+ * leaflet map:
  * 
  * <pre>
  *   var bikesafety = new L.TileLayer(
@@ -49,8 +50,8 @@ import org.opentripplanner.standalone.OTPServer;
  *   L.control.layers(null, { "Bike safety": bikesafety }).addTo(map);
  * </pre>
  * 
- * Tile rendering goes through TileRendererManager which select the appropriate renderer for the
- * given layer.
+ * Tile rendering goes through TileRendererManager which select the appropriate
+ * renderer for the given layer.
  * 
  * @see TileRendererManager
  * @see TileRenderer
@@ -61,58 +62,66 @@ import org.opentripplanner.standalone.OTPServer;
 @Path("/routers/{routerId}/inspector")
 public class GraphInspectorTileResource extends RoutingResource {
 
-    @Context
-    private OTPServer otpServer;
+	@Context
+	private OTPServer otpServer;
 
-    @PathParam("x")
-    int x;
+	@PathParam("x")
+	int x;
 
-    @PathParam("y")
-    int y;
+	@PathParam("y")
+	int y;
 
-    @PathParam("z")
-    int z;
+	@PathParam("z")
+	int z;
 
-    @PathParam("routerId")
-    String routerId;
+	@PathParam("routerId")
+	String routerId;
 
-    @PathParam("layer")
-    String layer;
+	@PathParam("layer")
+	String layer;
 
-    @PathParam("ext")
-    String ext;
+	@PathParam("ext")
+	String ext;
 
-    @GET @Path("/tile/{layer}/{z}/{x}/{y}.{ext}")
-    @Produces("image/*")
-    public Response tileGet() throws Exception {
+	@GET
+	@Path("/tile/{layer}/{z}/{x}/{y}.{ext}")
+	@Produces("image/*")
+	public Response tileGet() throws Exception {
 
-        // Re-use analyst
-        Envelope2D env = SlippyTile.tile2Envelope(x, y, z);
-        TileRequest tileRequest = new TileRequest(routerId, env, 256, 256);
+		// Re-use analyst
+		Envelope2D env = SlippyTile.tile2Envelope(x, y, z);
+		TileRequest tileRequest = new TileRequest(routerId, env, 256, 256);
 
-        BufferedImage image = otpServer.tileRendererManager.renderTile(tileRequest, layer);
+		BufferedImage image = otpServer.tileRendererManager.renderTile(
+				tileRequest, layer);
 
-        MIMEImageFormat format = new MIMEImageFormat("image/" + ext);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(image.getWidth() * image.getHeight() / 4);
-        ImageIO.write(image, format.type, baos);
-        CacheControl cc = new CacheControl();
-        cc.setMaxAge(3600);
-        cc.setNoCache(false);
-        return Response.ok(baos.toByteArray()).type(format.toString()).cacheControl(cc).build();
-    }
+		MIMEImageFormat format = new MIMEImageFormat("image/" + ext);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(image.getWidth()
+				* image.getHeight() / 4);
+		ImageIO.write(image, format.type, baos);
+		CacheControl cc = new CacheControl();
+		cc.setMaxAge(3600);
+		cc.setNoCache(false);
+		return Response.ok(baos.toByteArray()).type(format.toString())
+				.cacheControl(cc).build();
+	}
 
-    /**
-     * Gets all layer names
-     * 
-     * Used in fronted to create layer chooser
-     * @return 
-     */
-    @GET @Path("layers")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML + Q, MediaType.TEXT_XML + Q })
-    public InspectorLayersList getLayers() {
+	/**
+	 * Gets all layer names
+	 * 
+	 * Used in fronted to create layer chooser
+	 * 
+	 * @return
+	 */
+	@GET
+	@Path("layers")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML + Q,
+			MediaType.TEXT_XML + Q })
+	public InspectorLayersList getLayers() {
 
-        InspectorLayersList layersList = new InspectorLayersList(otpServer.tileRendererManager.getRenderers());
-        return layersList;
-    }
+		InspectorLayersList layersList = new InspectorLayersList(
+				otpServer.tileRendererManager.getRenderers());
+		return layersList;
+	}
 
 }

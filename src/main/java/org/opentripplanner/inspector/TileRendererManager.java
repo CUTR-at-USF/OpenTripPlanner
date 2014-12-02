@@ -29,9 +29,9 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
 
 /**
- * Process slippy map tile rendering requests. Get the tile renderer for the given layer, setup a
- * tile rendering context (bounding box, image graphic context, affine transform, etc...) and call
- * the renderer to paint the tile.
+ * Process slippy map tile rendering requests. Get the tile renderer for the
+ * given layer, setup a tile rendering context (bounding box, image graphic
+ * context, affine transform, etc...) and call the renderer to paint the tile.
  * 
  * @see GraphInspectorTileResource
  * @see TileRenderer
@@ -41,78 +41,88 @@ import com.vividsolutions.jts.geom.util.AffineTransformation;
  */
 public class TileRendererManager {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TileRendererManager.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(TileRendererManager.class);
 
-    private Map<String, TileRenderer> renderers = new HashMap<String, TileRenderer>();
+	private Map<String, TileRenderer> renderers = new HashMap<String, TileRenderer>();
 
-    private GraphService graphService;
+	private GraphService graphService;
 
-    public TileRendererManager(GraphService graphService) {
-        this.graphService = graphService;
+	public TileRendererManager(GraphService graphService) {
+		this.graphService = graphService;
 
-        // Register layers.
-        renderers.put("bike-safety", new EdgeVertexTileRenderer(new BikeSafetyEdgeRenderer()));
-        renderers.put("traversal", new EdgeVertexTileRenderer(
-                new TraversalPermissionsEdgeRenderer()));
-        renderers.put("wheelchair", new EdgeVertexTileRenderer(new WheelchairEdgeRenderer()));
-    }
+		// Register layers.
+		renderers.put("bike-safety", new EdgeVertexTileRenderer(
+				new BikeSafetyEdgeRenderer()));
+		renderers.put("traversal", new EdgeVertexTileRenderer(
+				new TraversalPermissionsEdgeRenderer()));
+		renderers.put("wheelchair", new EdgeVertexTileRenderer(
+				new WheelchairEdgeRenderer()));
+	}
 
-    public void registerRenderer(String layer, TileRenderer tileRenderer) {
-        renderers.put(layer, tileRenderer);
-    }
+	public void registerRenderer(String layer, TileRenderer tileRenderer) {
+		renderers.put(layer, tileRenderer);
+	}
 
-    public BufferedImage renderTile(final TileRequest tileRequest, String layer) {
+	public BufferedImage renderTile(final TileRequest tileRequest, String layer) {
 
-        TileRenderContext context = new TileRenderContext() {
-            @Override
-            public Envelope expandPixels(double marginXPixels, double marginYPixels) {
-                Envelope retval = new Envelope(bbox);
-                retval.expandBy(
-                        marginXPixels / tileRequest.width * (bbox.getMaxX() - bbox.getMinX()),
-                        marginYPixels / tileRequest.height * (bbox.getMaxY() - bbox.getMinY()));
-                return retval;
-            }
-        };
+		TileRenderContext context = new TileRenderContext() {
+			@Override
+			public Envelope expandPixels(double marginXPixels,
+					double marginYPixels) {
+				Envelope retval = new Envelope(bbox);
+				retval.expandBy(
+						marginXPixels / tileRequest.width
+								* (bbox.getMaxX() - bbox.getMinX()),
+						marginYPixels / tileRequest.height
+								* (bbox.getMaxY() - bbox.getMinY()));
+				return retval;
+			}
+		};
 
-        context.graph = graphService.getGraph(tileRequest.routerId);
-        if (context.graph == null)
-            throw new IllegalArgumentException("Unknown routerId: " + tileRequest.routerId);
+		context.graph = graphService.getGraph(tileRequest.routerId);
+		if (context.graph == null)
+			throw new IllegalArgumentException("Unknown routerId: "
+					+ tileRequest.routerId);
 
-        TileRenderer renderer = renderers.get(layer);
-        if (renderer == null)
-            throw new IllegalArgumentException("Unknown layer: " + layer);
+		TileRenderer renderer = renderers.get(layer);
+		if (renderer == null)
+			throw new IllegalArgumentException("Unknown layer: " + layer);
 
-        // The best place for caching tiles may be here
-        BufferedImage image = new BufferedImage(tileRequest.width, tileRequest.height,
-                renderer.getColorModel());
-        context.graphics = image.createGraphics();
-        Envelope2D trbb = tileRequest.bbox;
-        context.bbox = new Envelope(trbb.x, trbb.x + trbb.width, trbb.y, trbb.y + trbb.height);
-        context.transform = new AffineTransformation();
-        double xScale = tileRequest.width / trbb.width;
-        double yScale = tileRequest.height / trbb.height;
+		// The best place for caching tiles may be here
+		BufferedImage image = new BufferedImage(tileRequest.width,
+				tileRequest.height, renderer.getColorModel());
+		context.graphics = image.createGraphics();
+		Envelope2D trbb = tileRequest.bbox;
+		context.bbox = new Envelope(trbb.x, trbb.x + trbb.width, trbb.y, trbb.y
+				+ trbb.height);
+		context.transform = new AffineTransformation();
+		double xScale = tileRequest.width / trbb.width;
+		double yScale = tileRequest.height / trbb.height;
 
-        context.transform.translate(-trbb.x, -trbb.y - trbb.height);
-        context.transform.scale(xScale, -yScale);
-        context.metersPerPixel = Math.toRadians(trbb.height) * 6371000 / tileRequest.height;
-        context.tileWidth = tileRequest.width;
-        context.tileHeight = tileRequest.height;
+		context.transform.translate(-trbb.x, -trbb.y - trbb.height);
+		context.transform.scale(xScale, -yScale);
+		context.metersPerPixel = Math.toRadians(trbb.height) * 6371000
+				/ tileRequest.height;
+		context.tileWidth = tileRequest.width;
+		context.tileHeight = tileRequest.height;
 
-        long start = System.currentTimeMillis();
-        renderer.renderTile(context);
-        LOG.debug("Rendered tile at {},{} in {} ms", tileRequest.bbox.y, tileRequest.bbox.x,
-                System.currentTimeMillis() - start);
-        return image;
-    }
+		long start = System.currentTimeMillis();
+		renderer.renderTile(context);
+		LOG.debug("Rendered tile at {},{} in {} ms", tileRequest.bbox.y,
+				tileRequest.bbox.x, System.currentTimeMillis() - start);
+		return image;
+	}
 
-    /**
-     * Gets all renderers
-     * 
-     * Used to return list of renderers to client.
-     * Could be also used to show legend.
-     * @return 
-     */
-    public Map<String, TileRenderer> getRenderers() {
-        return renderers;
-    }
+	/**
+	 * Gets all renderers
+	 * 
+	 * Used to return list of renderers to client. Could be also used to show
+	 * legend.
+	 * 
+	 * @return
+	 */
+	public Map<String, TileRenderer> getRenderers() {
+		return renderers;
+	}
 }

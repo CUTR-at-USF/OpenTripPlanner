@@ -5,13 +5,16 @@ import org.opentripplanner.routing.services.StreetVertexIndexFactory;
 import org.opentripplanner.routing.services.StreetVertexIndexService;
 
 /**
- * Default implementation. Simply returns an instance of StreetVertexIndexServiceImpl.
+ * Default implementation. Simply returns an instance of
+ * StreetVertexIndexServiceImpl.
+ * 
  * @author avi
  */
-public class DefaultStreetVertexIndexFactory implements StreetVertexIndexFactory {
+public class DefaultStreetVertexIndexFactory implements
+		StreetVertexIndexFactory {
 
-    @Override
-    public StreetVertexIndexService newIndex(Graph g) {
-        return new StreetVertexIndexServiceImpl(g);
-    }
+	@Override
+	public StreetVertexIndexService newIndex(Graph g) {
+		return new StreetVertexIndexServiceImpl(g);
+	}
 }

@@ -19,15 +19,15 @@ import org.opentripplanner.api.adapters.TripType;
 
 @XmlRootElement(name = "tripMatch")
 public class TripMatch {
-    @XmlElement
-    public TripType trip;
+	@XmlElement
+	public TripType trip;
 
-    @XmlElement
-    public double matchDistanceMeter;
-    
-    @XmlElement
-    public double matchTimeSeconds;
-    
-    @XmlElement
-    public double matchFactor;
+	@XmlElement
+	public double matchDistanceMeter;
+
+	@XmlElement
+	public double matchTimeSeconds;
+
+	@XmlElement
+	public double matchFactor;
 }

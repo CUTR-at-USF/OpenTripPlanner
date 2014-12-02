@@ -27,22 +27,24 @@ import org.opentripplanner.routing.spt.ShortestPathTree;
 
 public class TrivialPathServiceImpl implements PathService {
 
-    GraphService graphService;
-    SPTServiceFactory sptServiceFactory;
+	GraphService graphService;
+	SPTServiceFactory sptServiceFactory;
 
-    public TrivialPathServiceImpl(GraphService graphService, SPTServiceFactory sptServiceFactory) {
-        this.graphService = graphService;
-        this.sptServiceFactory = sptServiceFactory;
-    }
+	public TrivialPathServiceImpl(GraphService graphService,
+			SPTServiceFactory sptServiceFactory) {
+		this.graphService = graphService;
+		this.sptServiceFactory = sptServiceFactory;
+	}
 
-    @Override
-    public List<GraphPath> getPaths(RoutingRequest options) {
-        ShortestPathTree spt = sptServiceFactory.instantiate().getShortestPathTree(options);
-        if (spt == null) {
-            return Collections.emptyList();
-        }
-        return spt.getPaths();
-    }
+	@Override
+	public List<GraphPath> getPaths(RoutingRequest options) {
+		ShortestPathTree spt = sptServiceFactory.instantiate()
+				.getShortestPathTree(options);
+		if (spt == null) {
+			return Collections.emptyList();
+		}
+		return spt.getPaths();
+	}
 
 	@Override
 	public void setSPTVisitor(SPTVisitor vis) {

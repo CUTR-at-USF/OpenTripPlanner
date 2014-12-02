@@ -19,40 +19,43 @@ import java.io.IOException;
 
 public class Trip extends Entity {
 
-    public Route  route;
-    public String service;
-    public String trip_id;
-    public String trip_headsign;
-    public String trip_short_name;
-    public int    direction_id;
-    public String block_id;
-    public Shape  shape;
-    public int    bikes_allowed;
-    public int    wheelchair_accessible;
+	public Route route;
+	public String service;
+	public String trip_id;
+	public String trip_headsign;
+	public String trip_short_name;
+	public int direction_id;
+	public String block_id;
+	public Shape shape;
+	public int bikes_allowed;
+	public int wheelchair_accessible;
 
-    public static class Loader extends Entity.Loader<Trip> {
+	public static class Loader extends Entity.Loader<Trip> {
 
-        public Loader(GTFSFeed feed) {
-            super(feed, "trips");
-        }
+		public Loader(GTFSFeed feed) {
+			super(feed, "trips");
+		}
 
-        @Override
-        public void loadOneRow() throws IOException {
-            Trip t = new Trip();
-            t.route           = getRefField("route_id", true, feed.routes);
-            //t.service         = getRefField("service_id", true, feed.calendarDates); // TODO calendar is special case, join tables
-            t.trip_id         = getStringField("trip_id", true);
-            t.trip_headsign   = getStringField("trip_headsign", false);
-            t.trip_short_name = getStringField("trip_short_name", false);
-            t.direction_id    = getIntField("direction_id", false, 0, 1);
-            t.block_id        = getStringField("block_id", false); // make a blocks multimap
-            t.shape           = getRefField("shape_id", false, feed.shapes);
-            t.bikes_allowed   = getIntField("bikes_allowed", false, 0, 2);
-            t.wheelchair_accessible = getIntField("wheelchair_accessible", false, 0, 2);
-            t.feed = feed;
-            feed.trips.put(t.trip_id, t);
-        }
+		@Override
+		public void loadOneRow() throws IOException {
+			Trip t = new Trip();
+			t.route = getRefField("route_id", true, feed.routes);
+			// t.service = getRefField("service_id", true, feed.calendarDates);
+			// // TODO calendar is special case, join tables
+			t.trip_id = getStringField("trip_id", true);
+			t.trip_headsign = getStringField("trip_headsign", false);
+			t.trip_short_name = getStringField("trip_short_name", false);
+			t.direction_id = getIntField("direction_id", false, 0, 1);
+			t.block_id = getStringField("block_id", false); // make a blocks
+															// multimap
+			t.shape = getRefField("shape_id", false, feed.shapes);
+			t.bikes_allowed = getIntField("bikes_allowed", false, 0, 2);
+			t.wheelchair_accessible = getIntField("wheelchair_accessible",
+					false, 0, 2);
+			t.feed = feed;
+			feed.trips.put(t.trip_id, t);
+		}
 
-    }
+	}
 
 }

@@ -24,83 +24,85 @@ import org.opentripplanner.routing.vertextype.PatternDepartVertex;
 
 import com.vividsolutions.jts.geom.LineString;
 
-
 /**
- *  Models waiting in a station on a vehicle.  The vehicle is not permitted to change 
- *  names during this time -- PatternInterlineDwell represents that case.
+ * Models waiting in a station on a vehicle. The vehicle is not permitted to
+ * change names during this time -- PatternInterlineDwell represents that case.
  */
-public class PatternDwell extends TablePatternEdge implements OnboardEdge, DwellEdge {
-    
-    private static final long serialVersionUID = 1L;
+public class PatternDwell extends TablePatternEdge implements OnboardEdge,
+		DwellEdge {
 
-    private int stopIndex;
-    
-    public PatternDwell(PatternArriveVertex from, PatternDepartVertex to, int stopIndex, TripPattern tripPattern) {
-        super(from, to);
-        this.stopIndex = stopIndex;
-    }
+	private static final long serialVersionUID = 1L;
 
-    public String getDirection() {
-        return getPattern().getDirection();
-    }
+	private int stopIndex;
 
-    public double getDistance() {
-        return 0;
-    }
-        
-    public TraverseMode getMode() {
-        return GtfsLibrary.getTraverseMode(getPattern().route);
-    }
+	public PatternDwell(PatternArriveVertex from, PatternDepartVertex to,
+			int stopIndex, TripPattern tripPattern) {
+		super(from, to);
+		this.stopIndex = stopIndex;
+	}
 
-    public String getName() {
-        return GtfsLibrary.getRouteName(getPattern().route);
-    }
+	public String getDirection() {
+		return getPattern().getDirection();
+	}
 
-    public State traverse(State state0) {
-        //int trip = state0.getTrip();
-        TripTimes tripTimes = state0.getTripTimes();
-        int dwellTime = tripTimes.getDwellTime(stopIndex);
-        StateEditor s1 = state0.edit(this);
-        s1.setBackMode(getMode());
-        s1.incrementTimeInSeconds(dwellTime);
-        s1.incrementWeight(dwellTime);
-        return s1.makeState();
-    }
+	public double getDistance() {
+		return 0;
+	}
 
-    @Override
-    public State optimisticTraverse(State s0) {
-        int dwellTime = getPattern().scheduledTimetable.getBestDwellTime(stopIndex);
-        StateEditor s1 = s0.edit(this);
-        s1.incrementTimeInSeconds(dwellTime);
-        s1.setBackMode(getMode());
-        s1.incrementWeight(dwellTime);
-        return s1.makeState();
-    }
-    
-    @Override
-    public double timeLowerBound(RoutingRequest options) {
-        return getPattern().scheduledTimetable.getBestDwellTime(stopIndex);
-    }
+	public TraverseMode getMode() {
+		return GtfsLibrary.getTraverseMode(getPattern().route);
+	}
 
-    @Override
-    public double weightLowerBound(RoutingRequest options) {
-        return timeLowerBound(options);
-    }
+	public String getName() {
+		return GtfsLibrary.getRouteName(getPattern().route);
+	}
 
-    public LineString getGeometry() {
-        return null;
-    }
+	public State traverse(State state0) {
+		// int trip = state0.getTrip();
+		TripTimes tripTimes = state0.getTripTimes();
+		int dwellTime = tripTimes.getDwellTime(stopIndex);
+		StateEditor s1 = state0.edit(this);
+		s1.setBackMode(getMode());
+		s1.incrementTimeInSeconds(dwellTime);
+		s1.incrementWeight(dwellTime);
+		return s1.makeState();
+	}
 
-    public String toString() {
-        return "PatternDwell(" + super.toString() + ")";
-    }
+	@Override
+	public State optimisticTraverse(State s0) {
+		int dwellTime = getPattern().scheduledTimetable
+				.getBestDwellTime(stopIndex);
+		StateEditor s1 = s0.edit(this);
+		s1.incrementTimeInSeconds(dwellTime);
+		s1.setBackMode(getMode());
+		s1.incrementWeight(dwellTime);
+		return s1.makeState();
+	}
 
-    public void setStopIndex(int stopIndex) {
-        this.stopIndex = stopIndex;
-    }
+	@Override
+	public double timeLowerBound(RoutingRequest options) {
+		return getPattern().scheduledTimetable.getBestDwellTime(stopIndex);
+	}
 
-    @Override
-    public int getStopIndex() {
-        return stopIndex;
-    }
+	@Override
+	public double weightLowerBound(RoutingRequest options) {
+		return timeLowerBound(options);
+	}
+
+	public LineString getGeometry() {
+		return null;
+	}
+
+	public String toString() {
+		return "PatternDwell(" + super.toString() + ")";
+	}
+
+	public void setStopIndex(int stopIndex) {
+		this.stopIndex = stopIndex;
+	}
+
+	@Override
+	public int getStopIndex() {
+		return stopIndex;
+	}
 }

@@ -20,17 +20,17 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.opentripplanner.routing.alertpatch.AlertPatch;
 
 public interface AlertPatchService {
-    Collection<AlertPatch> getAllAlertPatches();
+	Collection<AlertPatch> getAllAlertPatches();
 
-    Collection<AlertPatch> getStopPatches(AgencyAndId stop);
+	Collection<AlertPatch> getStopPatches(AgencyAndId stop);
 
-    Collection<AlertPatch> getRoutePatches(AgencyAndId route);
+	Collection<AlertPatch> getRoutePatches(AgencyAndId route);
 
-    void apply(AlertPatch alertPatch);
+	void apply(AlertPatch alertPatch);
 
-    void expire(Set<String> ids);
+	void expire(Set<String> ids);
 
-    void expireAll();
+	void expireAll();
 
-    void expireAllExcept(Set<String> ids);
+	void expireAllExcept(Set<String> ids);
 }

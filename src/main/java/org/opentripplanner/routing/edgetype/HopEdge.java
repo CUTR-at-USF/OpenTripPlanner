@@ -19,15 +19,16 @@ import com.vividsolutions.jts.geom.LineString;
 
 /**
  * FrequencyHops and PatternHops have start/stop Stops
+ * 
  * @author novalis
  *
  */
 public interface HopEdge {
 
-    Stop getEndStop();
+	Stop getEndStop();
 
-    Stop getBeginStop();
+	Stop getBeginStop();
 
-    void setGeometry(LineString geometry);
+	void setGeometry(LineString geometry);
 
 }

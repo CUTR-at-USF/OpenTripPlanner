@@ -30,47 +30,49 @@ import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 
 /** Reads the GTFS-RT from a local file. */
-public class GtfsRealtimeFileTripUpdateSource implements TripUpdateSource, PreferencesConfigurable {
-    private static final Logger LOG =
-            LoggerFactory.getLogger(GtfsRealtimeFileTripUpdateSource.class);
+public class GtfsRealtimeFileTripUpdateSource implements TripUpdateSource,
+		PreferencesConfigurable {
+	private static final Logger LOG = LoggerFactory
+			.getLogger(GtfsRealtimeFileTripUpdateSource.class);
 
-    private File file;
+	private File file;
 
-    /**
-     * Default agency id that is used for the trip ids in the TripUpdates
-     */
-    private String agencyId;
+	/**
+	 * Default agency id that is used for the trip ids in the TripUpdates
+	 */
+	private String agencyId;
 
-    @Override
-    public void configure(Graph graph, Preferences preferences) throws Exception {
-        this.agencyId = preferences.get("defaultAgencyId", null);
-        this.file = new File(preferences.get("file", ""));
-    }
+	@Override
+	public void configure(Graph graph, Preferences preferences)
+			throws Exception {
+		this.agencyId = preferences.get("defaultAgencyId", null);
+		this.file = new File(preferences.get("file", ""));
+	}
 
-    @Override
-    public List<TripUpdate> getUpdates() {
-        FeedMessage feedMessage = null;
-        List<FeedEntity> feedEntityList = null;
-        List<TripUpdate> updates = null;
-        try {
-            InputStream is = new FileInputStream(file);
-            if (is != null) {
-                feedMessage = FeedMessage.PARSER.parseFrom(is);
-                feedEntityList = feedMessage.getEntityList();
-                updates = new ArrayList<TripUpdate>(feedEntityList.size());
-                for (FeedEntity feedEntity : feedEntityList) {
-                    updates.add(feedEntity.getTripUpdate());
-                }
-            }
-        } catch (Exception e) {
-            LOG.warn("Failed to parse gtfs-rt feed at " + file + ":", e);
-        }
-        return updates;
-    }
+	@Override
+	public List<TripUpdate> getUpdates() {
+		FeedMessage feedMessage = null;
+		List<FeedEntity> feedEntityList = null;
+		List<TripUpdate> updates = null;
+		try {
+			InputStream is = new FileInputStream(file);
+			if (is != null) {
+				feedMessage = FeedMessage.PARSER.parseFrom(is);
+				feedEntityList = feedMessage.getEntityList();
+				updates = new ArrayList<TripUpdate>(feedEntityList.size());
+				for (FeedEntity feedEntity : feedEntityList) {
+					updates.add(feedEntity.getTripUpdate());
+				}
+			}
+		} catch (Exception e) {
+			LOG.warn("Failed to parse gtfs-rt feed at " + file + ":", e);
+		}
+		return updates;
+	}
 
-    public String toString() {
-        return "GtfsRealtimeFileTripUpdateSource(" + file + ")";
-    }
+	public String toString() {
+		return "GtfsRealtimeFileTripUpdateSource(" + file + ")";
+	}
 
 	@Override
 	public String getAgencyId() {

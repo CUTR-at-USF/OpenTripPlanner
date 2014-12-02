@@ -30,114 +30,123 @@ import org.slf4j.LoggerFactory;
 
 public class DownloadableGtfsInputSource implements CsvInputSource {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DownloadableGtfsInputSource.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(DownloadableGtfsInputSource.class);
 
-    private URL _url;
+	private URL _url;
 
-    private File _cacheDirectory;
+	private File _cacheDirectory;
 
-    private String _defaultAgencyId;
-    
-    public boolean useCached = true;
+	private String _defaultAgencyId;
 
-    // Pattern: Decorator
-    private ZipFileCsvInputSource _zip;
+	public boolean useCached = true;
 
-    public void setUrl(URL url) {
-        _url = url;
-    }
+	// Pattern: Decorator
+	private ZipFileCsvInputSource _zip;
 
-    public void setCacheDirectory(File cacheDirectory) {
-        _cacheDirectory = cacheDirectory;
-    }
+	public void setUrl(URL url) {
+		_url = url;
+	}
 
-    private void copyStreams(InputStream in, OutputStream out) throws IOException {
-        byte[] buffer = new byte[1024];
-        while (true) {
-            int rc = in.read(buffer);
-            if (rc == -1)
-                break;
-            out.write(buffer, 0, rc);
-        }
-        in.close();
-        out.close();
-    }
+	public void setCacheDirectory(File cacheDirectory) {
+		_cacheDirectory = cacheDirectory;
+	}
 
-    private File getTemporaryDirectory() {
+	private void copyStreams(InputStream in, OutputStream out)
+			throws IOException {
+		byte[] buffer = new byte[1024];
+		while (true) {
+			int rc = in.read(buffer);
+			if (rc == -1)
+				break;
+			out.write(buffer, 0, rc);
+		}
+		in.close();
+		out.close();
+	}
 
-        if (_cacheDirectory != null) {
-            if (!_cacheDirectory.exists()) {
-                if (!_cacheDirectory.mkdirs()) {
-                    throw new RuntimeException("Failed to create cache directory " + _cacheDirectory);
-                }
-            }
-            return _cacheDirectory;
-        }
+	private File getTemporaryDirectory() {
 
-        return new File(System.getProperty("java.io.tmpdir"));
-    }
+		if (_cacheDirectory != null) {
+			if (!_cacheDirectory.exists()) {
+				if (!_cacheDirectory.mkdirs()) {
+					throw new RuntimeException(
+							"Failed to create cache directory "
+									+ _cacheDirectory);
+				}
+			}
+			return _cacheDirectory;
+		}
 
-    private File getPathForGtfsBundle() throws IOException {
+		return new File(System.getProperty("java.io.tmpdir"));
+	}
 
-        if (_url != null) {
+	private File getPathForGtfsBundle() throws IOException {
 
-            File tmpDir = getTemporaryDirectory();
-            String cacheFile = _defaultAgencyId;
-            if (cacheFile == null) {
-                // Build a cache file based on URL
-                cacheFile = (_url.getHost() + _url.getFile()).replace("/", "_");
-            }
-            String fileName = cacheFile + "_gtfs.zip";
-            File gtfsFile = new File(tmpDir, fileName);
+		if (_url != null) {
 
-            if (gtfsFile.exists()) {
-                if (useCached) {
-                    LOG.info("using already downloaded gtfs file: path=" + gtfsFile);
-                    return gtfsFile;
-                }
-                LOG.info("useCached=false; GTFS will be re-downloaded." + gtfsFile);
-            }
+			File tmpDir = getTemporaryDirectory();
+			String cacheFile = _defaultAgencyId;
+			if (cacheFile == null) {
+				// Build a cache file based on URL
+				cacheFile = (_url.getHost() + _url.getFile()).replace("/", "_");
+			}
+			String fileName = cacheFile + "_gtfs.zip";
+			File gtfsFile = new File(tmpDir, fileName);
 
-            LOG.info("downloading gtfs: url=" + _url + " path=" + gtfsFile);
+			if (gtfsFile.exists()) {
+				if (useCached) {
+					LOG.info("using already downloaded gtfs file: path="
+							+ gtfsFile);
+					return gtfsFile;
+				}
+				LOG.info("useCached=false; GTFS will be re-downloaded."
+						+ gtfsFile);
+			}
 
-            BufferedInputStream in = new BufferedInputStream(_url.openStream());
-            BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(gtfsFile));
-            try {
-                copyStreams(in, out);
-            } catch (RuntimeException e) {
-                out.close();
-                if (!gtfsFile.delete()) {
-                    LOG.error("Failed to delete incomplete file " + gtfsFile);
-                }
-                throw e;
-            }
-            return gtfsFile;
-        }
+			LOG.info("downloading gtfs: url=" + _url + " path=" + gtfsFile);
 
-        throw new IllegalStateException("DownloadableGtfsInputSource did not include an url");
-    }
+			BufferedInputStream in = new BufferedInputStream(_url.openStream());
+			BufferedOutputStream out = new BufferedOutputStream(
+					new FileOutputStream(gtfsFile));
+			try {
+				copyStreams(in, out);
+			} catch (RuntimeException e) {
+				out.close();
+				if (!gtfsFile.delete()) {
+					LOG.error("Failed to delete incomplete file " + gtfsFile);
+				}
+				throw e;
+			}
+			return gtfsFile;
+		}
 
-    private synchronized void checkIfDownloaded() throws IOException {
-        if (_zip == null) {
-            _zip = new ZipFileCsvInputSource(new ZipFile(getPathForGtfsBundle()));
-        }
-    }
+		throw new IllegalStateException(
+				"DownloadableGtfsInputSource did not include an url");
+	}
 
-    @Override
-    public boolean hasResource(String name) throws IOException {
-        checkIfDownloaded();
-        return _zip.hasResource(name);
-    }
+	private synchronized void checkIfDownloaded() throws IOException {
+		if (_zip == null) {
+			_zip = new ZipFileCsvInputSource(
+					new ZipFile(getPathForGtfsBundle()));
+		}
+	}
 
-    @Override
-    public InputStream getResource(String name) throws IOException {
-        checkIfDownloaded();
-        return _zip.getResource(name);
-    }
+	@Override
+	public boolean hasResource(String name) throws IOException {
+		checkIfDownloaded();
+		return _zip.hasResource(name);
+	}
 
-    @Override
-    public void close() throws IOException {
-        checkIfDownloaded();
-        _zip.close();
-    }
+	@Override
+	public InputStream getResource(String name) throws IOException {
+		checkIfDownloaded();
+		return _zip.getResource(name);
+	}
+
+	@Override
+	public void close() throws IOException {
+		checkIfDownloaded();
+		_zip.close();
+	}
 }

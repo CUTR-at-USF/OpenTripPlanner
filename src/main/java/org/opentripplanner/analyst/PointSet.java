@@ -66,7 +66,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * PointSets are one of the three main web analyst resources: Pointsets
  * Indicators TimeSurfaces
  */
-public class PointSet implements Serializable{
+public class PointSet implements Serializable {
 
 	private static final long serialVersionUID = -8962916330731463238L;
 
@@ -87,9 +87,8 @@ public class PointSet implements Serializable{
 	 */
 	private Map<String, SampleSet> samples = new ConcurrentHashMap<String, SampleSet>();
 
-	
 	/*
-	 * Used to generate SampleSets on an as needed basis. 
+	 * Used to generate SampleSets on an as needed basis.
 	 */
 	protected GraphService graphService;
 
@@ -117,12 +116,14 @@ public class PointSet implements Serializable{
 	 */
 	public static PointSet fromCsv(File filename) throws IOException {
 		/* First, scan through the file to count lines and check for errors. */
-		CsvReader reader = new CsvReader(filename.getAbsolutePath(), ',', Charset.forName("UTF8"));
+		CsvReader reader = new CsvReader(filename.getAbsolutePath(), ',',
+				Charset.forName("UTF8"));
 		reader.readHeaders();
 		int nCols = reader.getHeaderCount();
 		while (reader.readRecord()) {
 			if (reader.getColumnCount() != nCols) {
-				LOG.error("CSV record {} has the wrong number of fields.", reader.getCurrentRecord());
+				LOG.error("CSV record {} has the wrong number of fields.",
+						reader.getCurrentRecord());
 				return null;
 			}
 		}
@@ -131,7 +132,8 @@ public class PointSet implements Serializable{
 		int nRecs = (int) reader.getCurrentRecord() + 1;
 		reader.close();
 		/* If we reached here, the file is entirely readable. Start over. */
-		reader = new CsvReader(filename.getAbsolutePath(), ',', Charset.forName("UTF8"));
+		reader = new CsvReader(filename.getAbsolutePath(), ',',
+				Charset.forName("UTF8"));
 		PointSet ret = new PointSet(nRecs);
 		reader.readHeaders();
 		if (reader.getHeaderCount() != nCols) {
@@ -144,9 +146,11 @@ public class PointSet implements Serializable{
 		int[][] properties = new int[nCols][ret.capacity];
 		for (int c = 0; c < nCols; c++) {
 			String header = reader.getHeader(c);
-			if (header.equalsIgnoreCase("lat") || header.equalsIgnoreCase("latitude")) {
+			if (header.equalsIgnoreCase("lat")
+					|| header.equalsIgnoreCase("latitude")) {
 				latCol = c;
-			} else if (header.equalsIgnoreCase("lon") || header.equalsIgnoreCase("longitude")) {
+			} else if (header.equalsIgnoreCase("lon")
+					|| header.equalsIgnoreCase("longitude")) {
 				lonCol = c;
 			} else {
 				ret.getOrCreatePropertyForId(header);
@@ -162,10 +166,10 @@ public class PointSet implements Serializable{
 		while (reader.readRecord()) {
 			int rec = (int) reader.getCurrentRecord();
 			for (int c = 0; c < nCols; c++) {
-				if(c==latCol || c==lonCol){
+				if (c == latCol || c == lonCol) {
 					continue;
 				}
-				
+
 				int[] prop = properties[c];
 				int mag = Integer.parseInt(reader.get(c));
 				prop[rec] = mag;
@@ -176,60 +180,63 @@ public class PointSet implements Serializable{
 		ret.capacity = nRecs;
 		return ret;
 	}
-	
-	public static PointSet fromShapefile( File file ) throws IOException, NoSuchAuthorityCodeException, FactoryException, EmptyPolygonException, UnsupportedGeometryException {
-        if ( ! file.exists())
-            throw new RuntimeException("Shapefile does not exist.");
-        
-        FileDataStore store = FileDataStoreFinder.getDataStore(file);
-        SimpleFeatureSource featureSource = store.getFeatureSource();
 
-        CoordinateReferenceSystem sourceCRS = featureSource.getInfo().getCRS();
-        CoordinateReferenceSystem WGS84 = CRS.decode("EPSG:4326", true);
-        
-        Query query = new Query();
-        query.setCoordinateSystem(sourceCRS);
-        query.setCoordinateSystemReproject(WGS84);
-        SimpleFeatureCollection featureCollection = featureSource.getFeatures(query);
-        
-        SimpleFeatureIterator it = featureCollection.features();
-        
-        PointSet ret = new PointSet(featureCollection.size());
-        int i=0;
-        while (it.hasNext()) {
-            SimpleFeature feature = it.next();
-            Geometry geom = (Geometry) feature.getDefaultGeometry();
-            
-            PointFeature ft = new PointFeature();
-            ft.setGeom(geom);
-            for(Property prop : feature.getProperties() ){
-            	Object binding = prop.getType().getBinding();
-            	
-            	//attempt to coerce the prop's value into an integer
-            	int val;
-            	if(binding.equals(Integer.class)){
-            		val = (Integer)prop.getValue();
-            	} else if(binding.equals(Long.class)){
-            		val = ((Long)prop.getValue()).intValue();
-            	} else if(binding.equals(String.class)){
-            		try{
-            			val = Integer.parseInt((String)prop.getValue());
-            		} catch (NumberFormatException ex ){
-            			continue;
-            		}
-            	} else {
-            		continue;
-            	}
-            	
-            	ft.addAttribute(prop.getName().toString(), val);
-            }
-            
-            ret.addFeature(ft, i);
-            
-            i++;
-        }
-        
-        return ret;
+	public static PointSet fromShapefile(File file) throws IOException,
+			NoSuchAuthorityCodeException, FactoryException,
+			EmptyPolygonException, UnsupportedGeometryException {
+		if (!file.exists())
+			throw new RuntimeException("Shapefile does not exist.");
+
+		FileDataStore store = FileDataStoreFinder.getDataStore(file);
+		SimpleFeatureSource featureSource = store.getFeatureSource();
+
+		CoordinateReferenceSystem sourceCRS = featureSource.getInfo().getCRS();
+		CoordinateReferenceSystem WGS84 = CRS.decode("EPSG:4326", true);
+
+		Query query = new Query();
+		query.setCoordinateSystem(sourceCRS);
+		query.setCoordinateSystemReproject(WGS84);
+		SimpleFeatureCollection featureCollection = featureSource
+				.getFeatures(query);
+
+		SimpleFeatureIterator it = featureCollection.features();
+
+		PointSet ret = new PointSet(featureCollection.size());
+		int i = 0;
+		while (it.hasNext()) {
+			SimpleFeature feature = it.next();
+			Geometry geom = (Geometry) feature.getDefaultGeometry();
+
+			PointFeature ft = new PointFeature();
+			ft.setGeom(geom);
+			for (Property prop : feature.getProperties()) {
+				Object binding = prop.getType().getBinding();
+
+				// attempt to coerce the prop's value into an integer
+				int val;
+				if (binding.equals(Integer.class)) {
+					val = (Integer) prop.getValue();
+				} else if (binding.equals(Long.class)) {
+					val = ((Long) prop.getValue()).intValue();
+				} else if (binding.equals(String.class)) {
+					try {
+						val = Integer.parseInt((String) prop.getValue());
+					} catch (NumberFormatException ex) {
+						continue;
+					}
+				} else {
+					continue;
+				}
+
+				ft.addAttribute(prop.getName().toString(), val);
+			}
+
+			ret.addFeature(ft, i);
+
+			i++;
+		}
+
+		return ret;
 	}
 
 	public static PointSet fromGeoJson(File filename) {
@@ -319,7 +326,7 @@ public class PointSet implements Serializable{
 					jp.skipChildren(); // ignore all other keys except features
 				}
 			}
-		} catch (Exception ex) {			
+		} catch (Exception ex) {
 			LOG.error("GeoJSON parsing failure.");
 			return null;
 		}
@@ -370,9 +377,8 @@ public class PointSet implements Serializable{
 	}
 
 	/**
-<<<<<<< HEAD
-	 * Adds a grpah service to allow for auto creation of SampleSets for a given
-	 * graph
+	 * <<<<<<< HEAD Adds a grpah service to allow for auto creation of
+	 * SampleSets for a given graph
 	 * 
 	 * @param reference
 	 *            to the application graph service
@@ -385,35 +391,38 @@ public class PointSet implements Serializable{
 	/**
 	 * gets a sample set for a given graph id -- requires graphservice to be set
 	 * 
-	 * @param a valid graph id
+	 * @param a
+	 *            valid graph id
 	 * @return sampleset for graph
 	 */
 
 	public SampleSet getSampleSet(String routerId) {
-		if(this.graphService == null) 
+		if (this.graphService == null)
 			return null;
-		
+
 		if (this.samples.containsKey(routerId))
 			return this.samples.get(routerId);
 		Graph g = this.graphService.getGraph(routerId);
-		
+
 		return getSampleSet(g);
 	}
-	
-	/** 
-	 * gets a sample set for a graph object -- does not require graph service to be set 
-	 * @param g a graph objects
+
+	/**
+	 * gets a sample set for a graph object -- does not require graph service to
+	 * be set
+	 * 
+	 * @param g
+	 *            a graph objects
 	 * @return sampleset for graph
 	 */
-	
-	public SampleSet getSampleSet(Graph g) {	
+
+	public SampleSet getSampleSet(Graph g) {
 		if (g == null)
 			return null;
 		SampleSet sampleSet = new SampleSet(this, g.getSampleFactory());
 		this.samples.put(g.routerId, sampleSet);
 		return sampleSet;
 	}
-	
 
 	/**
 	 * Add a single feature with a variable number of free-form properties.
@@ -432,7 +441,8 @@ public class PointSet implements Serializable{
 
 	public void addFeature(PointFeature feat, int index) {
 		if (index >= capacity) {
-			throw new AssertionError("Number of features seems to have grown since validation.");
+			throw new AssertionError(
+					"Number of features seems to have grown since validation.");
 		}
 
 		polygons[index] = feat.getPolygon();
@@ -441,13 +451,12 @@ public class PointSet implements Serializable{
 
 		ids[index] = feat.getId();
 
-		for (Entry<String,Integer> ad : feat.getProperties().entrySet()) {
+		for (Entry<String, Integer> ad : feat.getProperties().entrySet()) {
 			String propId = ad.getKey();
 			Integer propVal = ad.getValue();
-			
+
 			this.getOrCreatePropertyForId(propId);
 			this.properties.get(propId)[index] = propVal;
-
 
 		}
 	}
@@ -458,7 +467,7 @@ public class PointSet implements Serializable{
 		if (polygons[index] != null) {
 			try {
 				ret.setGeom(polygons[index]);
-			} catch (Exception e) {	
+			} catch (Exception e) {
 				// The polygon is clean; this should never happen. We
 				// could pass the exception up but that'd just make the calling
 				// function deal with an exception that will never pop. So
@@ -473,7 +482,7 @@ public class PointSet implements Serializable{
 		ret.setLon(lons[index]);
 
 		for (Entry<String, int[]> property : this.properties.entrySet()) {
-			ret.addAttribute( property.getKey(), property.getValue()[index]);
+			ret.addAttribute(property.getKey(), property.getValue()[index]);
 		}
 
 		return ret;
@@ -481,16 +490,16 @@ public class PointSet implements Serializable{
 
 	public void setLabel(String catId, String label) {
 		PropertyMetadata meta = this.propMetadata.get(catId);
-		if(meta!=null){
-			meta.setLabel( label );
-		}		
+		if (meta != null) {
+			meta.setLabel(label);
+		}
 	}
 
 	public void setStyle(String catId, String styleAttribute, String styleValue) {
 		PropertyMetadata meta = propMetadata.get(catId);
-		
-		if(meta!=null){
-			meta.addStyle( styleAttribute, styleValue );
+
+		if (meta != null) {
+			meta.addStyle(styleAttribute, styleValue);
 		}
 	}
 
@@ -534,7 +543,7 @@ public class PointSet implements Serializable{
 				jgen.writeStringField("type", "FeatureCollection");
 
 				writeJsonProperties(jgen);
-				
+
 				jgen.writeArrayFieldStart("features");
 				{
 					for (int f = 0; f < capacity; f++) {
@@ -549,8 +558,9 @@ public class PointSet implements Serializable{
 			LOG.info("IOException, connection may have been closed while streaming JSON.");
 		}
 	}
-	
-	public void writeJsonProperties(JsonGenerator jgen) throws JsonGenerationException, IOException {
+
+	public void writeJsonProperties(JsonGenerator jgen)
+			throws JsonGenerationException, IOException {
 		jgen.writeObjectFieldStart("properties");
 		{
 
@@ -580,8 +590,10 @@ public class PointSet implements Serializable{
 							jgen.writeObjectFieldStart("style");
 							{
 
-								for (String styleKey : cat.style.attributes.keySet()) {
-									jgen.writeStringField(styleKey, cat.style.attributes.get(styleKey));
+								for (String styleKey : cat.style.attributes
+										.keySet()) {
+									jgen.writeStringField(styleKey,
+											cat.style.attributes.get(styleKey));
 								}
 							}
 							jgen.writeEndObject();
@@ -607,7 +619,8 @@ public class PointSet implements Serializable{
 	 * Pairs an array of times with the array of features in this pointset,
 	 * writing out the resulting (ID,time) pairs to a JSON object.
 	 */
-	protected void writeTimes(JsonGenerator jgen, int[] times) throws IOException {
+	protected void writeTimes(JsonGenerator jgen, int[] times)
+			throws IOException {
 		jgen.writeObjectFieldStart("times");
 		for (int i = 0; i < times.length; i++) { // capacity is now 1 if this is
 													// a one-to-many indicator
@@ -631,9 +644,11 @@ public class PointSet implements Serializable{
 	 *            will be written
 	 * @throws IOException
 	 */
-	private void writeFeature(int i, JsonGenerator jgen, Boolean forcePoints) throws IOException {
+	private void writeFeature(int i, JsonGenerator jgen, Boolean forcePoints)
+			throws IOException {
 
-		GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel());
+		GeometryFactory geometryFactory = new GeometryFactory(
+				new PrecisionModel());
 
 		GeometrySerializer geomSerializer = new GeometrySerializer();
 
@@ -644,11 +659,13 @@ public class PointSet implements Serializable{
 			jgen.writeFieldName("geometry");
 			{
 
-				if (!forcePoints && polygons != null && polygons.length >= i && polygons[i] != null) {
+				if (!forcePoints && polygons != null && polygons.length >= i
+						&& polygons[i] != null) {
 					geomSerializer.writeGeometry(jgen, polygons[i]);
 				} else {
 
-					Point p = geometryFactory.createPoint(new Coordinate(lons[i], lats[i]));
+					Point p = geometryFactory.createPoint(new Coordinate(
+							lons[i], lats[i]));
 					geomSerializer.writeGeometry(jgen, p);
 				}
 
@@ -666,10 +683,11 @@ public class PointSet implements Serializable{
 	 * This will be called once per point in an origin/destination pointset, and
 	 * once per origin in a one- or many-to-many indicator.
 	 */
-	protected void writeStructured(int i, JsonGenerator jgen) throws IOException {
+	protected void writeStructured(int i, JsonGenerator jgen)
+			throws IOException {
 		jgen.writeObjectFieldStart("structured");
-		for (Entry<String,int[]> entry : properties.entrySet()) {
-			jgen.writeNumberField( entry.getKey(), entry.getValue()[i] );
+		for (Entry<String, int[]> entry : properties.entrySet()) {
+			jgen.writeNumberField(entry.getKey(), entry.getValue()[i]);
 		}
 		jgen.writeEndObject();
 	}
@@ -690,17 +708,17 @@ public class PointSet implements Serializable{
 			n++;
 		}
 
-		for(Entry<String, int[]> property : this.properties.entrySet()) {
+		for (Entry<String, int[]> property : this.properties.entrySet()) {
 			int[] data = property.getValue();
-			
-			int[] magSlice = new int[end-start];
-			n=0;
-			for(int i=start; i<end; i++){
+
+			int[] magSlice = new int[end - start];
+			n = 0;
+			for (int i = start; i < end; i++) {
 				magSlice[n] = data[i];
 				n++;
 			}
-			
-			ret.properties.put( property.getKey(), magSlice );
+
+			ret.properties.put(property.getKey(), magSlice);
 		}
 
 		return ret;

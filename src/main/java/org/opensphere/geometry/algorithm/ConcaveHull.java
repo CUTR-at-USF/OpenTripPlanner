@@ -54,17 +54,16 @@ import com.vividsolutions.jts.triangulate.quadedge.QuadEdgeTriangle;
 import com.vividsolutions.jts.util.UniqueCoordinateArrayFilter;
 
 /**
- * Computes a concave hull of a {@link Geometry} which is
- * a concave {@link Geometry} that contains all the points
- * in the input {@link Geometry}.
- * The concave hull is not be defined as unique; here, it is
- * defined according to a threshold which is the maximum length
- * of border edges of the concave hull. 
+ * Computes a concave hull of a {@link Geometry} which is a concave
+ * {@link Geometry} that contains all the points in the input {@link Geometry}.
+ * The concave hull is not be defined as unique; here, it is defined according
+ * to a threshold which is the maximum length of border edges of the concave
+ * hull.
  * 
  * <p>
- * Uses the Duckham and al. (2008) algorithm defined in the paper
- * untitled "Efficient generation of simple polygons for characterizing
- * the shape of a set of points in the plane".
+ * Uses the Duckham and al. (2008) algorithm defined in the paper untitled
+ * "Efficient generation of simple polygons for characterizing the shape of a
+ * set of points in the plane".
  * 
  * @author Eric Grosso
  * 
@@ -74,17 +73,16 @@ public class ConcaveHull {
 	private GeometryFactory geomFactory;
 	private GeometryCollection geometries;
 	private double threshold;
-	
+
 	public HashMap<LineSegment, Integer> segments = new HashMap<LineSegment, Integer>();
 	public HashMap<Integer, Edge> edges = new HashMap<Integer, Edge>();
 	public HashMap<Integer, Triangle> triangles = new HashMap<Integer, Triangle>();
 	public TreeMap<Integer, Edge> lengths = new TreeMap<Integer, Edge>();
 
 	public HashMap<Integer, Edge> shortLengths = new HashMap<Integer, Edge>();
-	
-	public HashMap<Coordinate,Integer> coordinates = new HashMap<Coordinate, Integer>();
-	public HashMap<Integer, Vertex> vertices = new HashMap<Integer, Vertex>();
 
+	public HashMap<Coordinate, Integer> coordinates = new HashMap<Coordinate, Integer>();
+	public HashMap<Integer, Vertex> vertices = new HashMap<Integer, Vertex>();
 
 	/**
 	 * Create a new concave hull construction for the input {@link Geometry}.
@@ -97,9 +95,10 @@ public class ConcaveHull {
 		this.threshold = threshold;
 		this.geomFactory = geometry.getFactory();
 	}
-	
+
 	/**
-	 * Create a new concave hull construction for the input {@link GeometryCollection}.
+	 * Create a new concave hull construction for the input
+	 * {@link GeometryCollection}.
 	 * 
 	 * @param geometries
 	 * @param threshold
@@ -114,60 +113,56 @@ public class ConcaveHull {
 	 * Transform into GeometryCollection.
 	 * 
 	 * @param geom
-	 * 		input geometry
-	 * @return
-	 * 		a geometry collection
+	 *            input geometry
+	 * @return a geometry collection
 	 */
-	private static GeometryCollection transformIntoPointGeometryCollection(Geometry geom) {
+	private static GeometryCollection transformIntoPointGeometryCollection(
+			Geometry geom) {
 		UniqueCoordinateArrayFilter filter = new UniqueCoordinateArrayFilter();
 		geom.apply(filter);
 		Coordinate[] coord = filter.getCoordinates();
-		
+
 		Geometry[] geometries = new Geometry[coord.length];
-		for (int i = 0 ; i < coord.length ; i++) {
+		for (int i = 0; i < coord.length; i++) {
 			Coordinate[] c = new Coordinate[] { coord[i] };
 			CoordinateArraySequence cs = new CoordinateArraySequence(c);
 			geometries[i] = new Point(cs, geom.getFactory());
 		}
-		
+
 		return new GeometryCollection(geometries, geom.getFactory());
 	}
 
-	
 	/**
 	 * Transform into GeometryCollection.
 	 * 
 	 * @param geom
-	 * 		input geometry
-	 * @return
-	 * 		a geometry collection
+	 *            input geometry
+	 * @return a geometry collection
 	 */
-	private static GeometryCollection transformIntoPointGeometryCollection(GeometryCollection gc) {
+	private static GeometryCollection transformIntoPointGeometryCollection(
+			GeometryCollection gc) {
 		UniqueCoordinateArrayFilter filter = new UniqueCoordinateArrayFilter();
 		gc.apply(filter);
 		Coordinate[] coord = filter.getCoordinates();
-		
+
 		Geometry[] geometries = new Geometry[coord.length];
-		for (int i = 0 ; i < coord.length ; i++) {
+		for (int i = 0; i < coord.length; i++) {
 			Coordinate[] c = new Coordinate[] { coord[i] };
 			CoordinateArraySequence cs = new CoordinateArraySequence(c);
 			geometries[i] = new Point(cs, gc.getFactory());
 		}
-		
+
 		return new GeometryCollection(geometries, gc.getFactory());
 	}
 
-	
 	/**
 	 * Returns a {@link Geometry} that represents the concave hull of the input
-	 * geometry according to the threshold.
-	 * The returned geometry contains the minimal number of points needed to
-	 * represent the concave hull.
+	 * geometry according to the threshold. The returned geometry contains the
+	 * minimal number of points needed to represent the concave hull.
 	 *
 	 * @return if the concave hull contains 3 or more points, a {@link Polygon};
-	 * 2 points, a {@link LineString};
-	 * 1 point, a {@link Point};
-	 * 0 points, an empty {@link GeometryCollection}.
+	 *         2 points, a {@link LineString}; 1 point, a {@link Point}; 0
+	 *         points, an empty {@link GeometryCollection}.
 	 */
 	public Geometry getConcaveHull() {
 
@@ -178,40 +173,40 @@ public class ConcaveHull {
 			return this.geometries.getGeometryN(0);
 		}
 		if (this.geometries.getNumGeometries() == 2) {
-			return this.geomFactory.createLineString(this.geometries.getCoordinates());
+			return this.geomFactory.createLineString(this.geometries
+					.getCoordinates());
 		}
 
 		return concaveHull();
 	}
-	
+
 	/**
 	 * Create the concave hull.
 	 * 
-	 * @return
-	 * 		the concave hull
+	 * @return the concave hull
 	 */
 	private Geometry concaveHull() {
-		
-		// triangulation: create a DelaunayTriangulationBuilder object	
+
+		// triangulation: create a DelaunayTriangulationBuilder object
 		ConformingDelaunayTriangulationBuilder cdtb = new ConformingDelaunayTriangulationBuilder();
 
 		// add geometry collection
 		cdtb.setSites(this.geometries);
-		
+
 		QuadEdgeSubdivision qes = cdtb.getSubdivision();
-		
+
 		Collection<QuadEdge> quadEdges = qes.getEdges();
 		List<QuadEdgeTriangle> qeTriangles = QuadEdgeTriangle.createOn(qes);
-		Collection<com.vividsolutions.jts.triangulate.quadedge.Vertex> qeVertices = 
-			qes.getVertices(false);
-		
+		Collection<com.vividsolutions.jts.triangulate.quadedge.Vertex> qeVertices = qes
+				.getVertices(false);
+
 		int iV = 0;
 		for (com.vividsolutions.jts.triangulate.quadedge.Vertex v : qeVertices) {
 			this.coordinates.put(v.getCoordinate(), iV);
 			this.vertices.put(iV, new Vertex(iV, v.getCoordinate()));
 			iV++;
 		}
-		
+
 		// border
 		List<QuadEdge> qeFrameBorder = new ArrayList<QuadEdge>();
 		List<QuadEdge> qeFrame = new ArrayList<QuadEdge>();
@@ -227,23 +222,23 @@ public class ConcaveHull {
 		}
 
 		// border
-		for (int j = 0 ; j < qeFrameBorder.size() ; j++) {
+		for (int j = 0; j < qeFrameBorder.size(); j++) {
 			QuadEdge q = qeFrameBorder.get(j);
-			if (! qeFrame.contains(q)) {
+			if (!qeFrame.contains(q)) {
 				qeBorder.add(q);
 			}
 		}
-		
+
 		// deletion of exterior edges
 		for (QuadEdge qe : qeFrame) {
 			qes.delete(qe);
 		}
-		
+
 		HashMap<QuadEdge, Double> qeDistances = new HashMap<QuadEdge, Double>();
 		for (QuadEdge qe : quadEdges) {
 			qeDistances.put(qe, qe.toLineSegment().getLength());
 		}
-				
+
 		DoubleComparator dc = new DoubleComparator(qeDistances);
 		TreeMap<QuadEdge, Double> qeSorted = new TreeMap<QuadEdge, Double>(dc);
 		qeSorted.putAll(qeDistances);
@@ -253,12 +248,12 @@ public class ConcaveHull {
 		for (QuadEdge qe : qeSorted.keySet()) {
 			LineSegment s = qe.toLineSegment();
 			s.normalize();
-			
+
 			Integer idS = this.coordinates.get(s.p0);
 			Integer idD = this.coordinates.get(s.p1);
 			Vertex oV = this.vertices.get(idS);
 			Vertex eV = this.vertices.get(idD);
-			
+
 			Edge edge;
 			if (qeBorder.contains(qe)) {
 				oV.setBorder(true);
@@ -279,7 +274,7 @@ public class ConcaveHull {
 
 		// hm of linesegment and hm of edges // with id as key
 		// hm of triangles using hm of ls and connection with hm of edges
-		
+
 		i = 0;
 		for (QuadEdgeTriangle qet : qeTriangles) {
 			LineSegment sA = qet.getEdge(0).toLineSegment();
@@ -288,14 +283,14 @@ public class ConcaveHull {
 			sA.normalize();
 			sB.normalize();
 			sC.normalize();
-			
+
 			Edge edgeA = this.edges.get(this.segments.get(sA));
 			Edge edgeB = this.edges.get(this.segments.get(sB));
 			Edge edgeC = this.edges.get(this.segments.get(sC));
-			if (edgeA == null || edgeB == null || edgeC == null) 
-			    continue;
+			if (edgeA == null || edgeB == null || edgeC == null)
+				continue;
 
-			Triangle triangle = new Triangle(i, qet.isBorder()?true:false);
+			Triangle triangle = new Triangle(i, qet.isBorder() ? true : false);
 			triangle.addEdge(edgeA);
 			triangle.addEdge(edgeB);
 			triangle.addEdge(edgeC);
@@ -318,7 +313,6 @@ public class ConcaveHull {
 			}
 		}
 
-		
 		// concave hull algorithm
 		int index = 0;
 		while (index != -1) {
@@ -345,7 +339,7 @@ public class ConcaveHull {
 				if (neighbours.size() == 1) {
 					this.shortLengths.put(e.getId(), e);
 					this.lengths.remove(e.getId());
-				} else  {
+				} else {
 					Edge e0 = triangle.getEdges().get(0);
 					Edge e1 = triangle.getEdges().get(1);
 					// test if all the vertices are on the border
@@ -355,7 +349,8 @@ public class ConcaveHull {
 						this.lengths.remove(e.getId());
 					} else {
 						// management of triangles
-					        if (neighbours.size() < 1) continue; //not sure this is safe
+						if (neighbours.size() < 1)
+							continue; // not sure this is safe
 						Triangle tA = neighbours.get(0);
 						Triangle tB = neighbours.get(1);
 						tA.setBorder(true); // FIXME not necessarily useful
@@ -363,13 +358,13 @@ public class ConcaveHull {
 						this.triangles.remove(triangle.getId());
 						tA.removeNeighbour(triangle);
 						tB.removeNeighbour(triangle);
-						
+
 						// new edges
 						List<Edge> ee = triangle.getEdges();
 						Edge eA = ee.get(0);
 						Edge eB = ee.get(1);
 						Edge eC = ee.get(2);
-						
+
 						if (eA.isBorder()) {
 							this.edges.remove(eA.getId());
 							eB.setBorder(true);
@@ -446,7 +441,7 @@ public class ConcaveHull {
 				}
 			}
 		}
-		
+
 		// concave hull creation
 		List<LineString> edges = new ArrayList<LineString>();
 		for (Edge e : this.lengths.values()) {
@@ -462,14 +457,16 @@ public class ConcaveHull {
 		// merge
 		LineMerger lineMerger = new LineMerger();
 		lineMerger.add(edges);
-		LineString merge = (LineString)lineMerger.getMergedLineStrings().iterator().next();
-		
+		LineString merge = (LineString) lineMerger.getMergedLineStrings()
+				.iterator().next();
+
 		if (merge.isRing()) {
-			LinearRing lr = new LinearRing(merge.getCoordinateSequence(), this.geomFactory);
+			LinearRing lr = new LinearRing(merge.getCoordinateSequence(),
+					this.geomFactory);
 			Polygon concaveHull = new Polygon(lr, null, this.geomFactory);
 			return concaveHull;
 		}
-		
+
 		return merge;
 	}
 

@@ -25,51 +25,53 @@ import org.opentripplanner.routing.graph.Graph;
 /**
  * Implementation of ElevationGridCoverageFactory for Geotiff data.
  */
-public class GeotiffGridCoverageFactoryImpl implements ElevationGridCoverageFactory {
+public class GeotiffGridCoverageFactoryImpl implements
+		ElevationGridCoverageFactory {
 
-    private File path = null;
-    private GridCoverage2D coverage;
+	private File path = null;
+	private GridCoverage2D coverage;
 
-    public GeotiffGridCoverageFactoryImpl() {
+	public GeotiffGridCoverageFactoryImpl() {
 
-    }
+	}
 
-    public GeotiffGridCoverageFactoryImpl(File path) {
-        this.path = path;
-    }
+	public GeotiffGridCoverageFactoryImpl(File path) {
+		this.path = path;
+	}
 
-    public void setPath(File path) {
-        this.path = path;
-    }
+	public void setPath(File path) {
+		this.path = path;
+	}
 
-    @Override
-    public GridCoverage2D getGridCoverage() {
-        GeoTiffFormat format = new GeoTiffFormat();
-        GeoTiffReader reader = null;
+	@Override
+	public GridCoverage2D getGridCoverage() {
+		GeoTiffFormat format = new GeoTiffFormat();
+		GeoTiffReader reader = null;
 
-        try {
-            if (path == null) {
-                throw new RuntimeException("Path not set");
-            }
-            reader = format.getReader(path);
-            coverage = reader.read(null);
-        } catch (IOException e) {
-            throw new RuntimeException("Error getting coverage automatically. ", e);
-        }
+		try {
+			if (path == null) {
+				throw new RuntimeException("Path not set");
+			}
+			reader = format.getReader(path);
+			coverage = reader.read(null);
+		} catch (IOException e) {
+			throw new RuntimeException(
+					"Error getting coverage automatically. ", e);
+		}
 
-        return coverage;
-    }
+		return coverage;
+	}
 
-    @Override
-    public void checkInputs() {
-        if (!path.canRead()) {
-            throw new RuntimeException("Can't read elevation path: " + path);
-        }
-    }
+	@Override
+	public void checkInputs() {
+		if (!path.canRead()) {
+			throw new RuntimeException("Can't read elevation path: " + path);
+		}
+	}
 
-    @Override
-    public void setGraph(Graph graph) {
-        //nothing to do here
-    }
+	@Override
+	public void setGraph(Graph graph) {
+		// nothing to do here
+	}
 
 }

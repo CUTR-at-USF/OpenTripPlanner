@@ -23,23 +23,23 @@ import org.opentripplanner.routing.services.notes.NoteMatcher;
 
 public class NoteProperties {
 
-    public String notePattern;
+	public String notePattern;
 
-    public NoteMatcher noteMatcher;
+	public NoteMatcher noteMatcher;
 
-    public NoteProperties(String notePattern, NoteMatcher noteMatcher) {
-        this.notePattern = notePattern;
-        this.noteMatcher = noteMatcher;
-    }
+	public NoteProperties(String notePattern, NoteMatcher noteMatcher) {
+		this.notePattern = notePattern;
+		this.noteMatcher = noteMatcher;
+	}
 
-    public T2<Alert, NoteMatcher> generateNote(OSMWithTags way) {
-        Map<String, String> noteText = TemplateLibrary.generateI18N(notePattern, way,
-                Alert.defaultLanguage);
-        Alert note = new Alert();
-        note.alertHeaderText = new TranslatedString();
-        for (Map.Entry<String, String> kv : noteText.entrySet()) {
-            note.alertHeaderText.addTranslation(kv.getKey(), kv.getValue());
-        }
-        return new T2<>(note, noteMatcher);
-    }
+	public T2<Alert, NoteMatcher> generateNote(OSMWithTags way) {
+		Map<String, String> noteText = TemplateLibrary.generateI18N(
+				notePattern, way, Alert.defaultLanguage);
+		Alert note = new Alert();
+		note.alertHeaderText = new TranslatedString();
+		for (Map.Entry<String, String> kv : noteText.entrySet()) {
+			note.alertHeaderText.addTranslation(kv.getKey(), kv.getValue());
+		}
+		return new T2<>(note, noteMatcher);
+	}
 }

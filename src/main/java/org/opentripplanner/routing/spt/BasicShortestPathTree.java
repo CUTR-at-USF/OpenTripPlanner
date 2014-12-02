@@ -28,97 +28,103 @@ import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.routing.graph.Vertex;
 
 /**
- * A ShortestPathTree implementation that corresponds to a basic Dijkstra search, where there is a
- * single optimal state per vertex. It maintains a closed vertex list since decrease-key operations
- * are not guaranteed to be supported by the priority queue.
+ * A ShortestPathTree implementation that corresponds to a basic Dijkstra
+ * search, where there is a single optimal state per vertex. It maintains a
+ * closed vertex list since decrease-key operations are not guaranteed to be
+ * supported by the priority queue.
  * 
  * @author andrewbyrd
  */
 public class BasicShortestPathTree extends AbstractShortestPathTree {
-    
-    private static final int DEFAULT_CAPACITY = 500;
 
-    Map<Vertex, State> states;
+	private static final int DEFAULT_CAPACITY = 500;
 
-    /**
-     * Parameterless constructor that uses a default capacity for internal vertex-keyed data
-     * structures.
-     */
-    public BasicShortestPathTree(RoutingRequest options) {
-        this(options, DEFAULT_CAPACITY);
-    }
+	Map<Vertex, State> states;
 
-    /**
-     * Constructor with a parameter indicating the initial capacity of the data structures holding
-     * vertices. This can help avoid resizing and rehashing these objects during path searches.
-     * 
-     * @param n
-     *            - the initial size of vertex-keyed maps
-     */
-    public BasicShortestPathTree(RoutingRequest options, int n) {
-        super(options);
-        states = new IdentityHashMap<Vertex, State>(n);
-    }
+	/**
+	 * Parameterless constructor that uses a default capacity for internal
+	 * vertex-keyed data structures.
+	 */
+	public BasicShortestPathTree(RoutingRequest options) {
+		this(options, DEFAULT_CAPACITY);
+	}
 
-    @Override
-    public Collection<State> getAllStates() {
-        return states.values();
-    }
+	/**
+	 * Constructor with a parameter indicating the initial capacity of the data
+	 * structures holding vertices. This can help avoid resizing and rehashing
+	 * these objects during path searches.
+	 * 
+	 * @param n
+	 *            - the initial size of vertex-keyed maps
+	 */
+	public BasicShortestPathTree(RoutingRequest options, int n) {
+		super(options);
+		states = new IdentityHashMap<Vertex, State>(n);
+	}
 
-    /****
-     * {@link ShortestPathTree} Interface
-     ****/
+	@Override
+	public Collection<State> getAllStates() {
+		return states.values();
+	}
 
-    @Override
-    public boolean add(State state) {
-        Graph graph = state.getOptions().rctx.graph;
-        Vertex here = state.getVertex();
-        State existing = states.get(here);
-        if (existing == null || state.betterThan(existing)) {
-            states.put(here, state);
-            return true;
-        } else {
-            final Edge backEdge = existing.getBackEdge();
-            // If the previous back edge had turn restrictions, we need to continue
-            // the search because the previous path may be prevented by from reaching the end by
-            // turn restrictions.
+	/****
+	 * {@link ShortestPathTree} Interface
+	 ****/
 
-            return !graph.getTurnRestrictions(backEdge).isEmpty();
-        }
-    }
+	@Override
+	public boolean add(State state) {
+		Graph graph = state.getOptions().rctx.graph;
+		Vertex here = state.getVertex();
+		State existing = states.get(here);
+		if (existing == null || state.betterThan(existing)) {
+			states.put(here, state);
+			return true;
+		} else {
+			final Edge backEdge = existing.getBackEdge();
+			// If the previous back edge had turn restrictions, we need to
+			// continue
+			// the search because the previous path may be prevented by from
+			// reaching the end by
+			// turn restrictions.
 
-    @Override
-    public List<State> getStates(Vertex dest) {
-        State s = states.get(dest);
-        if (s == null)
-            return Collections.emptyList();
-        else
-            return Arrays.asList(s); // single-element array-backed list
-    }
+			return !graph.getTurnRestrictions(backEdge).isEmpty();
+		}
+	}
 
-    @Override
-    public State getState(Vertex dest) {
-        return states.get(dest);
-    }
+	@Override
+	public List<State> getStates(Vertex dest) {
+		State s = states.get(dest);
+		if (s == null)
+			return Collections.emptyList();
+		else
+			return Arrays.asList(s); // single-element array-backed list
+	}
 
-    @Override
-    public boolean visit(State s) {
-        final Graph graph = s.getOptions().rctx.graph;
-        final State existing = states.get(s.getVertex());
-        final Edge backEdge = existing.getBackEdge();
-        if (!graph.getTurnRestrictions(backEdge).isEmpty()) {
-            // If the previous back edge had turn restrictions, we need to continue
-            // the search because the previous path may be prevented by from reaching the end by
-            // turn restrictions.
+	@Override
+	public State getState(Vertex dest) {
+		return states.get(dest);
+	}
 
-            return true;
-        }
-        return (s == existing);
-    }
+	@Override
+	public boolean visit(State s) {
+		final Graph graph = s.getOptions().rctx.graph;
+		final State existing = states.get(s.getVertex());
+		final Edge backEdge = existing.getBackEdge();
+		if (!graph.getTurnRestrictions(backEdge).isEmpty()) {
+			// If the previous back edge had turn restrictions, we need to
+			// continue
+			// the search because the previous path may be prevented by from
+			// reaching the end by
+			// turn restrictions.
 
-    @Override
-    public int getVertexCount() {
-        return states.size();
-    }
+			return true;
+		}
+		return (s == existing);
+	}
+
+	@Override
+	public int getVertexCount() {
+		return states.size();
+	}
 
 }

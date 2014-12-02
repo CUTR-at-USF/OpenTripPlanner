@@ -28,91 +28,91 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @XmlRootElement(name = "Stop")
 public class StopType {
 
-    public StopType() {
-    }
+	public StopType() {
+	}
 
-    public StopType(org.onebusaway.gtfs.model.Stop stop) {
-        this.id = stop.getId();
-        this.stopLat = stop.getLat();
-        this.stopLon = stop.getLon();
-        this.stopCode = stop.getCode();
-        this.stopName = stop.getName();
-        this.stopDesc = stop.getDesc();
-        this.zoneId = stop.getZoneId();
-        this.stopUrl = stop.getUrl();
-        this.locationType = stop.getLocationType();
-        this.parentStation = stop.getParentStation();
-        // this.stopTimezone = stop.getTimezone();s
-        this.wheelchairBoarding = stop.getWheelchairBoarding();
-        this.direction = stop.getDirection();
-    }
+	public StopType(org.onebusaway.gtfs.model.Stop stop) {
+		this.id = stop.getId();
+		this.stopLat = stop.getLat();
+		this.stopLon = stop.getLon();
+		this.stopCode = stop.getCode();
+		this.stopName = stop.getName();
+		this.stopDesc = stop.getDesc();
+		this.zoneId = stop.getZoneId();
+		this.stopUrl = stop.getUrl();
+		this.locationType = stop.getLocationType();
+		this.parentStation = stop.getParentStation();
+		// this.stopTimezone = stop.getTimezone();s
+		this.wheelchairBoarding = stop.getWheelchairBoarding();
+		this.direction = stop.getDirection();
+	}
 
-    public StopType(org.onebusaway.gtfs.model.Stop stop, Boolean extended) {
-        this.id = stop.getId();
-        this.stopLat = stop.getLat();
-        this.stopLon = stop.getLon();
-        this.stopCode = stop.getCode();
-        this.stopName = stop.getName();
-        if (extended != null && extended.equals(true)) {
-            this.stopDesc = stop.getDesc();
-            this.zoneId = stop.getZoneId();
-            this.stopUrl = stop.getUrl();
-            this.locationType = stop.getLocationType();
-            this.parentStation = stop.getParentStation();
-            // this.stopTimezone = stop.getTimezone();
-            this.wheelchairBoarding = stop.getWheelchairBoarding();
-        }
-    }
+	public StopType(org.onebusaway.gtfs.model.Stop stop, Boolean extended) {
+		this.id = stop.getId();
+		this.stopLat = stop.getLat();
+		this.stopLon = stop.getLon();
+		this.stopCode = stop.getCode();
+		this.stopName = stop.getName();
+		if (extended != null && extended.equals(true)) {
+			this.stopDesc = stop.getDesc();
+			this.zoneId = stop.getZoneId();
+			this.stopUrl = stop.getUrl();
+			this.locationType = stop.getLocationType();
+			this.parentStation = stop.getParentStation();
+			// this.stopTimezone = stop.getTimezone();
+			this.wheelchairBoarding = stop.getWheelchairBoarding();
+		}
+	}
 
-    @XmlJavaTypeAdapter(AgencyAndIdAdapter.class)
-    @JsonSerialize
-    AgencyAndId id;
+	@XmlJavaTypeAdapter(AgencyAndIdAdapter.class)
+	@JsonSerialize
+	AgencyAndId id;
 
-    @XmlAttribute
-    @JsonSerialize
-    String stopName;
+	@XmlAttribute
+	@JsonSerialize
+	String stopName;
 
-    @XmlAttribute
-    @JsonSerialize
-    Double stopLat;
+	@XmlAttribute
+	@JsonSerialize
+	Double stopLat;
 
-    @XmlAttribute
-    @JsonSerialize
-    Double stopLon;
+	@XmlAttribute
+	@JsonSerialize
+	Double stopLon;
 
-    @XmlAttribute
-    @JsonSerialize
-    String stopCode;
+	@XmlAttribute
+	@JsonSerialize
+	String stopCode;
 
-    @XmlAttribute
-    @JsonSerialize
-    String stopDesc;
+	@XmlAttribute
+	@JsonSerialize
+	String stopDesc;
 
-    @XmlAttribute
-    @JsonSerialize
-    String zoneId;
+	@XmlAttribute
+	@JsonSerialize
+	String zoneId;
 
-    @XmlAttribute
-    @JsonSerialize
-    String stopUrl;
+	@XmlAttribute
+	@JsonSerialize
+	String stopUrl;
 
-    @XmlAttribute
-    @JsonSerialize
-    Integer locationType;
+	@XmlAttribute
+	@JsonSerialize
+	Integer locationType;
 
-    @XmlAttribute
-    @JsonSerialize
-    String parentStation;
+	@XmlAttribute
+	@JsonSerialize
+	String parentStation;
 
-    @XmlAttribute
-    @JsonSerialize
-    Integer wheelchairBoarding;
+	@XmlAttribute
+	@JsonSerialize
+	Integer wheelchairBoarding;
 
-    @XmlAttribute
-    @JsonSerialize
-    String direction;
+	@XmlAttribute
+	@JsonSerialize
+	String direction;
 
-    @XmlElements(value = @XmlElement(name = "route"))
-    public List<AgencyAndId> routes;
+	@XmlElements(value = @XmlElement(name = "route"))
+	public List<AgencyAndId> routes;
 
 }

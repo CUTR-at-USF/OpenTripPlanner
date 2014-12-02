@@ -17,130 +17,136 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
 /**
- * Fetch Bike Rental JSON feeds and pass each record on to the specific rental subclass
+ * Fetch Bike Rental JSON feeds and pass each record on to the specific rental
+ * subclass
  *
  * @see BikeRentalDataSource
  */
-public abstract class GenericJSONBikeRentalDataSource implements BikeRentalDataSource, PreferencesConfigurable {
+public abstract class GenericJSONBikeRentalDataSource implements
+		BikeRentalDataSource, PreferencesConfigurable {
 
-    private static final Logger log = LoggerFactory.getLogger(GenericJSONBikeRentalDataSource.class);
-    private String url;
+	private static final Logger log = LoggerFactory
+			.getLogger(GenericJSONBikeRentalDataSource.class);
+	private String url;
 
-    private String jsonParsePath;
+	private String jsonParsePath;
 
-    ArrayList<BikeRentalStation> stations = new ArrayList<BikeRentalStation>();
+	ArrayList<BikeRentalStation> stations = new ArrayList<BikeRentalStation>();
 
-    /**
-     * Construct superclass
-     *
-     * @param JSON path to get from enclosing elements to nested rental list.
-     *        Separate path levels with '/' For example "d/list"
-     *
-     */
-    public GenericJSONBikeRentalDataSource(String jsonPath) {
-        jsonParsePath = jsonPath;
-    }
+	/**
+	 * Construct superclass
+	 *
+	 * @param JSON
+	 *            path to get from enclosing elements to nested rental list.
+	 *            Separate path levels with '/' For example "d/list"
+	 *
+	 */
+	public GenericJSONBikeRentalDataSource(String jsonPath) {
+		jsonParsePath = jsonPath;
+	}
 
+	/**
+	 * Construct superclass where rental list is on the top level of JSON code
+	 *
+	 */
+	public GenericJSONBikeRentalDataSource() {
+		jsonParsePath = "";
+	}
 
-    /**
-     * Construct superclass where rental list is on the top level of JSON code
-     *
-     */
-    public GenericJSONBikeRentalDataSource() {
-        jsonParsePath = "";
-    }
+	@Override
+	public boolean update() {
+		try {
+			InputStream data = HttpUtils.getData(url);
+			if (data == null) {
+				log.warn("Failed to get data from url " + url);
+				return false;
+			}
+			parseJSON(data);
+			data.close();
+		} catch (IllegalArgumentException e) {
+			log.warn("Error parsing bike rental feed from " + url, e);
+			return false;
+		} catch (JsonProcessingException e) {
+			log.warn("Error parsing bike rental feed from " + url
+					+ "(bad JSON of some sort)", e);
+			return false;
+		} catch (IOException e) {
+			log.warn("Error reading bike rental feed from " + url, e);
+			return false;
+		}
+		return true;
+	}
 
-    @Override
-    public boolean update() {
-        try {
-            InputStream data = HttpUtils.getData(url);
-            if (data == null) {
-                log.warn("Failed to get data from url " + url);
-                return false;
-            }
-            parseJSON(data);
-            data.close();
-        } catch (IllegalArgumentException e) {
-            log.warn("Error parsing bike rental feed from " + url, e);
-            return false;
-        } catch (JsonProcessingException e) {
-            log.warn("Error parsing bike rental feed from " + url + "(bad JSON of some sort)", e);
-            return false;
-        } catch (IOException e) {
-            log.warn("Error reading bike rental feed from " + url, e);
-            return false;
-        }
-        return true;
-    }
+	private void parseJSON(InputStream dataStream)
+			throws JsonProcessingException, IllegalArgumentException,
+			IOException {
 
-    private void parseJSON(InputStream dataStream) throws JsonProcessingException, IllegalArgumentException,
-      IOException {
+		ArrayList<BikeRentalStation> out = new ArrayList<BikeRentalStation>();
 
-        ArrayList<BikeRentalStation> out = new ArrayList<BikeRentalStation>();
+		String rentalString = convertStreamToString(dataStream);
 
-        String rentalString = convertStreamToString(dataStream);
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode rootNode = mapper.readTree(rentalString);
 
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readTree(rentalString);
+		if (!jsonParsePath.equals("")) {
+			String delimiter = "/";
+			String[] parseElement = jsonParsePath.split(delimiter);
+			for (int i = 0; i < parseElement.length; i++) {
+				rootNode = rootNode.path(parseElement[i]);
+			}
 
-        if (!jsonParsePath.equals("")) {
-            String delimiter = "/";
-            String[] parseElement = jsonParsePath.split(delimiter);
-            for(int i =0; i < parseElement.length ; i++) {
-                rootNode = rootNode.path(parseElement[i]);
-            }
+			if (rootNode.isMissingNode()) {
+				throw new IllegalArgumentException(
+						"Could not find jSON elements " + jsonParsePath);
+			}
+		}
 
-            if (rootNode.isMissingNode()) {
-                throw new IllegalArgumentException("Could not find jSON elements " + jsonParsePath);
-              }
-        }
+		for (int i = 0; i < rootNode.size(); i++) {
+			JsonNode node = rootNode.get(i);
+			if (node == null) {
+				continue;
+			}
+			BikeRentalStation brstation = makeStation(node);
+			if (brstation != null)
+				out.add(brstation);
+		}
+		synchronized (this) {
+			stations = out;
+		}
+	}
 
-        for (int i = 0; i < rootNode.size(); i++) {
-            JsonNode node = rootNode.get(i);
-            if (node == null) {
-                continue;
-            }
-            BikeRentalStation brstation = makeStation(node);
-            if (brstation != null)
-                out.add(brstation);
-        }
-        synchronized(this) {
-            stations = out;
-        }
-    }
+	private String convertStreamToString(java.io.InputStream is) {
+		java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+		return s.hasNext() ? s.next() : "";
+	}
 
-    private String convertStreamToString(java.io.InputStream is) {
-        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-        return s.hasNext() ? s.next() : "";
-    }
+	@Override
+	public synchronized List<BikeRentalStation> getStations() {
+		return stations;
+	}
 
-    @Override
-    public synchronized List<BikeRentalStation> getStations() {
-        return stations;
-    }
+	public String getUrl() {
+		return url;
+	}
 
-    public String getUrl() {
-        return url;
-    }
+	public void setUrl(String url) {
+		this.url = url;
+	}
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
+	public abstract BikeRentalStation makeStation(JsonNode rentalStationNode);
 
-    public abstract BikeRentalStation makeStation(JsonNode rentalStationNode);
+	@Override
+	public String toString() {
+		return getClass().getName() + "(" + url + ")";
+	}
 
-    @Override
-    public String toString() {
-        return getClass().getName() + "(" + url + ")";
-    }
-
-    @Override
-    public void configure(Graph graph, Preferences preferences) {
-        String url = preferences.get("url", null);
-        if (url == null)
-            throw new IllegalArgumentException("Missing mandatory 'url' configuration.");
-        setUrl(url);
-    }
+	@Override
+	public void configure(Graph graph, Preferences preferences) {
+		String url = preferences.get("url", null);
+		if (url == null)
+			throw new IllegalArgumentException(
+					"Missing mandatory 'url' configuration.");
+		setUrl(url);
+	}
 }

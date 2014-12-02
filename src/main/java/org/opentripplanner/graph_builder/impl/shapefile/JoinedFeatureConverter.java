@@ -27,121 +27,134 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is a simple feature converter that gets features from a secondary feature source. This is
- * useful if you have (say) bike lane data in another file.
+ * This is a simple feature converter that gets features from a secondary
+ * feature source. This is useful if you have (say) bike lane data in another
+ * file.
  */
 public class JoinedFeatureConverter<T> implements SimpleFeatureConverter<T> {
 
-    private static Logger log = LoggerFactory.getLogger(JoinedFeatureConverter.class);
+	private static Logger log = LoggerFactory
+			.getLogger(JoinedFeatureConverter.class);
 
-    private SimpleFeatureConverter<T> converter;
+	private SimpleFeatureConverter<T> converter;
 
-    private String joinedKey;
+	private String joinedKey;
 
-    private String mainKey;
+	private String mainKey;
 
-    private FeatureSource<SimpleFeatureType, SimpleFeature> joinedSource;
+	private FeatureSource<SimpleFeatureType, SimpleFeature> joinedSource;
 
-    private HashMap<String, SimpleFeature> cache;
+	private HashMap<String, SimpleFeature> cache;
 
-    public JoinedFeatureConverter() {
-    }
+	public JoinedFeatureConverter() {
+	}
 
-    public JoinedFeatureConverter(String mainKey, String joinedKey,
-            SimpleFeatureConverter<T> converter,
-            FeatureSource<SimpleFeatureType, SimpleFeature> joinedSource) {
-        this.mainKey = mainKey;
-        this.joinedKey = joinedKey;
-        this.converter = converter;
-        this.joinedSource = joinedSource;
-    }
+	public JoinedFeatureConverter(String mainKey, String joinedKey,
+			SimpleFeatureConverter<T> converter,
+			FeatureSource<SimpleFeatureType, SimpleFeature> joinedSource) {
+		this.mainKey = mainKey;
+		this.joinedKey = joinedKey;
+		this.converter = converter;
+		this.joinedSource = joinedSource;
+	}
 
-    @Override
-    public T convert(SimpleFeature feature) {
-        ensureCached();
-        String mainKeyValue = toHashableString(feature.getAttribute(this.mainKey));
-        if (mainKeyValue == null) {
-            log.warn("Feature " + feature.getID() + " has null value for its mainKey (" + mainKey + ")");
-            return null;
-        }
-        SimpleFeature joinedFeature = cache.get(mainKeyValue);
+	@Override
+	public T convert(SimpleFeature feature) {
+		ensureCached();
+		String mainKeyValue = toHashableString(feature
+				.getAttribute(this.mainKey));
+		if (mainKeyValue == null) {
+			log.warn("Feature " + feature.getID()
+					+ " has null value for its mainKey (" + mainKey + ")");
+			return null;
+		}
+		SimpleFeature joinedFeature = cache.get(mainKeyValue);
 
-        if (joinedFeature == null) {
-            return null;
-        } else {
-            return converter.convert(joinedFeature);
-        }
-    }
+		if (joinedFeature == null) {
+			return null;
+		} else {
+			return converter.convert(joinedFeature);
+		}
+	}
 
-    /** We have to cache all the features in the supplemental file, because
-     * if we try to load them on the fly, GeoTools wigs out.
-     */
-    private void ensureCached() {
-        if (cache != null) {
-            return;
-        }
-        cache = new HashMap<String, SimpleFeature>();
-        try {
-            FeatureCollection<SimpleFeatureType, SimpleFeature> features = joinedSource
-                    .getFeatures();
-            FeatureIterator<SimpleFeature> it = features.features();
-            while (it.hasNext()) {
-                SimpleFeature feature = it.next();
-                String joinedKeyValue = toHashableString(feature.getAttribute(joinedKey));
-                if (joinedKeyValue != null) {
-                    cache.put(joinedKeyValue, feature);
-                } else {
-                    log.warn("Feature " + feature.getID() + " has null value for its joinedKey (" + joinedKey + ")");
-                }
-            }
-            it.close();
+	/**
+	 * We have to cache all the features in the supplemental file, because if we
+	 * try to load them on the fly, GeoTools wigs out.
+	 */
+	private void ensureCached() {
+		if (cache != null) {
+			return;
+		}
+		cache = new HashMap<String, SimpleFeature>();
+		try {
+			FeatureCollection<SimpleFeatureType, SimpleFeature> features = joinedSource
+					.getFeatures();
+			FeatureIterator<SimpleFeature> it = features.features();
+			while (it.hasNext()) {
+				SimpleFeature feature = it.next();
+				String joinedKeyValue = toHashableString(feature
+						.getAttribute(joinedKey));
+				if (joinedKeyValue != null) {
+					cache.put(joinedKeyValue, feature);
+				} else {
+					log.warn("Feature " + feature.getID()
+							+ " has null value for its joinedKey (" + joinedKey
+							+ ")");
+				}
+			}
+			it.close();
 
-        } catch (IOException e) {
-            throw new RuntimeException("Could not cache values for joined shapefile", e);
-        }
-    }
+		} catch (IOException e) {
+			throw new RuntimeException(
+					"Could not cache values for joined shapefile", e);
+		}
+	}
 
-    /**
-     * Convert a feature value to a String for hashing. We use this instead of simply calling
-     * toString to avoid issues when the column types for these features are slightly different. See
-     * http://opentripplanner.org/ticket/226
-     * 
-     * @param keyValue
-     * @return a string to use as the hash key
-     */
-    private String toHashableString(Object keyValue) {
-        if (keyValue == null) {
-            return null;
-        }
-        if (keyValue instanceof Number) {
-            keyValue = ((Number)keyValue).doubleValue();
-        }
-        return keyValue.toString();
-    }
-    
-    public void setConverter(SimpleFeatureConverter<T> converter) {
-        this.converter = converter;
-    }
+	/**
+	 * Convert a feature value to a String for hashing. We use this instead of
+	 * simply calling toString to avoid issues when the column types for these
+	 * features are slightly different. See
+	 * http://opentripplanner.org/ticket/226
+	 * 
+	 * @param keyValue
+	 * @return a string to use as the hash key
+	 */
+	private String toHashableString(Object keyValue) {
+		if (keyValue == null) {
+			return null;
+		}
+		if (keyValue instanceof Number) {
+			keyValue = ((Number) keyValue).doubleValue();
+		}
+		return keyValue.toString();
+	}
 
-    /**
-     * The name of the attribute in the joined feature source to use as the join key.
-     */
-    public void setJoinedKey(String joinedKey) {
-        this.joinedKey = joinedKey;
-    }
+	public void setConverter(SimpleFeatureConverter<T> converter) {
+		this.converter = converter;
+	}
 
-    /**
-     * The name of the attribute in the main feature source to use as the join key.
-     */
-    public void setMainKey(String mainKey) {
-        this.mainKey = mainKey;
-    }
+	/**
+	 * The name of the attribute in the joined feature source to use as the join
+	 * key.
+	 */
+	public void setJoinedKey(String joinedKey) {
+		this.joinedKey = joinedKey;
+	}
 
-    public void setJoinedSourceFactory(FeatureSourceFactory factory) {
-        this.joinedSource = factory.getFeatureSource();
-    }
+	/**
+	 * The name of the attribute in the main feature source to use as the join
+	 * key.
+	 */
+	public void setMainKey(String mainKey) {
+		this.mainKey = mainKey;
+	}
 
-    public void setJoinedSource(FeatureSource<SimpleFeatureType, SimpleFeature> joinedSource) {
-        this.joinedSource = joinedSource;
-    }
+	public void setJoinedSourceFactory(FeatureSourceFactory factory) {
+		this.joinedSource = factory.getFeatureSource();
+	}
+
+	public void setJoinedSource(
+			FeatureSource<SimpleFeatureType, SimpleFeature> joinedSource) {
+		this.joinedSource = joinedSource;
+	}
 }

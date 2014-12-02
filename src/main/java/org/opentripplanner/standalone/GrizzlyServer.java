@@ -20,101 +20,131 @@ import javax.ws.rs.core.Application;
 
 public class GrizzlyServer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GrizzlyServer.class);
-    
-    static {
-        // Remove existing handlers attached to the j.u.l root logger
-        SLF4JBridgeHandler.removeHandlersForRootLogger();  // (since SLF4J 1.6.5)
-        // Bridge j.u.l (used by Jersey) to the SLF4J root logger
-        SLF4JBridgeHandler.install();
-    }
+	private static final Logger LOG = LoggerFactory
+			.getLogger(GrizzlyServer.class);
 
-    /** The command line parameters, including things like port number and content directories. */
-    private CommandLineParameters params;
-    private OTPServer server;
+	static {
+		// Remove existing handlers attached to the j.u.l root logger
+		SLF4JBridgeHandler.removeHandlersForRootLogger(); // (since SLF4J 1.6.5)
+		// Bridge j.u.l (used by Jersey) to the SLF4J root logger
+		SLF4JBridgeHandler.install();
+	}
 
-    /** Construct a Grizzly server with the given IoC injector and command line parameters. */
-    public GrizzlyServer (CommandLineParameters params, OTPServer server) {
-        this.params = params;
-        this.server = server;
-    }
+	/**
+	 * The command line parameters, including things like port number and
+	 * content directories.
+	 */
+	private CommandLineParameters params;
+	private OTPServer server;
 
-    /**
-     * This function goes through roughly the same steps as Jersey's GrizzlyServerFactory, but we instead construct
-     * an HttpServer and NetworkListener manually so we can set the number of threads and other details.
-     */
-    public void run() {
-        
-        LOG.info("Starting OTP Grizzly server on ports {} (HTTP) and {} (HTTPS) of interface {}",
-            params.port, params.securePort, params.bindAddress);
-        LOG.info("Base path is X, graphs are at {}", params.graphDirectory);
-        HttpServer httpServer = new HttpServer();
+	/**
+	 * Construct a Grizzly server with the given IoC injector and command line
+	 * parameters.
+	 */
+	public GrizzlyServer(CommandLineParameters params, OTPServer server) {
+		this.params = params;
+		this.server = server;
+	}
 
-        /* Configure SSL */
-        SSLContextConfigurator sslConfig = new SSLContextConfigurator();
-        sslConfig.setKeyStoreFile("/var/otp/keystore");
-        sslConfig.setKeyStorePass("opentrip");
+	/**
+	 * This function goes through roughly the same steps as Jersey's
+	 * GrizzlyServerFactory, but we instead construct an HttpServer and
+	 * NetworkListener manually so we can set the number of threads and other
+	 * details.
+	 */
+	public void run() {
 
-        /* OTP is CPU-bound, so we want only as many worker threads as we have cores. */
-        ThreadPoolConfig threadPoolConfig = ThreadPoolConfig.defaultConfig()
-            .setCorePoolSize(1)
-            .setMaxPoolSize(Runtime.getRuntime().availableProcessors());
+		LOG.info(
+				"Starting OTP Grizzly server on ports {} (HTTP) and {} (HTTPS) of interface {}",
+				params.port, params.securePort, params.bindAddress);
+		LOG.info("Base path is X, graphs are at {}", params.graphDirectory);
+		HttpServer httpServer = new HttpServer();
 
-        /* HTTP (non-encrypted) listener */
-        NetworkListener httpListener = new NetworkListener("otp_insecure", params.bindAddress, params.port);
-        // OTP is CPU-bound, we don't want more threads than cores. TODO: We should switch to async handling.
-        httpListener.setSecure(false);
+		/* Configure SSL */
+		SSLContextConfigurator sslConfig = new SSLContextConfigurator();
+		sslConfig.setKeyStoreFile("/var/otp/keystore");
+		sslConfig.setKeyStorePass("opentrip");
 
-        /* HTTPS listener */
-        NetworkListener httpsListener = new NetworkListener("otp_secure", params.bindAddress, params.securePort);
-        // Ideally we'd share the threads between HTTP and HTTPS.
-        httpsListener.setSecure(true);
-        httpsListener.setSSLEngineConfig(
-                new SSLEngineConfigurator(sslConfig)
-                        .setClientMode(false)
-                        .setNeedClientAuth(false)
-        );
+		/*
+		 * OTP is CPU-bound, so we want only as many worker threads as we have
+		 * cores.
+		 */
+		ThreadPoolConfig threadPoolConfig = ThreadPoolConfig.defaultConfig()
+				.setCorePoolSize(1)
+				.setMaxPoolSize(Runtime.getRuntime().availableProcessors());
 
-        // For both HTTP and HTTPS listeners: enable gzip compression, set thread pool, add listener to httpServer.
-        for (NetworkListener listener : new NetworkListener[] {httpListener, httpsListener}) {
-            CompressionConfig cc = listener.getCompressionConfig();
-            cc.setCompressionMode(CompressionConfig.CompressionMode.ON);
-            cc.setCompressionMinSize(50000); // the min number of bytes to compress
-            cc.setCompressableMimeTypes("application/json", "text/json"); // the mime types to compress
-            listener.getTransport().setWorkerThreadPoolConfig(threadPoolConfig);
-            httpServer.addListener(listener);
-        }
+		/* HTTP (non-encrypted) listener */
+		NetworkListener httpListener = new NetworkListener("otp_insecure",
+				params.bindAddress, params.port);
+		// OTP is CPU-bound, we don't want more threads than cores. TODO: We
+		// should switch to async handling.
+		httpListener.setSecure(false);
 
-        /* Add a few handlers (~= servlets) to the Grizzly server. */
+		/* HTTPS listener */
+		NetworkListener httpsListener = new NetworkListener("otp_secure",
+				params.bindAddress, params.securePort);
+		// Ideally we'd share the threads between HTTP and HTTPS.
+		httpsListener.setSecure(true);
+		httpsListener.setSSLEngineConfig(new SSLEngineConfigurator(sslConfig)
+				.setClientMode(false).setNeedClientAuth(false));
 
-        /* 1. A Grizzly wrapper around the Jersey Application. */
-        Application app = new OTPApplication(server, !params.insecure);
-        HttpHandler dynamicHandler = ContainerFactory.createContainer(HttpHandler.class, app);
-        httpServer.getServerConfiguration().addHttpHandler(dynamicHandler, "/otp/");
+		// For both HTTP and HTTPS listeners: enable gzip compression, set
+		// thread pool, add listener to httpServer.
+		for (NetworkListener listener : new NetworkListener[] { httpListener,
+				httpsListener }) {
+			CompressionConfig cc = listener.getCompressionConfig();
+			cc.setCompressionMode(CompressionConfig.CompressionMode.ON);
+			cc.setCompressionMinSize(50000); // the min number of bytes to
+												// compress
+			cc.setCompressableMimeTypes("application/json", "text/json"); // the
+																			// mime
+																			// types
+																			// to
+																			// compress
+			listener.getTransport().setWorkerThreadPoolConfig(threadPoolConfig);
+			httpServer.addListener(listener);
+		}
 
-        /* 2. A static content handler to serve the client JS apps etc. from the classpath. */
-        HttpHandler staticHandler = new CLStaticHttpHandler(GrizzlyServer.class.getClassLoader(), "/client/");
-        httpServer.getServerConfiguration().addHttpHandler(staticHandler, "/");
+		/* Add a few handlers (~= servlets) to the Grizzly server. */
 
-        /* 3. Test alternate method (no Jersey). */
-        // As in servlets, * is needed in base path to identify the "rest" of the path.
-        // GraphService gs = (GraphService) iocFactory.getComponentProvider(GraphService.class).getInstance();
-        // Graph graph = gs.getGraph();
-        // httpServer.getServerConfiguration().addHttpHandler(new OTPHttpHandler(graph), "/test/*");
-        
-        /* RELINQUISH CONTROL TO THE SERVER THREAD */
-        try {
-            httpServer.start(); 
-            LOG.info("Grizzly server running.");
-            Thread.currentThread().join();
-        } catch (BindException be) {
-            LOG.error("Cannot bind to port {}. Is it already in use?", params.port);
-        } catch (IOException ioe) {
-            LOG.error("IO exception while starting server.");
-        } catch (InterruptedException ie) {
-            LOG.info("Interrupted, shutting down.");
-        }
-        httpServer.shutdown();
+		/* 1. A Grizzly wrapper around the Jersey Application. */
+		Application app = new OTPApplication(server, !params.insecure);
+		HttpHandler dynamicHandler = ContainerFactory.createContainer(
+				HttpHandler.class, app);
+		httpServer.getServerConfiguration().addHttpHandler(dynamicHandler,
+				"/otp/");
 
-    }
+		/*
+		 * 2. A static content handler to serve the client JS apps etc. from the
+		 * classpath.
+		 */
+		HttpHandler staticHandler = new CLStaticHttpHandler(
+				GrizzlyServer.class.getClassLoader(), "/client/");
+		httpServer.getServerConfiguration().addHttpHandler(staticHandler, "/");
+
+		/* 3. Test alternate method (no Jersey). */
+		// As in servlets, * is needed in base path to identify the "rest" of
+		// the path.
+		// GraphService gs = (GraphService)
+		// iocFactory.getComponentProvider(GraphService.class).getInstance();
+		// Graph graph = gs.getGraph();
+		// httpServer.getServerConfiguration().addHttpHandler(new
+		// OTPHttpHandler(graph), "/test/*");
+
+		/* RELINQUISH CONTROL TO THE SERVER THREAD */
+		try {
+			httpServer.start();
+			LOG.info("Grizzly server running.");
+			Thread.currentThread().join();
+		} catch (BindException be) {
+			LOG.error("Cannot bind to port {}. Is it already in use?",
+					params.port);
+		} catch (IOException ioe) {
+			LOG.error("IO exception while starting server.");
+		} catch (InterruptedException ie) {
+			LOG.info("Interrupted, shutting down.");
+		}
+		httpServer.shutdown();
+
+	}
 }

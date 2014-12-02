@@ -21,35 +21,37 @@ import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
 
 /**
- * This is actually kind of a hack, and assumes that there is only one copy of CalendarServiceData
- * in the universe.
+ * This is actually kind of a hack, and assumes that there is only one copy of
+ * CalendarServiceData in the universe.
  * 
  * @author novalis
  * 
  */
 public class MultiCalendarServiceImpl extends CalendarServiceImpl {
 
-    public MultiCalendarServiceImpl() {
-        setData(new CalendarServiceData());
-    }
+	public MultiCalendarServiceImpl() {
+		setData(new CalendarServiceData());
+	}
 
-    public void addData(CalendarServiceData data, GtfsRelationalDao dao) {
-        CalendarServiceData _data = super.getData();
-        for (Agency agency : dao.getAllAgencies()) {
-            String agencyId = agency.getId();
-            _data.putTimeZoneForAgencyId(agencyId, data.getTimeZoneForAgencyId(agencyId));
-        }
-        for (LocalizedServiceId id : data.getLocalizedServiceIds()) {
-            _data.putDatesForLocalizedServiceId(id, data.getDatesForLocalizedServiceId(id));
-        }
-        for (AgencyAndId serviceId : data.getServiceIds()) {
-            _data.putServiceDatesForServiceId(serviceId,
-                    data.getServiceDatesForServiceId(serviceId));
-        }
-    }
+	public void addData(CalendarServiceData data, GtfsRelationalDao dao) {
+		CalendarServiceData _data = super.getData();
+		for (Agency agency : dao.getAllAgencies()) {
+			String agencyId = agency.getId();
+			_data.putTimeZoneForAgencyId(agencyId,
+					data.getTimeZoneForAgencyId(agencyId));
+		}
+		for (LocalizedServiceId id : data.getLocalizedServiceIds()) {
+			_data.putDatesForLocalizedServiceId(id,
+					data.getDatesForLocalizedServiceId(id));
+		}
+		for (AgencyAndId serviceId : data.getServiceIds()) {
+			_data.putServiceDatesForServiceId(serviceId,
+					data.getServiceDatesForServiceId(serviceId));
+		}
+	}
 
-    public CalendarServiceData getData() {
-        return super.getData();
-    }
+	public CalendarServiceData getData() {
+		return super.getData();
+	}
 
 }

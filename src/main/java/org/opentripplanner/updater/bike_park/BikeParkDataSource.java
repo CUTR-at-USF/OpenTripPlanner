@@ -28,10 +28,12 @@ import org.opentripplanner.routing.bike_park.BikePark;
  */
 public interface BikeParkDataSource {
 
-    /** Update the data from the source;
-     * returns true if there might have been changes */
-    public boolean update();
-    
-    public List<BikePark> getBikeParks();
-    
+	/**
+	 * Update the data from the source; returns true if there might have been
+	 * changes
+	 */
+	public boolean update();
+
+	public List<BikePark> getBikeParks();
+
 }

@@ -20,20 +20,20 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @XmlRootElement(name = "AgencyAndId")
 public class AgencyAndIdType {
-    public AgencyAndIdType(String agency, String id) {
-        this.agency = agency;
-        this.id = id;
-    }
+	public AgencyAndIdType(String agency, String id) {
+		this.agency = agency;
+		this.id = id;
+	}
 
-    public AgencyAndIdType() {
-    }
+	public AgencyAndIdType() {
+	}
 
-    @XmlAttribute
-    @JsonSerialize
-    String agency;
+	@XmlAttribute
+	@JsonSerialize
+	String agency;
 
-    @XmlAttribute
-    @JsonSerialize
-    String id;
+	@XmlAttribute
+	@JsonSerialize
+	String id;
 
 }

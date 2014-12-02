@@ -84,173 +84,197 @@ import static org.apache.commons.math3.util.FastMath.toRadians;
 @Produces({ MediaType.APPLICATION_JSON })
 public class SurfaceResource extends RoutingResource {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TimeSurface.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(TimeSurface.class);
 
-    @Context
-    OTPServer server;
+	@Context
+	OTPServer server;
 
-    @Context
-    UriInfo uriInfo;
+	@Context
+	UriInfo uriInfo;
 
-    @POST
-    public Response createSurface(@QueryParam("cutoffMinutes") 
-    @DefaultValue("90") int cutoffMinutes,
-    @QueryParam("routerId") String routerId) {
+	@POST
+	public Response createSurface(
+			@QueryParam("cutoffMinutes") @DefaultValue("90") int cutoffMinutes,
+			@QueryParam("routerId") String routerId) {
 
-        // Build the request
-        try {
-            RoutingRequest req = buildRequest(0); // batch must be true
-           
-            Graph graph;
-            
-            // routerId is optional -- select default graph if not set
-        	if(routerId == null || routerId.isEmpty()) {
-        		graph = server.graphService.getGraph();
-        	}
-        	else
-        		graph = server.graphService.getGraph(routerId);
-            
-        	req.setRoutingContext(graph);
-        	
-            EarliestArrivalSPTService sptService = new EarliestArrivalSPTService();
-            sptService.maxDuration = (60 * cutoffMinutes);
-            ShortestPathTree spt = sptService.getShortestPathTree(req);
-            req.cleanup();
-            if (spt != null) {
-                TimeSurface surface = new TimeSurface(spt);
-                surface.params = Maps.newHashMap();
-                for (Map.Entry<String, List<String>> e : uriInfo.getQueryParameters().entrySet()) {
-                    // include only the first instance of each query parameter
-                    surface.params.put(e.getKey(), e.getValue().get(0));
-                }
-                surface.cutoffMinutes = cutoffMinutes;
-                server.surfaceCache.add(surface);
-                return Response.ok().entity(new TimeSurfaceShort(surface)).build(); // .created(URI)
-            } else {
-                return Response.noContent().entity("NO SPT").build();
-            }
-        } catch (ParameterException pex) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("BAD USER").build();
-        }
+		// Build the request
+		try {
+			RoutingRequest req = buildRequest(0); // batch must be true
 
-    }
+			Graph graph;
 
-    /** List all the available surfaces. */
-    @GET
-    public Response getTimeSurfaceList () {
-        return Response.ok().entity(TimeSurfaceShort.list(server.surfaceCache.cache.asMap().values())).build();
-    }
+			// routerId is optional -- select default graph if not set
+			if (routerId == null || routerId.isEmpty()) {
+				graph = server.graphService.getGraph();
+			} else
+				graph = server.graphService.getGraph(routerId);
 
-    /** Describe a specific surface. */
-    @GET @Path("/{surfaceId}")
-    public Response getTimeSurfaceList (@PathParam("surfaceId") Integer surfaceId) {
-        TimeSurface surface = server.surfaceCache.get(surfaceId);
-        if (surface == null) return Response.status(Response.Status.NOT_FOUND).entity("Invalid surface ID.").build();
-        return Response.ok().entity(new TimeSurfaceShort(surface)).build();
-        // DEBUG return Response.ok().entity(surface).build();
-    }
+			req.setRoutingContext(graph);
 
-    /** Evaluate a surface at all the points in a PointSet. */
-    @GET @Path("/{surfaceId}/indicator")
-    public Response getIndicator (@PathParam("surfaceId") Integer surfaceId,
-                                  @QueryParam("targets")  String  targetPointSetId,
-                                  @QueryParam("origins")  String  originPointSetId,
-                                  @QueryParam("detail")   boolean detail) {
+			EarliestArrivalSPTService sptService = new EarliestArrivalSPTService();
+			sptService.maxDuration = (60 * cutoffMinutes);
+			ShortestPathTree spt = sptService.getShortestPathTree(req);
+			req.cleanup();
+			if (spt != null) {
+				TimeSurface surface = new TimeSurface(spt);
+				surface.params = Maps.newHashMap();
+				for (Map.Entry<String, List<String>> e : uriInfo
+						.getQueryParameters().entrySet()) {
+					// include only the first instance of each query parameter
+					surface.params.put(e.getKey(), e.getValue().get(0));
+				}
+				surface.cutoffMinutes = cutoffMinutes;
+				server.surfaceCache.add(surface);
+				return Response.ok().entity(new TimeSurfaceShort(surface))
+						.build(); // .created(URI)
+			} else {
+				return Response.noContent().entity("NO SPT").build();
+			}
+		} catch (ParameterException pex) {
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity("BAD USER").build();
+		}
 
+	}
 
-    	final TimeSurface surf = server.surfaceCache.get(surfaceId);
-    	
-        if (surf == null) return badRequest("Invalid TimeSurface ID.");
-        final PointSet pset = server.pointSetCache.get(targetPointSetId);
-        if (pset == null) return badRequest("Missing or invalid target PointSet ID.");
-        
-        //TODO cache this sampleset
-        Graph gg = server.graphService.getGraph(surf.routerId);
-        SampleSet samples = pset.getSampleSet( gg );
-        
-        final ResultFeature indicator = new ResultFeature(samples, surf);
-        if (indicator == null) return badServer("Could not compute indicator as requested.");
-        return Response.ok().entity(new StreamingOutput() {
-            @Override
-            public void write(OutputStream output) throws IOException, WebApplicationException {
-                indicator.writeJson(output);
-            }
-        }).build();
+	/** List all the available surfaces. */
+	@GET
+	public Response getTimeSurfaceList() {
+		return Response
+				.ok()
+				.entity(TimeSurfaceShort.list(server.surfaceCache.cache.asMap()
+						.values())).build();
+	}
 
-    }
+	/** Describe a specific surface. */
+	@GET
+	@Path("/{surfaceId}")
+	public Response getTimeSurfaceList(@PathParam("surfaceId") Integer surfaceId) {
+		TimeSurface surface = server.surfaceCache.get(surfaceId);
+		if (surface == null)
+			return Response.status(Response.Status.NOT_FOUND)
+					.entity("Invalid surface ID.").build();
+		return Response.ok().entity(new TimeSurfaceShort(surface)).build();
+		// DEBUG return Response.ok().entity(surface).build();
+	}
 
-    /** Create vector isochrones for a surface. */
-    @GET @Path("/{surfaceId}/isochrone")
-    public Response getIsochrone (
-            @PathParam("surfaceId") Integer surfaceId,
-            @QueryParam("spacing") int spacing) {
-        final TimeSurface surf = server.surfaceCache.get(surfaceId);
-        if (surf == null) return badRequest("Invalid TimeSurface ID.");
-        if (spacing < 1) spacing = 5;
-        List<IsochroneData> isochrones = getIsochronesAccumulative(surf, spacing);
-        final FeatureCollection fc = LIsochrone.makeContourFeatures(isochrones);
-        return Response.ok().entity(new StreamingOutput() {
-            @Override
-            public void write(OutputStream output) throws IOException {
-                FeatureJSON fj = new FeatureJSON();
-                fj.writeFeatureCollection(fc, output);
-            }
-        }).build();
-    }
+	/** Evaluate a surface at all the points in a PointSet. */
+	@GET
+	@Path("/{surfaceId}/indicator")
+	public Response getIndicator(@PathParam("surfaceId") Integer surfaceId,
+			@QueryParam("targets") String targetPointSetId,
+			@QueryParam("origins") String originPointSetId,
+			@QueryParam("detail") boolean detail) {
 
-    @Path("/{surfaceId}/isotiles/{z}/{x}/{y}.png")
-    @GET @Produces("image/png")
-    public Response tileGet(@PathParam("surfaceId") Integer surfaceId,
-                            @PathParam("x") int x,
-                            @PathParam("y") int y,
-                            @PathParam("z") int z) throws Exception {
+		final TimeSurface surf = server.surfaceCache.get(surfaceId);
 
-        Envelope2D env = SlippyTile.tile2Envelope(x, y, z);
-        TimeSurface surfA = server.surfaceCache.get(surfaceId);
-        if (surfA == null) return badRequest("Unrecognized surface ID.");
-        	
-        TileRequest tileRequest = new TileRequest(surfA.routerId, env, 256, 256);
-       
-        MIMEImageFormat imageFormat = new MIMEImageFormat("image/png");
-        RenderRequest renderRequest =
-                new RenderRequest(imageFormat, Layer.TRAVELTIME, Style.COLOR30, true, false);
-        // TODO why can't the renderer be static?
-        return server.renderer.getResponse(tileRequest, surfA, null, renderRequest);
-    }
+		if (surf == null)
+			return badRequest("Invalid TimeSurface ID.");
+		final PointSet pset = server.pointSetCache.get(targetPointSetId);
+		if (pset == null)
+			return badRequest("Missing or invalid target PointSet ID.");
 
-    private Response badRequest(String message) {
-        return Response.status(Response.Status.BAD_REQUEST).entity("Bad request: " + message).build();
-    }
+		// TODO cache this sampleset
+		Graph gg = server.graphService.getGraph(surf.routerId);
+		SampleSet samples = pset.getSampleSet(gg);
 
-    private Response badServer(String message) {
-        return Response.status(Response.Status.BAD_REQUEST).entity("Server fail: " + message).build();
-    }
+		final ResultFeature indicator = new ResultFeature(samples, surf);
+		if (indicator == null)
+			return badServer("Could not compute indicator as requested.");
+		return Response.ok().entity(new StreamingOutput() {
+			@Override
+			public void write(OutputStream output) throws IOException,
+					WebApplicationException {
+				indicator.writeJson(output);
+			}
+		}).build();
 
-    /**
-     * Use Laurent's accumulative grid sampler. Cutoffs in minutes.
-     * The grid and Delaunay triangulation are cached, so subsequent requests are very fast.
-     */
-    public List<IsochroneData> getIsochronesAccumulative(TimeSurface surf, int spacing) {
+	}
 
-        long t0 = System.currentTimeMillis();
-        DelaunayIsolineBuilder<WTWD> isolineBuilder = new DelaunayIsolineBuilder<WTWD>(
-                surf.sampleGrid.delaunayTriangulate(), new WTWD.IsolineMetric());
+	/** Create vector isochrones for a surface. */
+	@GET
+	@Path("/{surfaceId}/isochrone")
+	public Response getIsochrone(@PathParam("surfaceId") Integer surfaceId,
+			@QueryParam("spacing") int spacing) {
+		final TimeSurface surf = server.surfaceCache.get(surfaceId);
+		if (surf == null)
+			return badRequest("Invalid TimeSurface ID.");
+		if (spacing < 1)
+			spacing = 5;
+		List<IsochroneData> isochrones = getIsochronesAccumulative(surf,
+				spacing);
+		final FeatureCollection fc = LIsochrone.makeContourFeatures(isochrones);
+		return Response.ok().entity(new StreamingOutput() {
+			@Override
+			public void write(OutputStream output) throws IOException {
+				FeatureJSON fj = new FeatureJSON();
+				fj.writeFeatureCollection(fc, output);
+			}
+		}).build();
+	}
 
-        List<IsochroneData> isochrones = new ArrayList<IsochroneData>();
-        for (int minutes = spacing; minutes <= surf.cutoffMinutes; minutes += spacing) {
-            int seconds = minutes * 60;
-            WTWD z0 = new WTWD();
-            z0.w = 1.0;
-            z0.wTime = seconds;
-            z0.d = 300; // meters. TODO set dynamically / properly, make sure it matches grid cell size?
-            IsochroneData isochrone = new IsochroneData(seconds, isolineBuilder.computeIsoline(z0));
-            isochrones.add(isochrone);
-        }
+	@Path("/{surfaceId}/isotiles/{z}/{x}/{y}.png")
+	@GET
+	@Produces("image/png")
+	public Response tileGet(@PathParam("surfaceId") Integer surfaceId,
+			@PathParam("x") int x, @PathParam("y") int y, @PathParam("z") int z)
+			throws Exception {
 
-        long t1 = System.currentTimeMillis();
-        LOG.debug("Computed {} isochrones in {}msec", isochrones.size(), (int) (t1 - t0));
+		Envelope2D env = SlippyTile.tile2Envelope(x, y, z);
+		TimeSurface surfA = server.surfaceCache.get(surfaceId);
+		if (surfA == null)
+			return badRequest("Unrecognized surface ID.");
 
-        return isochrones;
-    }
+		TileRequest tileRequest = new TileRequest(surfA.routerId, env, 256, 256);
+
+		MIMEImageFormat imageFormat = new MIMEImageFormat("image/png");
+		RenderRequest renderRequest = new RenderRequest(imageFormat,
+				Layer.TRAVELTIME, Style.COLOR30, true, false);
+		// TODO why can't the renderer be static?
+		return server.renderer.getResponse(tileRequest, surfA, null,
+				renderRequest);
+	}
+
+	private Response badRequest(String message) {
+		return Response.status(Response.Status.BAD_REQUEST)
+				.entity("Bad request: " + message).build();
+	}
+
+	private Response badServer(String message) {
+		return Response.status(Response.Status.BAD_REQUEST)
+				.entity("Server fail: " + message).build();
+	}
+
+	/**
+	 * Use Laurent's accumulative grid sampler. Cutoffs in minutes. The grid and
+	 * Delaunay triangulation are cached, so subsequent requests are very fast.
+	 */
+	public List<IsochroneData> getIsochronesAccumulative(TimeSurface surf,
+			int spacing) {
+
+		long t0 = System.currentTimeMillis();
+		DelaunayIsolineBuilder<WTWD> isolineBuilder = new DelaunayIsolineBuilder<WTWD>(
+				surf.sampleGrid.delaunayTriangulate(), new WTWD.IsolineMetric());
+
+		List<IsochroneData> isochrones = new ArrayList<IsochroneData>();
+		for (int minutes = spacing; minutes <= surf.cutoffMinutes; minutes += spacing) {
+			int seconds = minutes * 60;
+			WTWD z0 = new WTWD();
+			z0.w = 1.0;
+			z0.wTime = seconds;
+			z0.d = 300; // meters. TODO set dynamically / properly, make sure it
+						// matches grid cell size?
+			IsochroneData isochrone = new IsochroneData(seconds,
+					isolineBuilder.computeIsoline(z0));
+			isochrones.add(isochrone);
+		}
+
+		long t1 = System.currentTimeMillis();
+		LOG.debug("Computed {} isochrones in {}msec", isochrones.size(),
+				(int) (t1 - t0));
+
+		return isochrones;
+	}
 
 }

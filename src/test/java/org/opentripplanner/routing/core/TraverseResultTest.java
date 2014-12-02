@@ -20,30 +20,30 @@ import org.junit.Test;
 
 public class TraverseResultTest {
 
-    @Test
-    public void testAddToExistingResultChain() {
+	@Test
+	public void testAddToExistingResultChain() {
 
-        State resultChain = null;
+		State resultChain = null;
 
-        /* note: times are rounded to seconds toward zero */
-        
-        for (int i = 0; i < 4; i++) {
-            State r = new State(null, i * 1000, new RoutingRequest());
-            resultChain = r.addToExistingResultChain(resultChain);
-        }
+		/* note: times are rounded to seconds toward zero */
 
-        assertEquals(3000, resultChain.getTimeSeconds(), 0.0);
+		for (int i = 0; i < 4; i++) {
+			State r = new State(null, i * 1000, new RoutingRequest());
+			resultChain = r.addToExistingResultChain(resultChain);
+		}
 
-        resultChain = resultChain.getNextResult();
-        assertEquals(2000, resultChain.getTimeSeconds(), 0.0);
+		assertEquals(3000, resultChain.getTimeSeconds(), 0.0);
 
-        resultChain = resultChain.getNextResult();
-        assertEquals(1000, resultChain.getTimeSeconds(), 0.0);
+		resultChain = resultChain.getNextResult();
+		assertEquals(2000, resultChain.getTimeSeconds(), 0.0);
 
-        resultChain = resultChain.getNextResult();
-        assertEquals(0000, resultChain.getTimeSeconds(), 0.0);
+		resultChain = resultChain.getNextResult();
+		assertEquals(1000, resultChain.getTimeSeconds(), 0.0);
 
-        resultChain = resultChain.getNextResult();
-        assertNull(resultChain);
-    }
+		resultChain = resultChain.getNextResult();
+		assertEquals(0000, resultChain.getTimeSeconds(), 0.0);
+
+		resultChain = resultChain.getNextResult();
+		assertNull(resultChain);
+	}
 }

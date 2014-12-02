@@ -24,11 +24,13 @@ import org.opentripplanner.util.model.EncodedPolylineBean;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineString;
 
-public class LineStringAdapter extends XmlAdapter<EncodedPolylineBean, LineString>{
+public class LineStringAdapter extends
+		XmlAdapter<EncodedPolylineBean, LineString> {
 
 	@Override
 	public LineString unmarshal(EncodedPolylineBean arg) throws Exception {
-	    throw new UnsupportedOperationException("We presently serialize LineString as EncodedPolylineBean, and thus cannot deserialize them");
+		throw new UnsupportedOperationException(
+				"We presently serialize LineString as EncodedPolylineBean, and thus cannot deserialize them");
 	}
 
 	@Override
@@ -41,5 +43,4 @@ public class LineStringAdapter extends XmlAdapter<EncodedPolylineBean, LineStrin
 		return PolylineEncoder.createEncodings(coords);
 	}
 
-	
 }

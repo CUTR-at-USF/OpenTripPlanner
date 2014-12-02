@@ -19,29 +19,31 @@ import java.io.IOException;
 
 public class Shape extends Entity {
 
-    public String shape_id;
-    public double shape_pt_lat;
-    public double shape_pt_lon;
-    public int    shape_pt_sequence;
-    public double shape_dist_traveled;
+	public String shape_id;
+	public double shape_pt_lat;
+	public double shape_pt_lon;
+	public int shape_pt_sequence;
+	public double shape_dist_traveled;
 
-    public static class Loader extends Entity.Loader<Shape> {
+	public static class Loader extends Entity.Loader<Shape> {
 
-        public Loader(GTFSFeed feed) {
-            super(feed, "shapes");
-        }
+		public Loader(GTFSFeed feed) {
+			super(feed, "shapes");
+		}
 
-        @Override
-        public void loadOneRow() throws IOException {
-            Shape s = new Shape();
-            s.shape_id = getStringField("shape_id", true);
-            s.shape_pt_lat = getDoubleField("shape_pt_lat", true, -90D, 90D);
-            s.shape_pt_lon = getDoubleField("shape_pt_lon", true, -180D, 180D);
-            s.shape_pt_sequence = getIntField("shape_pt_sequence", true, 0, Integer.MAX_VALUE);
-            s.shape_dist_traveled = getDoubleField("shape_dist_traveled", false, 0D, Double.MAX_VALUE);
-            s.feed = feed;
-            feed.shapes.put(s.shape_id, s); // TODO this should be a multimap
-        }
+		@Override
+		public void loadOneRow() throws IOException {
+			Shape s = new Shape();
+			s.shape_id = getStringField("shape_id", true);
+			s.shape_pt_lat = getDoubleField("shape_pt_lat", true, -90D, 90D);
+			s.shape_pt_lon = getDoubleField("shape_pt_lon", true, -180D, 180D);
+			s.shape_pt_sequence = getIntField("shape_pt_sequence", true, 0,
+					Integer.MAX_VALUE);
+			s.shape_dist_traveled = getDoubleField("shape_dist_traveled",
+					false, 0D, Double.MAX_VALUE);
+			s.feed = feed;
+			feed.shapes.put(s.shape_id, s); // TODO this should be a multimap
+		}
 
-    }
+	}
 }

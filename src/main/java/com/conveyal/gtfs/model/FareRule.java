@@ -20,35 +20,38 @@ import java.io.IOException;
 
 public class FareRule extends Entity {
 
-    public Fare fare;
-    public String route_id;
-    public String origin_id;
-    public String destination_id;
-    public String contains_id;
+	public Fare fare;
+	public String route_id;
+	public String origin_id;
+	public String destination_id;
+	public String contains_id;
 
-    public static class Loader extends Entity.Loader<FareRule> {
+	public static class Loader extends Entity.Loader<FareRule> {
 
-        public Loader(GTFSFeed feed) {
-            super(feed, "fare_rules");
-        }
+		public Loader(GTFSFeed feed) {
+			super(feed, "fare_rules");
+		}
 
-        @Override
-        public void loadOneRow() throws IOException {
+		@Override
+		public void loadOneRow() throws IOException {
 
-            /* Calendars and Fares are special: they are stored as joined tables rather than simple maps. */
-            String fareId = getStringField("fare_id", true);
-            Fare fare = feed.getOrCreateFare(fareId);
-            FareRule fr = new FareRule();
-            fr.fare = fare;
-            fr.route_id = getStringField("route_id", false);
-            fr.origin_id = getStringField("origin_id", false);
-            fr.destination_id = getStringField("destination_id", false);
-            fr.contains_id = getStringField("contains_id", false);
-            fr.feed = feed;
-            fare.fare_rules.add(fr);
+			/*
+			 * Calendars and Fares are special: they are stored as joined tables
+			 * rather than simple maps.
+			 */
+			String fareId = getStringField("fare_id", true);
+			Fare fare = feed.getOrCreateFare(fareId);
+			FareRule fr = new FareRule();
+			fr.fare = fare;
+			fr.route_id = getStringField("route_id", false);
+			fr.origin_id = getStringField("origin_id", false);
+			fr.destination_id = getStringField("destination_id", false);
+			fr.contains_id = getStringField("contains_id", false);
+			fr.feed = feed;
+			fare.fare_rules.add(fr);
 
-        }
+		}
 
-    }
+	}
 
 }

@@ -16,15 +16,15 @@ package org.opentripplanner.graph_builder.impl.stopsAlerts;
 import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.routing.vertextype.TransitStop;
 
-public abstract class AbstractStopTester implements IStopTester{
+public abstract class AbstractStopTester implements IStopTester {
 
-    String type;
-    
-    public String getType(){
-    	return this.type;
-    }
+	String type;
 
-    @Override
-    abstract public boolean fulfillDemands(TransitStop ts, Graph graph);
+	public String getType() {
+		return this.type;
+	}
+
+	@Override
+	abstract public boolean fulfillDemands(TransitStop ts, Graph graph);
 
 }

@@ -19,12 +19,12 @@ package org.opentripplanner.routing.util;
  * @author avi
  */
 public interface UniqueIdGenerator<T> {
-    
-    /**
-     * Generates the identifier. May consider the element.
-     * 
-     * @param elem
-     * @return
-     */
-    public int getId(T elem);
+
+	/**
+	 * Generates the identifier. May consider the element.
+	 * 
+	 * @param elem
+	 * @return
+	 */
+	public int getId(T elem);
 }

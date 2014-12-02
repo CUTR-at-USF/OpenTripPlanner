@@ -27,29 +27,30 @@ import org.opentripplanner.routing.graph.Graph;
 
 public class GTFSPatternHopFactoryTest {
 
-    @Test
-    public void testBikesAllowed() throws IOException {
-        MockGtfs gtfs = MockGtfs.create();
-        gtfs.putAgencies(1);
-        gtfs.putRoutes(1);
-        gtfs.putStops(2);
-        gtfs.putCalendars(1);
-        gtfs.putTrips(1, "r0", "sid0", "bikes_allowed=1");
-        gtfs.putStopTimes("t0", "s0,s1");
-        gtfs.putLines("frequencies.txt", "trip_id,start_time,end_time,headway_secs",
-                "t0,09:00:00,17:00:00,300");
+	@Test
+	public void testBikesAllowed() throws IOException {
+		MockGtfs gtfs = MockGtfs.create();
+		gtfs.putAgencies(1);
+		gtfs.putRoutes(1);
+		gtfs.putStops(2);
+		gtfs.putCalendars(1);
+		gtfs.putTrips(1, "r0", "sid0", "bikes_allowed=1");
+		gtfs.putStopTimes("t0", "s0,s1");
+		gtfs.putLines("frequencies.txt",
+				"trip_id,start_time,end_time,headway_secs",
+				"t0,09:00:00,17:00:00,300");
 
-        GTFSPatternHopFactory factory = new GTFSPatternHopFactory(GtfsLibrary.createContext(gtfs
-                .read()));
-        Graph graph = new Graph();
-        factory.run(graph);
+		GTFSPatternHopFactory factory = new GTFSPatternHopFactory(
+				GtfsLibrary.createContext(gtfs.read()));
+		Graph graph = new Graph();
+		factory.run(graph);
 
-        for (Edge edge : graph.getEdges()) {
-            if (edge instanceof TransitBoardAlight) {
-                TripPattern pattern = ((TransitBoardAlight)edge).getPattern();
-                // TODO assertTrue(pattern.getBikesAllowed());
-            }
-        }
-    }
+		for (Edge edge : graph.getEdges()) {
+			if (edge instanceof TransitBoardAlight) {
+				TripPattern pattern = ((TransitBoardAlight) edge).getPattern();
+				// TODO assertTrue(pattern.getBikesAllowed());
+			}
+		}
+	}
 
 }

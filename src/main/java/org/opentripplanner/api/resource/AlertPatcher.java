@@ -39,72 +39,78 @@ import org.opentripplanner.routing.services.AlertPatchService;
 @XmlRootElement
 public class AlertPatcher {
 
-    @Context AlertPatchService alertPatchService; // FIXME inject Application
+	@Context
+	AlertPatchService alertPatchService; // FIXME inject Application
 
-    /**
-     * Return a list of all patches that apply to a given stop
-     *
-     * @return Returns either an XML or a JSON document, depending on the HTTP Accept header of the
-     *         client making the request.
-     */
-    @GET
-    @Path("/stopPatches")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML + Q, MediaType.TEXT_XML + Q })
-    public AlertPatchResponse getStopPatches(@QueryParam("agency") String agency,
-            @QueryParam("id") String id) {
+	/**
+	 * Return a list of all patches that apply to a given stop
+	 *
+	 * @return Returns either an XML or a JSON document, depending on the HTTP
+	 *         Accept header of the client making the request.
+	 */
+	@GET
+	@Path("/stopPatches")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML + Q,
+			MediaType.TEXT_XML + Q })
+	public AlertPatchResponse getStopPatches(
+			@QueryParam("agency") String agency, @QueryParam("id") String id) {
 
-        AlertPatchResponse response = new AlertPatchResponse();
-        Collection<AlertPatch> alertPatches = alertPatchService.getStopPatches(new AgencyAndId(agency, id));
-        for (AlertPatch alertPatch : alertPatches) {
-            response.addAlertPatch(alertPatch);
-        }
-        return response;
-    }
+		AlertPatchResponse response = new AlertPatchResponse();
+		Collection<AlertPatch> alertPatches = alertPatchService
+				.getStopPatches(new AgencyAndId(agency, id));
+		for (AlertPatch alertPatch : alertPatches) {
+			response.addAlertPatch(alertPatch);
+		}
+		return response;
+	}
 
-    /**
-     * Return a list of all patches that apply to a given route
-     *
-     * @return Returns either an XML or a JSON document, depending on the HTTP Accept header of the
-     *         client making the request.
-     */
-    @GET
-    @Path("/routePatches")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML + Q, MediaType.TEXT_XML + Q })
-    public AlertPatchResponse getRoutePatches(@QueryParam("agency") String agency,
-            @QueryParam("id") String id) {
+	/**
+	 * Return a list of all patches that apply to a given route
+	 *
+	 * @return Returns either an XML or a JSON document, depending on the HTTP
+	 *         Accept header of the client making the request.
+	 */
+	@GET
+	@Path("/routePatches")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML + Q,
+			MediaType.TEXT_XML + Q })
+	public AlertPatchResponse getRoutePatches(
+			@QueryParam("agency") String agency, @QueryParam("id") String id) {
 
-        AlertPatchResponse response = new AlertPatchResponse();
-        Collection<AlertPatch> alertPatches =
-                alertPatchService.getRoutePatches(new AgencyAndId(agency, id));
-        for (AlertPatch alertPatch : alertPatches) {
-            response.addAlertPatch(alertPatch);
-        }
-        return response;
-    }
+		AlertPatchResponse response = new AlertPatchResponse();
+		Collection<AlertPatch> alertPatches = alertPatchService
+				.getRoutePatches(new AgencyAndId(agency, id));
+		for (AlertPatch alertPatch : alertPatches) {
+			response.addAlertPatch(alertPatch);
+		}
+		return response;
+	}
 
-    @RolesAllowed("user")
-    @POST
-    @Path("/patch")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML + Q, MediaType.TEXT_XML + Q })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public AlertPatchCreationResponse createPatches(AlertPatchSet alertPatches) {
-        AlertPatchCreationResponse response = new AlertPatchCreationResponse();
-        for (AlertPatch alertPatch : alertPatches.alertPatches) {
-            if (alertPatch.getId() == null) {
-                response.status = "Every patch must have an id";
-                return response;
-            }
+	@RolesAllowed("user")
+	@POST
+	@Path("/patch")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML + Q,
+			MediaType.TEXT_XML + Q })
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+			MediaType.TEXT_XML })
+	public AlertPatchCreationResponse createPatches(AlertPatchSet alertPatches) {
+		AlertPatchCreationResponse response = new AlertPatchCreationResponse();
+		for (AlertPatch alertPatch : alertPatches.alertPatches) {
+			if (alertPatch.getId() == null) {
+				response.status = "Every patch must have an id";
+				return response;
+			}
 
-            final AgencyAndId route = alertPatch.getRoute();
-            if (route != null && route.getId().equals("")) {
-                response.status = "Every route patch must have a route id";
-                return response;
-            }
-        }
-        for (AlertPatch alertPatch : alertPatches.alertPatches) {
-            alertPatchService.apply(alertPatch);
-        }
-        response.status = "OK";
-        return response;
-    }
+			final AgencyAndId route = alertPatch.getRoute();
+			if (route != null && route.getId().equals("")) {
+				response.status = "Every route patch must have a route id";
+				return response;
+			}
+		}
+		for (AlertPatch alertPatch : alertPatches.alertPatches) {
+			alertPatchService.apply(alertPatch);
+		}
+		response.status = "OK";
+		return response;
+	}
 }

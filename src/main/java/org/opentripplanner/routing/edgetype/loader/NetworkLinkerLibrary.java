@@ -41,89 +41,100 @@ import org.opentripplanner.routing.vertextype.TransitStop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class NetworkLinkerLibrary {
 
-    private static Logger LOG = LoggerFactory.getLogger(NetworkLinkerLibrary.class);
+	private static Logger LOG = LoggerFactory
+			.getLogger(NetworkLinkerLibrary.class);
 
-    /* for each original bundle of (turn)edges making up a street, a list of 
-       edge pairs that will replace it */
-    HashMap<HashSet<StreetEdge>, LinkedList<P2<StreetEdge>>> replacements =
-        new HashMap<HashSet<StreetEdge>, LinkedList<P2<StreetEdge>>>();
-    
-    /* a map to track which vertices were associated with each linked vertex, to avoid repeat splitting */
-    HashMap<Vertex, Collection<StreetVertex>> splitVertices = 
-            new HashMap<Vertex, Collection<StreetVertex>> (); 
+	/*
+	 * for each original bundle of (turn)edges making up a street, a list of
+	 * edge pairs that will replace it
+	 */
+	HashMap<HashSet<StreetEdge>, LinkedList<P2<StreetEdge>>> replacements = new HashMap<HashSet<StreetEdge>, LinkedList<P2<StreetEdge>>>();
 
-    /* by default traverse options allow walking only, which is what we want */
-    RoutingRequest options = new RoutingRequest();
+	/*
+	 * a map to track which vertices were associated with each linked vertex, to
+	 * avoid repeat splitting
+	 */
+	HashMap<Vertex, Collection<StreetVertex>> splitVertices = new HashMap<Vertex, Collection<StreetVertex>>();
 
-    Graph graph;
+	/* by default traverse options allow walking only, which is what we want */
+	RoutingRequest options = new RoutingRequest();
 
-    StreetVertexIndexServiceImpl index;
+	Graph graph;
 
-    EdgesForRoute edgesForRoute;
+	StreetVertexIndexServiceImpl index;
 
-    private DistanceLibrary distanceLibrary = SphericalDistanceLibrary.getInstance();
+	EdgesForRoute edgesForRoute;
 
-    public NetworkLinkerLibrary(Graph graph, Map<Class<?>, Object> extra) {
-        this.graph = graph;
-        EdgesForRoute edgesForRoute = (EdgesForRoute) extra.get(EdgesForRoute.class);
-        this.edgesForRoute = edgesForRoute;
-        LOG.debug("constructing index...");
-        this.index = new StreetVertexIndexServiceImpl(graph);
-    }
+	private DistanceLibrary distanceLibrary = SphericalDistanceLibrary
+			.getInstance();
 
-    /**
-     * The entry point for networklinker to link each transit stop.
-     * 
-     * @param v
-     * @param wheelchairAccessible
-     * @return true if the links were successfully added, otherwise false
-     */
-    public LinkRequest connectVertexToStreets(TransitStop v, boolean wheelchairAccessible) {
-        LinkRequest request = new LinkRequest(this);
-        request.connectVertexToStreets(v, wheelchairAccessible);
-        return request;
-    }
+	public NetworkLinkerLibrary(Graph graph, Map<Class<?>, Object> extra) {
+		this.graph = graph;
+		EdgesForRoute edgesForRoute = (EdgesForRoute) extra
+				.get(EdgesForRoute.class);
+		this.edgesForRoute = edgesForRoute;
+		LOG.debug("constructing index...");
+		this.index = new StreetVertexIndexServiceImpl(graph);
+	}
 
-    /**
-     * The entry point for networklinker to link each bike rental station.
-     * 
-     * @param v
-     */
-    public LinkRequest connectVertexToStreets(BikeRentalStationVertex v) {
-        LinkRequest request = new LinkRequest(this);
-        request.connectVertexToStreets(v, new TraverseModeSet(TraverseMode.WALK,
-                TraverseMode.BICYCLE), new LinkRequest.StreetLinkFactory<BikeRentalStationVertex>() {
-            @Override
-            public Collection<? extends Edge> connect(StreetVertex sv, BikeRentalStationVertex v) {
-                return Arrays.asList(new StreetBikeRentalLink(sv, v), new StreetBikeRentalLink(v,
-                        sv));
-            }
-        });
-        return request;
-    }
+	/**
+	 * The entry point for networklinker to link each transit stop.
+	 * 
+	 * @param v
+	 * @param wheelchairAccessible
+	 * @return true if the links were successfully added, otherwise false
+	 */
+	public LinkRequest connectVertexToStreets(TransitStop v,
+			boolean wheelchairAccessible) {
+		LinkRequest request = new LinkRequest(this);
+		request.connectVertexToStreets(v, wheelchairAccessible);
+		return request;
+	}
 
-   /** 
-     * The entry point for networklinker to link each bike park.
-     * 
-     * @param v
-     */
-    public LinkRequest connectVertexToStreets(BikeParkVertex v) {
-        LinkRequest request = new LinkRequest(this);
-        request.connectVertexToStreets(v, new TraverseModeSet(TraverseMode.WALK,
-                TraverseMode.BICYCLE), new LinkRequest.StreetLinkFactory<BikeParkVertex>() {
-            @Override
-            public Collection<? extends Edge> connect(StreetVertex sv, BikeParkVertex v) {
-                return Arrays.asList(new StreetBikeParkLink(sv, v), new StreetBikeParkLink(v, sv));
-            }
-        });
-        return request;
-    }
+	/**
+	 * The entry point for networklinker to link each bike rental station.
+	 * 
+	 * @param v
+	 */
+	public LinkRequest connectVertexToStreets(BikeRentalStationVertex v) {
+		LinkRequest request = new LinkRequest(this);
+		request.connectVertexToStreets(v, new TraverseModeSet(
+				TraverseMode.WALK, TraverseMode.BICYCLE),
+				new LinkRequest.StreetLinkFactory<BikeRentalStationVertex>() {
+					@Override
+					public Collection<? extends Edge> connect(StreetVertex sv,
+							BikeRentalStationVertex v) {
+						return Arrays.asList(new StreetBikeRentalLink(sv, v),
+								new StreetBikeRentalLink(v, sv));
+					}
+				});
+		return request;
+	}
 
-    public DistanceLibrary getDistanceLibrary() {
-        return distanceLibrary;
-    }
+	/**
+	 * The entry point for networklinker to link each bike park.
+	 * 
+	 * @param v
+	 */
+	public LinkRequest connectVertexToStreets(BikeParkVertex v) {
+		LinkRequest request = new LinkRequest(this);
+		request.connectVertexToStreets(v, new TraverseModeSet(
+				TraverseMode.WALK, TraverseMode.BICYCLE),
+				new LinkRequest.StreetLinkFactory<BikeParkVertex>() {
+					@Override
+					public Collection<? extends Edge> connect(StreetVertex sv,
+							BikeParkVertex v) {
+						return Arrays.asList(new StreetBikeParkLink(sv, v),
+								new StreetBikeParkLink(v, sv));
+					}
+				});
+		return request;
+	}
+
+	public DistanceLibrary getDistanceLibrary() {
+		return distanceLibrary;
+	}
 
 }

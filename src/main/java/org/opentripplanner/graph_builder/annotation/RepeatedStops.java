@@ -17,19 +17,19 @@ import org.onebusaway.gtfs.model.Trip;
 
 public class RepeatedStops extends GraphBuilderAnnotation {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public static final String FMT = "Trip %s visits stops repeatedly. Removed duplicates.";
-    
-    public final Trip trip;
-    
-    public RepeatedStops(Trip trip){
-    	this.trip = trip;
-    }
-    
-    @Override
-    public String getMessage() {
-        return String.format(FMT, trip);
-    }
+	public static final String FMT = "Trip %s visits stops repeatedly. Removed duplicates.";
+
+	public final Trip trip;
+
+	public RepeatedStops(Trip trip) {
+		this.trip = trip;
+	}
+
+	@Override
+	public String getMessage() {
+		return String.format(FMT, trip);
+	}
 
 }

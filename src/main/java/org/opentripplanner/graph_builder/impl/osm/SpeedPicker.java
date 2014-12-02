@@ -17,6 +17,6 @@ package org.opentripplanner.graph_builder.impl.osm;
  * Choose a speed that should be applied to a given segment
  */
 public class SpeedPicker {
-    public OSMSpecifier specifier;
-    public float speed;
+	public OSMSpecifier specifier;
+	public float speed;
 }

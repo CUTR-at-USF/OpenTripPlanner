@@ -20,20 +20,20 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @XmlType
 public class Entry {
-    @XmlAttribute
-    @JsonSerialize
-    public String key;
+	@XmlAttribute
+	@JsonSerialize
+	public String key;
 
-    @XmlAttribute
-    @JsonSerialize
-    public String value;
+	@XmlAttribute
+	@JsonSerialize
+	public String value;
 
-    public Entry() {
-        // empty constructor required by JAXB
-    }
+	public Entry() {
+		// empty constructor required by JAXB
+	}
 
-    public Entry(String key, String value) {
-        this.key = key;
-        this.value = value;
-    }
+	public Entry(String key, String value) {
+		this.key = key;
+		this.value = value;
+	}
 }

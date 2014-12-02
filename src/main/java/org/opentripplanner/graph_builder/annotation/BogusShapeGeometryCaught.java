@@ -18,24 +18,25 @@ import org.onebusaway.gtfs.model.StopTime;
 
 public class BogusShapeGeometryCaught extends GraphBuilderAnnotation {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public static final String FMT = "Shape geometry for shape_id %s cannot be used with stop " +
-    		"times %s and %s; using straight-line path instead";
-    
-    final AgencyAndId shapeId;
-    final StopTime stA;
-    final StopTime stB;
-    
-    public BogusShapeGeometryCaught(AgencyAndId shapeId, StopTime stA, StopTime stB){
-    	this.shapeId = shapeId;
-    	this.stA = stA;
-    	this.stB = stB;
-    }
-    
-    @Override
-    public String getMessage() {
-        return String.format(FMT, shapeId, stA, stB);
-    }
+	public static final String FMT = "Shape geometry for shape_id %s cannot be used with stop "
+			+ "times %s and %s; using straight-line path instead";
+
+	final AgencyAndId shapeId;
+	final StopTime stA;
+	final StopTime stB;
+
+	public BogusShapeGeometryCaught(AgencyAndId shapeId, StopTime stA,
+			StopTime stB) {
+		this.shapeId = shapeId;
+		this.stA = stA;
+		this.stB = stB;
+	}
+
+	@Override
+	public String getMessage() {
+		return String.format(FMT, shapeId, stA, stB);
+	}
 
 }

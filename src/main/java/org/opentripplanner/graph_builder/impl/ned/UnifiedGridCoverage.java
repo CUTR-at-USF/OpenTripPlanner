@@ -29,80 +29,85 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Stitches together multiple elevation maps into a single elevation map,
- * hackily.  This is horrible, but the geotools way of doing things is
- * too slow.   
+ * hackily. This is horrible, but the geotools way of doing things is too slow.
+ * 
  * @author novalis
  *
  */
 public class UnifiedGridCoverage extends AbstractCoverage {
 
-    private static final long serialVersionUID = -7798801307087575896L;
+	private static final long serialVersionUID = -7798801307087575896L;
 
-    private static Logger log = LoggerFactory.getLogger(UnifiedGridCoverage.class);
-    
-    private ArrayList<Coverage> regions;
+	private static Logger log = LoggerFactory
+			.getLogger(UnifiedGridCoverage.class);
 
-    private List<VerticalDatum> datums;
+	private ArrayList<Coverage> regions;
 
-    protected UnifiedGridCoverage(CharSequence name, Coverage coverage, List<VerticalDatum> datums) {
-        super(name, coverage);
-        regions = new ArrayList<Coverage>();
-        regions.add(coverage);
-        this.datums = datums;
-    }
+	private List<VerticalDatum> datums;
 
-    @Override
-    public Object evaluate(DirectPosition point) throws PointOutsideCoverageException,
-            CannotEvaluateException {
-        /* we don't care about this */
-        return null;
-    }
+	protected UnifiedGridCoverage(CharSequence name, Coverage coverage,
+			List<VerticalDatum> datums) {
+		super(name, coverage);
+		regions = new ArrayList<Coverage>();
+		regions.add(coverage);
+		this.datums = datums;
+	}
 
-    public double[] evaluate(DirectPosition point, double[] values)
-            throws PointOutsideCoverageException, CannotEvaluateException {
+	@Override
+	public Object evaluate(DirectPosition point)
+			throws PointOutsideCoverageException, CannotEvaluateException {
+		/* we don't care about this */
+		return null;
+	}
 
-        for (Coverage region : regions) {
-            // GeneralEnvelope has a contains method, OpenGIS Envelope does not
-            GeneralEnvelope env = ((GeneralEnvelope)region.getEnvelope());
-            // avoid incurring exception construction overhead when there are many regions
-            if (env.contains(point)) {
-                double[] result;
-                double x = point.getOrdinate(0);
-                double y = point.getOrdinate(1);
-                try {
-                    result = region.evaluate(point, values);
-                    for (VerticalDatum datum : datums) {
-                        if (datum.covers(x, y)) {
-                            result[0] += datum.interpolatedHeight(x, y);
-                            return result;
-                        }
-                    }
-                    //if we get here, all vdatums failed.
-                    log.error("Failed to convert elevation at " + y + ", " + x + " from NAVD88 to NAD83");
-                } catch (PointOutsideCoverageException e) {
-                    continue;
-                }
-                return result;
-            }
-        }
-        /* not found */
-        log.warn("Point not found: " + point);
-        
-        return null;
-    }
-    
-    @Override
-    public int getNumSampleDimensions() {
-        return regions.get(0).getNumSampleDimensions();
-    }
+	public double[] evaluate(DirectPosition point, double[] values)
+			throws PointOutsideCoverageException, CannotEvaluateException {
 
-    @Override
-    public SampleDimension getSampleDimension(int index) throws IndexOutOfBoundsException {
-        return regions.get(0).getSampleDimension(index);
-    }
+		for (Coverage region : regions) {
+			// GeneralEnvelope has a contains method, OpenGIS Envelope does not
+			GeneralEnvelope env = ((GeneralEnvelope) region.getEnvelope());
+			// avoid incurring exception construction overhead when there are
+			// many regions
+			if (env.contains(point)) {
+				double[] result;
+				double x = point.getOrdinate(0);
+				double y = point.getOrdinate(1);
+				try {
+					result = region.evaluate(point, values);
+					for (VerticalDatum datum : datums) {
+						if (datum.covers(x, y)) {
+							result[0] += datum.interpolatedHeight(x, y);
+							return result;
+						}
+					}
+					// if we get here, all vdatums failed.
+					log.error("Failed to convert elevation at " + y + ", " + x
+							+ " from NAVD88 to NAD83");
+				} catch (PointOutsideCoverageException e) {
+					continue;
+				}
+				return result;
+			}
+		}
+		/* not found */
+		log.warn("Point not found: " + point);
 
-    public void add(GridCoverage2D regionCoverage) {
-        regions.add(regionCoverage);
-    }
+		return null;
+	}
+
+	@Override
+	public int getNumSampleDimensions() {
+		return regions.get(0).getNumSampleDimensions();
+	}
+
+	@Override
+	public SampleDimension getSampleDimension(int index)
+			throws IndexOutOfBoundsException {
+		return regions.get(0).getSampleDimension(index);
+	}
+
+	public void add(GridCoverage2D regionCoverage) {
+		regions.add(regionCoverage);
+	}
 
 }

@@ -32,133 +32,146 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineString;
 
 /**
- * A transit vehicle's journey (temporary vertex) between departure while onboard a trip and arrival
- * at the next. This version represents a set of such journeys specified by a TripPattern.
+ * A transit vehicle's journey (temporary vertex) between departure while
+ * onboard a trip and arrival at the next. This version represents a set of such
+ * journeys specified by a TripPattern.
  * 
  * @author laurent
  */
 public class OnBoardDepartPatternHop extends Edge implements OnboardEdge {
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private TripTimes tripTimes;
+	private TripTimes tripTimes;
 
-    private ServiceDay serviceDay;
+	private ServiceDay serviceDay;
 
-    private int stopIndex;
+	private int stopIndex;
 
-    private double positionInHop;
+	private double positionInHop;
 
-    private Trip trip;
+	private Trip trip;
 
-    private Stop endStop;
+	private Stop endStop;
 
-    private LineString geometry = null;
+	private LineString geometry = null;
 
-    /**
-     * @param from Originating vertex.
-     * @param to Destination vertex: a PatternStopVertex for the next stop of the current hop.
-     * @param tripTimes Resolved trip times for the trip with updated real-time info if available.
-     * @param serviceDay Service day on which trip is running.
-     * @param stopIndex Index of the current stop.
-     * @param positionInHop Between 0 to 1, an estimation of the covered distance in this hop so
-     *        far.
-     */
-    public OnBoardDepartPatternHop(OnboardDepartVertex from, PatternStopVertex to,
-            TripTimes tripTimes, ServiceDay serviceDay, int stopIndex, double positionInHop) {
-        super(from, to);
-        this.stopIndex = stopIndex;
-        this.serviceDay = serviceDay;
-        this.tripTimes = tripTimes;
-        this.positionInHop = positionInHop;
-        this.trip = tripTimes.trip;
-        this.endStop = to.getStop();
-    }
+	/**
+	 * @param from
+	 *            Originating vertex.
+	 * @param to
+	 *            Destination vertex: a PatternStopVertex for the next stop of
+	 *            the current hop.
+	 * @param tripTimes
+	 *            Resolved trip times for the trip with updated real-time info
+	 *            if available.
+	 * @param serviceDay
+	 *            Service day on which trip is running.
+	 * @param stopIndex
+	 *            Index of the current stop.
+	 * @param positionInHop
+	 *            Between 0 to 1, an estimation of the covered distance in this
+	 *            hop so far.
+	 */
+	public OnBoardDepartPatternHop(OnboardDepartVertex from,
+			PatternStopVertex to, TripTimes tripTimes, ServiceDay serviceDay,
+			int stopIndex, double positionInHop) {
+		super(from, to);
+		this.stopIndex = stopIndex;
+		this.serviceDay = serviceDay;
+		this.tripTimes = tripTimes;
+		this.positionInHop = positionInHop;
+		this.trip = tripTimes.trip;
+		this.endStop = to.getStop();
+	}
 
-    public double getDistance() {
-        /*
-         * Do not multiply by positionInHop, as it is already taken into account by the from vertex
-         * location.
-         */
-        return SphericalDistanceLibrary.getInstance().distance(getFromVertex().getY(),
-                getFromVertex().getX(), endStop.getLat(), endStop.getLon());
-    }
+	public double getDistance() {
+		/*
+		 * Do not multiply by positionInHop, as it is already taken into account
+		 * by the from vertex location.
+		 */
+		return SphericalDistanceLibrary.getInstance().distance(
+				getFromVertex().getY(), getFromVertex().getX(),
+				endStop.getLat(), endStop.getLon());
+	}
 
-    public TraverseMode getMode() {
-        return GtfsLibrary.getTraverseMode(trip.getRoute());
-    }
+	public TraverseMode getMode() {
+		return GtfsLibrary.getTraverseMode(trip.getRoute());
+	}
 
-    public String getName() {
-        return GtfsLibrary.getRouteName(trip.getRoute());
-    }
+	public String getName() {
+		return GtfsLibrary.getRouteName(trip.getRoute());
+	}
 
-    public State optimisticTraverse(State state0) {
-        return traverse(state0);
-    }
+	public State optimisticTraverse(State state0) {
+		return traverse(state0);
+	}
 
-    public State traverse(State state0) {
-        RoutingRequest options = state0.getOptions();
+	public State traverse(State state0) {
+		RoutingRequest options = state0.getOptions();
 
-        if (options.reverseOptimizing || options.reverseOptimizeOnTheFly) {
-            throw new UnsupportedOperationException(
-                    "Cannot (yet) reverse-optimize depart-on-board mode.");
-        }
-        
-        /* Can't be traversed backwards. */
-        if (options.arriveBy)
-            return null;
+		if (options.reverseOptimizing || options.reverseOptimizeOnTheFly) {
+			throw new UnsupportedOperationException(
+					"Cannot (yet) reverse-optimize depart-on-board mode.");
+		}
 
-        StateEditor s1 = state0.edit(this);
-        // s1.setBackMode(TraverseMode.BOARDING); TODO Do we need this?
-        s1.setServiceDay(serviceDay);
-        s1.setTripTimes(tripTimes);
+		/* Can't be traversed backwards. */
+		if (options.arriveBy)
+			return null;
 
-        // s1.incrementNumBoardings(); TODO Needed?
-        s1.setTripId(trip.getId());
-        s1.setPreviousTrip(trip);
-        s1.setZone(endStop.getZoneId());
-        s1.setRoute(trip.getRoute().getId());
+		StateEditor s1 = state0.edit(this);
+		// s1.setBackMode(TraverseMode.BOARDING); TODO Do we need this?
+		s1.setServiceDay(serviceDay);
+		s1.setTripTimes(tripTimes);
 
-        int remainingTime = (int) Math.round(
-                (1.0 - positionInHop) * tripTimes.getRunningTime(stopIndex));
+		// s1.incrementNumBoardings(); TODO Needed?
+		s1.setTripId(trip.getId());
+		s1.setPreviousTrip(trip);
+		s1.setZone(endStop.getZoneId());
+		s1.setRoute(trip.getRoute().getId());
 
-        s1.incrementTimeInSeconds(remainingTime);
-        s1.incrementWeight(remainingTime);
-        s1.setBackMode(getMode());
-        s1.setEverBoarded(true);
-        return s1.makeState();
-    }
+		int remainingTime = (int) Math.round((1.0 - positionInHop)
+				* tripTimes.getRunningTime(stopIndex));
 
-    public void setGeometry(LineString geometry) {
-        this.geometry = geometry;
-    }
+		s1.incrementTimeInSeconds(remainingTime);
+		s1.incrementWeight(remainingTime);
+		s1.setBackMode(getMode());
+		s1.setEverBoarded(true);
+		return s1.makeState();
+	}
 
-    public LineString getGeometry() {
-        if (geometry == null) {
-            Coordinate c1 = new Coordinate(getFromVertex().getX(), getFromVertex().getY());
-            Coordinate c2 = new Coordinate(endStop.getLon(), endStop.getLat());
-            geometry = GeometryUtils.getGeometryFactory().createLineString(
-                    new Coordinate[] { c1, c2 });
-        }
-        return geometry;
-    }
+	public void setGeometry(LineString geometry) {
+		this.geometry = geometry;
+	}
 
-    public String toString() {
-        return "OnBoardPatternHop(" + getFromVertex() + ", " + getToVertex() + ")";
-    }
+	public LineString getGeometry() {
+		if (geometry == null) {
+			Coordinate c1 = new Coordinate(getFromVertex().getX(),
+					getFromVertex().getY());
+			Coordinate c2 = new Coordinate(endStop.getLon(), endStop.getLat());
+			geometry = GeometryUtils.getGeometryFactory().createLineString(
+					new Coordinate[] { c1, c2 });
+		}
+		return geometry;
+	}
 
-    @Override
-    public int getStopIndex() {
-        return stopIndex;
-    }
+	public String toString() {
+		return "OnBoardPatternHop(" + getFromVertex() + ", " + getToVertex()
+				+ ")";
+	}
 
-    @Override
-    public Trip getTrip() {
-        return trip;
-    }
+	@Override
+	public int getStopIndex() {
+		return stopIndex;
+	}
 
-    @Override
-    public String getDirection() {
-        return tripTimes.getHeadsign(stopIndex);
-    }
+	@Override
+	public Trip getTrip() {
+		return trip;
+	}
+
+	@Override
+	public String getDirection() {
+		return tripTimes.getHeadsign(stopIndex);
+	}
 
 }

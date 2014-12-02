@@ -25,16 +25,14 @@ import org.opentripplanner.routing.alertpatch.AlertPatch;
 
 @XmlRootElement
 public class AlertPatchResponse {
-    @XmlElementWrapper
-    @XmlElements({
-        @XmlElement(name = "AlertPatch", type = AlertPatch.class)
-        })
-    public List<AlertPatch> alertPatches;
+	@XmlElementWrapper
+	@XmlElements({ @XmlElement(name = "AlertPatch", type = AlertPatch.class) })
+	public List<AlertPatch> alertPatches;
 
-    public void addAlertPatch(AlertPatch alertPatch) {
-        if (alertPatches == null) {
-            alertPatches = new ArrayList<AlertPatch>();
-        }
-        alertPatches.add(alertPatch);
-    }
+	public void addAlertPatch(AlertPatch alertPatch) {
+		if (alertPatches == null) {
+			alertPatches = new ArrayList<AlertPatch>();
+		}
+		alertPatches.add(alertPatch);
+	}
 }

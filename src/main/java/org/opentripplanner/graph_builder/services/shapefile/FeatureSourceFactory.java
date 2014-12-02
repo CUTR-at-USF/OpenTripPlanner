@@ -18,10 +18,10 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
 public interface FeatureSourceFactory {
-    public FeatureSource<SimpleFeatureType, SimpleFeature> getFeatureSource();
+	public FeatureSource<SimpleFeatureType, SimpleFeature> getFeatureSource();
 
-    public void cleanup();
-    
-    /** @see GraphBuilder.checkInputs() */
-    public void checkInputs();
+	public void cleanup();
+
+	/** @see GraphBuilder.checkInputs() */
+	public void checkInputs();
 }

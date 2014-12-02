@@ -22,33 +22,37 @@ import java.io.IOException;
 
 public class CalendarDate extends Entity {
 
-    public Service  service;
-    public DateTime date;
-    public int      exception_type;
+	public Service service;
+	public DateTime date;
+	public int exception_type;
 
-    public static class Loader extends Entity.Loader<CalendarDate> {
+	public static class Loader extends Entity.Loader<CalendarDate> {
 
-        public Loader(GTFSFeed feed) {
-            super(feed, "calendar_dates");
-        }
+		public Loader(GTFSFeed feed) {
+			super(feed, "calendar_dates");
+		}
 
-        @Override
-        public void loadOneRow() throws IOException {
-            /* Calendars and Fares are special: they are stored as joined tables rather than simple maps. */
-            String service_id = getStringField("service_id", true);
-            Service service = feed.getOrCreateService(service_id);
-            DateTime date = getDateField("date", true);
-            if (service.calendar_dates.containsKey(date)) {
-                feed.errors.add(new DuplicateKeyError(tableName, row, "(service_id, date)"));
-            } else {
-                CalendarDate cd = new CalendarDate();
-                cd.service = service;
-                cd.date = date;
-                cd.exception_type = getIntField("exception_type", true, 0, 1);
-                cd.feed = feed;
-                service.calendar_dates.put(date, cd);
-            }
-        }
-    }
+		@Override
+		public void loadOneRow() throws IOException {
+			/*
+			 * Calendars and Fares are special: they are stored as joined tables
+			 * rather than simple maps.
+			 */
+			String service_id = getStringField("service_id", true);
+			Service service = feed.getOrCreateService(service_id);
+			DateTime date = getDateField("date", true);
+			if (service.calendar_dates.containsKey(date)) {
+				feed.errors.add(new DuplicateKeyError(tableName, row,
+						"(service_id, date)"));
+			} else {
+				CalendarDate cd = new CalendarDate();
+				cd.service = service;
+				cd.date = date;
+				cd.exception_type = getIntField("exception_type", true, 0, 1);
+				cd.feed = feed;
+				service.calendar_dates.put(date, cd);
+			}
+		}
+	}
 
 }

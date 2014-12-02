@@ -26,90 +26,90 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @XmlRootElement(name = "trip")
 public class TripType {
 
-    @SuppressWarnings("deprecation")
-    public TripType(Trip obj) {
-        this.id = obj.getId();
-        this.serviceId = obj.getServiceId();
-        this.tripShortName = obj.getTripShortName();
-        this.tripHeadsign = obj.getTripHeadsign();
-        this.routeId = obj.getRoute().getId();
-        this.directionId = obj.getDirectionId();
-        this.blockId = obj.getBlockId();
-        this.shapeId = obj.getShapeId();
-        this.wheelchairAccessible = obj.getWheelchairAccessible();
-        this.tripBikesAllowed = obj.getTripBikesAllowed();
-        this.bikesAllowed = obj.getBikesAllowed();
-        this.route = obj.getRoute();
-    }
+	@SuppressWarnings("deprecation")
+	public TripType(Trip obj) {
+		this.id = obj.getId();
+		this.serviceId = obj.getServiceId();
+		this.tripShortName = obj.getTripShortName();
+		this.tripHeadsign = obj.getTripHeadsign();
+		this.routeId = obj.getRoute().getId();
+		this.directionId = obj.getDirectionId();
+		this.blockId = obj.getBlockId();
+		this.shapeId = obj.getShapeId();
+		this.wheelchairAccessible = obj.getWheelchairAccessible();
+		this.tripBikesAllowed = obj.getTripBikesAllowed();
+		this.bikesAllowed = obj.getBikesAllowed();
+		this.route = obj.getRoute();
+	}
 
-    @SuppressWarnings("deprecation")
-    public TripType(Trip obj, Boolean extended) {
-        this.id = obj.getId();
-        this.tripShortName = obj.getTripShortName();
-        this.tripHeadsign = obj.getTripHeadsign();
-        if (extended != null && extended.equals(true)) {
-            this.route = obj.getRoute();
-            this.serviceId = obj.getServiceId();
-            this.routeId = obj.getRoute().getId();
-            this.directionId = obj.getDirectionId();
-            this.blockId = obj.getBlockId();
-            this.shapeId = obj.getShapeId();
-            this.wheelchairAccessible = obj.getWheelchairAccessible();
-            this.tripBikesAllowed = obj.getTripBikesAllowed();
-            this.bikesAllowed = obj.getBikesAllowed();
-        }
-    }
+	@SuppressWarnings("deprecation")
+	public TripType(Trip obj, Boolean extended) {
+		this.id = obj.getId();
+		this.tripShortName = obj.getTripShortName();
+		this.tripHeadsign = obj.getTripHeadsign();
+		if (extended != null && extended.equals(true)) {
+			this.route = obj.getRoute();
+			this.serviceId = obj.getServiceId();
+			this.routeId = obj.getRoute().getId();
+			this.directionId = obj.getDirectionId();
+			this.blockId = obj.getBlockId();
+			this.shapeId = obj.getShapeId();
+			this.wheelchairAccessible = obj.getWheelchairAccessible();
+			this.tripBikesAllowed = obj.getTripBikesAllowed();
+			this.bikesAllowed = obj.getBikesAllowed();
+		}
+	}
 
-    public TripType() {
-    }
+	public TripType() {
+	}
 
-    @XmlJavaTypeAdapter(AgencyAndIdAdapter.class)
-    @JsonSerialize
-    AgencyAndId id;
+	@XmlJavaTypeAdapter(AgencyAndIdAdapter.class)
+	@JsonSerialize
+	AgencyAndId id;
 
-    @XmlJavaTypeAdapter(AgencyAndIdAdapter.class)
-    @JsonSerialize
-    AgencyAndId serviceId;
+	@XmlJavaTypeAdapter(AgencyAndIdAdapter.class)
+	@JsonSerialize
+	AgencyAndId serviceId;
 
-    @XmlAttribute
-    @JsonSerialize
-    String tripShortName;
+	@XmlAttribute
+	@JsonSerialize
+	String tripShortName;
 
-    @XmlAttribute
-    @JsonSerialize
-    String tripHeadsign;
+	@XmlAttribute
+	@JsonSerialize
+	String tripHeadsign;
 
-    @XmlJavaTypeAdapter(AgencyAndIdAdapter.class)
-    @JsonSerialize
-    AgencyAndId routeId;
+	@XmlJavaTypeAdapter(AgencyAndIdAdapter.class)
+	@JsonSerialize
+	AgencyAndId routeId;
 
-    @XmlAttribute
-    @JsonSerialize
-    String directionId;
+	@XmlAttribute
+	@JsonSerialize
+	String directionId;
 
-    @XmlAttribute
-    @JsonSerialize
-    String blockId;
+	@XmlAttribute
+	@JsonSerialize
+	String blockId;
 
-    @XmlJavaTypeAdapter(AgencyAndIdAdapter.class)
-    @JsonSerialize
-    AgencyAndId shapeId;
+	@XmlJavaTypeAdapter(AgencyAndIdAdapter.class)
+	@JsonSerialize
+	AgencyAndId shapeId;
 
-    @XmlAttribute
-    @JsonSerialize
-    Integer wheelchairAccessible;
+	@XmlAttribute
+	@JsonSerialize
+	Integer wheelchairAccessible;
 
-    @XmlAttribute
-    @JsonSerialize
-    Integer tripBikesAllowed;
-    
-    @XmlAttribute
-    @JsonSerialize
-    Integer bikesAllowed;
+	@XmlAttribute
+	@JsonSerialize
+	Integer tripBikesAllowed;
 
-    Route route;
+	@XmlAttribute
+	@JsonSerialize
+	Integer bikesAllowed;
 
-    public Route getRoute() {
-        return route;
-    }
+	Route route;
+
+	public Route getRoute() {
+		return route;
+	}
 }

@@ -14,7 +14,7 @@
 package org.opentripplanner.geocoder.yahoo;
 
 public class YahooGeocoderResults {
-	
+
 	private YahooGeocoderResultSet ResultSet;
 
 	public YahooGeocoderResultSet getResultSet() {
@@ -24,5 +24,5 @@ public class YahooGeocoderResults {
 	public void setResultSet(YahooGeocoderResultSet resultSet) {
 		ResultSet = resultSet;
 	}
-	
+
 }
