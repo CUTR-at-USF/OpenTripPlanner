@@ -21,7 +21,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.PrintWriter;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;

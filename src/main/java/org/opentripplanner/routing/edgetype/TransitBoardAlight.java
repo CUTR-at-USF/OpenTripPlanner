@@ -129,7 +129,6 @@ public class TransitBoardAlight extends TablePatternEdge implements OnboardEdge 
     public State traverse(State s0, long arrivalTimeAtStop) {
         RoutingContext rctx    = s0.getContext();
         RoutingRequest options = s0.getOptions();
-
         /* If the user requested a wheelchair accessible trip, check whether and this stop is not accessible. */
         if (options.wheelchairAccessible && ! getPattern().wheelchairAccessible(stopIndex)) {
             return null;
@@ -260,7 +259,9 @@ public class TransitBoardAlight extends TablePatternEdge implements OnboardEdge 
                 }
             }
             if (bestWait < 0) return null; // no appropriate trip was found
-            Trip trip = bestTripTimes.trip;       
+            
+            Trip trip = bestTripTimes.trip;    
+            
             /* check if route and/or Agency are banned for this plan */
             // FIXME this should be done WHILE searching for a trip.
             if (options.tripIsBanned(trip)) return null;

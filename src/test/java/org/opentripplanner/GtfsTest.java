@@ -32,9 +32,7 @@ import org.opentripplanner.api.resource.PlanGenerator;
 import org.opentripplanner.common.model.GenericLocation;
 import org.opentripplanner.graph_builder.impl.GtfsGraphBuilderImpl;
 import org.opentripplanner.graph_builder.model.GtfsBundle;
-import org.opentripplanner.routing.algorithm.GenericAStar;
 import org.opentripplanner.routing.core.RoutingRequest;
-import org.opentripplanner.routing.core.ServiceDay;
 import org.opentripplanner.routing.core.TraverseMode;
 import org.opentripplanner.routing.core.TraverseModeSet;
 import org.opentripplanner.routing.graph.Graph;
@@ -70,7 +68,7 @@ public abstract class GtfsTest extends TestCase {
 
     public Itinerary itinerary = null;
 
-    protected void setUp() throws FileNotFoundException, UnsupportedEncodingException {
+    protected void setUp() {
         File gtfs = new File("src/test/resources/" + getFeedName());
         File gtfsRealTime = new File("src/test/resources/" + getFeedName() + ".pb");
         GtfsBundle gtfsBundle = new GtfsBundle(gtfs);

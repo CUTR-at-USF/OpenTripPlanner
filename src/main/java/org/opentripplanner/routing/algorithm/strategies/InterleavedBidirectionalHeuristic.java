@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+
 import org.opentripplanner.common.geometry.DistanceLibrary;
 import org.opentripplanner.common.geometry.SphericalDistanceLibrary;
 import org.opentripplanner.common.pqueue.BinHeap;
@@ -32,6 +33,7 @@ import org.opentripplanner.routing.spt.BasicShortestPathTree;
 import org.opentripplanner.routing.spt.ShortestPathTree;
 import org.opentripplanner.routing.vertextype.StreetVertex;
 import org.opentripplanner.routing.vertextype.TransitStationStop;
+import org.opentripplanner.routing.vertextype.TransitVertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -279,11 +281,13 @@ public class InterleavedBidirectionalHeuristic implements RemainingWeightHeurist
             State s = pq.extract_min();
             double w = s.getWeight();
             Vertex v = s.getVertex();
-            if (v instanceof TransitStationStop) {
-                stopStates.add(s);
-                // Prune street search upon reaching TransitStationStops.
-                // Do not save weights at transit stops. Since they may be reached by 
-                // SimpleTransfer their weights will be recorded during the main heuristic search.
+            if (v instanceof TransitVertex) {
+                if (v instanceof TransitStationStop) {
+                    stopStates.add(s);
+                    // Prune street search upon reaching TransitStationStops.
+                }
+                // Do not save weights at transit stops (or any other Transit Vertices). Since stops may be reached
+                // by SimpleTransfer their weights will be recorded during the main heuristic search.
                 continue;
             }
             // at this point the vertex is closed (pulled off heap).

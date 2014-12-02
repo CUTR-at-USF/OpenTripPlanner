@@ -13,35 +13,18 @@
 
 package org.opentripplanner.updater.stoptime;
 
- 
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.Date;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TimeZone;
  
-
-
-
-import java.util.TreeSet;
-
 import com.google.common.collect.Maps;
-
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.opentripplanner.routing.core.ServiceDay;
 import org.opentripplanner.routing.edgetype.Timetable;
 import org.opentripplanner.routing.edgetype.TripPattern;
 import org.opentripplanner.routing.edgetype.TimetableResolver;
-import org.opentripplanner.routing.edgetype.TimetableResolver.SortedTimetableComparator;
 import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.routing.graph.GraphIndex;
 import org.slf4j.Logger;
@@ -88,23 +71,9 @@ public class TimetableSnapshotSource {
     private final TimeZone timeZone;
 
     private GraphIndex graphIndex;
-    //just for test
-    FileWriter logFile;
     public TimetableSnapshotSource(Graph graph) {
         timeZone = graph.getTimeZone();
         graphIndex = graph.index;
- 
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();
- 
-		try {
-			logFile = new FileWriter("tripUpdatesLogs.txt", false);
-			logFile.write("      OTP started at "+ dateFormat.format(date));
-			logFile.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
  
     }
 
@@ -269,9 +238,24 @@ public class TimetableSnapshotSource {
     }
 
     protected boolean handleUnscheduledTrip(TripUpdate tripUpdate, String feedId, ServiceDate serviceDate) {
-        // TODO: Handle unscheduled trip
-        LOG.warn("Unscheduled trips are currently unsupported. Skipping TripUpdate.");
-        return false;
+    	
+    	TripDescriptor tripDescriptor = tripUpdate.getTrip();
+        // This does not include Agency ID or feed ID, trips are feed-unique and we currently assume a single static feed.
+        String tripId = tripDescriptor.getTripId();
+        TripPattern pattern = getPatternForTripId(tripId);
+
+        if (pattern == null) {
+            LOG.warn("No pattern found for tripId {}, skipping TripUpdate.", tripId);
+            return false;
+        }
+
+        if (tripUpdate.getStopTimeUpdateCount() < 1) {
+            LOG.warn("TripUpdate contains no updates, skipping.");
+            return false;
+        }
+
+        // we have a message we actually want to apply
+        return buffer.update(pattern, tripUpdate, feedId, timeZone, serviceDate);
     }
 
     protected boolean handleReplacementTrip(TripUpdate tripUpdate, String feedId, ServiceDate serviceDate) {

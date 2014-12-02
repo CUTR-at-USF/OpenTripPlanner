@@ -345,10 +345,12 @@ otp.widgets.ItinerariesWidget =
             //as [agency] route name
             var headerModeText = leg.interlineWithPreviousLeg ? _tr("CONTINUES AS") : otp.util.Itin.modeString(leg.mode).toUpperCase()
             var headerHtml = "<b>" + headerModeText + "</b>";
-
+			var currentseconds = new Date().getTime() / 1000;
+			
             // Add info about realtimeness of the leg
-            if (leg.realTime && typeof(leg.arrivalDelay) === 'number') {
-                var minDelay = Math.round(leg.arrivalDelay / 60)
+           /* if (leg.realTime && typeof(leg.arrivalDelay) === 'number') {
+                //var minDelay = Math.round(leg.arrivalDelay / 60)
+                //var minDelay = Math.round(leg.arrivalDelay / 60) - currentseconds/60 
                 if (minDelay > 0) {
                     //TRANSLATORS: Something in Public transport is x minutes late
                     headerHtml += ' <span style="color:red;">(' + ngettext("%d min late", "%d mins late", minDelay) + ')</span>';
@@ -359,7 +361,7 @@ otp.widgets.ItinerariesWidget =
                     //TRANSLATORS: Something in Public transport is on time
                     headerHtml += ' <span style="color:green;">(' + _tr("on time") + ')</span>';
                 }
-            }
+            }*/
 
             if(leg.mode === "WALK" || leg.mode === "BICYCLE") {
                 headerHtml += " "+otp.util.Itin.distanceString(leg.distance)+ pgettext("direction", " to ")+leg.to.name;
