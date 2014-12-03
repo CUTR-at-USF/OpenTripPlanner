@@ -529,12 +529,8 @@ otp.widgets.ItinerariesWidget =
             // show the start time and stop
 
             // prevaricate if this is a nonstruct frequency trip
-            //if( leg.isNonExactFrequency === true ){
-                //TRANSLATORS: public transport drives every N minutes
-            //	$('<div class="otp-itin-leg-leftcol">' + ngettext("every %d min", "every %d mins", (leg.headway/60))+"</div>").appendTo(legDiv);
-            //} else {
-                $('<div class="otp-itin-leg-leftcol">'+otp.util.Time.formatItinTime(leg.startTime, otp.config.locale.time.time_format)+"</div>").appendTo(legDiv);
-            //}
+             $('<div class="otp-itin-leg-leftcol">'+otp.util.Time.formatItinTime(leg.startTime, otp.config.locale.time.time_format)+"</div>").appendTo(legDiv);
+            
             
             //TRANSLATORS: Depart station / Board at station in itinerary
             var startHtml = '<div class="otp-itin-leg-endpointDesc">' + (leg.interlineWithPreviousLeg ? "<b>" + pgettext("itinerary", "Depart") + "</b> " : _tr("<b>Board</b> at ")) +leg.from.name;
@@ -635,11 +631,7 @@ otp.widgets.ItinerariesWidget =
 
             $('<div class="otp-itin-leg-buffer"></div>').appendTo(legDiv);            
 
-           // if( leg.isNonExactFrequency === true ) {
-           // 	$('<div class="otp-itin-leg-leftcol">' + _tr('late as') + ' ' + otp.util.Time.formatItinTime(leg.endTime, otp.config.locale.time.time_format)+"</div>").appendTo(legDiv);   
-           // } else {
-                $('<div class="otp-itin-leg-leftcol">'+otp.util.Time.formatItinTime(leg.endTime, otp.config.locale.time.time_format)+"</div>").appendTo(legDiv);   
-           // }
+            $('<div class="otp-itin-leg-leftcol">'+otp.util.Time.formatItinTime(leg.endTime, otp.config.locale.time.time_format)+"</div>").appendTo(legDiv);   
             
             //TRANSLATORS: Stay on board/Alight [at stop name]
             var endAction = (nextLeg && nextLeg.interlineWithPreviousLeg) ? _tr("Stay on board") : _tr("Alight");
