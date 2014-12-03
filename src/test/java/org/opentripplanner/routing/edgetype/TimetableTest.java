@@ -310,7 +310,7 @@ public class TimetableTest {
     @Test
     public void testUpdateFreqTrip() throws Exception {
 
-        GtfsContext context2 = GtfsLibrary.readGtfs(new File(ConstantsForTests.FAKE_Freq_GTFS));
+        GtfsContext context2 = GtfsLibrary.readGtfs(new File(ConstantsForTests.FAKE_FREQ_GTFS));
         Graph graph2 = new Graph();
 
         GTFSPatternHopFactory factory = new GTFSPatternHopFactory(context2);

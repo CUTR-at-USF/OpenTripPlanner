@@ -1099,7 +1099,7 @@ public class PlanGeneratorTest {
         assertNull(legs[3].headway);
         assertEquals(F_DISTANCE[3], legs[3].distance, 0.0);
 
-        //assertEquals("Ferry", legs[4].agencyId);
+        assertEquals("Ferry", legs[4].agencyId);
         assertEquals("Brian Ferry", legs[4].agencyName);
         assertEquals("http://www.ferry.org/", legs[4].agencyUrl);
         assertEquals(2, legs[4].agencyTimeZoneOffset);
