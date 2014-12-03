@@ -634,8 +634,8 @@ public class PlanGeneratorTest {
         TimetableSnapshotSource timetableSnapshotSource = mock(TimetableSnapshotSource.class);
 
         when(timetableSnapshotSource.getTimetableSnapshot()).thenReturn(resolver);
-
-        timetableSnapshotSource.getTimetableSnapshot().update(
+ 
+		timetableSnapshotSource.getTimetableSnapshot().update(
                 thirdTripPattern, tripUpdate, "Ferry", timeZone, serviceDate);
 
         // Further graph initialization
